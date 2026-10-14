@@ -1,0 +1,109 @@
+# The daily run, in three jobs:
+#   digest  produce the digest and the top stories card, commit news/ and
+#           news_today.md back as history, and build the site
+#   deploy  publish the site to GitHub Pages
+#   email   send the digest, after deploy so its "read on the web" link works
+# See docs/deployment.md for the secrets this needs.
+name: Daily digest
+
+on:
+  schedule:
+    # 11:00 UTC is 07:00 in Toronto during daylight time and 06:00 in winter.
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+    inputs:
+      lookback_hours:
+        description: "Override the time window in hours. Empty continues from the last digest."
+        required: false
+      send_email:
+        description: "Email the digest"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10
+
+      - name: Install
+        run: uv sync --frozen
+
+      - name: Produce digest
+        env:
+          CHAT_GEMINI_API_KEYS: ${{ secrets.CHAT_GEMINI_API_KEYS }}
+          # Traces are throwaway on a CI runner.
+          RAILTRACKS_DISABLE_EVENTS: "true"
+          LOOKBACK: ${{ inputs.lookback_hours }}
+        run: uv run newsring run --no-email ${LOOKBACK:+--lookback-hours "$LOOKBACK"}
+
+      - name: Commit news
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news news_today.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "news: $(date -u +%F)"
+            git pull --rebase --quiet
+            git push
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: digest
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+  email:
+    needs: [digest, deploy]
+    if: github.event_name == 'schedule' || inputs.send_email
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.digest.outputs.sha }}
+
+      - uses: astral-sh/setup-uv@v10
+
+      - name: Install
+        run: uv sync --frozen --extra email
+
+      - name: Send
+        env:
+          NEWSRING_EMAIL_TO: ${{ secrets.NEWSRING_EMAIL_TO }}
+          EMALIA_ADDRESS: ${{ secrets.EMALIA_ADDRESS }}
+          EMALIA_PROVIDER: ${{ vars.EMALIA_PROVIDER || 'gmail' }}
+          EMALIA_PASSWORD: ${{ secrets.EMALIA_PASSWORD }}
+        run: uv run newsring email

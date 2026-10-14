@@ -1,0 +1,583 @@
+{
+  "date": "2026-10-13",
+  "generated_at": "2026-10-13T09:32:33.202894Z",
+  "title": "The Daily Digest: Hidden Skills, Long Runs, and Background Daemons",
+  "intro": "Today’s papers probe what agents can hide, sustain, and actually deliver—not just what they can demonstrate in a short run. On the infrastructure side, a reported Codex CLI daemon default raises the usual question of who, exactly, is running your agent after you close the window.",
+  "stories": [
+    {
+      "headline": "A capability audit can miss what the model is hiding",
+      "summary": "Researchers construct backdoors that embed encrypted neural networks in a host model’s weights and execute them only when a secret trigger arrives. Under cryptographic assumptions, the hidden computations are designed to resist elicitation and interpretation—even with full access to the weights—and resisted several tested approaches on a small chemical-reaction prediction task. The result is a specific limit on behavioral audits, not evidence that any given model is hiding a capability.",
+      "why_it_matters": "For capability evaluations, passing elicitation tests is not a proof that no triggered behavior exists.",
+      "reason": "The result that models can provably conceal arbitrary capabilities is directly relevant to capability evaluations and the limits of behavioral testing.",
+      "item": {
+        "key": "arxiv:2610.13928",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "AI models can provably hide arbitrary capabilities",
+        "url": "https://arxiv.org/abs/2610.13928",
+        "discussion_url": "https://news.ycombinator.com/item?id=50065692",
+        "published": "2026-10-13T02:07:08Z",
+        "summary": "Comments",
+        "content": "Computer Science > Machine Learning\n  [Submitted on 9 Oct 2026]\nTitle:AI Models Can Provably Hide Arbitrary Capabilities\nView PDF HTML (experimental)\n            Abstract:Capability evaluations aim to surface dangerous model behaviors before deployment, but their reliability depends on the assumption that hidden capabilities can be elicited. We show this assumption does not hold under adversarial conditions by constructing backdoor attacks that embed encrypted neural networks within host model weights, decrypting and executing them only upon receiving a secret trigger. Using digital lockers, these hidden circuits remain provably hard to elicit and interpret under cryptographic assumptions, even given full access to model weights, extending prior work from hiding fixed strings to arbitrary computations. We implement our proof of concept constructions in PyTorch and evaluate elicitation through fine-tuning, weight noising, gradient-based trigger search, and latent adversarial training on a small chemical reaction prediction task - a proxy for CBRN-relevant capabilities. Our results demonstrate resistance to these methods and, together with our cryptographic guarantees, reveal a limit of elicitation-based capability audits. We release our models to support the improvement of defenses.\n    \nAdditional Features\nReferences & Citations\n    \n    Loading...\nBibliographic and Citation Tools\n            Bibliographic Explorer (What is the Explorer?)\n          \n            Connected Papers (What is Connected Papers?)\n          \n            Litmaps (What is Litmaps?)\n          \n            scite Smart Citations (What are Smart Citations?)\n          \nCode, Data and Media Associated with this Article\n            alphaXiv (What is alphaXiv?)\n          \n            CatalyzeX Code Finder for Papers (What is CatalyzeX?)\n          \n            DagsHub (What is DagsHub?)\n          \n            Gotit.pub (What is GotitPub?)\n          \n            Hugging Face (What is Huggingface?)\n          \n            ScienceCast (What is ScienceCast?)\n          \nDemos\nRecommenders and Search Tools\n              Influence Flower (What are Influence Flowers?)\n            \n              CORE Recommender (What is CORE?)\n            \n              IArxiv Recommender\n              (What is IArxiv?)\n            \narXivLabs: experimental projects with community collaborators\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\nHave an idea for a project that will add value for arXiv's community? Learn more about arXivLabs.",
+        "score": 206.0,
+        "comments": 105,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "Training terminal agents on work that takes the long way",
+      "summary": "TerminalHorizon synthesizes long-horizon task environments from professional work, using independent execution to identify omitted work and evidence to guide reconstruction. It progressively extends tasks under the same goal, so later stages build on earlier results and require further exploration or improvement. The authors train Qwen3.5-27B on 1.5K environments and report gains across 12 benchmarks, alongside case studies where the model continues experimenting within a 12-hour research budget.",
+      "why_it_matters": "The work targets a real data gap for agent harnesses: trajectories that teach exploration, feedback-driven adjustment, and end-to-end completion rather than isolated tool calls.",
+      "reason": "This work targets the data problem behind long-horizon terminal agents: training trajectories that capture exploration, evidence-gathering, and sustained task completion.",
+      "item": {
+        "key": "arxiv:2610.13166",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Scaling Agentic Data for Long-Horizon Terminal Intelligence",
+        "url": "https://huggingface.co/papers/2610.13166",
+        "discussion_url": null,
+        "published": "2026-10-13T00:00:00Z",
+        "summary": "Terminal agents are moving beyond local operations toward completing real-world professional tasks. Short trajectories can demonstrate commands and tool calls, but they do not fully show how agents accumulate evidence through exploration, use it to inform judgments, continually adjust strategies based on feedback, and turn intermediate results into final deliverables. High-quality long-horizon trajectories capture these agentic behavioral patterns and their connections within a single problem-solving process, providing richer experience for sustained autonomous work. However, environment synthesis may complete or simplify the key work underlying these patterns in advance and thus remove the need for exploration, implementation, and verification that the agent was meant to perform. To address this, we introduce TerminalHorizon, a fully automated data synthesis engine for long-horizon terminal agents. Starting from real-world professional work, it uses independent execution to identify key work omitted during construction and uses the resulting evidence to guide environment reconstruction. To extend these patterns across stages, it progressively expands tasks under the same goal…",
+        "content": "Abstract\nTerminal agents are moving beyond local operations toward completing real-world professional tasks. Short trajectories can demonstrate commands and tool calls, but they do not fully show how agents accumulate evidence through exploration, use it to inform judgments, continually adjust strategies based on feedback, and turn intermediate results into final deliverables. High-quality long-horizon trajectories capture these agentic behavioral patterns and their connections within a single problem-solving process, providing richer experience for sustained autonomous work. However, environment synthesis may complete or simplify the key work underlying these patterns in advance and thus remove the need for exploration, implementation, and verification that the agent was meant to perform. To address this, we introduce TerminalHorizon, a fully automated data synthesis engine for long-horizon terminal agents. Starting from real-world professional work, it uses independent execution to identify key work omitted during construction and uses the resulting evidence to guide environment reconstruction. To extend these patterns across stages, it progressively expands tasks under the same goal, introducing new requirements that build on prior results and call for further exploration and improvement. Using this engine, we construct 1.5K task environments and perform supervised fine-tuning of Qwen3.5-27B on the resulting dataset to obtain TerminalHorizon-27B. We achieve substantial performance gains on all 12 benchmarks spanning coding-agent tasks, agentic tasks in real-world production settings, and general reasoning. Multiple RSI case studies, each with a 12-hour research budget, further demonstrate the model's ability to continue experimenting beyond an initial solution, improve its methods based on feedback, and retain effective improvements in its final deliverables.\nCommunity\nScaling Agentic Data for Long-Horizon Terminal Intelligence\nWebsite: https://zs1314.github.io/TerminalHorizon\nGet this paper in your agent:\nhf papers read 2610.13166 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash",
+        "score": 84.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Coding agents still struggle to build the agent you asked for",
+      "summary": "AgentSWE evaluates agent-building across creation, editing, and optimization, with 25 tasks framed as commissions rather than coding exams. Builders can iterate on illustrative cases, but frozen submissions are tested on held-out cases against requirement-derived rubrics or benchmark objectives. The authors report that no evaluated coding agent comes close to reliably delivering the stated requirements; recurring failures include overfitting visible examples, hollow runtimes, and unsupported claims of completion.",
+      "why_it_matters": "It tests a useful layer above code generation: whether an agent-building workflow produces software that behaves as specified beyond the examples it saw.",
+      "reason": "It examines whether coding agents can build agents that actually satisfy user requirements, a useful evaluation target for agent-building workflows.",
+      "item": {
+        "key": "arxiv:2610.13361",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "AgentSWE: Can Coding Agents Build the Agent You Actually Want?",
+        "url": "https://huggingface.co/papers/2610.13361",
+        "discussion_url": null,
+        "published": "2026-10-13T00:00:00Z",
+        "summary": "As the production of software passes into the hands of software itself, coding agents are increasingly commissioned to build agents fitted to their users' own workflows. This delegation carries a quiet assumption, that the delivered agent will faithfully serve the requirement it was built for, rather than merely appear to. No existing benchmark tests that assumption. We introduce AgentSWE, a benchmark for agent software engineering spanning three stages of the agent development lifecycle: Creation of a complete agent from a natural-language requirement, Editing of production agent codebases, and Optimization toward a measurable target. Each of its 25 tasks is framed as a commission rather than an exam: the builder iterates against a handful of illustrative cases, while acceptance exercises the frozen submission on held-out cases designed to span the full requirement, grading behavior against requirement-derived rubrics under hard pass/fail gates or, for Optimization, against the source benchmark's own objective. Evaluating a range of coding agents across models and harnesses, we find that none comes close to delivering what a requirement asks for: the gap between what a builder…",
+        "content": "Abstract\nAs the production of software passes into the hands of software itself, coding agents are increasingly commissioned to build agents fitted to their users' own workflows. This delegation carries a quiet assumption, that the delivered agent will faithfully serve the requirement it was built for, rather than merely appear to. No existing benchmark tests that assumption. We introduce AgentSWE, a benchmark for agent software engineering spanning three stages of the agent development lifecycle: Creation of a complete agent from a natural-language requirement, Editing of production agent codebases, and Optimization toward a measurable target. Each of its 25 tasks is framed as a commission rather than an exam: the builder iterates against a handful of illustrative cases, while acceptance exercises the frozen submission on held-out cases designed to span the full requirement, grading behavior against requirement-derived rubrics under hard pass/fail gates or, for Optimization, against the source benchmark's own objective. Evaluating a range of coding agents across models and harnesses, we find that none comes close to delivering what a requirement asks for: the gap between what a builder demonstrates and what it delivers is the norm, not the corner case. An accompanying empirical analysis of the failure trajectories identifies recurring failure modes, among them overfitting to the visible cases, hollow runtimes behind code that looks complete, and unsupported claims of completion, each a signal by which coding agents can learn to build the agents they are asked for.\nCommunity\nGet this paper in your agent:\nhf papers read 2610.13361 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 1\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 70.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "A Codex CLI session reportedly leaves a daemon behind",
+      "summary": "A Codex CLI issue reports that version 0.157.0 starts a persistent managed daemon by default, copies the app-server package into a separate release directory, and launches a background updater. According to the report, the daemon can retain environment variables from the session that started it, while updates may restart the backend and interrupt active turns; stopping the daemon reportedly leaves its updater running. This is an issue report, not an independent confirmation of behavior across every setup, but the reporter says disabling `daemon_auto_start` prevents new TUI sessions from spawning it.",
+      "why_it_matters": "Persistent agent infrastructure should make its process identity, inherited environment, update behavior, and user-consent boundary legible.",
+      "reason": "A CLI that installs a persistent, self-updating daemon by default raises concrete questions about agent harness permissions, persistence, and user consent.",
+      "item": {
+        "key": "github.com/openai/codex/issues/48195",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Codex CLI installs a persistent, self-updating background daemon by default",
+        "url": "https://github.com/openai/codex/issues/48195",
+        "discussion_url": "https://news.ycombinator.com/item?id=50060694",
+        "published": "2026-10-12T18:29:04Z",
+        "summary": "Comments",
+        "content": "Repository navigation\nCLI: make daemon_auto_start opt-in — a persistent, self-updating background daemon shouldn't be the default #48195\nDescription\nWhat variant of Codex are you using?\nCLI — 0.157.0, installed via npm install -g @openai/codex, Linux (WSL2)\nWhat feature would you like to see?\nPlease make daemon_auto_start opt-in (default false) for the CLI, or at least ask once before turning it on.\nSince 0.157.0, just opening an interactive codex session:\n- Starts a persistent background daemon (codex app-server --managed-daemon). It runs in its own session with no TTY and keeps running after every Codex window is closed (reparented to PID 1) until codex app-server daemon stop or a reboot.\n- Copies the whole platform package (~374 MB: codex, codex-code-mode-host, bundled bwrap/zsh/rg) into ~/.codex/packages/app-server-daemon/releases/<version>/ — byte-identical to what npm had just installed — and runs the daemon from that copy. From then on the backend's version is decoupled from the CLI version I installed with my package manager.\n- Starts a detached updater (codex app-server daemon pid-update-loop) that checks for updates 5 minutes after start and then hourly, downloads new releases and restarts the backend (which can kill active turns, see app-server daemon: auto-update force-kills active turns after a 60s drain budget, and cannot be disabled #40969).\n- Pins the environment of whichever session happened to start it. I launch Codex through a wrapper that sets HTTPS_PROXY per invocation; the daemon keeps the first session's proxy variables and its outbound connections go through that proxy, whatever later sessions are launched with. Hooks in --remote mode receive the daemon's cwd, not the session's #42457 and Hooks spawned by the app-server daemon cannot identify the client terminal, breaking terminal-targeting hooks #37537 (daemon cwd / terminal instead of the session's) look like the same root cause.\nFor a CLI, the least surprising default is that the backend lives and dies with the window, runs the binary I installed, and doesn't update itself in the background. A shared, self-updating daemon makes sense for Remote Control / the desktop app, so it would be fine to enable it there, or when the user explicitly runs codex app-server daemon start / bootstrap.\nIf it stays on by default, please at least:\n- exit an auto-started daemon when its last client disconnects;\n- not copy/self-update when the CLI was installed by a package manager (npm/brew/pacman) — run the installed binary instead (Support externally managed app-server daemon executables #41188, npm update leaves app-server on old version, but daemon update/restart refuse recovery #46468, Codex 0.157.0 no longer starts with the Arch Linux package unless --no-daemon is used #48050).\nAdditional information\nBug found while turning it off: codex app-server daemon stop stops the app-server but leaves the pid-update-loop updater running (still alive 70 s later, had to kill it manually).\nWorkaround I'm using:\ncodex features disable daemon_auto_start\ncodex app-server daemon stop\npkill -f 'app-server daemon pid-update-loop'   # not stopped by `daemon stop`\nrm -rf ~/.codex/packages/app-server-daemon\nWith the flag off, a new TUI session no longer spawns a daemon.\nActivity\n- addedenhancementNew feature or requestNew feature or requestCLIIssues related to the Codex CLIIssues related to the Codex CLIapp-serverIssues involving app server protocol or interfacesIssues involving app server protocol or interfaceson Sep 25, 2026\n- @Yihua-Liu-1997 thanks for reporting this, I hit it myself... stuff should not be creating mystery servers and processes all of a sudden on small version number bumps without giving people a heads-up... Reacted by tagor, Flaviu Tamas, Felipe Lopes, Josh Triplett, BigBoyDevBox, Kamil Mielnik, Mikhail, Ayanami Kaine, Mike Elliott, Alexander Williamson and 9 more\n- agreed. the CLI is unusable until this is fixed. Reacted by tagor, Steven Dale, Felipe Lopes, krrr, Shaun Pedicini, Christian Hahn, BigBoyDevBox, Mikhail, Ayanami Kaine, Mike Elliott and 12 more\n- I can confirm this on Windows 10 LTSC with Codex CLI 0.157.0\nSetting daemon_auto_start = false in config.toml resolves the issue\nTwo improvements would help: \n  - Automatically fall back to local mode when daemon startup is blocked by elevation, instead of requiring --no-daemon.\n  - Make daemon auto-start opt-in rather than the default.\nThis would preserve the security restrictions without disrupting the normal CLI workflow. Reacted by BigBoyDevBox and Leo Razoumov\n- @tagorr Indeed — both 1 and 2 would work~ Reacted by tagor\n- added a commit that references this issueon Sep 28, 2026\n- The Codex CLI is unusable due to this bug on Windows.\n- This is terrible. I can't input anything on the CLI at all. You should fix this problem as soon as possible and give us 100 banked reset!\n- aetherxeg-source commentedon Oct 3, 2026 More actions There is a useful provenance boundary behind this request: installed CLI identity != daemon execution identity\nOnce the CLI copies itself into a managed release directory and a background updater can replace that copy, the process that services a later turn is no longer necessarily the artifact the user explicitly installed or invoked. I would make the daemon expose a small execution receipt for each client attachment containing at least: client_cli_version + daemon_binary_digest + daemon_generation + updater_state + inherited_environment_generation\nThen a client can distinguish: \n  - same installed artifact, same daemon generation;\n  - same CLI but different daemon generation;\n  - daemon binary changed independently of the package-manager state;\n  - daemon inherited environment from an earlier session.\nA strong regression would start the daemon under environment A, attach from environment B, update the installed CLI, and verify that the client can see exactly which daemon generation/binary/environment is authoritative for the turn rather than…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "ReplaySSM stores recent inputs instead of every state update",
+      "summary": "ReplaySSM represents an SSM state as a checkpoint plus a buffer of recent inputs, computes outputs from that representation, and folds the buffer into the checkpoint periodically. The design aims to reduce state traffic, make speculative-decoding rollback cheaper, and avoid feeding quantization error back through recurrent state updates. The source describes evaluations across Mamba-2 and GDN hybrid models and says the implementation is integrated into TensorRT-LLM, vLLM, and FlashInfer, but the supplied material does not include the measured performance results.",
+      "why_it_matters": "If the approach delivers on those goals, it could address serving bottlenecks that matter for hybrid models—and make speculative decoding and lower-precision state more practical.",
+      "reason": "ReplaySSM addresses state storage and decoding speed in hybrid models, with potential implications for serving several current model families.",
+      "item": {
+        "key": "developer.nvidia.com/blog/replayssm-rethinking-state-storage-for-faster-hybrid-model-decoding",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "ReplaySSM: Rethinking State Storage for Faster Hybrid-Model Decoding",
+        "url": "https://developer.nvidia.com/blog/replayssm-rethinking-state-storage-for-faster-hybrid-model-decoding/",
+        "discussion_url": null,
+        "published": "2026-10-12T16:00:54Z",
+        "summary": "Hybrid models interleave state-space model (SSM) layers with a few attention layers. NVIDIA Nemotron 3, Qwen3.5 through Qwen3.8, Kimi-K3, and GLM-5.3-Flash are...",
+        "content": "Hybrid models interleave state-space model (SSM) layers with a few attention layers. NVIDIA Nemotron 3, Qwen3.5 through Qwen3.8, Kimi-K3, and GLM-5.3-Flash are all built this way, with Mamba-2, Gated DeltaNet (GDN), or Kimi Delta Attention (KDA) as the SSM layer.\nSSM layers are designed to make decoding fast: they use a fixed-size state in place of a key-value (KV) cache that grows with context length. At serving batch sizes, however, the SSM layers, not attention, can be the latency bottleneck up to 100K tokens of context. SSM layers also complicate two techniques that reliably speed up attention decoding: speculative decoding and quantization.\nReplaySSM makes SSM layers the fast part again. It represents the SSM state as a checkpoint plus a buffer of recent inputs. This separates output computation from state updates and addresses three challenges in current SSM decoding: state traffic, rollback for speculative decoding, and error accumulation in a quantized state.\nReplaySSM is joint work between NVIDIA and the Dao AI Lab at Princeton. The paper, ReplaySSM: Cache SSM Inputs, Not State, details all three benefits and presents the full evaluation. It is available on arXiv, with code on GitHub. It is integrated into NVIDIA TensorRT-LLM, vLLM, and FlashInfer, and also runs in production in GLM-5.3-Flash and Kimi-K3.\nWhy SSM layers can become a decoding bottleneck\nTake the Mamba-2 layer used in NVIDIA Nemotron 3 Ultra as an example. It decodes one token with the following recurrence:\nwhere \\(S_t\\) is the state, \\(\\alpha_t\\) is a data-dependent decay, and \\(v_t\\), \\(k_t\\), and \\(q_t\\) are the token’s inputs. Each step loads \\(S_{t-1}\\) from high-bandwidth memory (HBM), applies the decay and a rank-1 update, computes the output with \\(q_t\\), and stores \\(S_t\\) back. GDN and KDA add a delta-rule correction, but their updates can be written in the same outer-product form, so what follows applies to them too.\nDuring decoding, the state does two jobs. It is read to produce this token’s output, and it is updated to become the next token’s state. Conventional decoding does both at once: each step updates the state, reads the output from it, and stores it for the next step. All three challenges come from this fusion.\nState memory traffic\nAn SSM decoding step loads and stores the full state while performing little arithmetic on it, so the kernel is bound by HBM bandwidth, not compute. At serving batch sizes, that makes the SSM layers, not attention, the largest component of the decode step up to 100K tokens on Nemotron-3-Super-NVFP4 at batch size 256 on one NVIDIA Blackwell Ultra B300 GPU (Figure 2, left).\nTwo factors drive this:\n- Layer count: The model has five times as many SSM layers as attention layers.\n- State size: One layer’s FP32 state is 4 MiB per sequence, while an FP8 KV entry is 0.5 KiB per token, so an SSM layer’s state is the size of an attention layer’s KV cache for 8K tokens.\nRollback for speculative decoding\nSpeculative decoding has a drafter propose T tokens, verifies them in one pass through the target model, and rolls back to the last accepted token. Attention naturally supports rollback by moving the KV cache pointer. But once an SSM has summarized the drafts into its state, the update has no easy inverse, so rollback becomes expensive. Serving engines such as vLLM work around this by storing a state snapshot after every draft token and picking the one that matches the accepted prefix. That is one read and T writes per step on a memory-bound path, and the snapshots cap how many requests fit in GPU memory. As a result, speculative decoding, a reliable speedup for Transformers, barely helps SSMs at serving batch sizes.\nState quantization\nThe quantized state produces the output and is the input to the next update, so its rounding error re-enters the recurrence at every step. A KV cache has no such loop: a quantized entry is read many times but never written back into itself, which is why KV caches tolerate lower precision than SSM states. Qwen3.5-122B-A10B-NVFP4, for example, uses the NVIDIA NVFP4 4-bit floating-point format for its weights, with an FP8 KV cache and an FP32 SSM state.\nHow ReplaySSM represents the state\nThe SSM recurrence can be unrolled over a window of h tokens:\nwhere \\(S_{\\mathrm{ckpt}}\\) is the state before the window and \\(\\gamma\\) is the cumulative decay. Conventional decoding follows the left side step by step. ReplaySSM uses the right side: it represents the state as a checkpoint plus a small buffer of recent input records (\\(\\alpha_j\\), \\(v_j\\), \\(k_j\\)) for Mamba-2.\nOn most steps, which we call non-flush steps, it appends the current inputs to the buffer and computes the output from the checkpoint and the buffer without storing a state. When the buffer of L records fills, a flush step folds the buffered inputs into the checkpoint, writes the new checkpoint to HBM once, and clears the buffer. The outputs match conventional decoding up to floating-point differences. ReplaySSM’s approach can be summarized in three questions:\nWhat does ReplaySSM do?\nIt caches recent SSM inputs and represents the state as a checkpoint plus those inputs.\nWhat does this change?\nIt separates output computation from state updates: outputs are computed every step, while the checkpoint is updated once per window.\nWhat does this achieve?\nIt reduces state memory traffic, simplifies speculative rollback, and supports low-precision state reads without propagating their rounding error through recurrent updates.\nHow we evaluated ReplaySSM\nWe evaluate four hybrid models from two families, Nemotron 3 with Mamba-2 layers and Qwen3.5 with GDN layers, from 4B dense models on one NVIDIA H100 Tensor Core GPU to 120B-class mixture-of-experts (MoE) models on one NVIDIA Blackwell Ultra B300 GPU (Table 1). We implemented ReplaySSM in vLLM and compared it with vLLM’s own kernels at their best launch configuration.\nPerformance runs keep the SSM state in FP32, the default precision for these models…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Meta adds two Muse models, with performance claims still internal",
+      "summary": "Meta has released Muse Wonder and Muse Wonder Full for Muse Code subscribers, with Wonder also available through the Meta Model API. The company says they can compete with leading OpenAI and Anthropic models, citing internal benchmark tests, but the coverage provides no detailed results and says comparisons with Google’s Gemini 4 Argon remain unclear. Meta says Wonder is eventually intended to power its Muse agent, without giving a timeline.",
+      "why_it_matters": "The release may matter for agent builders, but the supplied evidence does not yet let readers assess the model claims or likely capability differences.",
+      "reason": "Meta's new Muse models are a notable frontier release, and the claimed performance comparisons make the technical details worth checking.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1009479/meta-muse-wonder-full-ai-model",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Meta has some Wonder Full new AI models",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1009479/meta-muse-wonder-full-ai-model",
+        "discussion_url": null,
+        "published": "2026-10-12T17:00:00Z",
+        "summary": "Meta is making up for lost time in the AI race. After launching Muse Spark, the first model from its revamped Superintelligence Labs division, and buzzy AI agent Muse, it's now launching two new models it claims can go toe-to-toe with the industry's best. The new models, Muse Wonder and Muse Wonder Full, are available […]",
+        "content": "Meta is making up for lost time in the AI race. After launching Muse Spark, the first model from its revamped Superintelligence Labs division, and buzzy AI agent Muse, it’s now launching two new models it claims can go toe-to-toe with the industry’s best.\nMeta has some Wonder Full new AI models\nMeta says the models compete with the industry’s best and will soon power its Muse agent.\nThe new models, Muse Wonder and Muse Wonder Full, are available for Muse Code subscribers starting today. Wonder can also be accessed through the Meta Model API, Meta said.\nMeta says it eventually plans to power its Muse AI agent with Wonder, starting with subscribers, and will develop specialized models it “can bring to everyone using Muse.” It hasn’t shared specifics or provided a timeline for either.\nThe company says its new models can rival leading models from OpenAI and Anthropic, including GPT-6 Astra, Claude Opus 5.5, and Claude Fable 5.1, pointing to results from internal testing on several industry benchmarks. It’s unclear how they stack up against Google’s Gemini 4 Argon, whose capabilities are still coming into focus.\nThe launches are part of Meta’s aggressive push to reestablish itself as a major force in AI. The company has poured billions into talent and infrastructure and has been steadily expanding its AI lineup, including with image model Muse Image and a heavy focus on bringing useful AI agents to the masses through Muse.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "research.meta.ai/blog/muse-wonder",
+          "source": "Hacker News (AI)",
+          "tags": [
+            "community"
+          ],
+          "title": "Muse Wonder",
+          "url": "https://research.meta.ai/blog/muse-wonder",
+          "discussion_url": "https://news.ycombinator.com/item?id=50059115",
+          "published": "2026-10-12T16:48:01Z",
+          "summary": "Comments",
+          "content": "",
+          "score": 628.0,
+          "comments": 335,
+          "also_in": [
+            "Hacker News front page"
+          ]
+        }
+      ]
+    },
+    {
+      "headline": "GUI agents need applicable history, not just relevant history",
+      "summary": "ExpActivator matches the current GUI screen to historical states in a frozen backbone’s latent space and offers the corresponding past action as a reference. For proactive suggestions, it activates a recurring intent only when the time and scenario support it, otherwise abstaining. The authors report improved within-trajectory step success across four GUI backbones while using about one-fifth as many history tokens, and stronger results on their proactive metric than the cited baseline.",
+      "why_it_matters": "This is a practical design lesson for personalized agents: retrieve memory at the decision point, and let the agent abstain when a remembered routine does not fit.",
+      "reason": "Its distinction between relevant history and genuinely applicable experience speaks to a practical failure mode in personalized GUI agents.",
+      "item": {
+        "key": "arxiv:2609.33304",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Relevance Does Not Imply Applicability: Experience Activation for Personal GUI Agents",
+        "url": "https://huggingface.co/papers/2609.33304",
+        "discussion_url": null,
+        "published": "2026-10-13T00:00:00Z",
+        "summary": "Personal Graphical User Interface (GUI) agents rely on interaction history to infer what a user wants from ambiguous instructions and to anticipate recurring routines. Existing approaches retrieve task-relevant history and append it to the policy's context, implicitly assuming that experience relevant to a task remains useful for each decision within it. We find that this help is largely spent at the first decision: retrieved history strongly improves the opening step of an episode, yet provides little sustained benefit over the remaining 90\\% of steps, and offers weak guidance on whether a proactive suggestion is warranted. A relevant record may tell the agent where to begin, but not which past action applies to the current screen or whether a routine is due now. The underlying issue is that relevance does not imply applicability}: relevance is determined at the task level, whereas applicability depends on the situation at decision time. We therefore recast personalization as experience activation and introduce ExpActivator, a training-free framework that activates only the experience applicable to the current situation. During execution, ExpActivator matches each new screen to…",
+        "content": "Relevance Does Not Imply Applicability: Experience Activation for Personal GUI Agents\nAbstract\nPersonal Graphical User Interface (GUI) agents rely on interaction history to infer what a user wants from ambiguous instructions and to anticipate recurring routines. Existing approaches retrieve task-relevant history and append it to the policy's context, implicitly assuming that experience relevant to a task remains useful for each decision within it. We find that this help is largely spent at the first decision: retrieved history strongly improves the opening step of an episode, yet provides little sustained benefit over the remaining 90\\% of steps, and offers weak guidance on whether a proactive suggestion is warranted. A relevant record may tell the agent where to begin, but not which past action applies to the current screen or whether a routine is due now. The underlying issue is that relevance does not imply applicability}: relevance is determined at the task level, whereas applicability depends on the situation at decision time. We therefore recast personalization as experience activation and introduce ExpActivator, a training-free framework that activates only the experience applicable to the current situation. During execution, ExpActivator matches each new screen to historical states in the frozen GUI backbone's latent space and supplies the corresponding action as a reference. Before execution, it activates a recurring intent only when the current time and scenario provide sufficient support, and otherwise abstains. Across four GUI backbones, ExpActivator improves within-trajectory step success by 28\\% on average, achieves the best personalized execution on every backbone while using about one-fifth as many history tokens, and reaches approximately 2.3times the Matthews correlation coefficient of the strongest proactive baseline. Experience pays where it is activated, not where it is appended.\nGet this paper in your agent:\nhf papers read 2609.33304 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 1\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 29.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "“Don’t think” instructions don’t reliably stop visible reasoning",
+      "summary": "The paper evaluates no-thinking behavior by separating pre-answer traces from final answers and measuring answer-only compliance, trace relevance, and explicit inference. Across six models and several task types, it finds that visible inference persists despite explicit controls, and becomes more common as the answer space opens. Accuracy stays stable on Boolean and multiple-choice questions, while open-ended questions expose a trade-off between answer-only compliance and accuracy.",
+      "why_it_matters": "A reasoning-mode setting is not a dependable control surface unless evaluations check the behavior it is meant to suppress.",
+      "reason": "Measuring when models keep reasoning despite being told not to offers a useful probe of model behavior and control over reasoning modes.",
+      "item": {
+        "key": "arxiv:2610.11765",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Thinking Inertia: LLMs Keep Thinking When Told Not To",
+        "url": "https://huggingface.co/papers/2610.11765",
+        "discussion_url": null,
+        "published": "2026-10-13T00:00:00Z",
+        "summary": "Large Language Models (LLMs) increasingly ship with explicit \"thinking modes\", yet their counterpart, \"no-thinking\", has received far less attention. We study LLMs' no-thinking behavior along two axes. a. How to measure no-thinking? Prior work typically defines no-thinking through proxies such as a disabled thinking mode or the absence of long traces. These proxies are unreliable: disabled thinking modes may still emit reasoning, while long traces may contain filler rather than genuine inference. We instead normalize each response into a pre-answer trace and final answer, and evaluate it at three levels: (i) Empty-Thinking Rate for strict answer-only compliance; (ii) instruction-aware Question-Pre-answer Relevance for similarity between the question and pre-answer trace; and (iii) LLM-as-judge Explicit Inference Rate for visible explicit inference. Together, these metrics distinguish answer-only output, relevant but non-inferential text, and explicit inference. b. How does no-thinking vary across tasks and models? We evaluate six prompting interventions on six LLMs across Boolean, multiple-choice, and open-ended questions. We find that explicit no-think controls cannot reliably…",
+        "content": "Abstract\nLarge Language Models (LLMs) increasingly ship with explicit \"thinking modes\", yet their counterpart, \"no-thinking\", has received far less attention. We study LLMs' no-thinking behavior along two axes. a. How to measure no-thinking? Prior work typically defines no-thinking through proxies such as a disabled thinking mode or the absence of long traces. These proxies are unreliable: disabled thinking modes may still emit reasoning, while long traces may contain filler rather than genuine inference. We instead normalize each response into a pre-answer trace and final answer, and evaluate it at three levels: (i) Empty-Thinking Rate for strict answer-only compliance; (ii) instruction-aware Question-Pre-answer Relevance for similarity between the question and pre-answer trace; and (iii) LLM-as-judge Explicit Inference Rate for visible explicit inference. Together, these metrics distinguish answer-only output, relevant but non-inferential text, and explicit inference. b. How does no-thinking vary across tasks and models? We evaluate six prompting interventions on six LLMs across Boolean, multiple-choice, and open-ended questions. We find that explicit no-think controls cannot reliably eliminate visible inference. Models instead exhibit \"Thinking Inertia\": explicit inference persists even under strict controls and becomes more prevalent as the answer space opens. Accuracy remains stable on Boolean and multiple-choice tasks, whereas open-ended tasks reveal a trade-off between answer-only compliance and task accuracy. Rewriting the same questions across answer spaces shows that supplying candidate answers makes answer-only responses easier to produce. These findings establish no-thinking as a non-trivial capability: stopping explicit reasoning cannot be assumed from model settings or instructions alone and deserves systematic evaluation alongside reasoning ability.\nCommunity\nToday’s LLMs are used to thinking longer. But can they stop when explicitly told NOT to?\nExcited to share our #NeurIPS2026 work:\nLLMs Keep Thinking When Told Not To\nWe observe persistent “Thinking Inertia”:\nLLMs keep reasoning even when explicitly told not to. They may get the answer right, yet fail to follow the no-thinking instruction.\n💡 Knowing when NOT to think may be just as important as knowing how to think.\nProject Page: 🌐 https://thinking-inertia.github.io\nGet this paper in your agent:\nhf papers read 2610.11765 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 1\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 43.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "llama.cpp adds an initial Q8_0 matrix-multiplication prototype for ggml-zdnn.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b11582",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b11582",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11582",
+        "discussion_url": null,
+        "published": "2026-10-13T08:32:25Z",
+        "summary": "ggml-zdnn : introduce Q8_0 mat mul ( #29836 )\n\nggml-zdnn: initial prototype of q8_0 matmul\n\nSigned-off-by: Aaron Teo aaron.teo1@ibm.com\n\ndocs: update zdnn docs\n\nSigned-off-by: Aaron Teo aaron.teo1@ibm.com\n\nSigned-off-by: Aaron Teo aaron.teo1@ibm.com\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/55333692\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows arm64 (CUDA 13) - CUDA 13.4…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Ollama 0.40.4 updates llama.cpp and includes a change to compact restored recurrent state after speculative rollback.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.4-rc1",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.4",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.4-rc1",
+        "discussion_url": null,
+        "published": "2026-10-13T05:26:17Z",
+        "summary": "What's Changed\n\nllama: update llama.cpp to b11521 for decision models and EmbeddingGemma 2 by @jmorganca in #18917\n\nserver: reuse verified manifests and loaded models in inference routes by @dhiltgen in #18947\n\nmlx: compact restored recurrent state after speculative rollback by @dhiltgen in #18955\n\nlaunch: include installed models in Codex /model picker by @ParthSareen in #18887\n\nMLX, MLX-C: version bump by @dhiltgen in #18956\n\nFull Changelog : v0.40.3...v0.40.4-rc1",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new vision-and-language navigation paper frames multi-agent teams as a way to tackle tasks beyond a single agent’s capabilities.",
+      "item": {
+        "key": "arxiv:2609.35965",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Systematic Multi-Agent Vision-and-Language Navigation: Formulation, Benchmark, and Method",
+        "url": "https://huggingface.co/papers/2609.35965",
+        "discussion_url": null,
+        "published": "2026-10-13T00:00:00Z",
+        "summary": "Vision-and-Language Navigation (VLN) has largely focused on a single agent following a single instruction, yet many real-world applications require teams of robots to tackle tasks beyond the capabilities of any individual agent. We present Systematic Multi-Agent Vision-and-Language Navigation, providing, to our knowledge, the first systematic formalization of multi-agent VLN as a constrained coordination problem: each mission consists of subtasks carrying dependency and resource constraints (presence locks and holding chains). A verified four-stage crafting pipeline instantiates the task as MAVLN, comprising 11,724 episodes across 145 scenes with teams of up to four agents under three instruction regimes, accompanied by tailored constraint-aware metrics. We further present TRISS, a coordination-ready navigation system coupling an LLM-based subtask scheduler, a shared topological memory that turns each agent's exploration into team knowledge, and a conflict-aware execution mechanism that realizes simultaneous intentions as collision-free routes. Extensive experiments establish TRISS as a comprehensive baseline and reveal substantial room for improvement across scheduling, planning…",
+        "content": "",
+        "score": 9.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A vLLM 0.32.0 release candidate adds host-pool reporting to KV-cache capacity logs.",
+      "item": {
+        "key": "github.com/vllm-project/vllm/releases/tag/v0.32.0rc0",
+        "source": "vLLM releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.32.0rc0: [HiSparse] Report host pool in KV cache capacity logs (#60285)",
+        "url": "https://github.com/vllm-project/vllm/releases/tag/v0.32.0rc0",
+        "discussion_url": null,
+        "published": "2026-10-12T20:49:49Z",
+        "summary": "Signed-off-by: Matthew Bonanni mbonanni@redhat.com\n\nCo-authored-by: Claude Opus 5.5 noreply@anthropic.com",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain Anthropic 1.7.6 refreshes model profiles, including declaring mid-conversation support in profiles.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.6",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-anthropic==1.7.6",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.6",
+        "discussion_url": null,
+        "published": "2026-10-12T14:40:17Z",
+        "summary": "Changes since langchain-anthropic==1.7.5\n\nrelease(anthropic): 1.7.6 ( #41221 )\n\nchore(model-profiles): refresh model profile data ( #41145 )\n\nfeat(core,anthropic,openai): declare mid-conversation support in model profiles ( #41180 )\n\nchore(deps): bump langgraph-sdk from 0.4.4 to 0.4.6 in /libs/partners/anthropic ( #41101 )\n\nchore(deps): bump langgraph-sdk from 0.4.2 to 0.4.4 in /libs/partners/anthropic ( #41080 )\n\nchore(deps): bump urllib3 from 2.7.0 to 2.8.0 in /libs/partners/anthropic ( #40964 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain OpenAI 1.7.1 also updates model profiles to declare mid-conversation support.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-openai%3D%3D1.7.1",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-openai==1.7.1",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-openai%3D%3D1.7.1",
+        "discussion_url": null,
+        "published": "2026-10-12T14:33:11Z",
+        "summary": "Changes since langchain-openai==1.7.0\n\nrelease(openai): 1.7.1 ( #41222 )\n\nfeat(core,anthropic,openai): declare mid-conversation support in model profiles ( #41180 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your agents remember the right thing—and stop when told.",
+  "slow_day_note": "",
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 17,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 27,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 31,
+      "kept": 12,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 876,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1287,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 269,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 178,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 89,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-12T09:31:18.522962Z",
+    "candidates": 78,
+    "triaged": 78,
+    "enriched": 8,
+    "model": "openai/gpt-6-luna",
+    "seconds": 74.7,
+    "usage": {
+      "calls": 2,
+      "input_tokens": 13151,
+      "output_tokens": 3370,
+      "cost_usd": 0.003329
+    }
+  }
+}

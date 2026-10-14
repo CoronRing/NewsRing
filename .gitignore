@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# railtracks run traces
+.railtracks/
+
+# Generated output. news/ and news_today.md are committed by the scheduled
+# workflow, since news/ is the history that prevents repeats; site/ is rebuilt
+# from it on every run.
+site/
+
+# Agent temp files and logs
+.agent_temp/
+.log/

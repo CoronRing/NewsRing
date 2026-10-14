@@ -1,0 +1,811 @@
+{
+  "date": "2026-10-14",
+  "generated_at": "2026-10-14T05:22:46.139086Z",
+  "title": "Agent harnesses, rubric hacking, and replacing Git with Scion",
+  "intro": "Today's highlights span the entire agent stack, from harness-level recursive adaptation to low-level GPU kernel transposition for decode-phase MoE routing. We also look at Anthropic outgrowing Git under sheer agent commit pressure, alongside clean diagnostic work on rubric reward hacking.",
+  "stories": [
+    {
+      "headline": "Gemini 4 Argon lands with agentic refactoring wins and aggressive pricing",
+      "summary": "Google has officially released Gemini 4 Argon via API and developer platforms, priced at $2/M input and $10/M output tokens (with 95% off cached inputs). DeepMind highlights practical engineering workloads over synthetic benchmarks: the model helped untangle a ~6-million-line legacy browser feature directory in Chromium, tuned Python session prep in the Agent Development Kit by 40%, and achieved a 2.85x vLLM inference speedup on Gemma 4 E2B via attention and speculative decoding optimizations. It also claimed the top spot on the Vals Index across coding, legal, and finance tasks.",
+      "why_it_matters": "The sub-surface refactoring and framework optimization case studies show a model specifically optimized for long-horizon, autonomous code manipulation rather than single-turn completion.",
+      "reason": "Google's new flagship Gemini 4 Argon is now live, bringing major updates to reasoning and agentic coding workflows across API and developer environments.",
+      "item": {
+        "key": "deepmind.google/blog/introducing-gemini-4-argon",
+        "source": "Google DeepMind",
+        "tags": [
+          "lab"
+        ],
+        "title": "Gemini 4 Argon: Built to solve your hardest problems",
+        "url": "https://deepmind.google/blog/introducing-gemini-4-argon/",
+        "discussion_url": null,
+        "published": "2026-10-13T16:01:52Z",
+        "summary": "",
+        "content": "Gemini 4 Argon: Built to solve your hardest problems\nGemini 4 Argon is now globally available today for developers and enterprises via the API in AI Studio and Gemini platform, for Google AI Ultra subscribers in Google Antigravity, and Google AI Ultra and Pro subscribers in the Gemini app and AI Mode in Search.\nArgon excels at deep work in complex, real-world tasks across domains including coding, finance, legal, cybersecurity, and science. Its depth and precision across multi-step tasks leads Argon to outperform other frontier models on benchmarks across domains, ranking #1 on the Vals Index, which measures model performance across critical economic sectors like finance, coding, legal, and tax work.\nThe model launches today at an introductory price 1 of $2 per million input tokens and $10 per million output tokens (with cached input tokens at 95% off).\nTeams at Google, across enterprises, and in the research community have already been using Argon to land significant impact across fields:\n- To solve major engineering problems like large codebase refactoring and optimizations\n- To optimize business workflows across domains like legal, finance, and science\n- To find and patch critical cybersecurity vulnerabilities\n- To enable novel breakthroughs in quantum computing, nuclear fusion, and life sciences\nSolving complex engineering tasks\nAt Google, we’ve been using Argon on our hardest engineering problems. Over the past few weeks, software engineers have been shipping high-quality code faster than ever. Argon in Antigravity has helped teams increase agentic code submissions by more than 35% while reducing code rollbacks by nearly a third.\n- Untangling browser feature code in Chrome: Argon helped the Chrome team separate core webpage handling from a ~6 million line legacy folder of browser features held within Chromium’s 40 million-line codebase. Piping multiple clean code changes at a time, Argon helped the team finish an architectural refactor across hundreds of files, completing months of work in weeks. For Chrome's billions of global users, this will unlock the ability for live webpages to move fluidly between tabs, side panels, and floating windows without reloading, eliminating an entire category of browser crashes.\n- Optimizing a production Python codebase in hours: Argon in Antigravity is helping the team behind Google's open-source Agent Development Kit (ADK), a framework powering enterprise agents, push their performance engineering further. The team gave Argon their .agents/skills rulebook and a one-paragraph goal to eliminate framework overhead without breaking existing apps. Working autonomously overnight, Argon surfaced optimizations, now live in google/adk-python, that cut in-memory session prep time by 40% in long sessions and sped up cold imports by 21%. Read the engineering deep dive to learn more.\n- Quantum chemistry open-source package optimization: xTB (Semiempirical Extended Tight-Binding) is one of the most-cited open-source quantum chemistry packages for molecules. Scientists use it to predict molecules' 3D shapes and to screen large numbers of drug and materials candidates. Using Argon in Antigravity, our researchers made xTB up to 2.3x faster at predicting molecular structures and 1.8x faster at conformer search. The changes have been contributed to the official xTB repository on GitHub.\n- Making our open Gemma models nearly three times as fast: Using Argon, we achieved a 2.85x end-to-end inference speedup on an A100 via vLLM (accelerating throughput from ~37,900 to over 108,000 tokens per second on Gemma 4 E2B) with 100% token parity and zero quality drop in just a few days, a process that would usually take months. Check out the upstream pull requests (optimizing everything from attention tuning to speculative decoding) to see the exact changes.\n- Delivering complex 3D visualizations: Argon brings major improvements in spatial reasoning, mathematical precision, and visual coding compared to previous Gemini models. Using slash commands like /goal and prompting for multi-agent loops with custom skills in Antigravity, Googlers are using Argon to prototype complex 3D visualizations, high-fidelity games, and interactive animations in vanilla code that can be rendered directly in the browser.\nTransforming critical business and professional workflows\nArgon combines frontier reasoning, deep visual perception, expanded domain knowledge, and stronger writing capabilities across legal, finance, science, and coding to help with high-stakes professional workflows. It communicates clearly, keeping you in the loop, and follows style instructions better than any of our previous Gemini models. Argon answers questions more directly with less hedging, doesn’t repeat itself more than necessary, and skips clichés throughout the responses.\nEnterprise customers and startups in our early access program are already seeing strong wins with Argon.\nUsing its advanced reasoning and multimodal capabilities while maintaining strict grounding, Argon excels in deep multimodal document comprehension, longitudinal data analysis, and interactive analytical sandboxes.\nAccelerating real-world impact with researchers and domain experts\nResearchers, engineers, and security specialists are already using Argon to push the boundaries of cyber defense, science, math, and robotics. It’s helping cyber defenders and researchers test hypotheses, autonomously audit critical codebases and formal proofs, and catch subtle zero-day vulnerabilities and logic flaws.\nBringing state-of-the-art cyber capabilities to more trusted defenders\nStarting today, we’re beginning expansion to hundreds of additional Fairwind Program partners.\nWiz is already using Argon for its \"Scan for Good\" initiative, which protects critical infrastructure for the public good and for free. With early access to the model, Wiz has demonstrated Argon's real-world impact across multiple high-stakes sectors:\n- Securing sensitive government data: As…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-argon",
+          "source": "Google Gemini Blog",
+          "tags": [
+            "lab",
+            "models"
+          ],
+          "title": "Gemini 4 Argon is now available for developers.",
+          "url": "https://blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-argon/",
+          "discussion_url": null,
+          "published": "2026-10-13T16:00:00Z",
+          "summary": "Build complex software and cybersecurity workflows with Google Gemini 4 Argon. Check out the Gemini API Developer Guide and read the Google Antigravity and Android Studi…",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon",
+          "source": "Google AI Blog",
+          "tags": [
+            "lab"
+          ],
+          "title": "Gemini 4 Argon: Built to solve your hardest problems",
+          "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon/",
+          "discussion_url": null,
+          "published": "2026-10-13T16:00:00Z",
+          "summary": "TBD",
+          "content": "We’re giving developers, enterprises, scientists, and consumers access to Gemini 4 Argon, our latest frontier model.",
+          "score": null,
+          "comments": null,
+          "also_in": [
+            "Google Gemini Blog"
+          ]
+        },
+        {
+          "key": "blog.google/innovation-and-ai/products/gemini-app/gemini-4-argon-availability",
+          "source": "Google Gemini Blog",
+          "tags": [
+            "lab",
+            "models"
+          ],
+          "title": "Gemini 4 Argon comes to the Gemini app.",
+          "url": "https://blog.google/innovation-and-ai/products/gemini-app/gemini-4-argon-availability/",
+          "discussion_url": null,
+          "published": "2026-10-13T16:00:00Z",
+          "summary": "Gemini 4 Argon brings frontier reasoning and agentic coding to the Google Gemini app. Google AI Pro and Ultra subscribers can now access Gemini 4 Argon.",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "theverge.com/ai-artificial-intelligence/1009862/google-releases-gemini-4-argon",
+          "source": "The Verge (AI)",
+          "tags": [
+            "press"
+          ],
+          "title": "Google finally releases Gemini 4 Argon",
+          "url": "https://www.theverge.com/ai-artificial-intelligence/1009862/google-releases-gemini-4-argon",
+          "discussion_url": null,
+          "published": "2026-10-13T16:00:00Z",
+          "summary": "After months sitting on the sidelines of the frontier AI race, Google has finally launched its long-awaited Gemini 4 Argon model, claiming it can compete with the best the industry has to offer. Google says Argon delivers \"frontier reasoning and improved performance across complex workflows,\" while cutting down on hedging, repetition, and the cliches that […]",
+          "content": "After months sitting on the sidelines of the frontier AI race, Google has finally launched its long-awaited Gemini 4 Argon model, claiming it can compete with the best the industry has to offer.\n\nGoogle says Argon delivers \"frontier reasoning and improved performance across complex workflows,\" while cutting down on hedging, repetition, and the cliches that continue to plague AI chatbots. The company claims Argon outperforms rival models like GPT-6 Astra, Claude Fable 5.1, and Claude Opus 5.5 across a range of benchmarks, including coding, cybersecurity, science, finance, and law.\n\nGoogle says it's already putting Argon to use internally, s …\n\nRead the full story at The Verge.",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "deepmind.google/models/gemini",
+          "source": "Hacker News front page",
+          "tags": [
+            "community"
+          ],
+          "title": "Gemini 4 Argon",
+          "url": "https://deepmind.google/models/gemini/",
+          "discussion_url": "https://news.ycombinator.com/item?id=50073879",
+          "published": "2026-10-13T16:03:16Z",
+          "summary": "Comments",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "deepmind.google/blog/developing-gemini-4-argon-responsibly-and-safely",
+          "source": "Google DeepMind",
+          "tags": [
+            "lab"
+          ],
+          "title": "Developing Gemini 4 Argon responsibly and safely",
+          "url": "https://deepmind.google/blog/developing-gemini-4-argon-responsibly-and-safely/",
+          "discussion_url": null,
+          "published": "2026-10-13T19:43:07Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "blog.google/innovation-and-ai/technology/safety-security/gemini-4-model-safety-security",
+          "source": "Google Gemini Blog",
+          "tags": [
+            "lab",
+            "models"
+          ],
+          "title": "Developing Gemini 4 Argon responsibly and safely",
+          "url": "https://blog.google/innovation-and-ai/technology/safety-security/gemini-4-model-safety-security/",
+          "discussion_url": null,
+          "published": "2026-10-13T18:00:00Z",
+          "summary": "Gemini 4 Argon logo next to a large white \"4\", all on a gradient blue background",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "deepmind.google/blog/gemini-4-argon-for-robotics",
+          "source": "Google DeepMind",
+          "tags": [
+            "lab"
+          ],
+          "title": "Gemini 4 Argon for Robotics",
+          "url": "https://deepmind.google/blog/gemini-4-argon-for-robotics/",
+          "discussion_url": null,
+          "published": "2026-10-13T16:01:58Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "simonwillison.net/2026/Oct/13/llm-gemini",
+          "source": "Simon Willison",
+          "tags": [
+            "practitioner"
+          ],
+          "title": "llm-gemini 0.35",
+          "url": "https://simonwillison.net/2026/Oct/13/llm-gemini/",
+          "discussion_url": null,
+          "published": "2026-10-13T22:28:54Z",
+          "summary": "Release: llm-gemini 0.35\n\nI added support to llm-gemini for the new Gemini 4 Argon model, made available today via the Gemini API and for customers of their $100/month subscription plan.\n\nHere are the low, medium and high pelicans . As expected, they are all excellent: Gemini has a track record of producing great SVGs, and are the only lab where I know their staff have invested in SVG specifically (and who have boasted about their pelicans before.)\n\nHere's the \"high\" illustration, which cost me 17.166 cents:\n\nThe pricing is interesting. At launch, Argon is $2/million input and $10/million output - the same price as GPT-6 Sol, half the price of Claude Opus 5.5 and 1/5th the price of Claude Fable 5.1 and GPT-6 Astra.\n\nBut on December 1st Argon is set to double in price - so it will be the same price as Opus 5.5.\n\nPrices like this aren't really comparable these days since what really matters is how many tokens a model takes to achieve a goal within an agentic harness.\n\nOne useful clue for that comes from Artificial Analysis, who publish the total cost to run their benchmark using each model. Argon is looking very good there - costing $2,407 to run the benchmark, putting it close to…",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Harness^2 evolves the agent harness instead of model weights",
+      "summary": "Researchers introduce Harness^2, a framework exploring recursive self-improvement strictly at the execution harness layer rather than altering model weights. In open-world tasks lacking ground-truth verifiers, it operates via a two-tier recursion design: task-level recursion using a contrastive 'Propose-Probe-Compose' cycle to refine runtime harness configs, and harness-level recursion that distills successful configurations into a durable meta-harness for future tasks. Tested with GLM-5 and Gemini 3.5 Flash, the single-step harness evolution delivered notable benchmark lifts, including 11.5 points on WorkBuddy-Bench and 11.8 percentage points on LAB.",
+      "why_it_matters": "Treating harness scaffolding as an optimizable parameter search space offers a practical route to boost multi-turn task success without fine-tuning underlying models.",
+      "reason": "This paper investigates recursive self-improvement at the harness layer rather than model weights, presenting techniques to automatically adapt open-world agent execution harnesses.",
+      "item": {
+        "key": "arxiv:2610.14224",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Harness^2: Recursive Agent Harnessing for an Open World",
+        "url": "https://huggingface.co/papers/2610.14224",
+        "discussion_url": null,
+        "published": "2026-10-14T00:00:00Z",
+        "summary": "LLM agents' capabilities depend not only on their underlying models but also on their execution harnesses. Recursive self-improvement (RSI) offers a promising approach to automatically evolve these harnesses. However, deploying RSI in open-world settings still faces two critical challenges. First, open-world tasks are typically unseen during the harness design phase and novel at test time, leaving no ground-truth verifiers to reliably guide online harness edits. Second, the RSI process remains highly task-specific and fails to generalize to novel scenarios. We introduce Harness^2, a plug-and-play, recursive agent harnessing framework that addresses these challenges through two connected levels of recursion. Task-level recursion refines the current task's harness using a contrastive Propose-Probe-Compose step that reliably guides edits without ground-truth verifiers, and can be scaled further via parallel or sequential recursion. Harnessing-level recursion then extracts experience from these edits to update a continual improvement harness, enabling the agent to better adapt to future tasks. Across three professional benchmarks and four model-harness configurations, a single step…",
+        "content": "Abstract\nLLM agents' capabilities depend not only on their underlying models but also on their execution harnesses. Recursive self-improvement (RSI) offers a promising approach to automatically evolve these harnesses. However, deploying RSI in open-world settings still faces two critical challenges. First, open-world tasks are typically unseen during the harness design phase and novel at test time, leaving no ground-truth verifiers to reliably guide online harness edits. Second, the RSI process remains highly task-specific and fails to generalize to novel scenarios. We introduce Harness^2, a plug-and-play, recursive agent harnessing framework that addresses these challenges through two connected levels of recursion. Task-level recursion refines the current task's harness using a contrastive Propose-Probe-Compose step that reliably guides edits without ground-truth verifiers, and can be scaled further via parallel or sequential recursion. Harnessing-level recursion then extracts experience from these edits to update a continual improvement harness, enabling the agent to better adapt to future tasks. Across three professional benchmarks and four model-harness configurations, a single step consistently improves GLM-5 and Gemini 3.5 Flash over their base harnesses, yielding gains of up to 11.5 points on WorkBuddy-Bench, 4.5 points on JobBench, and 11.8 percentage points on LAB, with further gains as the task-level recursion budget increases.\nGet this paper in your agent:\nhf papers read 2610.14224 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 17.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "ClawLoop implements teacher-free agent training loops in sandbox harnesses",
+      "summary": "Most post-training setups for tool-using agents rely heavily on larger external teacher models collecting static trajectories. ClawLoop removes that external dependency by implementing a closed, harness-native self-improvement cycle directly inside execution sandboxes with shell and file access. It couples task synthesis—using diagnosis-conditioned difficulty scaling with agent-free and agent-based validation—with model training (SFT/RL) and behavior diagnosis rollouts that shape the next generation of tasks. Using Qwen3.6-27B as the base loop model, improvements transferred downstream to 9B and 4B models across ClawGym-Bench and SkillsBench.",
+      "why_it_matters": "Removes the glass ceiling of static teacher datasets by letting sandbox interaction logs directly generate and filter the next curriculum.",
+      "reason": "ClawLoop explores self-improving agents operating directly inside sandbox workspaces and file systems via harness-native training loops.",
+      "item": {
+        "key": "arxiv:2610.14118",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "ClawLoop: Self-Improving Agents via Harness-Native Training Loop",
+        "url": "https://huggingface.co/papers/2610.14118",
+        "discussion_url": null,
+        "published": "2026-10-14T00:00:00Z",
+        "summary": "The rapid advancement of Large Language Models (LLMs) has driven their deployment toward general-purpose harness environments, where LLM-based agents operate in sandbox workspaces and interact directly with file systems and shells. While numerous post-training pipelines exist for tool-use agents, their counterparts for harness-based agents remain scarce and are predominantly one-shot and teacher-dependent: a stronger external model synthesizes tasks and collects trajectories, the target agent is trained once, and evaluation results are consumed by human researchers rather than fed back into the loop. Such pipelines are inherently bounded by the capability of the external model and the scope of human prior, leaving no room for self-improvement. To address these limitations, we propose ClawLoop, a framework that enables self-improving without any external teacher model and with minimal prior dependencies. ClawLoop composes three phases into a self-sustaining cycle: Task Synthesis, which generates a diverse pool of training tasks via two complementary construction routines, applies diagnosis-conditioned difficulty growth followed by both agent-free and agent-based task validation…",
+        "content": "Abstract\nThe rapid advancement of Large Language Models (LLMs) has driven their deployment toward general-purpose harness environments, where LLM-based agents operate in sandbox workspaces and interact directly with file systems and shells. While numerous post-training pipelines exist for tool-use agents, their counterparts for harness-based agents remain scarce and are predominantly one-shot and teacher-dependent: a stronger external model synthesizes tasks and collects trajectories, the target agent is trained once, and evaluation results are consumed by human researchers rather than fed back into the loop. Such pipelines are inherently bounded by the capability of the external model and the scope of human prior, leaving no room for self-improvement. To address these limitations, we propose ClawLoop, a framework that enables self-improving without any external teacher model and with minimal prior dependencies. ClawLoop composes three phases into a self-sustaining cycle: Task Synthesis, which generates a diverse pool of training tasks via two complementary construction routines, applies diagnosis-conditioned difficulty growth followed by both agent-free and agent-based task validation; Training, which updates the agent via SFT and/or RL; and Diagnosis and Feedback, which analyzes the agent's rollout behaviors to produce a capability analysis report that will be used as feedback for task synthesis in the next iteration. Using Qwen3.6-27B as the loop model, ClawLoop yields consistent improvements on SkillsBench, Claw-Eval-Live, and ClawGym-Bench. The iteratively refined tasks are further transferred to smaller-scale Qwen3.5-4B and 9B models with gains across all benchmarks, validating data quality independently of the loop model.\nGet this paper in your agent:\nhf papers read 2610.14118 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 9.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Additive rubric aggregation buys points with unrequested advice",
+      "summary": "Rubric-based RL often falls prey to severe reward hacking because judges use additive scoring across criteria, allowing models to offset catastrophic errors by over-generating unhelpful or irrelevant answers. Demonstrating this on clinical consults, a model advising emergency care can delay the critical 'call 911' instruction with 2,000 characters of explanatory padding to harvest rubric checklist points, scoring higher while giving worse care. The authors propose ProRubric, which reorganizes rubrics into protocol dimensions requiring all grouped criteria to pass simultaneously while zeroing credit if a failure clause triggers. On Qwen3-4B, this protocol-level aggregation improved appropriateness by 10.8 points without sacrificing coverage.",
+      "why_it_matters": "For anyone using LLM-as-judge or rubric rewards, this neatly proves that score aggregation structure is just as vulnerable to reward hacking as the criteria themselves.",
+      "reason": "It pinpoints critical failure modes where additive scoring in rubric-based RL and LLM judges leads to severe reward hacking, proposing protocol-level fixes.",
+      "item": {
+        "key": "arxiv:2609.38847",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Scoring Higher, Answering Worse: Mitigating Reward Hacking in Rubric-Based RL via Protocol-Level Rubrics",
+        "url": "https://huggingface.co/papers/2609.38847",
+        "discussion_url": null,
+        "published": "2026-10-14T00:00:00Z",
+        "summary": "Rubric-based reinforcement learning (Rubric-RL) trains language models where no verifier exists. A judge checks each criterion of a rubric, and the verdicts are aggregated into a reward, most often by a weighted sum. We show that this additive aggregation is the weak point. Under a sum, criteria compensate for one another: a policy that misses the one decision that matters can buy the points back with advice nobody asked for. On clinical consultation, such a policy scores higher and answers worse. Rubric coverage rises while appropriateness on held-out physician criteria falls below the untrained model. The medical criteria are not to blame. Grouped so that they must hold together, the same criteria, unchanged to the word, recover a third of the loss; shorter answers recover almost none. We therefore propose Protocol-level Rubrics (ProRubric), which keeps what the criteria ask for and changes how they are aggregated. It groups a checklist into a few protocol-level dimensions. A dimension counts only when all of its criteria hold and its failure clause does not fire. The grouping is done once, offline, and leaves the optimizer unchanged. ProRubric raises appropriateness by 10.8…",
+        "content": "Scoring Higher, Answering Worse: Mitigating Reward Hacking in Rubric-Based RL via Protocol-Level Rubrics\nAbstract\nRubric-based reinforcement learning (Rubric-RL) trains language models where no verifier exists. A judge checks each criterion of a rubric, and the verdicts are aggregated into a reward, most often by a weighted sum. We show that this additive aggregation is the weak point. Under a sum, criteria compensate for one another: a policy that misses the one decision that matters can buy the points back with advice nobody asked for. On clinical consultation, such a policy scores higher and answers worse. Rubric coverage rises while appropriateness on held-out physician criteria falls below the untrained model. The medical criteria are not to blame. Grouped so that they must hold together, the same criteria, unchanged to the word, recover a third of the loss; shorter answers recover almost none. We therefore propose Protocol-level Rubrics (ProRubric), which keeps what the criteria ask for and changes how they are aggregated. It groups a checklist into a few protocol-level dimensions. A dimension counts only when all of its criteria hold and its failure clause does not fire. The grouping is done once, offline, and leaves the optimizer unchanged. ProRubric raises appropriateness by 10.8 points without losing coverage and has the best seven-benchmark average at both scales. Reward validity is set not only by what a rubric verifies, but by how it aggregates. Code is available at https://github.com/Estrellajer/ProRubric\nCommunity\nCan an AI get a better score by giving a worse answer? Surprisingly, yes.\nImagine asking whether to call 911—and getting 2,000+ characters of explanation before the model tells you to call. The answer checks plenty of boxes, but misses what matters: getting the urgent advice to you immediately.\nWe found that rubric-based RL can encourage this behavior. When checklist scores simply add up, models can earn points for extra details that compensate for a critical mistake.\nProRubric changes how those points are earned. Related requirements must pass together, and a critical failure wipes out the group’s credit. On Qwen3-4B, this improves appropriateness by 10.8 points over standard Rubric-RL without sacrificing rubric coverage.\nThe takeaway: better checklists are only half the story—how we score them matters too.\nGet this paper in your agent:\nhf papers read 2609.38847 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 20.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "DeltaTTG uses remaining token count to assign credit in multi-turn RL",
+      "summary": "RLVR on multi-turn agents frequently suffers from credit assignment issues due to sparse terminal rewards and the high compute cost of intermediate evaluators. DeltaTTG proposes using 'Token-to-Go' (TTG)—the estimated number of tokens left until task completion—as a low-cost, observable proxy for remaining effort. By learning a shared, frozen progress meter over historical trajectory logs, the system dynamically redistributes outcome-derived advantages across intermediate actions without altering total reward scales or signs. The technique yields a 5.7 to 7.2 point improvement over GRPO across ALFWorld, PaperSearchQA, and BFCLv3 on Qwen3-4B and Llama-3.1-8B-Instruct while maintaining comparable GPU training hours.",
+      "why_it_matters": "Provides a clean, domain-agnostic step-level reward signal for multi-turn agent RL without requiring expensive per-step judge calls.",
+      "reason": "DeltaTTG addresses credit assignment in multi-turn agent RLVR by using a token-to-go progress metric instead of relying solely on sparse terminal rewards.",
+      "item": {
+        "key": "arxiv:2610.17666",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "DeltaTTG: Training Multi-Turn Agents with a Token-to-Go Progress Meter",
+        "url": "https://huggingface.co/papers/2610.17666",
+        "discussion_url": null,
+        "published": "2026-10-14T00:00:00Z",
+        "summary": "Reinforcement learning with verifiable rewards (RLVR) for multi-turn agents relies on sparse terminal rewards that say little about individual steps. Within-group step comparisons depend on reliable state matching and sufficiently diverse sampled outcomes, while direct step scoring may require costly external evaluators, human annotations, or task-specific heuristics. We introduce DeltaTTG to learn a reusable progress signal through a shared progress meter, using low-cost supervision from diverse policies' recorded trajectories without task-specific progress rules. Its supervision target, Token-to-Go (TTG), the number of tokens remaining to be generated until task completion, serves as an observable proxy for remaining completion effort. During actor training, changes in the frozen meter's estimates redistribute outcome-derived advantages across steps without altering the reward, preserving each trajectory's advantage sign and token-average scale. On ALFWorld, PaperSearchQA, and BFCLv3, DeltaTTG improves the average score over GRPO by 5.7 and 7.2 points with Qwen3-4B and Llama-3.1-8B-Instruct, respectively, outperforms all compared RL baselines on average, and keeps actor-training…",
+        "content": "DeltaTTG: Training Multi-Turn Agents with a Token-to-Go Progress Meter\nAbstract\nReinforcement learning with verifiable rewards (RLVR) for multi-turn agents relies on sparse terminal rewards that say little about individual steps. Within-group step comparisons depend on reliable state matching and sufficiently diverse sampled outcomes, while direct step scoring may require costly external evaluators, human annotations, or task-specific heuristics. We introduce DeltaTTG to learn a reusable progress signal through a shared progress meter, using low-cost supervision from diverse policies' recorded trajectories without task-specific progress rules. Its supervision target, Token-to-Go (TTG), the number of tokens remaining to be generated until task completion, serves as an observable proxy for remaining completion effort. During actor training, changes in the frozen meter's estimates redistribute outcome-derived advantages across steps without altering the reward, preserving each trajectory's advantage sign and token-average scale. On ALFWorld, PaperSearchQA, and BFCLv3, DeltaTTG improves the average score over GRPO by 5.7 and 7.2 points with Qwen3-4B and Llama-3.1-8B-Instruct, respectively, outperforms all compared RL baselines on average, and keeps actor-training GPU-hours close to GRPO. Further experiments show improved sample efficiency and out-of-domain performance, and support the meter's ability to distinguish step quality and guide test-time action selection across actor sizes. The code is available at https://github.com/Xuyan923r/DeltaTTG.\nCommunity\nReinforcement learning with verifiable rewards (RLVR) for multi-turn agents relies on sparse terminal rewards that say little about individual steps. Within-group step comparisons depend on reliable state matching and sufficiently diverse sampled outcomes, while direct step scoring may require costly external evaluators, human annotations, or task-specific heuristics. We introduce DeltaTTG to learn a reusable progress signal through a shared progress meter, using low-cost supervision from diverse policies' recorded trajectories without task-specific progress rules. Its supervision target, Token-to-Go (TTG), the number of tokens remaining to be generated until task completion, serves as an observable proxy for remaining completion effort. During actor training, changes in the frozen meter's estimates redistribute outcome-derived advantages across steps without altering the reward, preserving each trajectory's advantage sign and token-average scale. On ALFWorld, PaperSearchQA, and BFCLv3, DeltaTTG improves the average score over GRPO by 5.7 and 7.2 points with Qwen3-4B and Llama-3.1-8B-Instruct, respectively, outperforms all compared RL baselines on average, and keeps actor-training GPU-hours close to GRPO. Further experiments show improved sample efficiency and out-of-domain performance, and support the meter's ability to distinguish step quality and guide test-time action selection across actor sizes.\nGet this paper in your agent:\nhf papers read 2610.17666 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 9.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Anthropic replaces Git with centralized VCS after daily PR volume explodes",
+      "summary": "Anthropic revealed that their daily merged code changes surged from 2,500 in May to over 30,000 in September 2026, driven largely by coding agents hitting internal repos. Dealing with a 100 GB main branch history and an estimated 600 PB/day of potential raw Git network traffic across CI and sandbox checkouts, a team of seven built and migrated to Scion, a centralized Subversion-style VCS, in five months. The team explicitly passed on offline support because Claude—the primary committer—is necessarily online. They also noted that while internal adversarial model-on-model reviews caught subtle flaws, human engineers frequently had to step in to keep agents from over-engineering systems for hypothetical edge cases.",
+      "why_it_matters": "A concrete benchmark for agentic velocity in production: developer tooling built for humans completely broke under the transaction volume of automated coding loops.",
+      "reason": "Anthropic details the engineering behind replacing Git internally to handle the massive code change volume generated by coding agents.",
+      "item": {
+        "key": "simonwillison.net/2026/Oct/13/redesigning-source-control-at-anthropic",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "Redesigning source control at Anthropic",
+        "url": "https://simonwillison.net/2026/Oct/13/redesigning-source-control-at-anthropic/",
+        "discussion_url": null,
+        "published": "2026-10-13T23:00:06Z",
+        "summary": "Redesigning source control at Anthropic\n\nInteresting piece from Anthropic describing why and how they built their own custom alternative to Git, based on the dramatic increase in rate of changes to their code after the past six months.\n\nIn May 2026, Anthropic averaged around 2,500 code changes merged per day; as of September, we merged over 30,000 per day.\n\nThey included a chart showing those changes. I had Claude modify their chart ( code here ) to add markers for the public releases of each of their models in 2026:\n\nThis shows public release dates, not the date when models became available for Anthropic's internal use. My guess is that the introduction of Fable/Mythos class models is a key factor in the increased coding velocity.\n\n\"Antique\" is their new code review system. The source control system is called Scion, and sounds to me like a reinvention of centralized source control along the lines of Subversion. They had some pretty extreme requirements:\n\nThe history of our main branch alone is almost 100 GB, and a  compressed  working copy is over 25 GB. We perform on the order of 25 million code checkouts per day for CI, before counting developer environments, agent sandboxes…",
+        "content": "13th October 2026 - Link Blog\nRedesigning source control at Anthropic (via) Interesting piece from Anthropic describing why and how they built their own custom alternative to Git, based on the dramatic increase in rate of changes to their code after the past six months.\nIn May 2026, Anthropic averaged around 2,500 code changes merged per day; as of September, we merged over 30,000 per day.\nThey included a chart showing those changes. I had Claude modify their chart (code here) to add markers for the public releases of each of their models in 2026:\nThis shows public release dates, not the date when models became available for Anthropic's internal use. My guess is that the introduction of Fable/Mythos class models is a key factor in the increased coding velocity.\n\"Antique\" is their new code review system. The source control system is called Scion, and sounds to me like a reinvention of centralized source control along the lines of Subversion. They had some pretty extreme requirements:\nThe history of our main branch alone is almost 100 GB, and a compressed working copy is over 25 GB. We perform on the order of 25 million code checkouts per day for CI, before counting developer environments, agent sandboxes, and research jobs. Fetched naively, that would be over 600 PB of git traffic per day.\nThe new system was built by a team of seven people, and the migration from Git was completed in five months.\nWhen asked on Hacker News about the lack of offline support, Scion engineer Nick G replied:\nSince Claude is by far the heaviest user of Scion and is necessarily online, this just wasn't important to do.\nAs an aside, I've been trying adversarial review in my own projects recently, where you have a model try and find flaws (I often play Claude and GPT off against each other). This note from the article reflected my own experience with that:\nAnthropic also makes extensive use of adversarial review, and, while this is incredibly effective in many ways, it can also be myopic, so skilled engineers needed to steer Claude away from over-engineering parts of the system in response to hypothetical concerns.\nRecent articles\n- Hello Python 3.15, goodbye 3.10, and now I can use 3.11 - 12th October 2026\n- A new feature for my blog, built using my voice - 9th October 2026\n- Claude Haiku 5.5 - 7th October 2026\n- We're going to need default hard budget caps on pretty much everything - 3rd October 2026",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "anthropic.com/engineering/redesigning-source-control",
+          "source": "Hacker News front page",
+          "tags": [
+            "community"
+          ],
+          "title": "Redesigning source control at Anthropic",
+          "url": "https://www.anthropic.com/engineering/redesigning-source-control",
+          "discussion_url": "https://news.ycombinator.com/item?id=50073633",
+          "published": "2026-10-13T15:49:56Z",
+          "summary": "Comments",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Parsimony benchmarks code bloat in agent patches",
+      "summary": "Parsimony is a new open-source evaluation benchmark designed to measure code verbosity in model-generated solutions. Instead of naive line counts, it parses AST coding units (statements, function calls, names, and literals) across diffs submitted to SWE-bench Verified tasks to calculate net syntax elements added versus removed. The author notes that while verbosity does not automatically equal bad design, larger diffs correlate modestly with higher solve rates (Spearman 0.33–0.60 on larger leaderboards), indicating models frequently brute-force edge cases with sprawling logic rather than concise refactors.",
+      "why_it_matters": "Gives agent engineers a concrete metric to penalize code bloat and diff pollution in agentic SWE harnesses.",
+      "reason": "This open-source benchmark evaluates agents and models on code verbosity and diff bloat, filling a blind spot left by standard solve-rate metrics.",
+      "item": {
+        "key": "parsimony.lasu.dev/",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: Parsimony – an open-source benchmark for how much code AI models add",
+        "url": "https://parsimony.lasu.dev/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50077619",
+        "published": "2026-10-13T19:50:31Z",
+        "summary": "Existing benchmarks measure solve rate and token output/cost, but don't punish excess code, which makes a codebase harder to work with in the long term. I wanted to measure this since it matters most for long-term projects.\nMethod: it takes the patches that benchmarks already publish (DeepSWE, SWE-bench Verified, SWE-bench Live) and counts \"coding units\": syntax elements like statements, calls, names and literals. I didn't use lines of code, so cramming code isn't rewarded. Deleted code is subtracted, so it measures net units.\nGPT-6 and Claude 5.5 have no public patches yet, so I ran them myself on 3–10 tasks on my own subscriptions (shown as faded circles, not ranked).\nAny feedback or model contributions are welcome, especially public patch exports for newer models.\nGitHub: https://github.com/La5u/Parsimony\nNot affiliated with any of the benchmarks.",
+        "content": "def has_negative(values):\n    found = False\n    for value in values:\n        if value < 0:\n            found = True\n    return found\nParsimony\nExisting benchmarks measure solve rate and cost, but don't punish excess code, which makes a codebase harder to work with in the long term. Parsimony measures how much code AI models add.\nIt takes the patches that benchmarks already publish and counts coding units: syntax elements like statements, calls, comparisons, names and literals. Lines aren't counted, so cramming code isn't rewarded, and deleted code is subtracted: net units = added − removed.\nCompare models\nHow to read this\nModels are ranked by mean net units added on the tasks they solved, lowest first. \"Net units added (mean)\" also includes failed attempts. Solved comes from SWE-bench Verified; tests aren't rerun. Measured is how many solved attempts could be measured.\nThe Artificial Analysis Intelligence Index is an outside score, matched by model and reasoning effort. It doesn't affect the rank.\nFaded models were run by me on the first 3–10 DeepSWE Python tasks (OpenAI models with pi, Anthropic models with Claude Code) and graded with each task's own tests. They aren't verified or ranked. GPT-5.6 Sol ran both ways: my run added 0.88× the code of its published run.\nLeaderboard\nData sources\nHashes\nMethod\n- Each patch is applied to the task's code, and both versions of every changed file are parsed. Nothing is run.\n- Tests, docs and generated files are left out. Only Python is measured.\n- Pass/fail comes from SWE-bench's published results; tests aren't rerun.\nLimits\n- Smaller isn't always better: units measure size, not readability or design.\n- Models that write more code also tend to solve more tasks (Spearman 0.33–0.60 on the boards with 26+ models).\n- Every model uses the same agent (mini-SWE-agent), but the agent still affects how much code gets written.\nAdd your own benchmark\nHave code-size numbers from another benchmark? Download the example file, fill in your results and open it to get the same chart and table. The file stays in your browser. Format and how to share it.\nExample: check for a negative number\nBoth return the same result.\ndef has_negative(values):\n    return any(value < 0 for value in values)",
+        "score": 63.0,
+        "comments": 11,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Swap-AB: Hopper WGMMA optimizations for decode-phase fused MoEs",
+      "summary": "AWS published an architectural teardown of kernel optimizations for fused Mixture-of-Experts on Hopper GPUs. During decode, single-token generation produces tiny batch rows (M < 64, often M = 1), causing Tensor Cores executing Warp Group Matrix Multiply Accumulate (WGMMA) instructions to starve because Hopper ISA structurally locks operand A's leading row dimension to 64. By mathematically transposing the linear algebra before PTX assembly (Swap-AB), the kernel promotes the vast expert dimension (N) into operand A, ensuring full hardware lane utilization and unlocking memory prefetching during sparse expert routing.",
+      "why_it_matters": "Essential reading for inference serving engineers tuning low-latency, small-batch MoE generation on NVIDIA H100s.",
+      "reason": "AWS details low-level MoE inference kernel optimizations, including Swap-AB for WGMMA and Triton FP8 routing, that yield measurable throughput gains.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/mixture-of-experts-kernel-engineering-on-amazon-sagemaker-ai",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Mixture-of-Experts kernel engineering on Amazon SageMaker AI",
+        "url": "https://aws.amazon.com/blogs/machine-learning/mixture-of-experts-kernel-engineering-on-amazon-sagemaker-ai/",
+        "discussion_url": null,
+        "published": "2026-10-13T15:17:09Z",
+        "summary": "AWS engineers share kernel optimizations for fused Mixture-of-Experts (MoE) models on Amazon SageMaker AI: Swap-AB for WGMMA utilization, Triton backend routing for FP8 quantization, and eliminating Triton JIT recompilation. Together they deliver up to 10% higher throughput and up to 9% faster Time to First Token on H200 GPUs.",
+        "content": "Mixture-of-Experts (MoE) is a sparsely-activated architecture that scales large language model (LLM) capacity while keeping per-token compute low. Because its operations account for a large share of total compute time, inefficiencies there directly raise request latency and cost. Therefore, optimizing MoE operations through kernel engineering offers the largest opportunity for performance gains.\n\nFused MoE is a key optimization technique for the MoE architecture. A fused MoE system merges token routing, data shuffling, and specialized network calculations into a single batched operation on the GPU. This replaces executing those routing and expert computations as separate, sequential loop operations. While this provides latency advantages, it also brings complexity in kernel implementations and debugging capability. High GPU utilization for this architecture requires hardware-specific optimizations.\n\nIn this post, we describe the different kernel optimizations we implemented for fused MoE models and show you how you can benefit from this work. We used a representative MoE model as our primary example.\n\nSwap-AB for WGMMA utilization\n\nTo maximize tensor processing throughput, the NVIDIA Hopper architecture relies on the Warp Group Matrix Multiply Accumulate (WGMMA) instruction protocol, which executes collectively across a cooperative warpgroup of 128 threads. This operand asymmetry is fundamentally an instruction set architecture (ISA)-level property. In the underlying wgmma.mma_async assembly definition, the hardware fixes the matrix row dimension (M) at a constant scale of 64 to define its parallel thread-mapping topology. The column dimension (N) remains highly variable. Operand A strictly maps across this fixed M dimension (using registers or shared memory), and Operand B maps across the variable N dimension (through a shared memory descriptor). These operand slots are therefore structurally non-interchangeable. Consequently, peak hardware tile utilization is governed by these rigid shape encodings, requiring that the M dimension equals or exceeds 64 to prevent compute execution lanes from sitting idle.\n\nThis structural preference stems from how Hopper Tensor Cores partition memory blocks. The hardware enforces a fixed minimum layout shape for the leading dimension of the first operand, locking the block height to exactly 64 (M=64). When a mathematical matrix possesses a large, continuous leading dimension in this primary slot, Hopper’s internal hardware schedulers can cleanly map and distribute data across the physical computing grid.\n\nThis structural asymmetry becomes a severe performance bottleneck during the decode phase of MoE networks. In a standard MoE layer, the linear algebra governing expert computation is formulated using traditional matrix notation:\n\nA[M,K] x B[K,N] —> C[M,N]\n\nWhere (M) represents the token row count (or batch size), (K) represents the hidden feature dimension, and (N) represents the expansive expert output dimension.\n\nDuring the decode phase, the system processes only one token per user sequence at a time. Consequently, the batch space or token row size is profoundly thin, regularly dropping to a profile where (M < 64), and frequently down to a single row (M = 1). Under this standard structural layout:\n\nMatrix (A) transforms into a thin, fragmented horizontal vector (for example, 1 x 4096).\n\nMatrix (B) (the core expert weights) remains in a large, dense vertical block (for example, 4096 x 8192).\n\nBecause the row count (M) is tiny, Matrix (A) is physically incapable of filling the hardware’s fixed (64)-row layout bucket for Operand A. When the WGMMA instruction executes over this layout, it leaves a vast portion of the physical Tensor Core capacity completely starved. The silicon spends clock cycles processing empty spatial slots, leading to poor hardware utilization.\n\nIn a standard dense LLM layer, weight matrices are static, unified, and perfectly contiguous. In an MoE layer, however, the workload is fractured across a fleet of independent subnetworks (experts). This creates unique memory and layout bottlenecks that make it hypersensitive to the WGMMA constraints of the Hopper GPU. In a standard dense layer, matrix multiplication multiplies a token vector by a single layer weight matrix. The output dimension (N) is the model’s hidden size (for example, 4096).\n\nIn a Fused MoE kernel, the GPU isn’t only multiplying against one expert. It’s grouping and running math for all active experts simultaneously to avoid launching individual kernels for each expert. For a standard dense layer, N is the hidden size (4,096). For a fused MoE layer, N is the number of experts chosen multiplied by the expert intermediate size. For a model running a topk=8 routine, the effective N dimension inside the fused kernel explodes into tens or hundreds of thousands of parameters. Because the N dimension is so disproportionately large compared to the tiny decode token size (M=1), the layout asymmetry becomes extreme. Transposing the matrices moves this large, combined MoE dimension into the primary slot, unlocking hardware prefetching at a scale that standard dense layers cannot match.\n\nTo resolve this hardware misalignment without altering the underlying mathematical integrity of the model, we exploit the algebraic property of matrix transposition:\n\nB T [N,K] x A T [K,M] —> C T [N,M]\n\nFigure 1: Swap-AB for WGMMA utilization\n\nBy programmatically flipping the matrix multiplication before it reaches the PTX assembly layer, we realigned the software to match the exact topography of the Hopper silicon. This transposition triggers two immediate architectural advantages on the GPU. First, it saturates the physical layout. The expansive expert dimension (N = 8192) is promoted to the first operand position (B T ), and because (N) is large it easily floods the hardware’s mandatory (64)-row threshold. The Tensor Cores then operate at maximum local density with no wasted execution cycles. Second, it activates asynchronous prefetching. Hopper’s dedicated hardware copy engines can prefetch memory addresses asynchronously from shared memory straight into registers before the math execution block fires. Placing the continuous, large weight blocks (B T ) in the leading slot lets these engines trace the data layout smoothly and keep the compute pipeline saturated without CPU intervention. This produced a 2–4 percent end-to-end output throughput improvement across large-scale MoE models on H200. We upstreamed this optimization to vLLM, and it is available in version 0.24.0 or later.\n\nBackend routing for FP8 tensor quantization\n\nBeyond kernel internals, the choice of which backend executes the MoE computation has a large effect on performance. The vLLM MoE oracle routes different quantization schemes to Triton, FlashInfer+CUTLASS, or other backends. Profiling revealed that for FP8 tensor-quantized models on Hopper, the Triton backend consistently outperforms the default FLASHINFER_CUTLASS path.\n\nThe Triton backend outperforms CUTLASS in low-concurrency MoE workloads primarily because it replaces rigid, framework-level matrix math configurations with custom, operator-level register fusion. CUTLASS relies on standard C++ template structures that treat FP8 tensor scaling, matrix multiplication, and expert aggregation as discrete mathematical operations. The Triton backend instead consolidates this entire pipeline into a single hardware pass. Data is pulled from global high-bandwidth memory (HBM) exactly once and processed entirely within the GPU’s ultra-fast local SRAM registers and compute execution files. It’s then streamed back to the final matrix destination. This removes the slow global VRAM read/write roundtrips that compromise CUTLASS when it is forced to constantly step through intermediate tensor scaling steps.\n\nFurthermore, this register-level fusion is specifically paired with dynamic scheduling layouts designed around variable token bucketing…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "Ollama v0.40.4 adds direct CLI support for running decision models via `ollama run` for classification and rubric grading.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.4",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.4",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.4",
+        "discussion_url": null,
+        "published": "2026-10-14T02:23:26Z",
+        "summary": "Decision models in the CLI\n\nDecision models can now be used directly from the terminal with ollama run — ask yes/no questions, classify text into labels, or score against a rubric:\n\nollama run nimble --ask \"Is a refund being requested?\" < ticket.txt\n\nWhat's Changed\n\nKev decision models are now supported by the MLX runner on Apple silicon\n\nollama launch can now be used with usage credits without upgrading to a paid plan\n\nollama launch codex now includes locally installed Ollama models in its model picker. Use /model within the Codex CLI to swap models.\n\nImproved inference performance by reusing verified manifests and already loaded models\n\nAdded support for multimodal embeddings through llama-server\n\nFixed loading multimodal embedding models with small context windows\n\nImproved Gemma 4 prefill performance on NVIDIA GPUs with the MLX runner\n\nMLX runner now clips long Laya states instead of rejecting them\n\nImproved speculative decoding reliability in the MLX runner, including recurrent state handling after rollback\n\nUpdated llama.cpp with native decision model support\n\nUpdated README and documentation with clearer privacy and cloud-services wording\n\nFull Changelog : v0.40.3...v0.40.4",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "PANINI-DR introduces generative semantic workspaces to maintain state and verify intermediate findings during multi-step research investigations.",
+      "item": {
+        "key": "arxiv:2610.15208",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "PANINI-DR: Controlled Deep Research through Generative Semantic Workspaces",
+        "url": "https://huggingface.co/papers/2610.15208",
+        "discussion_url": null,
+        "published": "2026-10-14T00:00:00Z",
+        "summary": "Deep research requires connecting multiple steps of search, reasoning, and computation, with intermediate findings guiding what to investigate next. As investigations grow, agents must maintain research state across model calls and check findings before errors propagate into subsequent work. We introduce PANINI-DR, a multi-agent harness that separates coordination of the overall investigation from the research and verification of individual subquestions. A shared workspace, built on the Generative Semantic Workspace representation, records subquestions, their dependencies, findings, and supporting evidence. Researchers investigate individual subquestions, while a separate verification agent checks proposed answers against those subquestions and their evidence. Verification feedback guides further investigation, and recorded findings inform subsequent assignments. We evaluate PANINI-DR on BrowseComp-Plus, FRAMES, and MoNaCo against seven state-of-the-art deep-research harnesses, all using a shared language-model backbone and frozen corpora. PANINI-DR achieves the strongest average performance across the three benchmarks. On BrowseComp-Plus, it achieves 73.3% accuracy, outperforming…",
+        "content": "",
+        "score": 6.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "DoSA (Dots Sparse Attention) implements conditional key scoring to reduce indexer compute while maintaining exact top-k token selection.",
+      "item": {
+        "key": "arxiv:2610.13990",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "DoSA: Dots Sparse Attention",
+        "url": "https://huggingface.co/papers/2610.13990",
+        "discussion_url": null,
+        "published": "2026-10-14T00:00:00Z",
+        "summary": "Sparse attention visits few keys, yet finding them can still require scoring every key with every indexer head. We introduce DoSA (Dots Sparse Attention), a lossless method for making this computation conditional while preserving exact token selection. Its central observation is that Top-K selection requires sufficient evidence to reject a candidate, not necessarily its full score. A seed set supplies a lower bound on the winning threshold. Nonnegative head projections and joint residual bounds upper-bound positive contributions, while activation-informed aggregation bounds the magnitude subtracted by negative heads. The certificate directs full scoring toward candidates that remain eligible; exact-score filtering further reduces writeback and selection work. We establish the certificate and its exact-selection conditions, and analyze how geometry and selection margins govern its effectiveness. Our GPU implementation accelerates the complete Indexer by up to 2.74 times over SGLang and 1.69 times over LiteTopK across English, Chinese, and code workloads. End-to-end evaluation on GLM-5.2 and DeepSeek-V3.2 achieves up to 1.94 times and 1.50 times time-to-first-token speedups over the…",
+        "content": "",
+        "score": 36.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new guide breaks down the engineering practicalities of building LLM execution harnesses specifically for game development pipelines.",
+      "item": {
+        "key": "kylekukshtel.com/ai-harness-engineering-game-development-claude-code",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "How to engineer an AI harness for game development",
+        "url": "https://kylekukshtel.com/ai-harness-engineering-game-development-claude-code",
+        "discussion_url": "https://news.ycombinator.com/item?id=50072120",
+        "published": "2026-10-13T14:14:23Z",
+        "summary": "",
+        "content": "",
+        "score": 142.0,
+        "comments": 64,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Grok 4.7 is now available on Amazon Bedrock, with AWS providing benchmarks on reasoning effort levels versus token costs across tool-calling workflows.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/build-long-horizon-agents-with-grok-4-7-on-amazon-bedrock",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Build long-horizon agents with Grok 4.7 on Amazon Bedrock",
+        "url": "https://aws.amazon.com/blogs/machine-learning/build-long-horizon-agents-with-grok-4-7-on-amazon-bedrock/",
+        "discussion_url": null,
+        "published": "2026-10-13T15:52:20Z",
+        "summary": "Grok 4.7 is now available on Amazon Bedrock. In this post, we build a tool-calling agent on Grok 4.7 and evaluate it on three reasoning tasks at four reasoning effort levels, measuring correctness and token cost per completed task. We show how to tune the trade-off per request and monitor it in production.",
+        "content": "SpaceXAI’s Grok 4.7 is now available on Amazon Bedrock, which offers a choice of foundation models (FMs) from multiple providers. According to SpaceXAI, Grok 4.7 is trained to work longer on more difficult tasks and knows when to check its own work. That matters most for agents, which carry a task through many steps and must verify what they find along the way.\n\nAn agent that works this way has to do more than look things up. It has to form a candidate answer, check it against what it has learned, and refine it until it fits. Grok 4.7 exposes a reasoning effort setting that controls how much deliberation happens before each response, and for agent workloads a practical question is which level to run.\n\nIn this post, we build a tool-calling agent on Grok 4.7 and evaluate it on three tasks that require search rather than lookup. The tasks are diagnosing a two-service outage from its alerts, scheduling maintenance under interacting constraints, and choosing an optimal set of migrations under a budget. Each task has exactly one correct answer, verified by brute force. We ran all three at every reasoning effort level, six times each, for 72 agent runs.\n\nThe agent answered 67 of the 72 runs correctly. At xhigh it answered all 18 correctly, and at low it answered 15 of 18 while using about an eighth of the output tokens. That gives a clear trade-off you can tune per request, and we show how to measure it on your own tasks and how to monitor it in production.\n\nWe report token counts rather than currency throughout. Token prices change, and the counts are what your own costs are derived from, so a measurement expressed in tokens stays valid.\n\nWhat SpaceXAI reports about Grok 4.7\n\nAccording to SpaceXAI, Grok 4.7 uses a larger base model than Grok 4.6 and was trained with a longer reinforcement learning run on a harder mix of tasks. This mix is weighted toward problems that take many hours to complete. SpaceXAI reports that the model is better at verifying its own work and at managing longer context.\n\nSpaceXAI’s published benchmark results follow that emphasis. The largest reported gains over Grok 4.6 appear in the categories that measure sustained work rather than single-turn answers.\n\nBenchmark\nCategory\nGrok 4.6\nGrok 4.7\n\nTerminal-Bench 4.0\nMulti-hour terminal work\n20.3%\n37.6%\n\nEEBench\nElectrical engineering\n53.0%\n64.0%\n\nHarvey Legal Agent Benchmark\nLegal work\n15.8%\n19.6%\n\nCursorBench 4.0\nLonger-running coding\n40.4%\n46.3%\n\nHealthBench Professional\nClinical reasoning\n48.5%\n56.7%\n\nAA Briefcase v1.1\nMulti-hour office work\n1,546\n1,657\n\nSource: SpaceXAI, Introducing Grok 4.7 ( https://x.ai/news/grok-4-7 ). Scores are as published by SpaceXAI at the time of the model launch.\n\nBenchmarks show how a model performs across standard tasks. For your own workload, the useful next step is to measure on tasks shaped like yours, which is what the rest of this post walks through.\n\nSpaceXAI lists a 500K token context window for Grok 4.7, with text and image input and text output. On Amazon Bedrock, the model supports configurable reasoning effort, tool calling, and structured output.\n\nHow you access Grok 4.7 on Amazon Bedrock\n\nGrok 4.7 runs on the bedrock-runtime endpoint and is accessed through a cross-Region inference profile. Two profiles are available:\n\nInference profile\nRouting\nUse when\n\nus.xai.grok-4.7\nWithin the US geography\nYou have US data residency requirements\n\nglobal.xai.grok-4.7\nCommercial AWS Regions\nYou have no residency constraints and want the widest capacity\n\nCross-Region inference routes requests across multiple AWS Regions, which gives you higher throughput without managing capacity Region by Region. Requests name one of the inference profiles rather than a bare model ID.\n\nThe model supports the OpenAI-compatible Chat Completions and Responses APIs, and the Amazon Bedrock Converse API. On Converse, reasoning is returned as a reasoningContent block alongside the text block. In inferenceConfig , set maxTokens only, and put model-specific parameters, such as reasoning effort, in additionalModelRequestFields .\n\nFor the current list of supported Regions, service tiers, and token prices, see the Grok 4.7 model card in the Amazon Bedrock User Guide and the Amazon Bedrock pricing page ( https://aws.amazon.com/bedrock/pricing/ ).\n\nPrerequisites\n\nAn AWS account with access to Amazon Bedrock, and model access enabled for Grok 4.7.\n\nPython 3.9 or later, with openai , boto3 , and aws-bedrock-token-generator installed.\n\nAWS credentials configured in your environment.\n\nYour AWS Identity and Access Management (IAM) identity needs bedrock:InvokeModel on both the inference profile and your account’s default project:\n\narn:aws:bedrock:{region}::inference-profile/us.xai.grok-4.7 or the global. equivalent.\n\narn:aws:bedrock:{region}:{account-id}:project/default .\n\nInclude both resources in the policy statement. The default project permission is required in addition to the inference profile.\n\nConnect to the model\n\nFor production use, we recommend generating a short-term bearer token from your existing AWS credentials, so authentication stays tied to your IAM identity and no long-lived secret is stored:\n\nfrom aws_bedrock_token_generator import provide_token\nfrom openai import OpenAI\n\nREGION = \"us-west-2\"\nMODEL_ID = \"us.xai.grok-4.7\"\n\nclient = OpenAI(\napi_key=provide_token(region=REGION),\nbase_url=f\"https://bedrock-runtime.{REGION}.amazonaws.com/openai/v1\",\ntimeout=360,\nmax_retries=0, # retries are handled explicitly, see \"Build in retries\" below\n)\n\nReasoning tokens count as output tokens and draw down max_completion_tokens before the answer text is produced, so size the limit to leave room for both. If the limit is reached during reasoning, the response returns without answer text, so check for empty content in agent code and raise the limit if you see it. Our runs used a limit of 32,768 tokens, which left headroom at every effort level.\n\nGrok 4.7 supports four effort levels: low , medium , high , and xhigh . Effort levels can change between model versions, so it is worth confirming them against the service rather than hardcoding a list:\n\ndef supported_effort_levels(candidates=(\"none\", \"low\", \"medium\", \"high\", \"xhigh\", \"max\")):\nsupported = []\nfor level in candidates:\ntry:\nclient.responses.create(model=MODEL_ID, input=\"Say OK.\",\nreasoning={\"effort\": level}, max_output_tokens=2048)\nsupported.append(level)\nexcept Exception as exc:\nif \"unsupported_value\" not in str(exc) and \"invalid_value\" not in str(exc):\nraise\nreturn supported\n\nprint(supported_effort_levels()) # ['low', 'medium', 'high', 'xhigh']\n\nDesign tasks that need reasoning\n\nMany agent evaluations test diligence: read a record, filter it, add it up. Those tasks are worth having, but to see what reasoning effort contributes, a task has to require search: the answer can’t be read off the data, it has to be proposed and then checked.\n\nWe built a synthetic environment of 20 services, exposed through seven tools, and three tasks on top of it. Every task has exactly one correct answer, and each is built so that a quick heuristic is not enough to find it.\n\nTask\nWhat the agent has to do\nWhat makes it a reasoning task\n\ntwo_fault_diagnosis\nTwo services failed silently at 03:00 and 12 others raised alerts. Identify the two that failed\nFailed services raise no alerts, so the answer is not among the alerting services. 190 possible pairs, and only one explains exactly the alerts observed\n\nmaintenance_schedule\nPatch eight services over four nights, two per night, under ten constraints and a rule that two services from the same team never share a night\n2,520 possible schedules, one valid. The team rule depends on data the agent has to look up\n\nmigration_budget\nChoose candidates to migrate that maximize risk reduction within a budget, including transitive prerequisites\n53 feasible sets, one optimal. Picking the best ratio first gives a set nine points short of the optimum\n\nFour practices keep a measurement like this trustworthy, and they…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "llama.cpp release b11610 enables OpenSSL within FP32/FP16 SYCL builds to restore Hugging Face HTTPS model downloads.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b11610",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b11610",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11610",
+        "discussion_url": null,
+        "published": "2026-10-14T02:25:26Z",
+        "summary": "Enable OpenSSL in FP32/FP16 SYCL builds to restore HF HTTPS downloads…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your diffs stay lean and your WGMMA units stay saturated.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "Google DeepMind Releases Gemini 4 Argon",
+      "blurb": "Gemini 4 Argon delivers frontier reasoning and agentic coding capabilities for complex software and cybersecurity workflows.",
+      "item": {
+        "key": "deepmind.google/blog/introducing-gemini-4-argon",
+        "source": "Google DeepMind",
+        "tags": [
+          "lab"
+        ],
+        "title": "Gemini 4 Argon: Built to solve your hardest problems",
+        "url": "https://deepmind.google/blog/introducing-gemini-4-argon/",
+        "discussion_url": null,
+        "published": "2026-10-13T16:01:52Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Security incident",
+      "headline": "OpenAI Engineer Arrested for Bugging Conference Room",
+      "blurb": "An OpenAI engineer was arrested after the company discovered a sophisticated recording device hidden inside one of its offices.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1010642/openai-employee-arrested-recording-device",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "OpenAI employee arrested for allegedly planting a bug in a conference room",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1010642/openai-employee-arrested-recording-device",
+        "discussion_url": null,
+        "published": "2026-10-13T20:45:25Z",
+        "summary": "An OpenAI engineer was arrested after the company said it discovered a \"sophisticated recording device\" hidden in one of its offices. The employee was identified as Abdulrahman Alfozan, a 35-year-old Saudi national. Alfozan is charged with using or endeavoring to use a device to intercept oral communications, according to a press release from the Department […]",
+        "content": "An OpenAI engineer was arrested after the company said it discovered a \"sophisticated recording device\" hidden in one of its offices. The employee was identified as Abdulrahman Alfozan, a 35-year-old Saudi national. Alfozan is charged with using or endeavoring to use a device to intercept oral communications, according to a press release from the Department of Justice .\n\nOpenAI's post about the incident says it used its AI models to \"understand the device and where it had come from, identifying that a specific employee had planted it a few days earlier.\"\n\nAs noted by the DOJ, OpenAI found the device plugged into a TV's USB port in an executiv …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "NVIDIA Open-Sources Entire Run:ai Platform",
+      "blurb": "NVIDIA is making the full Run:ai platform available as open source software as part of the NVIDIA DSX AI Factory platform.",
+      "item": {
+        "key": "developer.nvidia.com/blog/nvidia-runai-is-now-open-source-as-part-of-nvidia-dsx-ai-factory-platform",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "NVIDIA Run:ai Is Now Open Source as Part of NVIDIA DSX AI Factory Platform",
+        "url": "https://developer.nvidia.com/blog/nvidia-runai-is-now-open-source-as-part-of-nvidia-dsx-ai-factory-platform/",
+        "discussion_url": null,
+        "published": "2026-10-13T14:19:40Z",
+        "summary": "NVIDIA is making the full NVIDIA Run:ai platform available as open source software, giving customers, developers, and ecosystem partners access to...",
+        "content": "NVIDIA is making the full NVIDIA Run:ai platform available as open source software, giving customers, developers, and ecosystem partners access to...\nNVIDIA is making the full NVIDIA Run:ai platform available as open source software, giving customers, developers, and ecosystem partners access to production-grade AI workload and GPU orchestration capabilities. This release expands the NVIDIA DSX AI Factory Platform by establishing NVIDIA Run:ai as an open foundation that enables the broader ecosystem to bring differentiated solutions to market…\n\nSource",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 23,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 17,
+      "kept": 15,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 876,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1288,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 269,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 178,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 89,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-13T07:32:33.202894Z",
+    "candidates": 94,
+    "triaged": 94,
+    "enriched": 7,
+    "headline_candidates": 137,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.7-flash (key 1)"
+    ],
+    "seconds": 234.3,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 26534,
+      "output_tokens": 7699,
+      "cost_usd": 0.048772
+    }
+  }
+}
