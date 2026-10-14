@@ -354,7 +354,7 @@ _E = {
     "wrap": "max-width:640px;margin:0 auto;padding:24px 16px;font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif;color:#191919;font-size:16px;line-height:1.6;",
     "brand": "font-family:Archivo,Helvetica,Arial,sans-serif;font-weight:800;font-size:20px;color:#191919;text-decoration:none;",
     "date": "font-family:Consolas,Menlo,monospace;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#5c5c5c;",
-    "eyebrow": "display:inline-block;background:#fffa00;color:#0a0a0b;font-family:Consolas,Menlo,monospace;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;margin-top:24px;",
+    "eyebrow": "display:inline-block;background:#0a0a0b;color:#fffa00;font-family:Consolas,Menlo,monospace;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;margin-top:24px;",
     "h1": "font-family:Archivo,Helvetica,Arial,sans-serif;font-weight:800;font-size:30px;line-height:1.15;margin:12px 0 0;color:#191919;",
     "intro": "font-size:17px;color:#5c5c5c;margin:12px 0 0;",
     "h3": "font-family:Consolas,Menlo,monospace;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#5c5c5c;margin:32px 0 10px;",
@@ -366,8 +366,10 @@ _E = {
     "why": "margin:0 0 10px;font-size:15px;color:#5c5c5c;",
     "links": "font-family:Consolas,Menlo,monospace;font-size:12px;color:#8a8a8a;",
     "a": "color:#191919;text-decoration:underline;text-decoration-color:#d9d400;",
-    "cta": "background:#fffa00;color:#0a0a0b;padding:18px 20px;margin-top:32px;",
-    "button": "display:inline-block;background:#0a0a0b;color:#fffa00;font-family:Consolas,Menlo,monospace;font-weight:700;font-size:13px;padding:10px 12px;text-decoration:none;margin-top:10px;",
+    "cta": "background:#0a0a0b;color:#f5f5f5;padding:18px 20px;margin-top:32px;border-left:4px solid #fffa00;",
+    "cta_title": "font-family:Archivo,Helvetica,Arial,sans-serif;font-size:18px;font-weight:800;color:#fffa00;",
+    "cta_text": "color:#f5f5f5;",
+    "button": "display:inline-block;border:1px solid #fffa00;color:#fffa00;font-family:Consolas,Menlo,monospace;font-weight:700;font-size:13px;padding:10px 12px;text-decoration:none;margin-top:10px;",
     "foot": "font-family:Consolas,Menlo,monospace;font-size:11px;color:#8a8a8a;margin-top:24px;",
 }
 
@@ -447,14 +449,19 @@ def to_email_html(
         out.append(f'<p style="{_E["p"]}">{escape(record.sign_off)}</p>')
     if project_url:
         out.append(
-            f'<div style="{_E["cta"]}"><strong style="font-family:Archivo,Helvetica,Arial,sans-serif;font-size:18px;">Want your own feed?</strong><br>'
-            "Your interests, your tone. No ads, no sponsors, open source.<br>"
+            f'<div style="{_E["cta"]}"><strong style="{_E["cta_title"]}">Want your own feed?</strong><br>'
+            f'<span style="{_E["cta_text"]}">Your interests, your tone. No ads, no sponsors, open source.</span><br>'
             f'<a href="{escape(project_url, quote=True)}" style="{_E["button"]}">Get NewsRing →</a></div>'
         )
     out.append(f'<div style="{_E["foot"]}">{escape(stats_line(record))}</div></div>')
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        # Clients that honour these (Apple Mail, iOS) then show the design as
+        # is. Outlook.com and Gmail recolour text regardless, which is why no
+        # element here puts dark text on a bright fill.
+        '<meta name="color-scheme" content="light">'
+        '<meta name="supported-color-schemes" content="light">'
         f"<title>{escape(record.title)}</title></head>"
         f'<body style="{_E["body"]}">' + "".join(out) + "</body></html>"
     )

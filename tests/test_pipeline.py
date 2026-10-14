@@ -216,3 +216,16 @@ def test_recipients_parse_a_list_and_drop_duplicates(
 
     monkeypatch.setenv("NEWSRING_EMAIL_TO", "a@x.com, b@y.com;A@x.com\n c@z.com,,")
     assert recipients(config) == ["a@x.com", "b@y.com", "c@z.com"]
+
+
+def test_email_never_puts_dark_text_on_a_bright_fill(config: Config) -> None:
+    """Dark-mode mail clients lighten text but keep bright fills, so the pair turns unreadable."""
+    import re
+
+    from newsring.render import to_email_html
+
+    record = _record(config, DigestOutput(title="T", intro="I.", stories=[]))
+    html = to_email_html(record, web_url="https://site/x.html", project_url="https://proj")
+    for style in re.findall(r'style="([^"]*)"', html):
+        if "background:#fffa00" in style:
+            raise AssertionError(f"bright fill in email: {style}")
