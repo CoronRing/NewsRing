@@ -25,7 +25,7 @@ from newsring.agents import Agents, build_agents
 from newsring.collect import Candidates, build_candidates, describe, window_start
 from newsring.config import Config
 from newsring.enrich import enrich_items
-from newsring.history import History, load_history
+from newsring.history import History, covered_section, load_history
 from newsring.llm import describe_llm
 from newsring.models import (
     DigestHeadline,
@@ -280,9 +280,7 @@ async def collect(request: RunRequest, history: History) -> Pools:
     config = request.config
     start = window_start(
         request.now,
-        history,
         lookback_hours=config.run.lookback_hours,
-        max_lookback_hours=config.run.max_lookback_hours,
         override_hours=request.lookback_hours,
     )
     fetched = await fetch_all(
@@ -293,12 +291,15 @@ async def collect(request: RunRequest, history: History) -> Pools:
     headline_start = request.now - timedelta(hours=config.headlines.window_hours)
     return Pools(
         digest=build_candidates(fetched, history, start),
-        headlines=build_candidates(fetched, History(), headline_start, id_prefix="h"),
+        # The card ignores what the digest sent, but never repeats its own stories.
+        headlines=build_candidates(
+            fetched, History(seen_keys=history.card_keys), headline_start, id_prefix="h"
+        ),
     )
 
 
 async def pick_headlines(
-    agents: Agents, pool: dict[str, Item], config: Config, today: date
+    agents: Agents, pool: dict[str, Item], config: Config, today: date, history: History
 ) -> list[DigestHeadline]:
     """Choose the card's top stories from the headline pool.
 
@@ -311,6 +312,7 @@ async def pick_headlines(
         pool: Headline candidates by id.
         config: The configuration.
         today: Digest date, for the prompt.
+        history: Archive history; recent cards are listed as already covered.
 
     Returns:
         The card's stories, most exciting first.
@@ -323,7 +325,8 @@ async def pick_headlines(
         f"{config.headlines.window_hours} hours:\n\n"
     )
     try:
-        response = await rt.call(agents.headliner, header + listing)
+        recent = covered_section(history.carded, what="recent cards")
+        response = await rt.call(agents.headliner, header + listing + recent)
     except Exception as exc:  # noqa: BLE001 - the card is optional
         logger.warning("Headline card skipped: %s", exc)
         return []
@@ -362,6 +365,7 @@ async def produce_digest(request: RunRequest) -> DigestRecord:
     history = load_history(
         config.resolve(config.delivery.archive_dir),
         days=config.run.history_days,
+        recent_days=config.run.recent_days,
         today=request.today,
     )
     pools = await collect(request, history)
@@ -373,14 +377,15 @@ async def produce_digest(request: RunRequest) -> DigestRecord:
             + (f"; failed sources: {', '.join(failed)}" if failed else "")
         )
 
-    headlines = await pick_headlines(agents, pools.headlines.by_id, config, request.today)
+    headlines = await pick_headlines(agents, pools.headlines.by_id, config, request.today, history)
 
     pool = await triage(agents, candidates.by_id, config)
     selection = Selection(picks=[], quick_hits=[], slow_day_note="")
     if pool:
         listing = "\n\n".join(describe(cid, item) for cid, item in pool.items())
         header = f"Today is {request.today:%A %d %B %Y}. {len(pool)} candidates:\n\n"
-        chosen = await rt.call(agents.editor, header + listing)
+        recent = covered_section(history.covered, what="your recent digests")
+        chosen = await rt.call(agents.editor, header + listing + recent)
         selection = validate_selection(chosen.structured, pool, config)
 
     enriched = 0

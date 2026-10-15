@@ -1,4 +1,4 @@
-# The daily run, in three jobs:
+# The daily run at 09:00 Pacific, in three jobs:
 #   digest  produce the digest and the top stories card, commit news/ and
 #           news_today.md back as history, and build the site
 #   deploy  publish the site to GitHub Pages
@@ -8,12 +8,14 @@ name: Daily digest
 
 on:
   schedule:
-    # 11:00 UTC is 07:00 in Toronto during daylight time and 06:00 in winter.
-    - cron: "0 11 * * *"
+    # 09:00 Pacific, daylight saving handled by GitHub. Scheduled runs can
+    # start late when GitHub is busy; one started 4.5 hours late in testing.
+    - cron: "0 9 * * *"
+      timezone: "America/Los_Angeles"
   workflow_dispatch:
     inputs:
       lookback_hours:
-        description: "Override the time window in hours. Empty continues from the last digest."
+        description: "Override the time window in hours. Empty uses the configured window (72)."
         required: false
       send_email:
         description: "Email the digest"
@@ -30,7 +32,7 @@ concurrency:
 jobs:
   digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     permissions:
       contents: write
     outputs:
@@ -49,7 +51,21 @@ jobs:
           # Traces are throwaway on a CI runner.
           RAILTRACKS_DISABLE_EVENTS: "true"
           LOOKBACK: ${{ inputs.lookback_hours }}
-        run: uv run newsring run --no-email ${LOOKBACK:+--lookback-hours "$LOOKBACK"}
+        # The model failover rides out a few minutes of overload inside one
+        # attempt; this outer loop covers a longer outage. Re-running is safe:
+        # a run only writes files once it has finished.
+        run: |
+          for attempt in 1 2 3; do
+            if uv run newsring run --no-email ${LOOKBACK:+--lookback-hours "$LOOKBACK"}; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::Attempt $attempt failed; retrying in 10 minutes."
+              sleep 600
+            fi
+          done
+          echo "::error::All 3 attempts failed."
+          exit 1
 
       - name: Commit news
         id: commit

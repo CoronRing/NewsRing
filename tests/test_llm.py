@@ -106,7 +106,7 @@ def test_gives_up_after_the_last_round() -> None:
     llm, sleeps = _llm(("flash", k1), cooldown=1, rounds=3)
     with pytest.raises(rt.llm.ProviderRateLimitError):
         llm.structured(None, None)  # type: ignore[arg-type]
-    assert k1.calls == 3 and sleeps == [1, 1]
+    assert k1.calls == 3 and sleeps == [1, 2]  # the wait doubles
 
 
 def test_other_errors_are_raised_immediately() -> None:

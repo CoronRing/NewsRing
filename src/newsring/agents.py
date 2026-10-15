@@ -112,7 +112,8 @@ How to choose:
 3. Prefer substance (releases, research, technical write-ups, real incidents) over commentary, opinion and marketing.
 4. When several candidates cover the same story, pick the best one as the main entry and list the others in related_ids. Prefer the primary source (the lab's own post, the release notes, the paper) over coverage of it.
 5. Each id may appear only once across all picks, related_ids and quick hits.
-6. If fewer than {count.min} stories are genuinely worth the reader's time, pick fewer and say why in slow_day_note. Never pad with filler.
+6. Never repeat a story listed under "Already covered", whatever the source or headline, unless there is a substantial new development; then say what is new in the reason.
+7. If fewer than {count.min} stories are genuinely worth the reader's time, pick fewer and say why in slow_day_note. Never pad with filler.
 
 For each pick, give a one-sentence reason addressed to why this reader would care. Use ids exactly as given."""
 
@@ -164,6 +165,7 @@ The audience is {settings.audience}. The card is read in a few seconds, so each 
 4. Skip funding news, opinion pieces, minor version bumps and marketing.
 5. When two stories are equally strong, prefer the newer one.
 6. Pick {settings.count} different stories, never two about the same event.
+7. Never repeat a story listed under "Already covered" unless there is a substantial new development.
 
 ## How to write
 

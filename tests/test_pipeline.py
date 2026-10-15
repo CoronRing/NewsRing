@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from newsring.collect import WINDOW_OVERLAP, build_candidates, window_start
+from newsring.collect import build_candidates, window_start
 from newsring.config import Config
 from newsring.deliver import build_site, write_archive
 from newsring.history import History, load_history
@@ -25,22 +25,9 @@ from newsring.render import to_html, to_markdown
 from tests.conftest import NOW, make_item
 
 
-def test_window_start() -> None:
-    empty = History()
-    assert window_start(NOW, empty, lookback_hours=24, max_lookback_hours=72) == NOW - timedelta(
-        hours=24
-    )
-    recent = History(last_generated=NOW - timedelta(hours=10))
-    assert window_start(NOW, recent, lookback_hours=24, max_lookback_hours=72) == (
-        NOW - timedelta(hours=10) - WINDOW_OVERLAP
-    )
-    stale = History(last_generated=NOW - timedelta(days=30))
-    assert window_start(NOW, stale, lookback_hours=24, max_lookback_hours=72) == NOW - timedelta(
-        hours=72
-    )
-    assert window_start(
-        NOW, recent, lookback_hours=24, max_lookback_hours=72, override_hours=5
-    ) == (NOW - timedelta(hours=5))
+def test_window_is_a_fixed_number_of_hours() -> None:
+    assert window_start(NOW, lookback_hours=72) == NOW - timedelta(hours=72)
+    assert window_start(NOW, lookback_hours=72, override_hours=5) == NOW - timedelta(hours=5)
 
 
 def test_build_candidates_windows_filters_caps_and_merges(config: Config) -> None:
@@ -165,10 +152,12 @@ def test_render_and_archive_round_trip(config: Config, tmp_path: Path) -> None:
     assert feed["stories"][0]["summary_html"] == "<p>Body <strong>bold</strong>.</p>\n"
 
     # The next day's run treats this digest's stories as already sent.
-    history = load_history(archive, days=14, today=date(2026, 10, 14))
+    history = load_history(archive, days=14, recent_days=3, today=date(2026, 10, 14))
     assert {"ex.com/1", "ex.com/2", "ex.com/3"} <= history.seen_keys
     # Re-running the same day ignores that day's own record.
-    assert load_history(archive, days=14, today=date(2026, 10, 13)).seen_keys == set()
+    assert (
+        load_history(archive, days=14, recent_days=3, today=date(2026, 10, 13)).seen_keys == set()
+    )
 
 
 def test_usage_from_payload_reads_only_each_nodes_own_calls() -> None:
@@ -229,3 +218,35 @@ def test_email_never_puts_dark_text_on_a_bright_fill(config: Config) -> None:
     for style in re.findall(r'style="([^"]*)"', html):
         if "background:#fffa00" in style:
             raise AssertionError(f"bright fill in email: {style}")
+
+
+def test_history_lists_recent_coverage_and_card_stories(config: Config, tmp_path: Path) -> None:
+    from newsring.history import covered_section
+    from newsring.models import DigestHeadline
+
+    record = _record(
+        config,
+        DigestOutput(
+            title="T",
+            intro="I.",
+            stories=[WrittenStory(id="c1", headline="Argon ships", summary="S")],
+        ),
+    )
+    card_item = make_item("https://blog.example/argon", title="Argon")
+    record.headlines = [
+        DigestHeadline(kicker="Model", headline="Argon lands", blurb="B", item=card_item)
+    ]
+    archive = tmp_path / "news"
+    write_archive(record, archive)  # dated 2026-10-13
+
+    history = load_history(archive, days=14, recent_days=3, today=date(2026, 10, 15))
+    assert "blog.example/argon" in history.card_keys
+    assert [c.headline for c in history.carded] == ["Argon lands"]
+    assert history.covered[0].line() == "- 2026-10-13: Argon ships (ex.com)"
+    section = covered_section(history.covered, what="your recent digests")
+    assert "Already covered in your recent digests" in section and "Argon ships" in section
+
+    # Outside recent_days the headlines drop out of the prompt, but URLs stay excluded.
+    later = load_history(archive, days=14, recent_days=1, today=date(2026, 10, 15))
+    assert later.covered == [] and "ex.com/1" in later.seen_keys
+    assert covered_section([], what="x") == ""

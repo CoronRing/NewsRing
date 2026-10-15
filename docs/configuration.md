@@ -41,7 +41,7 @@ Secrets never go in this file. API keys and mailbox credentials come from the en
 | `triage_model` | none | A cheaper model for the triage pass. Same provider. Defaults to `model`. |
 | `fallback_models` | `[]` | Models tried in order when `model` is overloaded or rate limited on every key. Same provider. |
 | `rotation_cooldown` | `30` | Seconds to wait when every model and key has failed, before trying them all again. |
-| `rotation_rounds` | `2` | Passes over every model and key before a call fails. |
+| `rotation_rounds` | `4` | Passes over every model and key before a call fails. The wait between passes starts at `rotation_cooldown` and doubles, so four passes wait 30, 60 and 120 seconds. |
 
 ### Several keys and fallback models
 
@@ -51,7 +51,7 @@ When `api_key_env` holds more than one key (comma separated, or a list like `[ke
 - **Overloaded or failing (500, 502, 503, 504, timeout):** skip the rest of that model's keys and move to the next model.
 - **Any other error:** fail immediately; another key will not fix a bad request.
 
-If everything fails, it waits `rotation_cooldown` seconds and tries again, up to `rotation_rounds` passes. Warnings name the model and key number, never the key.
+If everything fails, it waits and tries again, up to `rotation_rounds` passes, doubling the wait each time. Warnings name the model and key number, never the key.
 
 For Gemini, a model name that litellm's catalog does not know yet (railtracks refuses those) is sent through Gemini's OpenAI-compatible endpoint instead, so new models work on release day.
 
@@ -59,10 +59,10 @@ For Gemini, a model name that litellm's catalog does not know yet (railtracks re
 
 | Key | Default | Meaning |
 |---|---|---|
-| `lookback_hours` | `24` | Time window on the first run, when the archive is empty. |
-| `max_lookback_hours` | `72` | Longest window after a gap. After a week offline you get the last three days, not a week of stale news. |
-| `history_days` | `14` | Stories sent in this many past days are never sent again. |
-| `timezone` | `"UTC"` | IANA zone that decides which date a digest is filed under. |
+| `lookback_hours` | `72` | Every run reads this many hours back. Overlap between days is safe because of the next two settings. |
+| `history_days` | `14` | Stories sent in this many past days are never sent again, matched by URL. |
+| `recent_days` | `3` | Headlines from this many past days are shown to the Editor and the Headliner as already covered, so the same story from a different source is skipped too, unless there is a substantial new development. |
+| `timezone` | `"America/Los_Angeles"` | IANA zone that decides which date a digest is filed under. Match it to the schedule in the workflow. |
 | `triage_threshold` | `150` | Above this many candidates, a triage pass scores them before the editor sees them. |
 | `triage_batch_size` | `60` | Candidates per triage call. Batches run concurrently. |
 | `triage_keep` | `80` | Candidates passed on to the editor after triage. |
@@ -72,7 +72,7 @@ For Gemini, a model name that litellm's catalog does not know yet (railtracks re
 | `fetch_concurrency` | `8` | Parallel HTTP requests. |
 | `save_traces` | `true` | Let railtracks record each run under `.railtracks/` beside the config file. railtracks only accepts this setting process-wide, so the CLI sets `RAILTRACKS_HOME` (unless already set) and, when this is false, `RAILTRACKS_DISABLE_EVENTS`. |
 
-The window normally starts two hours before the last digest was generated, so items published between runs are not missed. `newsring run --lookback-hours N` overrides it for one run.
+The window is a fixed `lookback_hours`, not "since the last digest", so a late or failed run loses nothing. `newsring run --lookback-hours N` overrides it for one run.
 
 ## `[headlines]`
 

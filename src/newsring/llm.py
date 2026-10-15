@@ -156,9 +156,10 @@ class FailoverLLM(rt.llm.ModelBase):
       not help.
     - Any other error is raised straight away.
 
-    When every candidate has failed, it waits `cooldown` seconds and tries
-    them all again, up to `rounds` passes, since free-tier limits are mostly
-    per minute.
+    When every candidate has failed, it waits and tries them all again, up to
+    `rounds` passes. The wait starts at `cooldown` seconds and doubles each
+    time, since rate limits are mostly per minute and "high demand" spells
+    on popular models can last several minutes.
 
     railtracks resolves an agent's model once per call, before model
     middleware runs, so middleware can retry a call but cannot change the key
@@ -229,12 +230,17 @@ class FailoverLLM(rt.llm.ModelBase):
         )
         return candidate.model if kind == "transient" else None
 
+    def _wait(self, round_number: int) -> float:
+        """Seconds to wait before pass `round_number` (1-based after the first pass)."""
+        return self._cooldown * 2 ** (round_number - 1)
+
     def _run(self, call: Callable[[rt.llm.ModelBase], _T]) -> _T:
         last: BaseException | None = None
         for round_number in range(self._rounds):
             if round_number:
-                logger.warning("Every model and key failed; waiting %.0fs", self._cooldown)
-                self._sleep(self._cooldown)
+                wait = self._wait(round_number)
+                logger.warning("Every model and key failed; waiting %.0fs", wait)
+                self._sleep(wait)
             skip: str | None = None
             for index in self._order():
                 candidate = self._candidates[index]
@@ -258,8 +264,9 @@ class FailoverLLM(rt.llm.ModelBase):
         last: BaseException | None = None
         for round_number in range(self._rounds):
             if round_number:
-                logger.warning("Every model and key failed; waiting %.0fs", self._cooldown)
-                await asyncio.sleep(self._cooldown)
+                wait = self._wait(round_number)
+                logger.warning("Every model and key failed; waiting %.0fs", wait)
+                await asyncio.sleep(wait)
             skip: str | None = None
             for index in self._order():
                 candidate = self._candidates[index]

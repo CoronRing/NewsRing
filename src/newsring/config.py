@@ -94,7 +94,7 @@ class LLMSettings(_Strict):
         fallback_models: Models tried, in order, when `model` is rate limited
             on every key or overloaded. Same provider.
         rotation_cooldown: When every model and key has failed, seconds to
-            wait before trying them all again.
+            wait before trying them all again. Doubles after each failed pass.
         rotation_rounds: Passes over every model and key before a call fails.
     """
 
@@ -107,17 +107,20 @@ class LLMSettings(_Strict):
     triage_model: str | None = None
     fallback_models: list[str] = Field(default_factory=list)
     rotation_cooldown: float = Field(default=30.0, ge=0)
-    rotation_rounds: int = Field(default=2, ge=1)
+    rotation_rounds: int = Field(default=4, ge=1)
 
 
 class RunSettings(_Strict):
     """How one run gathers and narrows candidates.
 
     Attributes:
-        lookback_hours: Window on the first run, when there is no history.
-        max_lookback_hours: Longest window after a gap, so a week offline does
-            not produce a digest of stale news.
-        history_days: How far back previous digests are read to avoid repeats.
+        lookback_hours: Every run reads this many hours back. Stories already
+            sent are filtered out by history, so overlap between days is safe.
+        history_days: Stories sent in this many past days are never sent
+            again (matched by URL).
+        recent_days: Headlines from this many past days are shown to the
+            agents as already covered, so the same story from a different
+            source is not repeated either.
         timezone: IANA zone that decides which date a digest belongs to.
         triage_threshold: Above this many candidates, a triage pass scores them
             in batches before the editor sees them.
@@ -132,10 +135,10 @@ class RunSettings(_Strict):
             environment variables, since railtracks has no per-Flow switch.
     """
 
-    lookback_hours: int = Field(default=24, ge=1)
-    max_lookback_hours: int = Field(default=72, ge=1)
+    lookback_hours: int = Field(default=72, ge=1)
     history_days: int = Field(default=14, ge=0)
-    timezone: str = "UTC"
+    recent_days: int = Field(default=3, ge=0)
+    timezone: str = "America/Los_Angeles"
     triage_threshold: int = Field(default=150, ge=1)
     triage_batch_size: int = Field(default=60, ge=1)
     triage_keep: int = Field(default=80, ge=1)

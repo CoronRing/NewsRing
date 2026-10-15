@@ -22,10 +22,6 @@ from newsring.history import History
 from newsring.models import Item, SourceReport
 from newsring.sources import report
 
-#: How far before the last digest the next window starts. Feeds often publish
-#: with timestamps a little behind when the item actually appears.
-WINDOW_OVERLAP = timedelta(hours=2)
-
 
 @dataclass(slots=True)
 class Candidates:
@@ -43,31 +39,24 @@ class Candidates:
 
 
 def window_start(
-    now: datetime,
-    history: History,
-    *,
-    lookback_hours: int,
-    max_lookback_hours: int,
-    override_hours: int | None = None,
+    now: datetime, *, lookback_hours: int, override_hours: int | None = None
 ) -> datetime:
     """Choose the oldest publication time a run accepts.
 
+    The window is a fixed number of hours, not "since the last digest": a
+    story from two days ago that NewsRing has not sent is still news to the
+    reader, and what has been sent is filtered out by history instead. A run
+    that was delayed or failed therefore loses nothing.
+
     Args:
         now: Current time, timezone-aware.
-        history: Archive history.
-        lookback_hours: Window when there is no earlier digest.
-        max_lookback_hours: Longest window after a gap.
-        override_hours: Explicit window that ignores history.
+        lookback_hours: Hours back to read.
+        override_hours: Explicit window for one run, from the CLI.
 
     Returns:
         The start of the window.
     """
-    if override_hours is not None:
-        return now - timedelta(hours=override_hours)
-    if history.last_generated is None:
-        return now - timedelta(hours=lookback_hours)
-    since_last = history.last_generated - WINDOW_OVERLAP
-    return max(since_last, now - timedelta(hours=max_lookback_hours))
+    return now - timedelta(hours=override_hours if override_hours is not None else lookback_hours)
 
 
 def _newest_first_key(item: Item) -> float:

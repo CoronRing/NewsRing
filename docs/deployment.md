@@ -12,9 +12,9 @@ NewsRing needs somewhere to run once a day, somewhere to keep the archive betwee
 
 ## GitHub Actions
 
-`.github/workflows/daily.yml` runs at 11:00 UTC (07:00 in Toronto during daylight time, 06:00 in winter) in three jobs:
+`.github/workflows/daily.yml` runs at 09:00 Pacific, using the schedule's `timezone` field so daylight saving is handled by GitHub. It has three jobs:
 
-1. **digest**: produces the digest and the top stories card, commits `news/` and `news_today.md` to `main`, and builds the site. It never sees the mail credentials.
+1. **digest**: produces the digest and the top stories card, commits `news/` and `news_today.md` to `main`, and builds the site. It never sees the mail credentials. If a whole attempt fails (for example, every Gemini model overloaded for several minutes), it waits ten minutes and tries again, up to three attempts.
 2. **deploy**: publishes the site to GitHub Pages.
 3. **email**: sends the digest, after deploy, so the "read on the web" link in the email already works. It never sees the model keys.
 
@@ -38,7 +38,7 @@ It can also be run by hand from the Actions tab, with an optional window overrid
 
 ### Notes
 
-- **Scheduled runs are not exact.** GitHub queues `schedule` events, and they commonly start 5 to 30 minutes late at busy times.
+- **Scheduled runs are not exact.** GitHub queues `schedule` events. They commonly start 5 to 30 minutes late, and the first scheduled run of this workflow started 4.5 hours late. A late run loses no news, since every run reads a fixed 72 hours.
 - **Schedules pause on inactive repositories.** GitHub disables scheduled workflows in a public repository after 60 days without activity. The daily commit should keep the repository active; if the schedule is ever disabled, re-enable it from the Actions tab.
 - **The bot's commits do not trigger CI.** Pushes made with the workflow's own token never start other workflows.
 - **Logs are public** on a public repository. NewsRing logs model and key *numbers* when failing over, and the number of email recipients, never keys or addresses.
@@ -55,10 +55,10 @@ cp /path/to/.env .env      # CHAT_GEMINI_API_KEYS, NEWSRING_EMAIL_TO, EMALIA_* â
 uv run newsring run --dry-run --no-email   # check it works without writing anything
 ```
 
-Then schedule it. With cron, at 07:00 local time:
+Then schedule it. With cron, at 09:00 local time:
 
 ```cron
-0 7 * * * cd /home/ubuntu/newsring && /home/ubuntu/.local/bin/uv run newsring run >> .log/cron.log 2>&1
+0 9 * * * cd /home/ubuntu/newsring && /home/ubuntu/.local/bin/uv run newsring run >> .log/cron.log 2>&1
 ```
 
 Serve `site/` with any static file server, or commit and push to let the Pages workflow publish it. The `news/` directory is the only state: back it up or commit it, and a rebuilt host continues where the old one stopped.

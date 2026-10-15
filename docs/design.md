@@ -1,6 +1,6 @@
 # NewsRing design
 
-**Version 0.2.0** · October 2026
+**Version 0.3.0** · October 2026
 
 NewsRing is a personal news agent. Once a day it reads a list of free sources, picks the stories that match one reader's stated interests, and writes them up in the tone that reader asked for. The only product is the digest itself: a Markdown and HTML page, archived, optionally emailed, and optionally published as a static site.
 
@@ -85,10 +85,14 @@ Model output is treated as untrusted structure. The model never sees a URL and n
 
 ## State and history
 
-The archive directory (`news/`) is the only state. Each run writes `news/<date>.json` (the full `DigestRecord`) and `news/<date>.md`. The next run reads the records from the last `history_days` days to learn:
+The archive directory (`news/`) is the only state. Each run writes `news/<date>.json` (the full `DigestRecord`) and `news/<date>.md`.
 
-- **When the last digest was made.** The window starts two hours before that, so nothing published in the gap between runs is missed. It never reaches further back than `max_lookback_hours`, so a week offline does not produce a digest of stale news.
-- **Which stories were already sent.** Their canonical URLs are excluded, including related coverage and quick hits.
+Every run reads the last `lookback_hours` (72) of news, not "everything since the last digest". A story from two days ago that has not been sent is still news to the reader, and a late or failed run loses nothing. Overlapping windows mean the same stories come round again, so repeats are prevented in two layers:
+
+- **Exact repeats, in code.** The canonical URL of everything sent in the last `history_days` (stories, related coverage, quick hits) is dropped before any agent sees the candidates. The card keeps its own list, so it never repeats a card story either.
+- **The same story from a different source, by the agents.** A URL check cannot catch a second article about yesterday's launch. The headlines of the last `recent_days` digests (and, for the Headliner, cards) are appended to the agent's input under "Already covered", and both prompts say not to repeat those stories unless there is a substantial new development, in which case the write-up must say what is new.
+
+Measured on 2026-10-14 with a dry run dated the next day: with 29 recent headlines listed, the card and digest contained no story from the previous days, where before this change the card would have repeated the same launch for three days.
 
 A record for the run's own date is ignored, so re-running a day regenerates it instead of treating its own stories as already sent.
 
@@ -131,7 +135,7 @@ On free tiers each API key has a small per-minute and per-day quota, and popular
 - a **429** moves to the next candidate, usually the same model on the next key;
 - a **5xx or timeout** skips the rest of that model's keys, since the model itself is overloaded;
 - anything else is raised at once;
-- when everything has failed, it waits `rotation_cooldown` seconds and tries again, up to `rotation_rounds` passes;
+- when everything has failed, it waits and tries again, up to `rotation_rounds` passes, doubling the wait from `rotation_cooldown` each time;
 - it stays on whichever candidate last worked, so the rest of the run does not hit the same limit.
 
 It is a `ModelBase` subclass rather than middleware because railtracks resolves an agent's model once per call, before middleware runs, so middleware cannot change the key. 503s are recognised by walking the exception's cause chain for an HTTP status, because railtracks wraps them in a generic `ModelError`. Gemini model names that litellm's catalog does not know yet go through Gemini's OpenAI-compatible endpoint. All of this is written up in `RT_FEEDBACK.md`.

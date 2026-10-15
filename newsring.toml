@@ -34,13 +34,17 @@ fallback_models = ["gemini-3.7-flash", "gemini-3.5-flash"]
 # Several free-tier keys, comma separated or as a [list]; rate-limited keys are skipped.
 api_key_env = "CHAT_GEMINI_API_KEYS"
 rotation_cooldown = 30
-rotation_rounds = 2
+# Four passes wait 30s, 60s and 120s between them, riding out a few minutes of overload.
+rotation_rounds = 4
 
 [run]
-lookback_hours = 24
-max_lookback_hours = 72
+# Every run reads the last 3 days. Anything already sent in the last 14 days is
+# dropped by URL, and the last 3 days of headlines are shown to the agents as
+# already covered, so the same story from another source is skipped too.
+lookback_hours = 72
 history_days = 14
-timezone = "America/Toronto"
+recent_days = 3
+timezone = "America/Los_Angeles"
 triage_threshold = 150
 triage_keep = 80
 enrich = true
