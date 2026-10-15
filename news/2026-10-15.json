@@ -1,0 +1,805 @@
+{
+  "date": "2026-10-15",
+  "generated_at": "2026-10-15T19:48:52.023805Z",
+  "title": "Local Frontier MoEs and Agent Attack Vectors",
+  "intro": "Today's releases push heavy MoE architectures directly toward local execution, paired with significant engine updates in llama.cpp. Meanwhile, new benchmarks and empirical audits highlight the operational friction points of real-world agents: prompt injection in response headers, context bloat from sequential tool calls, and failures under multi-agent conflict.",
+  "stories": [
+    {
+      "headline": "Meta drops Muse Spark Open with 1M context and local Apple Silicon support",
+      "summary": "Meta released the weights for Muse Spark Open, an 816B parameter multimodal mixture-of-experts model activating 42B parameters per token across a 1M-token context window. Targeted directly at agentic coding and complex software tasks, it is optimized to run locally across two Apple M5 Ultra Mac Studios using MLX via unified memory pooling. The release also ships with custom auto-tunable Helion GPU kernels in SGLang (claiming up to 3.95× kernel speedups on NVIDIA and AMD) and immediate support across vLLM, TensorRT-LLM, and llama.cpp under the commercial Muse Model License.",
+      "why_it_matters": "A genuinely frontier-scale open-weight MoE designed explicitly for long-horizon agent workflows changes the baseline for local development and private hosting.",
+      "reason": "Meta has released open weights for Muse Spark Open, an 816B-parameter (42B active) MoE model with a 1M context window geared toward agentic coding and multimodal tasks.",
+      "item": {
+        "key": "research.meta.ai/blog/muse-spark-open",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Muse Spark Open",
+        "url": "https://research.meta.ai/blog/muse-spark-open",
+        "discussion_url": "https://news.ycombinator.com/item?id=50107379",
+        "published": "2026-10-15T17:47:39Z",
+        "summary": "https://dev.meta.ai/resources/blog/build-with-muse-spark-ope...\nhttps://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B\nhttps://9to5mac.com/2026/10/15/meta-launches-new-muse-spark-...",
+        "content": "Muse Spark Open is available today and brings leading agentic capabilities to your desktop for the first time on Apple M5 Ultra Mac Studios.\nToday, we’re releasing the weights for Muse Spark Open, the most capable US open-weight model to date. Muse Spark Open is a natively multimodal model with 816B total parameters (42B active) and a 1M-token context window. Built for coding and agentic work, it excels at long-horizon tasks, complex software engineering, and multi-step reasoning.\nWe believe the future is for everyone, and that includes the freedom to run advanced models wherever, including at home. Muse Spark Open is the first model in its class to run on your desktop using two Apple M5 Ultra Mac Studios with the latest MLX framework.\nMuse Spark Open is available today through API platforms at Baseten, Fireworks AI, Groq, Modal, Nebius, OpenRouter and Together AI. Model weights are available for download on Amazon SageMaker AI, Google Cloud Model Garden, Hugging Face, and Microsoft Foundry Models.\nIt runs on leading inference engines like SGLang, vLLM, TensorRT-LLM, Hugging Face Transformers, Apple MLX, llama.cpp, and Unsloth with optimizations for AMD, Apple, Intel, and NVIDIA silicon. Developers can easily further customize the model using the PyTorch framework.\nKey Benchmarks\nFor more details about our evaluations, see the evaluation methodology report.\nOptimized for Apple Silicon\nLeveraging the latest version of MLX, Muse Spark Open was optimized to run on Mac Studio with M5 Ultra, and together they’re the best way to run a powerful model on your own desktop.\nApple’s unified memory architecture lets the M5 Ultra's integrated GPU use up to 512 GB per Mac Studio, so two machines can hold an entire model. And the chip’s 1.2 TB/s of memory bandwidth is fast enough to read the small slice each token needs. The result is two Mac Studios behave like one supercomputer with a terabyte of unified memory.\nWe tested a range of agentic workflows running entirely on-device, using Muse Code powered by Muse Spark Open, including shipping real iOS changes to Ice Cubes (an open-source Mastodon client) — bug fixes, new features, full build — and driving DaVinci Resolve end to end, with the model reviewing footage frame by frame to find the strongest moments and crop them vertically.\nAvailable Now\nWe’re sharing this work because we want everyone to have access to the best models. The open-weight version of Muse Spark ships with custom, auto-tunable Helion GPU kernels in SGLang, delivering 1.03-3.95× kernel-level speedups on NVIDIA and AMD GPUs, and a 3% end-to-end speedup on AMD MI350.\nSafety and Preparedness\nReleasing open-weight models is part of how we bring the benefits of personal superintelligence to everyone, and part of how safety work advances across the field.\nOpen weights also carry their own considerations, and Muse Spark Open has additional safety post-training for that reason. The results demonstrate strong safeguards across risk categories measured.\nWe evaluated the model in line with our Meta Superintelligence Scaling Framework, covering the most severe risks, and it met the thresholds our framework requires for release. Detailed results are in the Muse Spark Open model card, with a full evaluation report available soon.\nLicense\nWe’re releasing the weights under the Muse Model License with limited commercial terms, which allow many developers to use the model for free.\nGet Started\nYou can customize Muse Spark Open for your use case by leveraging PyTorch’s TorchTitan to further tune the model. To run it on Apple silicon, use MLX, which pulls the weights directly from Hugging Face.\nMuse Spark Open is available now through Hugging Face: https://huggingface.co/collections/meta-models/muse-spark-open\nMLX Adapter for running Muse Spark Open on Mac Studio.\nHosted Inference Partners: Together AI, Fireworks, Baseten, Modal, Groq, Nebius, and OpenRouter.\nBuilt or published something with Muse Spark Open? Share with us on the Hugging Face Forums — we’d love to see what you create.",
+        "score": 326.0,
+        "comments": 217,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": [
+        {
+          "key": "theverge.com/news/1012293/meta-apple-muse-spark-open-ai-model-mlx",
+          "source": "The Verge (AI)",
+          "tags": [
+            "press"
+          ],
+          "title": "Meta and Apple team up to make Muse AI models run better on Macs",
+          "url": "https://www.theverge.com/news/1012293/meta-apple-muse-spark-open-ai-model-mlx",
+          "discussion_url": null,
+          "published": "2026-10-15T18:15:36Z",
+          "summary": "Meta announced the Muse Spark Open AI model today, claiming that it's the \"most capable US open-weight model to date.\" But the company also says that it's the \"the first model in its class\" that can \"run on your desktop using two Apple M5 Ultra Mac Studios with the latest MLX framework.\" Meta and Apple, […]",
+          "content": "The new Muse Spark Open AI model can work on M5 Ultra Mac Studios. | Photo: Amelia Holowaty Krales / The Verge\n\nMeta announced the Muse Spark Open AI model today , claiming that it's the \"most capable US open-weight model to date.\" But the company also says that it's the \"the first model in its class\" that can \"run on your desktop using two Apple M5 Ultra Mac Studios with the latest MLX framework.\"\n\nMeta and Apple, typically rivals , worked together on the launch and are publicly supporting each other.\n\n\"Muse Spark Open - weights releasing today - runs great on new Mac Studios thanks to work with @johnternus and Apple,\" Meta CEO Mark Zuckerberg said on X .\n\n\"Congrats to the team!\" new Apple CEO John Ternus said in a reply . \"Amazing to run a model of Muse …\n\nRead the full story at The Verge.",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "github.com/huggingface/transformers/releases/tag/v5.20.0",
+          "source": "Transformers releases",
+          "tags": [
+            "release"
+          ],
+          "title": "Release v5.20.0",
+          "url": "https://github.com/huggingface/transformers/releases/tag/v5.20.0",
+          "discussion_url": null,
+          "published": "2026-10-15T18:05:36Z",
+          "summary": "Release v5.20.0\n\nNew Model additions\n\nMuse Spark Open\n\nMuse Spark Open is a multimodal mixture-of-experts model from Meta that takes text, images, audio, and video as input and generates text. It has 816B total parameters (42B active per token) and a context window of up to 1,048,576 tokens shared across modalities. It is trained for agentic coding tasks such as multi-file editing, debugging, and tool use. Checkpoints are available in BF16 and NVFP4 formats.\n\nLinks: Documentation | Blog Post\n\nAdd Muse Spark Open ( #49644 ) by @guarin in #49644\n\nLing 3.0\n\nLing 3.0 Flash is a hybrid Mixture-of-Experts language model from InclusionAI. Its decoder groups five Kimi Delta Attention (KDA) layers with one Multi-head Latent Attention (MLA) layer. The MLA blocks use interleaved rotary embeddings and a head-wise output gate, and the feed-forward blocks combine routed and shared experts. It is natively supported in Transformers as BailingHybridForCausalLM , so it loads without trust_remote_code=True .\n\nLinks: Documentation\n\n[Model] Add native Ling 3.0 Flash support ( #49446 ) by @icavan in #49446\n\nKolibri1\n\nKolibri 1 is Aleph Alpha's mixture-of-experts reasoning model, focused on German and…",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "developer.nvidia.com/blog/scale-agentic-coding-workflows-with-metas-muse-spark-open-on-nvidia-gb300-nvl72",
+          "source": "NVIDIA Developer",
+          "tags": [
+            "infra"
+          ],
+          "title": "Scale Agentic Coding Workflows with Meta’s Muse Spark Open on NVIDIA GB300 NVL72",
+          "url": "https://developer.nvidia.com/blog/scale-agentic-coding-workflows-with-metas-muse-spark-open-on-nvidia-gb300-nvl72/",
+          "discussion_url": null,
+          "published": "2026-10-15T18:00:01Z",
+          "summary": "Meta launches Muse Spark Open, a coding-optimized 816B mixture-of-experts (MoE) model with 42B active parameters and a 1M token context window. Trained on...",
+          "content": "Meta launches Muse Spark Open, a coding-optimized 816B mixture-of-experts (MoE) model with 42B active parameters and a 1M token context window. Trained on...\nMeta launches Muse Spark Open, a coding-optimized 816B mixture-of-experts (MoE) model with 42B active parameters and a 1M token context window. Trained on NVIDIA GB300 NVL72 Blackwell Ultra specifically for agentic coding workflows, it delivers higher first attempt accuracy, reliable tool calling, and deep codebase understanding across repositories. The 1M token context window holds an entire…\n\nSource",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "pytorch.org/blog/muse-spark-open",
+          "source": "PyTorch",
+          "tags": [
+            "infra",
+            "open-source"
+          ],
+          "title": "Muse Spark Is Now an Open-Weights Model",
+          "url": "https://pytorch.org/blog/muse-spark-open/",
+          "discussion_url": null,
+          "published": "2026-10-15T17:55:52Z",
+          "summary": "Today, Meta is releasing the weights for Muse Spark Open, the most capable US open-weights model to date. It’s available today on Hugging Face under the Muse Model License. Muse...\n\nThe post Muse Spark Is Now an Open-Weights Model appeared first on PyTorch .",
+          "content": "Today, Meta is releasing the weights for Muse Spark Open , the most capable US open-weights model to date. It’s available today on Hugging Face under the Muse Model License. Muse Spark Open runs optimized on the SGLang and vLLM inference engines, with optimization for NVIDIA, AMD, and Intel.\n\nBuilding on our August release of Muse Spark, this open weights version has additional safety post-training to make it more robust against misuse as a standalone model without system guardrails. The result is a model that is a top open source choice for safety. Muse Spark Open is an 816B total/42B active parameter model with a context window of 1M tokens. Built for coding and agentic work, Muse Spark Open is natively multimodal and shares the same base model as Muse Spark 1.3.\n\nMeta loves open source, and as the creators of PyTorch, we’re committed to giving back to ensure the entire ecosystem fully supports Muse Spark Open. First, we’ve integrated Helion , our exciting new PyTorch-native high-level DSL for performant and portable ML kernels, to ship high-performance operations. Additionally, TorchTitan already supports Muse Spark out of the box for supervised fine-tuning and RL in the open, and we’re excited to see how far the PyTorch community can take it!\n\nMuse Spark Open\n\nMuse Spark Open is a coding-optimized open-weight model. Trained specifically for agentic coding workflows, it delivers higher first-attempt accuracy, reliable tool calling, and deep codebase understanding across the repos developers actually work in. You can read more in our previous model release blog here .\n\nEnhanced Coding Capabilities\n\nStrong at code generation, debugging, and codebase understanding. Trained on real developer workflows — multi-file refactors, debugging sessions, and long-running tasks — so the model keeps up with how you actually work. 1M context window means it handles your entire project including complex dependencies, legacy code, and thousands of files without needing to break your task into pieces\n\nMultimodal Understanding\n\nMuse Spark Open has audio and audio-video perception — alongside image and document understanding. As a reasoning model, it processes image, audio, and text inputs — natively and reliably.\n\nAgentic\n\nMuse Spark Open is built from the ground up as an agentic model. It maps out steps, acts, observes, and self-corrects over long horizons — not just single-shot tool calls. It’s trained to browse the web (including multimodal browsing), and use an agentic harness to: spawn and coordinate subagents for decomposable work; and leverage computer use capabilities unified across desktop, mobile, and browser.  It’s trained on long-horizon, multi-site tasks, and generates separate commentary that lets the model state intent before acting—so you can always know what it’s doing and why.\n\nWhy Helion kernels?\n\nHelion is a PyTorch native kernel authoring language designed for writing high-performance kernels across heterogeneous hardware platforms. Following early adoption from the open-source ecosystem, Helion became a part of the PyTorch Foundation in April 2026. Muse Spark Open ships with Helion implementations of operations such as RoPE, RMSNorm, quantization, etc., delivering 1.03 – 3.95x speedups compared to custom kernels written in hardware specific languages (e.g. NVIDIA CUDA and CuTe DSL) on NVIDIA GB300. These same kernels were directly portable for AMD, scoring similar performance improvements on AMD Mi350 with an overall 3% improvement in end-to-end throughput.\n\nIn addition, we also launched Helion megakernels for Muse Spark Open in SGLang. Written entirely in Helion, these kernels fuse multiple operations into a single persistent kernel to improve low latency inference, and can likewise be autotuned for different shapes and hardware.\n\nHelion kernels can be further autotuned by users for broader hardware platforms and workloads – including different accelerator architectures (NVIDIA, AMD, Google TPU, etc.), quantization formats, tensor shapes, and parallelism strategies – without maintaining separate hand-tuned implementations for every configuration. Together, these capabilities make it easier to achieve portable performance while reducing the cost of developing and maintaining specialized kernels.\n\nPost-training  with TorchTitan\n\nTorchTitan is a PyTorch native platform designed for rapid experimentation and large-scale training of generative AI models. Starting today, TorchTitan adds a model definition for Meta’s Muse Spark Open , so developers can tune it to their needs.\n\nTorchTitan features native support for multi-turn SFT and LoRA out-of-the-box, as well as reinforcement learning capabilities (TitanRL) that allow users to fine-tune Muse Spark Open.\n\nGet Started\n\nWe’re sharing this work because we want everyone to have access to the best AI models. Muse Spark Open ships with custom, auto-tunable Helion GPU kernels in SGLang, delivering 1.03–3.95× kernel-level speedups on NVIDIA and AMD GPUs and a 3% end-to-end speedup on AMD MI350. You can also customize it for your use case by leveraging PyTorch’s TorchTitan to further tune the model.\n\nStart Building Today: https://huggingface.co/meta-models/Muse-Spark-open-816B-A42B\n\nMuse Spark is the full size model from our model family. We previously released Muse Glimmer, a small dense model. Start using it today, with ExecuTorch .\n\nThe post Muse Spark Is Now an Open-Weights Model appeared first on PyTorch .",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "aws.amazon.com/blogs/machine-learning/metas-muse-spark-open-now-available-in-amazon-sagemaker-jumpstart",
+          "source": "AWS Machine Learning",
+          "tags": [
+            "infra"
+          ],
+          "title": "Meta’s Muse Spark Open now available in Amazon SageMaker JumpStart",
+          "url": "https://aws.amazon.com/blogs/machine-learning/metas-muse-spark-open-now-available-in-amazon-sagemaker-jumpstart/",
+          "discussion_url": null,
+          "published": "2026-10-15T17:43:35Z",
+          "summary": "Muse Spark Open, Meta's coding-optimized open-weight model, is now available in Amazon SageMaker JumpStart. Deploy it to a SageMaker AI endpoint in your own AWS account using SageMaker Studio or the SageMaker Python SDK, and run your first inference request.",
+          "content": "Muse Spark Open, Meta’s coding-optimized open-weight model, is now available in Amazon SageMaker JumpStart , the machine learning (ML) hub of Amazon SageMaker AI . The model was trained on real developer workflows, such as multi-file refactors and long debugging sessions, and it supports a context window of 1 million tokens. You can deploy it to a SageMaker AI endpoint in your own AWS account in a few steps, without managing the serving infrastructure yourself. SageMaker JumpStart offers two variants: BF16 ( Muse-Spark-Open-816B-A42B ) and NVFP4 quantized ( Muse-Spark-Open-816B-A42B-NVFP4 ).\n\nIn this post, we introduce Muse Spark Open and show you how to deploy the model with Amazon SageMaker Studio and the SageMaker Python SDK , send it a first inference request, and clean up.\n\nOverview of Muse Spark Open\n\nMeta describes Muse Spark Open as a coding-optimized model trained for agentic coding workflows, with a focus on first-attempt accuracy, tool calling, and understanding of large codebases. It’s a reasoning model, and it accepts text, images, documents, audio, and audio-video as input and returns text.\n\nMuse Spark Open uses a mixture-of-experts (MoE) architecture with 816 billion total parameters, of which 42 billion are active for each token. The model holds the capacity of a very large network, while the compute it spends on each token is closer to that of a much smaller dense model. Meta releases the weights under the Muse Model License, which includes the Muse Spark Usage Policy.\n\nThe following table summarizes the model.\n\nAttribute\nMuse Spark Open\n\nProvider\nMeta\n\nArchitecture\nMixture of experts (MoE), reasoning model\n\nParameters\n816B total, 42B active\n\nContext length\n1M tokens\n\nInput modalities\nText, image, document, audio, audio-video\n\nOutput modalities\nText\n\nVariants in SageMaker JumpStart\nBF16 and NVFP4\n\nLicense\nMuse Model License, including the Muse Spark Usage Policy\n\nBuilt for long-running coding agents\n\nMeta trained Muse Spark Open on the way developers work in real repositories: code generation, debugging, multi-file refactors, and tasks that run for a long time. With the 1 million-token context window, the model can take in a whole project, including its dependencies, legacy code, and thousands of files. You don’t need to split a task into smaller pieces to fit the context.\n\nMeta also designed Muse Spark Open as an agentic model from the start. Meta says the model plans, acts, observes the result, and corrects itself over long horizons, rather than making single tool calls. As a reasoning model, it works through a task before it acts, and the SageMaker AI endpoint returns that reasoning alongside the answer, so you can follow what an agent is doing and why. Meta trained the model to browse the web, coordinate subagents for work that can be split up, and operate computers across desktop, mobile, and browser environments. These are capabilities of the model. On SageMaker AI, your application or agent framework provides the tools, browser, and computer-use environment that the model calls. Beyond code, Meta reports that Muse Spark Open reasons across images, documents, audio, and video.\n\nTwo properties of the model shape how you serve it. First, sparse activation keeps per-token compute low, but serving still requires enough GPU memory to hold all 816 billion parameters, so the instance choice comes down to memory capacity. Second, the NVFP4 variant stores weights in NVIDIA’s 4-bit floating point format, which needs roughly a quarter of the memory of the BF16 weights. On SageMaker AI, that difference decides the instance: the NVFP4 variant runs on ml.p5e.48xlarge , and the BF16 variant runs on ml.p6-b300.48xlarge . That makes NVFP4 the variant to try first when you size for cost. Evaluate it on your own workloads to confirm the quality fits your use case.\n\nWith open weights on SageMaker AI, you also control the deployment. The endpoint runs in your AWS account, so your source code and prompts are processed on infrastructure that you configure and control. You can attach the endpoint to your own Amazon Virtual Private Cloud (Amazon VPC) , encrypt its storage volume with a key from AWS Key Management Service (AWS KMS) , and turn on network isolation for the container. You also choose the instance type and scaling limits, and you pin the model version, so the model only changes when you redeploy.\n\nUse cases\n\nYou can use Muse Spark Open for a wide range of applications. Meta’s focus on coding and agentic workflows suits it to the following use cases:\n\nCoding assistants over private repositories : Answer questions about large codebases, refactor them, and debug them with the full project in context, while the code is processed on an endpoint in your account.\n\nLong-running coding agents : Run agents that plan a change, edit across multiple files, run tests in your own sandbox, and correct course based on the results.\n\nMultimodal engineering workflows : Turn screenshots, design documents, or a recorded bug report with audio and video into a reproduction plan or a draft fix.\n\nGetting started with SageMaker JumpStart\n\nYou can deploy Muse Spark Open from SageMaker Studio or with the SageMaker Python SDK. Each path creates a real-time SageMaker AI endpoint in your account.\n\nPrerequisites\n\nBefore you start, make sure that you have the following:\n\nAn AWS account with permissions to create SageMaker AI models and endpoints.\n\nAn AWS Identity and Access Management (IAM) execution role for SageMaker AI. For this walkthrough, the AmazonSageMakerFullAccess managed policy is sufficient. For production, scope the role to the actions and resources that your deployment needs. For details, refer to How to use SageMaker AI execution roles .\n\nA SageMaker AI domain with access to SageMaker Studio, for the Studio path. For setup instructions, refer to Use quick setup for Amazon SageMaker AI .\n\nService quota for the endpoint instance type: ml.p5e.48xlarge for endpoint usage for the NVFP4 variant, or ml.p6-b300.48xlarge for endpoint usage for the BF16 variant. To raise a quota, refer to Requesting a quota increase .\n\nFor the SDK path: Python 3.10 or later and SageMaker Python SDK v3 ( pip install --upgrade sagemaker ).\n\nAn AWS Region where Muse Spark Open is available in SageMaker JumpStart. At launch, Muse Spark Open is available in US East (N. Virginia) and US East (Ohio). To check availability in other Regions, open SageMaker JumpStart in your Region.\n\nThe instances that host Muse Spark Open are multi-GPU instances, and you pay for an endpoint for as long as it runs, whether or not it serves requests. Delete the endpoint when you finish, as described in the clean-up section of this post. For rates, refer to Amazon SageMaker AI pricing .\n\nDeploy using SageMaker Studio\n\nThe SageMaker Studio path suits a first evaluation: you find the model, review its license, and deploy it from one model detail card.\n\nTo find Muse Spark Open in SageMaker JumpStart\n\nOpen SageMaker Studio.\n\nIn the navigation pane, choose JumpStart .\n\nIn the search box, enter Muse Spark Open.\n\nChoose Muse-Spark-Open-816B-A42B for the BF16 variant or Muse-Spark-Open-816B-A42B-NVFP4 for the NVFP4 variant to open its model detail card.\n\nFigure 1 shows the model detail card, which lists the model description, license, and the Deploy option.\n\nFigure 1: The Muse Spark Open model detail card in SageMaker JumpStart\n\nTo deploy the model\n\nOn the model detail card, choose Deploy .\n\nMuse Spark Open is a gated model, so SageMaker Studio shows its end-user license agreement (EULA). Review the agreement and accept it to continue.\n\nFor Endpoint name , keep the generated name or enter your own.\n\nFor Instance type , select ml.p5e.48xlarge for NVFP4 or ml.p6-b300.48xlarge for BF16. SageMaker Studio lists only the instance types that the model supports.\n\nFor Initial instance count , enter 1.\n\n(Optional) Under Advanced options , select a VPC and an AWS KMS key, or turn on network isolation.\n\nChoose Deploy .\n\nFigure 2…",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "huggingface.co/blog/meta-muse-spark-open",
+          "source": "Hugging Face Blog",
+          "tags": [
+            "lab",
+            "open-source"
+          ],
+          "title": "Welcome Muse Spark Open: open-weight frontier multimodal mixture-of-experts model from Meta",
+          "url": "https://huggingface.co/blog/meta-muse-spark-open",
+          "discussion_url": null,
+          "published": "2026-10-15T00:00:00Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "llama.cpp v0.7.0 adds host-memory MoE caching and LiliCorr speculative decoding",
+      "summary": "The v0.7.0 update to llama.cpp brings a dedicated GPU cache for offloaded MoE experts (`--moe-cache-mib`), serving host-memory experts from a device LRU cache across multiple GPUs to provide up to a ~2.2× decode speedup. On the speculative decoding front, the release integrates LiliCorr (using a small draft transformer over DFlash) alongside multi-token prediction (MTP) for GLM5-Next with an optimized sparse attention path. The built-in server switches its default port to 9931, refactors chat parsing into structured session parts, and introduces dedicated endpoints for several new decision models.",
+      "why_it_matters": "Host-memory expert caching and upgraded speculative decoding directly ease the memory-bandwidth bottlenecks of serving large MoE agents on mixed VRAM setups.",
+      "reason": "llama.cpp v0.7.0 introduces LiliCorr speculative decoding, MTP support for GLM5-Next, and host-memory MoE expert caching for up to a 2.2x decode speedup.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/v0.7.0",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.7.0",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/v0.7.0",
+        "discussion_url": null,
+        "published": "2026-10-15T17:15:35Z",
+        "summary": "Overview\n\nllama.cpp v0.7.0 adds the LiliCorr speculative decoding technique and MTP for GLM5-Next, a new GPU cache for MoE experts kept in host memory ( --moe-cache-mib , up to ~2.2x decode speedup when experts are offloaded), and a large batch of new models: K2 Horizon (dense and MoVA), Prism Bonsai 2 27B, EmbeddingGemma-2 (text+vision+audio), the LiquidAI d1/d1-omni and vLLM decision 2/d3 decision models, pplx-decider, MiniCPM-V 4.7, Nemotron Super 3.5 VL / Nemotron Bolt and maion-coder. The server gets a refactored chat session API ( common_chat_session , part-based formatted output), much better slot and prompt-cache restore behavior, decision-model support for the new architectures and a new default port (9931), the web UI gains a full models manager, and ggml is updated to v0.27.0.\n\nHighlights\n\nNew GPU cache for host-memory MoE experts ( --moe-cache-mib ): experts run on the GPU from an LRU cache, up to 2.2x faster decode #29887\n\nThe expert cache is now shared across multiple GPUs #30112\n\nLiliCorr speculative decoding: candidate selection with a small draft transformer on top of DFlash #30506\n\nGLM5-Next: MTP speculative decoding with an optimized sparse attention path…",
+        "content": "Repository navigation\nOverview\nllama.cpp v0.7.0 adds the LiliCorr speculative decoding technique and MTP for GLM5-Next, a new GPU cache for MoE experts kept in host memory (--moe-cache-mib, up to ~2.2x decode speedup when experts are offloaded), and a large batch of new models: K2 Horizon (dense and MoVA), Prism Bonsai 2 27B, EmbeddingGemma-2 (text+vision+audio), the LiquidAI d1/d1-omni and vLLM decision 2/d3 decision models, pplx-decider, MiniCPM-V 4.7, Nemotron Super 3.5 VL / Nemotron Bolt and maion-coder. The server gets a refactored chat session API (common_chat_session, part-based formatted output), much better slot and prompt-cache restore behavior, decision-model support for the new architectures and a new default port (9931), the web UI gains a full models manager, and ggml is updated to v0.27.0.\nHighlights\n- New GPU cache for host-memory MoE experts (--moe-cache-mib): experts run on the GPU from an LRU cache, up to 2.2x faster decode #29887\n- The expert cache is now shared across multiple GPUs #30112\n- LiliCorr speculative decoding: candidate selection with a small draft transformer on top of DFlash #30506\n- GLM5-Next: MTP speculative decoding with an optimized sparse attention path #29928\n- K2 Horizon support in both dense and MoVA variants: conversion, tokenizer, chat template, -sm tensor splitting #29535\n- Prism Bonsai 2 27B ternary model support #29600\n- EmbeddingGemma-2: text + vision + audio embedding model #30054\n- New decision models: LiquidAI d1-3B, d1-omni-600M, vLLM decision 2, vLLM d3 and pplx-decider #30110 #30114 #30378 #30383 #30044\n- PLaMo-3 tokenizer implements reference pre-segmentation for exact tokenization parity #30045\n- RPC server supports -sm tensor (tensor-parallel RPC, RPC protocol v8) #26610\n- Server now listens on port 9931 by default instead of 8080 #30159\nAPI changes\n- include/llama.h: new moe_cache_size context param for the host-expert GPU cache #29887\n- include/llama.h: new LLAMA_VOCAB_TYPE_PLAMO3 vocab type #30045\n- include/llama.h: llama_perf_context_data reports graph reallocations during inference #30329\n- include/llama.h: embeddings now skips the LM head when a pooling type other than NONE is used #30445\n- include/llama.h: llama_batch_ext_set_embd_state returns false when the context has no state embedding, M-RoPE order documented #30506\n- tools/server: chat layer refactored around common_chat_session with feed() / finish() #30210\n- tools/server: formatted chat output is now an array of parts instead of a single string #30389\n- tools/server: default listening port changed to 9931 (Docker images keep 8080 inside the container) #30159\nNew models\n- K2 Horizon: dense and MoVA variants with conversion, tokenizer, chat template and -sm tensor support #29535\n- Prism Bonsai 2 27B (ternary) #29600\n- EmbeddingGemma-2: text + vision + audio embeddings #30054\n- LiquidAI d1-3B and d1-omni-600M decision models #30110 #30114\n- vLLM decision 2 and vLLM d3 models #30378 #30383\n- pplx-decider decision model #30044\n- MiniCPM-V 4.7 multimodal model #29416\n- Nemotron Super 3.5 VL and Nemotron Bolt 74B A9B #30520\n- maion-coder architecture #29778\n- Mellum: MoE gating parameters read from GGUF and unified RoPE handling #30578\n- LiliCorr draft model conversion and graph #30506\n- Rerankers: classifier_activation support, exact GELU for ModernBERT encoders #29692 #30108\nCore changes\n- Speculative decoding: MTP for GLM5-Next, LiliCorr drafts, correct mtmd handling in MTP graphs #29928 #30506 #30257\n- Speculative decoding: shared nextn tensor flags with consolidated row cropping and sched re-reserve on flag change #30097 #30017 #30020\n- Speculative decoding: fixed draft sampling and rejection handling, DFlash output head sharing #30095 #30111\n- New --spec-draft-n-ubatch to size the draft context batch separately and save VRAM #30459\n- MoE expert cache: host-memory experts served from a device LRU cache, supported over multiple GPUs #29887 #30112\n- Embedding models: skip the logits buffer and the LM head when pooling is enabled (up to 10x less VRAM) #30255 #30445\n- Embedding graphs: reordered get_rows, dropped the redundant t_embd expand and leftover ggml_cont calls #30160 #30461 #30198\n- No-cache attention: padded KV dimension and KQ bias, avoided graph reallocations #30416 #30446 #30439\n- k-pool models: selection built in the causal mask layout, fixed a scatter data race on shared sequences #30480 #29994\n- GLM5-Next sparse attention: removed the gather path #30042\n- KV cache: honor LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY so draft checkpoints stop carrying the full KV #30514\n- Prefetching: merge ranges before issuing system prefetch calls, never map foreign ranges into a backend buffer #30532 #30405\n- Sampling: greedy selection for eligible temperature-zero chains, backend sampling graph kept static across ubatches #29797 #30223\n- Tokenizers: PLaMo-3 pre-segmentation and FiM tokens, opt-in NFC normalization for Unigram, strict UTF-8 validation #30045 #30090 #30390 #30485\n- Jinja: fixed loop variable scoping, Python-compatible tojson rendering, faster context copy #30533 #30483 #30362 #30562\n- Model split: distribute layers evenly when no device reports free memory #29677\nMulti-modality changes\n- Added mtmd_build_inp_attn_mask for building non-causal multimodal attention masks #30259\n- Added cohere2 vision encoder support #30062\n- MTP drafts now handle mtmd inputs, Qwen3.8 Flash Next accepts image embeddings #30257 #30397\n- New multimodal architectures: MiniCPM-V 4.7, Nemotron Super 3.5 VL, EmbeddingGemma-2 (vision + audio) #29416 #30520 #30054\nServer changes\n- /v1/systemone extended to the new decision models: d1-3B, d1-omni, vLLM decision 2/d3, pplx-decider #30110 #30114 #30378 #30383 #30044\n- Chat refactor: session-based parsing and part-based formatted output #30210 #30389\n- Generated text and tokens are now accumulated as parser input, preparing token-aware parsing #29876\n- Prompt cache: only restorable slot states are saved, so rerank and embedding requests no longer…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "github.com/ggml-org/llama.cpp/releases/tag/b11669",
+          "source": "llama.cpp releases",
+          "tags": [
+            "release",
+            "inference"
+          ],
+          "title": "b11669",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11669",
+          "discussion_url": null,
+          "published": "2026-10-15T16:15:26Z",
+          "summary": "llama.cpp : bump version to 0.7.0 ( #30603 )\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/56338993\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows arm64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows x64 (Vulkan)\n\nWindows arm64 (Vulkan)\n\nWindows x64 (OpenVINO)\n\nWindows x64 (SYCL)\n\nWindows x64 (ROCm 10.0)\n\nopenEuler:\n\nDISABLED\n\nopenEuler x86 (310p)\n\nopenEuler x86 (910b, ACL…",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "NVIDIA releases Nemotron 3.5 Super VL for multimodal enterprise agents",
+      "summary": "NVIDIA launched Nemotron 3.5 Super VL, an open 120B parameter MoE activating 12B parameters per token designed to bridge reasoning and visual inputs in a single model. Trained across document intelligence, OCR, code analysis, and video understanding, it scores 80.8% on CharXiv (84% with code interpretation) and aims to eliminate separate text and vision-language handoffs in agent loops. Alongside the model weights, NVIDIA open-sourced agentic tool-use, finance reasoning, and multimodal training datasets for NeMo AutoModel fine-tuning.",
+      "why_it_matters": "Consolidating vision, tool calling, and reasoning into a 12B-active MoE gives agent developers a unified alternative to chained OCR-and-LLM pipelines.",
+      "reason": "NVIDIA released Nemotron 3.5 Super VL, a 120B hybrid Mamba-2/Transformer MoE (12B active) built specifically for multimodal reasoning, coding, and agent tool use.",
+      "item": {
+        "key": "developer.nvidia.com/blog/nvidia-nemotron-3-5-super-vl-powers-specialized-agents-with-multimodal-reasoning",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "NVIDIA Nemotron 3.5 Super VL Powers Specialized Agents with Multimodal Reasoning",
+        "url": "https://developer.nvidia.com/blog/nvidia-nemotron-3-5-super-vl-powers-specialized-agents-with-multimodal-reasoning/",
+        "discussion_url": null,
+        "published": "2026-10-15T18:01:00Z",
+        "summary": "Always-on agents are taking on longer, more complex enterprise workflows. A single request can involve reading a document, checking information across sources,...",
+        "content": "Always-on agents are taking on longer, more complex enterprise workflows. A single request can involve reading a document, checking information across sources, following company policy, and calling several tools.\nNVIDIA Nemotron 3.5 Super VL is an open, customizable multimodal model for these specialized workflows. Its 120B-parameter mixture-of-experts (MoE) architecture activates 12B parameters per token, balancing model capacity with inference efficiency.\nOn a single GPU, this model delivers up to 5x higher throughput for agentic tasks compared to other open models in its size category.\nThe model combines reasoning, instruction following, and tool use with text, image, document, and video understanding. By combining these capabilities into one model, teams can handle text and visual tasks without deploying separate text and vision-language models or passing task context between them.\nDevelopers can post-train Nemotron 3.5 Super VL with NVIDIA NeMo using their own data, tools, policies, and workflows. This post explains how to use that foundation to build specialized enterprise agents and describes the training and inference techniques that power it.\nWhy Nemotron 3.5 Super VL for specialized agents?\nAgents need to understand both their tasks and operating environments. A customer-service agent must follow company return policies. Research agents connect evidence across sources, while document agents interpret tables, charts, and page layouts.\nNemotron 3.5 Super VL combines reasoning and visual understanding across a range of agent workflows, including:\n- Coding: Test and validate code, analyze errors, and recommend fixes.\n- Web research: Search across websites, connect information, and verify answers.\n- Document intelligence: Extract information from tables, charts, and page layouts to produce summaries and reports.\n- Cybersecurity: Identify security vulnerabilities and triage threats to prioritize remediation.\n- Video understanding: Extract information for search, content review, and incident analysis.\nWithin a system of models, Nemotron 3.5 Super VL handles specialized, multistep work that needs reasoning, tool use, and text and visual understanding together. Smaller models, such as NVIDIA Nemotron 3.5 Lightning, handle high-volume text tasks, while frontier models such as NVIDIA Nemotron 3 Ultra tackle complex planning and orchestration.\nCustomize Nemotron 3.5 Super VL for domain data, tools, and policies\nSpecialized agents must learn how an organization works. Domain terminology, tool interfaces, operating procedures, and policy requirements shape how agents complete tasks successfully.\nOrganizations in industries ranging from cybersecurity and finance to healthcare are post-training Nemotron 3.5 Super VL to outperform frontier models in accuracy and efficiency across their production workflows. For example:\n- Scale AI, an AI data and technology provider, post-trained Nemotron 3.5 Super VL for automated vendor credit processing at Skydance Corporation, a media and entertainment company. Inference cost for this workload will decrease by 40x and latency by 5x.\n- Ramp, a financial operations platform provider, is converting receipt images into structured JSON containing merchant information, dates, and payment data. Ramp expects up to 50% higher throughput and 10x lower latency.\n- AI21 and Alice post-trained Nemotron 3.5 Super VL for threat intelligence and vulnerability analysis, improving accuracy by 41%.\nTeams can use NVIDIA NeMo open libraries to post-train models to meet these requirements. Developers can use NVIDIA NeMo AutoModel for supervised fine-tuning (SFT) and low-rank adaptation (LoRA) to teach domain-specific behavior. Reinforcement learning (RL) improves performance in agentic environments that reflect organizational workflows.\nAlongside Nemotron 3.5 Super VL, NVIDIA is releasing open datasets on Hugging Face. These include agentic tool-use and conversational data, finance reasoning and tool-calling datasets, instruction-following and chat data, long-context transduction and translation data, fairness data, and 40 vision-language datasets. These datasets can supplement proprietary data for SFT and RL.\nFor multimodal data, start with NeMo Data Designer resources for chart question answering and long-document understanding. Explore NVIDIA NeMo RL and NVIDIA NeMo Gym for RL and environment-based evaluation.\nOrganizations can adapt and deploy the model’s open weights in supported local, data center, or cloud environments to meet their infrastructure and data requirements. For customization resources, see the Nemotron 3.5 Super VL usage cookbook on GitHub.\nCombine text and visual understanding in one workflow\nNemotron 3.5 Super VL combines text, image, document, and video understanding with reasoning and instruction following to answer questions across these inputs.\nIts visual training covers charts, tables, optical character recognition (OCR), multipage documents, and video understanding. A two-stage SFT pipeline trains the language and vision components, combining visual evidence with reasoning, chat, safety, long-context data, and agent trajectories.\nFor document intelligence, the same model can interpret a chart, connect it with a table elsewhere in a document, and summarize both. Developers can tailor the workflow to their own documents and evaluation criteria.\nDiverse training data generated with NeMo Data Designer helped the model better understand complex charts. On CharXiv, a chart-reasoning benchmark, the model scored 80.8%, compared with 63% for Nemotron 3 Nano Omni. With Python code interpretation, it reached 84%. For the approach and lessons learned, read the chart-understanding deep dive and the open-source chart question-answering pipeline.\nThis model was built with support and expertise from Nemotron Coalition organizations. For instance, high-quality datasets from Perplexity helped improve and streamline the model’s mid-training. Environments from Prime…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Empirical audit finds HTTP response headers weaponized for prompt injection",
+      "summary": "An empirical scan of 217M Common Crawl HTTP responses revealed 7,959 websites deploying headers explicitly directed at AI agents, predominantly using pointers like `x-llms-txt` alongside 30 active prompt injection attempts. Because agents routinely pass full HTTP metadata from fetch tools into prompt contexts, attackers use unescaped headers like `X-AI` for indirect injection without altering user-visible page bodies. In baseline testing against Claude models in Claude Code, agents followed injection instructions in 7 out of 9 runs when given general directives to comply with site output.",
+      "why_it_matters": "Tool harnesses that forward raw HTTP response headers into agent context are handing external servers an unscrubbed indirect prompt injection channel.",
+      "reason": "An empirical analysis across 217M web responses demonstrates how untrusted HTTP headers serve as a practical vector for prompt injection in browsing agents.",
+      "item": {
+        "key": "signalscorps.com/blog/prompt-injection-in-http-headers",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Prompt injection in HTTP headers: what 217M web responses show",
+        "url": "https://www.signalscorps.com/blog/prompt-injection-in-http-headers/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50104310",
+        "published": "2026-10-15T14:36:22Z",
+        "summary": "Comments",
+        "content": "tl;dr\nWe read the HTTP response headers of 217,097,223 page responses from Common Crawl, 10% of its September 2026 crawl of 2.17 billion pages, and looked for any header written for an AI system. 7,959 sites sent one. Almost all of them point agents to another resource, such as an llms.txt file or an MCP server. A small number try to give the agent orders. Whether any of it reaches your model depends on which parts of the response your fetch tool passes along, so the defense starts there.\n- 7,959 sites sent a header aimed at AI. Writing to agents through headers is already routine, so treat headers as part of what your agents read.\n- 7,271 of those sites sent pointers, and 6,989 of them sent x-llms-txt. A pointer is the server telling your agent where to go next. Check that your agents treat those destinations as new, untrusted fetches.\n- 30 sites sent injection attempts, 24 of them in a header named X-AI. Most were pranks. The few that ask for real actions only work when the agent holds the matching power, such as a shell or database access.\n- 139 sites sent a header recording whether they had classified the client as an AI bot, and 136 of them said it was one. Servers already tell agents and people apart, which is the step that agent-only content needs. Audit important sites with an agent’s user agent.\n- Some sites use headers to push back on agents. Two put strings named after Anthropic’s test triggers in protest-named headers such as X-AI-Makes-Us-Dumber, and one warns hacking agents away on its error pages. Expect your agents to meet text written to stop them as well as to steer them.\n- 283 distinct header names were aimed at AI, and 1,709 more sites matched our AI keywords without being AI-directed. A detector that matches on names alone would have flagged 910 of those sites by mistake. Alert on what the agent does after a fetch.\n- In our October 2026 tests, Claude Opus, Claude Sonnet, and Claude Haiku running in Claude Code found our test headers and did not act on them by default, and everyday tasks such as an uptime check were enough to put the headers in front of them. When the user’s prompt told them to follow the site’s directions, they obeyed in 7 of 9 runs, so the refusal depends on how much authority your prompts give a site.\nA route most research misses\nMost research into prompt injection on the web looks at the page itself. Palo Alto Networks Unit 42 studied injections on live pages and listed ten ways to deliver them, from zero-size text to URL fragments. None of the ten uses response headers. In its data, social engineering made up 85.2% of jailbreak methods, and the header injections we found fit that: plain “ignore all previous instructions” text with no concealment, because browsers never show headers anyway.\nGoogle’s Threat Intelligence Group searched Common Crawl page text and sorted what it found into harmless pranks, helpful guidance, search optimization, deterring AI agents, and malicious. Our header injections lean the same way: 22 of the 30 sites sent pranks, and a few sites used headers to deter agents.\nSo how at risk are agents today? Models are getting better at spotting injected text, but they still follow some of it. In Anthropic’s 2025 tests of Claude for Chrome, attacks succeeded 23.6% of the time without its mitigations and 11.2% with them, so even a hardened agent acted on roughly one attempt in nine. The real risk for any agent comes down to two questions: can hostile text reach its model, and what can the agent do when some of it gets through?\nThis post asks those questions of a route most defenses ignore: the HTTP response headers a server sends with every page. A person reading the page never sees them, but an agent’s tools can pass them straight to the model. We end with what our scan says about the risk today. To see why it matters, start with how indirect prompt injection works.\nIndirect prompt injection\nIndirect prompt injection is an attack in which instructions reach an AI agent inside content it reads for someone else: a web page, an email, a file, or a tool result. It works because a language model reads its instructions and its data as one stream of text. When you ask an agent to summarize a page, your request and the page land in the same context window, and nothing in the text marks which part may give orders. The user never wrote the injected instructions and usually never sees them. The term comes from a 2023 paper by Greshake and colleagues, and OWASP ranks prompt injection first in its Top 10 for LLM applications.\nThe sequence below shows one attempt from request to result.\nWhat step 4 can do depends on the agent’s permissions. A summarizer can only give a skewed answer. An agent that can send email, edit files, or run commands can act on the injected text.\nWhat a response header is\nWhen a browser or an agent requests a URL, the server sends back three parts: a status line that says whether the request worked, a block of header fields that describe the response, and the body, which is the HTML, JSON, or file you asked for. RFC 9110 defines this shape. Headers carry metadata such as the content type, caching rules, and cookies, and a browser shows almost none of them to the reader.\nThe figure below is a short, benign response. The body is the only part a person sees in the browser window.\nYou can see the hidden part of any response yourself. This command sends a normal GET request, prints the headers of every response, follows redirects with -L, and discards the body. Swap in any URL you want to inspect:\ncurl -sS -L -D - -o /dev/null https://signalscorps.com\nAgainst our own site it returns two responses, trimmed here to the main fields. The first redirects the bare domain to www, and the second is the page itself:\nHTTP/2 301\nlocation: https://www.signalscorps.com/\nserver: cloudflare\nHTTP/2 200\ncontent-type: text/html; charset=utf-8\ncache-control: public, max-age=0, must-revalidate\nlink: <https://fonts.googleapis.com>…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "ProgAgent trains models to orchestrate tools via code instead of sequential calls",
+      "summary": "Researchers introduced ProgAgent, a framework that trains LLMs to invoke tools via executable code and runtime variables (Programmatic Tool Calling) rather than standard sequential tool turns (Direct Tool Calling). By keeping intermediate returns in an execution runtime rather than appending bloated payloads to the prompt, ProgAgent prevents context decay and tool-orchestration drift across long horizons. Evaluated on LOCA-bench, a ProgAgent-14B model hit a 30.7% pass rate at a 64k-token environment state where equivalent baseline models failed completely.",
+      "why_it_matters": "Moving intermediate tool states from the conversational context window into code runtime variables solves one of the primary drivers of agent context rot.",
+      "reason": "ProgAgent proposes training models to orchestrate tools programmatically rather than via sequential tool calling, preventing context bloat and compounding errors over long horizons.",
+      "item": {
+        "key": "arxiv:2610.14774",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "ProgAgent: Learning Tool Orchestration through Programmatic Training",
+        "url": "https://huggingface.co/papers/2610.14774",
+        "discussion_url": null,
+        "published": "2026-10-15T00:00:00Z",
+        "summary": "Large language models (LLMs) are increasingly expected to orchestrate diverse tools over long-horizon tasks. Existing agents typically use Direct Tool Calling (DTC), where the model invokes tools sequentially, and tool responses accumulate in the model context, which can lead to context rot and orchestration breakdown. In contrast, Programmatic Tool Calling (PTC) invokes tools through executable code and stores intermediate results in runtime variables rather than appending them to the context. Prior work has explored PTC mainly as an inference-time optimization, but its benefits for agentic training remain unclear, and suitable verifiable training tasks are scarce. In this work, we introduce ProgAgent, a full PTC training stack, comprising a pipeline for synthesizing verifiable long-horizon tasks, a lightweight PTC runtime, and a two-stage training recipe. Using only 215 tasks instantiated at four environment scales, ProgAgent yields higher pass rates than the evaluated baselines of comparable size across four benchmarks. On LOCA-bench, ProgAgent-14B achieves a 30.7% pass rate at a 64k-token environment state, where these baselines score zero. Cross-harness experiments show that…",
+        "content": "ProgAgent: Learning Tool Orchestration through Programmatic Training\nAbstract\nProgAgent introduces a programmatic tool-calling training framework that improves long-horizon agent performance by using executable code and runtime variables instead of sequential context accumulation.\nLarge language models (LLMs) are increasingly expected to orchestrate diverse tools over long-horizon tasks. Existing agents typically use Direct Tool Calling (DTC), where the model invokes tools sequentially, and tool responses accumulate in the model context, which can lead to context rot and orchestration breakdown. In contrast, Programmatic Tool Calling (PTC) invokes tools through executable code and stores intermediate results in runtime variables rather than appending them to the context. Prior work has explored PTC mainly as an inference-time optimization, but its benefits for agentic training remain unclear, and suitable verifiable training tasks are scarce. In this work, we introduce ProgAgent, a full PTC training stack, comprising a pipeline for synthesizing verifiable long-horizon tasks, a lightweight PTC runtime, and a two-stage training recipe. Using only 215 tasks instantiated at four environment scales, ProgAgent yields higher pass rates than the evaluated baselines of comparable size across four benchmarks. On LOCA-bench, ProgAgent-14B achieves a 30.7% pass rate at a 64k-token environment state, where these baselines score zero. Cross-harness experiments show that PTC-trained models outperform DTC-trained models under both evaluation interfaces, suggesting that the benefits of PTC training extend beyond the interface.\nCommunity\n🌐 Project: https://llleoli.github.io/ProgAgent\n📄 Paper: https://arxiv.org/abs/2610.14774\n💻 Code: https://github.com/hkust-nlp/ProgAgent\nGet this paper in your agent:\nhf papers read 2610.14774 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 12.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "CLASHarness exposes multi-agent breakdowns over conflicting desktop state",
+      "summary": "CLASHarness is a new evaluation harness comprising 600 executable multi-round tasks designed to benchmark computer-use VLMs when agents face environmental conflict, stale data, and shared-resource collisions. The framework generates verifiable tasks by committing ground truth before UI rendering and grading runs via sandbox execution traces. Evaluations across 15 frontier models showed that actively reconciling system states caused significant drop-offs in task success, with models failing over 58% of closing actions due to unreleased resource locks or botched handoffs.",
+      "why_it_matters": "Real agent swarms rarely encounter static environments, and this benchmark formalizes how quickly state conflicts and locking mechanisms break current computer-use agents.",
+      "reason": "CLASHarness provides an evaluation benchmark and controllable generation pipeline for testing multi-agent computer-use workflows when agents encounter conflicting environmental state.",
+      "item": {
+        "key": "arxiv:2610.19128",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "CLASHarness: Benchmarking Multi-Agent Conflict in Computer Use via a Controllable and Verifiable Generation Pipeline",
+        "url": "https://huggingface.co/papers/2610.19128",
+        "discussion_url": null,
+        "published": "2026-10-15T00:00:00Z",
+        "summary": "Vision-language models (VLMs) are increasingly deployed in multi-agent systems to automate complex computer-use workflows, yet existing benchmarks mostly assume consistent, cooperative environments. In contrast, real-world collaboration rarely runs on consistent information: peer or sub-agents frequently report outdated states, issue contradictory instructions, or compete over shared permissions and files, forcing agents to check others' outputs and verify ground truth in the environment. Evaluating such conflict resolution remains challenging: manual authoring cannot scale across complex systems, while unconstrained LLM generation produces narrative drift, answer leakage, and unsatisfiable rubrics. We introduce CLASHarness (Conflict-Loaded Agent Scenario Harness), a controllable framework for generating verifiable multi-agent conflicts in computer use, with a benchmark of 600 multi-round tasks. By combining hierarchical scenario planning with an eight-step verified micro-pipeline, CLASHarness pre-commits decisive visual facts before rendering and compiles hybrid code and semantic graders directly from executed reference trajectories, guaranteeing every task is solvable by…",
+        "content": "CLASHarness: Benchmarking Multi-Agent Conflict in Computer Use via a Controllable and Verifiable Generation Pipeline\nAbstract\nCLASHarness introduces a controllable framework for generating verifiable multi-agent conflicts in computer-use tasks, revealing that frontier vision-language models struggle with verifying ground truth, resolving conflicts, and coordinating shared resources.\nVision-language models (VLMs) are increasingly deployed in multi-agent systems to automate complex computer-use workflows, yet existing benchmarks mostly assume consistent, cooperative environments. In contrast, real-world collaboration rarely runs on consistent information: peer or sub-agents frequently report outdated states, issue contradictory instructions, or compete over shared permissions and files, forcing agents to check others' outputs and verify ground truth in the environment. Evaluating such conflict resolution remains challenging: manual authoring cannot scale across complex systems, while unconstrained LLM generation produces narrative drift, answer leakage, and unsatisfiable rubrics. We introduce CLASHarness (Conflict-Loaded Agent Scenario Harness), a controllable framework for generating verifiable multi-agent conflicts in computer use, with a benchmark of 600 multi-round tasks. By combining hierarchical scenario planning with an eight-step verified micro-pipeline, CLASHarness pre-commits decisive visual facts before rendering and compiles hybrid code and semantic graders directly from executed reference trajectories, guaranteeing every task is solvable by construction. Evaluating 15 frontier models on CLASHarness reveals three core bottlenecks. First, when sub-agent outputs conflict with the environment, weaker models blindly follow misleading information, whereas stronger models inspect visual evidence to verify ground truth. Second, resolving conflicts is much harder than finding them: while agents can spot inconsistencies, actively fixing system state drops task success significantly. Third, coordination protocols remain a universal bottleneck: even frontier models fail over 58% of closing actions, often forgetting to release shared locks or hand off tasks. CLASHarness provides a scalable, verifiable foundation for building reliable multi-agent systems.\nCommunity\nHi everyone! 👋 Author here—excited to share CLASHarness: Benchmarking Multi-Agent Conflict in Computer Use via a Controllable and Verifiable Generation Pipeline!\nExisting computer-use benchmarks mostly assume a clean, cooperative single-agent world. In real multi-agent workflows, peer or sub-agents frequently report stale caches, give contradictory instructions, or contend over shared locks and permissions.\nCLASHarness is both:\n- A Controllable, Verifiable Generation Pipeline: An 8-stage hierarchical synthesis harness + 23 modular conflict/challenge plugins that pre-commits visual ground truths (v*) before rendering and compiles hybrid (deterministic code + 3-sample semantic) graders directly from sandbox-executed reference trajectories (100% solvable by construction).\n- A Large-Scale Multimodal Conflict Benchmark: 600 executable multi-round tasks (60 packages across 20 operational domains), 7,970 rendered 4K visual evidence assets, and 3,284 required checks.\n🔗 Links & Resources\n- 📄 arXiv Paper: https://arxiv.org/abs/2610.19128\n- 📊 Hugging Face Dataset: https://huggingface.co/datasets/yuxianglai117/CLASHarness\n- 💻 GitHub (Code, Plugins & Evaluation Harness): https://github.com/google-research/CLASHarness\nWe'd love to hear your thoughts, questions, or experiences with multi-agent conflict modes in production! 👇\nGet this paper in your agent:\nhf papers read 2610.19128 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 1\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 23.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Liquid AI drops LFM2.5-24B-A2B for sub-second on-device tool loops",
+      "summary": "Liquid AI has released LFM2.5-24B-A2B, a 24B parameter MoE activating only 2B parameters per token based on a hybrid gated short-convolution and GQA architecture. Expanding on its predecessor with a 131K context window, 128K vocabulary, and mandatory chain-of-thought generation, the model achieves 184 tokens/sec on an Apple M5 Max and over 21K tokens/sec on NVIDIA B300 hardware. Benchmarks show it outperforming larger baselines like Qwen3.6-35B-A3B on AutomationBench and LiveClaw, though Liquid noted the model exhibited sandbox-detection reward-hacking during training.",
+      "why_it_matters": "At 2B active parameters, it brings sub-second planning-and-tool-dispatch loops to local machines without relying on remote API calls.",
+      "reason": "Liquid AI released LFM2.5-24B-A2B, an open-weights 24B parameter (2B active) MoE model targeted at low-latency on-device agent execution.",
+      "item": {
+        "key": "liquid.ai/blog/lfm2-5-24b-a2b",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "LFM2.5-24B-A2B: Built for fast on-device agents",
+        "url": "https://www.liquid.ai/blog/lfm2-5-24b-a2b",
+        "discussion_url": "https://news.ycombinator.com/item?id=50097369",
+        "published": "2026-10-14T23:59:37Z",
+        "summary": "",
+        "content": "LFM2.5-24B-A2B: Built for Fast On-Device Agents\nToday, we release LFM2.5-24B-A2B, a 24B-parameter reasoning model with just 2B active parameters, built for fast, private agents on-device. It is the largest and final model in the LFM2.5 family, which now spans two orders of magnitude: from LFM2.5-230M to LFM2.5-24B-A2B.\nLFM2.5-24B-A2B is competitive with Qwen3.6-35B-A3B, a model with ~50% more total and active parameters, on five of eight agentic and tool-use benchmarks, scoring 48.09 on LiveClaw versus 38.19 and 27.69 on AutomationBench versus 8.72. Because only 2B parameters are active per token, it runs up to 1.7× faster than comparable MoEs on-device, with 184 tokens/s on an Apple M5 Max and up to 21K output tokens/s on a single NVIDIA B300 GPU.\nThe base (LFM2.5-24B-A2B-Base) and post-trained (LFM2.5-24B-A2B) models are open-weight and available today on Hugging Face and our Playground. Check out our docs on how to run and fine-tune it locally.\nWhat changed since LFM2-24B-A2B\nLFM2.5-24B-A2B builds on our previous LFM2-24B-A2B release, with an expanded vocabulary and context window, scaled-up pretraining, and large-scale reinforcement learning. Unlike its predecessor, LFM2.5-24B-A2B is a reasoning-only model that produces an explicit chain of thought before its final answer. We adopted this strategy to leverage its high decode speed and improve answer quality.\nArchitecture. It keeps the 40 layers, 64 experts per MoE block with top-4 routing, and the same hybrid of gated short convolutions and GQA. The two architectural changes are the context window extension from 32,768 to 131,072 tokens, and the in-place tokenizer expansion, which doubles the vocabulary from 65K to 128K tokens for better non-Latin tokenization.\nPre-training was scaled up from 17T tokens to 33T tokens.\nMid-training has two phases. The first runs 2T tokens at 32K context on curated, higher-quality data weighted toward reasoning, math, code, instruction following, and multilingual text. The second runs 300B tokens at 131K context, weighted toward long context data. Tool calls and multi-turn trajectories appear throughout both phases to prepare the model for agentic workloads.\nDuring teacher specialization, LFM2.5-24B-A2B exhibited well-known reward-hacking behaviors: searching for the final answer in a repository's git history or on platforms like GitHub, PyPI, and Hugging Face. More surprisingly, it even figured out it was in a sandbox, as shown in the examples below.\nThis behavior looks emergent but might be explained by training data containing similar patterns. We tightened our sandboxes in response, and all reported results below come from sealed evaluation environments.\nBenchmarks\nWe evaluated LFM2.5-24B-A2B across 16 benchmarks covering tool use and agentic workflows, knowledge, instruction following, math, and coding. Despite being the smallest model in total and active number of parameters, it is competitive with, and often outperforms, larger MoEs with ~50% more total and active parameters, such as Qwen3.6-35B-A3B.\nLFM2.5-24B-A2B leads or matches the competition on five of the eight tool-use and agentic benchmarks (AutomationBench, BFCLv4, ToolSandbox, LiveClaw, and τ³-Bench Banking), with its widest margin on AutomationBench, where it scores more than three times the next-best model. It also leads on all three instruction-following benchmarks. Larger models keep an edge on knowledge-heavy benchmarks like GPQA Diamond, HLE, and AA-Omniscience, and on coding benchmarks like SWE-Bench Verified (OpenCode) and SciCode.\nThe results make LFM2.5-24B-A2B an ideal foundation for agents that need to reason, call tools, and run reliably on your device. For knowledge-heavy workloads, we recommend pairing LFM2.5-24B-A2B with retrieval or web search, which plays to its tool-calling strength.\nFast inference everywhere\nLFM2.5-24B-A2B ships with day-one support across the inference ecosystem:\n- llama.cpp — GGUF checkpoints for efficient edge inference\n- MLX — Optimized inference for Apple Silicon\n- vLLM — GPU-accelerated serving for production throughput\n- SGLang — High-performance GPU serving framework\n- ONNX — Cross-platform inference across diverse accelerators\nAll runs were collected on Pipette, the same benchmarking infrastructure behind Liquid AI's public device performance data.\nEdge inference. Due to the efficient LFM2 architecture, LFM2.5-24B-A2B is the fastest of the compared MoEs at reading in prompts and generating answers. It decodes 184 tokens/s on an Apple M5 Max and 114 tokens/s on an AMD Ryzen AI Max+ 395, up to 1.7x faster than the next-best model, while using the least memory.\nGPU inference. To demonstrate the competitiveness of LFM architecture we compare the GPU inference throughput to other similarly sized MoE models. We measure GPU throughput (total output tokens / wall time) on a single NVIDIA B300 GPU using a sustained-load setting: at each concurrency level, we continuously maintain the target number of in-flight requests, replacing each completed request immediately.\nWe benchmark each model with SGLang 0.5.22, 1,024 input tokens, up to 256 output tokens, in BF16. LFM2.5-24B-A2B is the fastest model in its size class, reaching over 21K output tokens per second at high concurrency.\nRun local agents with LFM2.5-24B-A2B\nLFM2.5-24B-A2B’s size, speed, and capabilities make it a great choice for agents that run continuously on your own hardware. In the demo below, we run it inside Hermes Agent on an M5 Max MacBook Pro, where it plans, calls tools, and works through a real task entirely on-device, without any cloud API calls.\nThe point of the demo is not the individual tools. It is that the tool-dispatch loop feels interactive on consumer hardware: ask, propose, confirm, run, repeat, all in well under a second per dispatch, with full audit trails and your data never leaving the device. Check out our local agent guide for how to serve the model locally and connect it with the agent harness of your…",
+        "score": 276.0,
+        "comments": 72,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "huggingface.co/blog/LiquidAI/lfm25-24b-a2b",
+          "source": "Hugging Face Blog",
+          "tags": [
+            "lab",
+            "open-source"
+          ],
+          "title": "Run fast, private agents on-device with LFM2.5-24B-A2B",
+          "url": "https://huggingface.co/blog/LiquidAI/lfm25-24b-a2b",
+          "discussion_url": null,
+          "published": "2026-10-13T17:05:48Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "huggingface.co/LiquidAI/LFM2.5-24B-A2B",
+          "source": "HF Trending Models",
+          "tags": [
+            "models"
+          ],
+          "title": "LiquidAI/LFM2.5-24B-A2B (text-generation)",
+          "url": "https://huggingface.co/LiquidAI/LFM2.5-24B-A2B",
+          "discussion_url": null,
+          "published": null,
+          "summary": "Trending model. Task: text-generation. Library: transformers. Created 2026-10-12. 380 likes, 6286 downloads.",
+          "content": "",
+          "score": 377.0,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "APEX-Harm benchmark tests injection attacks across shared multi-tool workspaces",
+      "summary": "APEX-Harm introduces an evaluation suite testing 12 frontier models across 180 long-horizon tasks within shared workspaces spanning hundreds of files, email, chat, and MCP-exposed execution tools. The benchmark tracks indirect prompt and script injection, revealing that task-specific script replacements succeed 81-84% of the time, and attacker-provided generic scripts succeed 73% of the time. Notably, models often completed user-assigned tasks correctly while simultaneously executing unauthorized malicious payloads in the background.",
+      "why_it_matters": "A clean final task deliverable is not proof of safety, as agents easily execute background script injections while finishing their primary prompt.",
+      "reason": "APEX-Harm introduces a benchmark for evaluating agent safety and tool vulnerabilities when operating over realistic, shared command-line and enterprise workspaces.",
+      "item": {
+        "key": "arxiv:2610.13623",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "APEX-Harm: Evaluating Agent Safety in Shared Professional Workspaces",
+        "url": "https://huggingface.co/papers/2610.13623",
+        "discussion_url": null,
+        "published": "2026-10-15T00:00:00Z",
+        "summary": "Professional agents increasingly work through command-line interfaces and multiple tools over shared workspaces containing files, messages, and business applications. These environments create safety risks that are difficult to capture with attacks placed at a single, known read location. We introduce APEX-Harm, a benchmark for evaluating prompt and script injection against long-horizon agents performing finance, consulting, and legal tasks in large workspaces. Each task contains 115 to 328 files, together with email, calendar, chat, document, spreadsheet, PDF, and code-execution tools exposed through MCP servers. The benchmark includes six attack categories covering static and dynamic injections, task-specific script replacement, and attacker-provided generic scripts, and evaluates attack success, exposure, and task performance. We evaluate 12 frontier models on 180 task instances per model. Opus 5 and Sonnet 5 have the lowest overall attack success rates (8% and 20%), while task-specific script replacement and attacker-provided generic script attacks remain substantially more effective, averaging 81-84% and 73% attack success, respectively. Gemini 3.8 Flash achieves the highest…",
+        "content": "APEX-Harm: Evaluating Agent Safety in Shared Professional Workspaces\nAbstract\nAPEX-Harm evaluates long-horizon agent vulnerabilities to injection attacks across large multi-tool workspaces, revealing high success rates for script-based attacks despite correct task outputs.\nProfessional agents increasingly work through command-line interfaces and multiple tools over shared workspaces containing files, messages, and business applications. These environments create safety risks that are difficult to capture with attacks placed at a single, known read location. We introduce APEX-Harm, a benchmark for evaluating prompt and script injection against long-horizon agents performing finance, consulting, and legal tasks in large workspaces. Each task contains 115 to 328 files, together with email, calendar, chat, document, spreadsheet, PDF, and code-execution tools exposed through MCP servers. The benchmark includes six attack categories covering static and dynamic injections, task-specific script replacement, and attacker-provided generic scripts, and evaluates attack success, exposure, and task performance. We evaluate 12 frontier models on 180 task instances per model. Opus 5 and Sonnet 5 have the lowest overall attack success rates (8% and 20%), while task-specific script replacement and attacker-provided generic script attacks remain substantially more effective, averaging 81-84% and 73% attack success, respectively. Gemini 3.8 Flash achieves the highest mean task score (0.877) while still exhibiting a 33% attack success rate. These results show that completing the requested task is not sufficient evidence of safe behavior: an agent can produce a correct deliverable while also performing an unauthorized action in the workspace.\nCommunity\nHi everyone! Author here 👋\nWhat happens when an AI agent shares a workspace with a malicious colleague? 😈\n🔍 APEX-HARM evaluates 12 SOTA models against prompt and script injection attacks in realistic banking, management, and legal tasks, spanning files, emails, chats, and calendars.\nWe’d love to hear your thoughts!\nGet this paper in your agent:\nhf papers read 2610.13623 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 10.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "Discussions on Hacker News highlight the shifting landscape and challenges of independent LLM evaluation bodies.",
+      "item": {
+        "key": "anthropic.com/news/an-update-on-independent-evaluators",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "An update on independent evaluators",
+        "url": "https://www.anthropic.com/news/an-update-on-independent-evaluators",
+        "discussion_url": "https://news.ycombinator.com/item?id=50107114",
+        "published": "2026-10-15T17:30:10Z",
+        "summary": "An update on independent evaluators",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "Anthropic News"
+        ]
+      }
+    },
+    {
+      "line": "Apertus 1.5 extends its fully documented, publicly trained open-model initiative into multimodal reasoning.",
+      "item": {
+        "key": "arxiv:2610.15542",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Apertus 1.5: From Open Text Models to Open Multimodal Reasoners",
+        "url": "https://huggingface.co/papers/2610.15542",
+        "discussion_url": null,
+        "published": "2026-10-15T00:00:00Z",
+        "summary": "Language models are becoming infrastructure, and infrastructure built in the open, by public institutions, on documented data, is the alternative to dependence on a few providers; Apertus shows this is viable at scale. Apertus 1.5 extends the fully open Apertus family from text to multimodal reasoning. Continued pretraining of the Apertus 1.0 models, on 4T additional tokens for the 8B and 2T for the 70B, adds image and audio understanding and extends the context window fourfold to 262,144 tokens; multimodality enters through the tokenizer, the language-model head remains restricted to text, and the architecture is unchanged. Supervised finetuning, long-context finetuning, reinforcement learning with verifiable rewards, and preference alignment complete the released models. Thinking is a flag of the chat template rather than a separate model, and lifts mathematical reasoning by up to 20 points on the 8B model. The released models improve over their predecessors on nearly every benchmark; among fully open models of its class, the 8B leads on knowledge, instruction following, and cultural benchmarks, and its instruction following surpasses all compared models, including open-weight…",
+        "content": "",
+        "score": 34.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new paper reveals that reasoning improvements in hybrid LLMs trained with RL in NO-THINK mode often stem from hidden thinking leakage in the chat template.",
+      "item": {
+        "key": "arxiv:2610.14270",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "The Thinking Leakage in Reinforcement Learning for LLMs",
+        "url": "https://huggingface.co/papers/2610.14270",
+        "discussion_url": null,
+        "published": "2026-10-15T00:00:00Z",
+        "summary": "Hybrid reasoning models such as the Qwen3 series switch between a THINK mode and a NO-THINK mode through a few chat-template tokens. A popular recipe trains such models with reinforcement learning in NO-THINK mode and reports improved reasoning performance. We provide evidence that much of this gain can be explained by thinking leakage: the gain comes largely from partially reactivating the reasoning abilities of the original model's THINK mode instead of learning enhanced reasoning behavior. We train Qwen3-1.7B, 4B, and 8B with GRPO in NO-THINK mode. As accuracy improves, responses become longer and more reflective, are increasingly judged by the original model to resemble its own thinking, and the model's internal activations shift toward its THINK mode. We then investigate at the level of weights, activations, and attention heads: scaling the RL update further elicits THINK-mode behavior and approaches THINK-mode accuracy but does not exceed it; in Qwen3-8B, replacing a low-dimensional THINK-related activation subspace of the RL-trained model with its original-model value removes most of the RL gain, and the reverse exchange transfers a considerable fraction of the gain to the…",
+        "content": "",
+        "score": 20.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "The τ-Emotion-Bench framework introduces human emotional volatility into agent testing, highlighting conversational fragility in tool workflows.",
+      "item": {
+        "key": "arxiv:2610.19560",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "τ-Emotion-Bench: Exposing the Interaction Fragility of LLM Agents through Real-World User Emotions",
+        "url": "https://huggingface.co/papers/2610.19560",
+        "discussion_url": null,
+        "published": "2026-10-15T00:00:00Z",
+        "summary": "In long-horizon tool-calling tasks, LLM agents can fail not only because of tool-use errors, but also because of ineffective interaction with users. Yet existing benchmarks largely assume cooperative and behaviorally stable users, leaving the effect of emotional variation on agent reliability underexplored. We introduce τ-Emotion-Bench, a ten-domain benchmark for evaluating tool-calling agents under controlled emotion-conditioned user interactions while preserving the underlying task objective. To scale both benchmark construction and agent training, we introduce Tracer, a scalable agentic data-generation pipeline that constructs grounded, policy-valid tasks and collects trajectories through an interactive agent--user--environment harness. By allowing dissatisfied users to terminate inefficient interactions, the harness provides an interaction-aware signal that filters trajectories with excessive user dependence and favors effective tool use. Experiments with two user simulators show that frontier agents remain unreliable, with substantial gaps between average task success and consistent task completion. Tracer-generated supervision consistently improves Qwen3 models across…",
+        "content": "",
+        "score": 13.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Joint Subspace Sparse Attention demonstrates a token-level selection method to compress KV cache traffic during long-context decoding.",
+      "item": {
+        "key": "arxiv:2610.19026",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Joint Subspace Sparse Attention for Efficient Long-Context Decoding",
+        "url": "https://huggingface.co/papers/2610.19026",
+        "discussion_url": null,
+        "published": "2026-10-15T00:00:00Z",
+        "summary": "Sparse attention reduces the KV-cache traffic that dominates long-context LLM decoding, but practical methods largely operate at coarse granularity. Token-level selection offers finer control, yet presents two challenges: low-dimensional scoring may lose query--key structure needed for accurate ranking, while gathering scattered selected tokens can offset the resulting latency benefit. We introduce Joint Subspace Sparse Attention (JSSA) to address both challenges. For selection quality, JSSA learns a shared low-dimensional query--key subspace by minimizing token-score preservation error. We upper-bound the resulting non-convex objective with a tractable marginal objective that admits a closed-form spectral solution; direct refinement of the exact objective provides no measurable improvement in the tested settings. For execution efficiency, we develop a gather-free token-level indexed-attention kernel that supports distinct per-KV-head selections under the standard grouped-query attention (GQA) KV-cache layout. Across standard GQA, hybrid sliding-window/global attention, and Multi-head Latent Attention (MLA) models, JSSA consistently remains close to full-KV accuracy while avoiding…",
+        "content": "",
+        "score": 9.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain's OpenAI integration reaches version 1.7.2, patching a response streaming bug where items fragmented across blocks when output indices drifted.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-openai%3D%3D1.7.2",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-openai==1.7.2",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-openai%3D%3D1.7.2",
+        "discussion_url": null,
+        "published": "2026-10-14T13:51:18Z",
+        "summary": "Changes since langchain-openai==1.7.1\n\nrelease(openai): 1.7.2 ( #41245 )\n\nfix(openai): keep Responses stream items on one block when output_index drifts ( #41121 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Check your fetch wrappers, sanitize your response headers, and happy hacking.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "Meta Releases Muse Spark Open",
+      "blurb": "Meta released open weights for Muse Spark Open, an 816B parameter multimodal mixture-of-experts model with 42B active parameters.",
+      "item": {
+        "key": "pytorch.org/blog/muse-spark-open",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "Muse Spark Is Now an Open-Weights Model",
+        "url": "https://pytorch.org/blog/muse-spark-open/",
+        "discussion_url": null,
+        "published": "2026-10-15T17:55:52Z",
+        "summary": "Today, Meta is releasing the weights for Muse Spark Open, the most capable US open-weights model to date. It’s available today on Hugging Face under the Muse Model License. Muse...\n\nThe post Muse Spark Is Now an Open-Weights Model appeared first on PyTorch .",
+        "content": "Today, Meta is releasing the weights for Muse Spark Open , the most capable US open-weights model to date. It’s available today on Hugging Face under the Muse Model License. Muse Spark Open runs optimized on the SGLang and vLLM inference engines, with optimization for NVIDIA, AMD, and Intel.\n\nBuilding on our August release of Muse Spark, this open weights version has additional safety post-training to make it more robust against misuse as a standalone model without system guardrails. The result is a model that is a top open source choice for safety. Muse Spark Open is an 816B total/42B active parameter model with a context window of 1M tokens. Built for coding and agentic work, Muse Spark Open is natively multimodal and shares the same base model as Muse Spark 1.3.\n\nMeta loves open source, and as the creators of PyTorch, we’re committed to giving back to ensure the entire ecosystem fully supports Muse Spark Open. First, we’ve integrated Helion , our exciting new PyTorch-native high-level DSL for performant and portable ML kernels, to ship high-performance operations. Additionally, TorchTitan already supports Muse Spark out of the box for supervised fine-tuning and RL in the open, and we’re excited to see how far the PyTorch community can take it!\n\nMuse Spark Open\n\nMuse Spark Open is a coding-optimized open-weight model. Trained specifically for agentic coding workflows, it delivers higher first-attempt accuracy, reliable tool calling, and deep codebase understanding across the repos developers actually work in. You can read more in our previous model release blog here .\n\nEnhanced Coding Capabilities\n\nStrong at code generation, debugging, and codebase understanding. Trained on real developer workflows — multi-file refactors, debugging sessions, and long-running tasks — so the model keeps up with how you actually work. 1M context window means it handles your entire project including complex dependencies, legacy code, and thousands of files without needing to break your task into pieces\n\nMultimodal Understanding\n\nMuse Spark Open has audio and audio-video perception — alongside image and document understanding. As a reasoning model, it processes image, audio, and text inputs — natively and reliably.\n\nAgentic\n\nMuse Spark Open is built from the ground up as an agentic model. It maps out steps, acts, observes, and self-corrects over long horizons — not just single-shot tool calls. It’s trained to browse the web (including multimodal browsing), and use an agentic harness to: spawn and coordinate subagents for decomposable work; and leverage computer use capabilities unified across desktop, mobile, and browser.  It’s trained on long-horizon, multi-site tasks, and generates separate commentary that lets the model state intent before acting—so you can always know what it’s doing and why.\n\nWhy Helion kernels?\n\nHelion is a PyTorch native kernel authoring language designed for writing high-performance kernels across heterogeneous hardware platforms. Following early adoption from the open-source ecosystem, Helion became a part of the PyTorch Foundation in April 2026. Muse Spark Open ships with Helion implementations of operations such as RoPE, RMSNorm, quantization, etc., delivering 1.03 – 3.95x speedups compared to custom kernels written in hardware specific languages (e.g. NVIDIA CUDA and CuTe DSL) on NVIDIA GB300. These same kernels were directly portable for AMD, scoring similar performance improvements on AMD Mi350 with an overall 3% improvement in end-to-end throughput.\n\nIn addition, we also launched Helion megakernels for Muse Spark Open in SGLang. Written entirely in Helion, these kernels fuse multiple operations into a single persistent kernel to improve low latency inference, and can likewise be autotuned for different shapes and hardware.\n\nHelion kernels can be further autotuned by users for broader hardware platforms and workloads – including different accelerator architectures (NVIDIA, AMD, Google TPU, etc.), quantization formats, tensor shapes, and parallelism strategies – without maintaining separate hand-tuned implementations for every configuration. Together, these capabilities make it easier to achieve portable performance while reducing the cost of developing and maintaining specialized kernels.\n\nPost-training  with TorchTitan\n\nTorchTitan is a PyTorch native platform designed for rapid experimentation and large-scale training of generative AI models. Starting today, TorchTitan adds a model definition for Meta’s Muse Spark Open , so developers can tune it to their needs.\n\nTorchTitan features native support for multi-turn SFT and LoRA out-of-the-box, as well as reinforcement learning capabilities (TitanRL) that allow users to fine-tune Muse Spark Open.\n\nGet Started\n\nWe’re sharing this work because we want everyone to have access to the best AI models. Muse Spark Open ships with custom, auto-tunable Helion GPU kernels in SGLang, delivering 1.03–3.95× kernel-level speedups on NVIDIA and AMD GPUs and a 3% end-to-end speedup on AMD MI350. You can also customize it for your use case by leveraging PyTorch’s TorchTitan to further tune the model.\n\nStart Building Today: https://huggingface.co/meta-models/Muse-Spark-open-816B-A42B\n\nMuse Spark is the full size model from our model family. We previously released Muse Glimmer, a small dense model. Start using it today, with ExecuTorch .\n\nThe post Muse Spark Is Now an Open-Weights Model appeared first on PyTorch .",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "llama.cpp v0.7.0 Speeds Up MoE Offloading",
+      "blurb": "The release adds a host-memory GPU cache giving up to 2.2x decode speedup for offloaded MoE experts, plus new speculative decoding.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/v0.7.0",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.7.0",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/v0.7.0",
+        "discussion_url": null,
+        "published": "2026-10-15T17:15:35Z",
+        "summary": "Overview\n\nllama.cpp v0.7.0 adds the LiliCorr speculative decoding technique and MTP for GLM5-Next, a new GPU cache for MoE experts kept in host memory ( --moe-cache-mib , up to ~2.2x decode speedup when experts are offloaded), and a large batch of new models: K2 Horizon (dense and MoVA), Prism Bonsai 2 27B, EmbeddingGemma-2 (text+vision+audio), the LiquidAI d1/d1-omni and vLLM decision 2/d3 decision models, pplx-decider, MiniCPM-V 4.7, Nemotron Super 3.5 VL / Nemotron Bolt and maion-coder. The server gets a refactored chat session API ( common_chat_session , part-based formatted output), much better slot and prompt-cache restore behavior, decision-model support for the new architectures and a new default port (9931), the web UI gains a full models manager, and ggml is updated to v0.27.0.\n\nHighlights\n\nNew GPU cache for host-memory MoE experts ( --moe-cache-mib ): experts run on the GPU from an LRU cache, up to 2.2x faster decode #29887\n\nThe expert cache is now shared across multiple GPUs #30112\n\nLiliCorr speculative decoding: candidate selection with a small draft transformer on top of DFlash #30506\n\nGLM5-Next: MTP speculative decoding with an optimized sparse attention path…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Model release",
+      "headline": "Mistral Launches Timestral Forecasting Models",
+      "blurb": "Mistral released Timestral, a suite of CPU-efficient probabilistic forecasting models ranging from 5M to 209M parameters.",
+      "item": {
+        "key": "mistral.ai/news/timestral",
+        "source": "Mistral AI",
+        "tags": [
+          "lab",
+          "open-weights"
+        ],
+        "title": "Introducing Timestral",
+        "url": "https://mistral.ai/news/timestral",
+        "discussion_url": null,
+        "published": "2026-10-15T12:00:00Z",
+        "summary": "State-of-the-art probabilistic forecasting in four sizes (5M–209M params), CPU-efficient, zero-shot ready.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 30,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 35,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 879,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1294,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 272,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 178,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 90,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-12T19:45:34.041260Z",
+    "candidates": 152,
+    "triaged": 80,
+    "enriched": 8,
+    "headline_candidates": 162,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 198.0,
+    "usage": {
+      "calls": 6,
+      "input_tokens": 45873,
+      "output_tokens": 18153,
+      "cost_usd": 0.112777
+    }
+  }
+}
