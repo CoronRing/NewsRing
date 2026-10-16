@@ -1,0 +1,667 @@
+{
+  "date": "2026-10-16",
+  "generated_at": "2026-10-16T19:34:44.621466Z",
+  "title": "Agent Harnesses, Non-Git Source Control, and Benchmark Gaps",
+  "intro": "Today's updates highlight a clear trend: LLM agents are rapidly outgrowing legacy infrastructure and evaluation tools. From Anthropic dropping Git to accommodate agent commit velocity to new analyses exposing massive coverage gaps in standard AI benchmarks, the developer stack is adapting fast.",
+  "stories": [
+    {
+      "headline": "Reflection releases Beam 501B MoE for agentic coding",
+      "summary": "Reflection has released Beam, a 501B-parameter sparse Mixture-of-Experts model with 23B active parameters per token under an Apache 2.0 license. Built for long-context reasoning and agentic workloads up to 1M tokens, it features 43 sliding-window layers alongside 9 global attention layers that utilize scalable-softmax query scaling. The model introduces a constant-scale residual connection scheme, tool calling with a dedicated grammar, and ships with day-0 support in vLLM, SGLang, and transformers. Reflection is also providing a custom open-source Rust-based harness alongside FP8, NVFP4, and BF16 checkpoints.",
+      "why_it_matters": "A massive open-weight MoE model tuned specifically for agentic workflows with native vLLM support offers a serious heavy-duty option for self-hosted agent stacks.",
+      "reason": "Reflection AI has released Beam, a 501B-parameter open-weight model specialized for agentic coding and long-horizon tasks, with launch support in Hugging Face Transformers and AWS SageMaker.",
+      "item": {
+        "key": "huggingface.co/blog/reflection-beam",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "Welcome Beam: a 501B open model you can own, customize, and scale",
+        "url": "https://huggingface.co/blog/reflection-beam",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "",
+        "content": "Welcome Beam: a 501B open model you can own, customize, and scale\nBeam is focused on coding and agentic use cases. It is for teams that want a frontier-scale model on their own hardware, infrastructure, or cloud, and want to customize it to their own use cases. Beam ships with its own dedicated open source Rust based harness that delivers the best performance from the model.\nBeam has a native transformers implementation, as well as downstream libraries like vLLM and SGLang. We’ve worked with the Reflection team to bring you inference, SFT (supervised fine tuning), and RL (reinforcement learning) recipes for you to build with this model for your needs. On top of day-0 support in transformers, SGLang and vLLM, this post shows you how to run it, how to post-train it, and what we built with it.\nTL;DR\n- 501B-parameter MoEs LLM with 23B active per token. 52 layers, 256 experts per MoE layer, 8 routed per token.\n- Text in, text out with context window of 1M tokens.\n- Checkpoint formats: BF16, FP8, and NVFP4\n- Reasoning that can stay in context across turns (preserve_thinking), tool calling with a dedicated grammar. The model supports five reasoning values: \"low\", \"medium\" (default), \"high\", \"xhigh\", and \"max\".\n- Response template in the tokenizer.\n- Speculative decoding drafter model with DFlash2\n- Day-0 libraries: transformers, SGLang, vLLM. Full-parameter RL with Miles.\n- Ships with a Rust-based custom harness.\n- Apache 2.0.\nBuild with Beam\nReflection is going to give out $10,000 Hub credits to the best projects that use Beam. All you have to do is make a thing, and share it on the Hub:\n- You could make a demo that uses the Beam model on Spaces\n- You could quantize it for your favorite hardware\n- You could generate a synthetic dataset for your favorite problem\n- You could build an RL environment with or for Beam\n- You could benchmark Beam and share the results.\n- You could surprise us!\nIf you build something with Beam, then share it on the Hub for a chance to win $10,000. All you have to do is build the space, model, or dataset repo and share it on the model’s repo page. We’ll collect all the links, select the best, and send out the credits to your Hub accounts.\nWhat is Beam?\nBeam is a text-only model built for long-context (1M context length) reasoning and agentic work. It is a sparse MoE model, where each token is computed by a small fraction of the network, so it runs at the speed of a much smaller model while keeping the capacity of a large one.\nAttention\nThe decoder has 52 layers with a hidden size of 5,120. Most layers use sliding-window attention over the previous 512 tokens; every sixth layer, and the last one, attend to the full context. That gives 43 sliding-window layers and 9 global ones.\nInside the attention block (both layer types)\nThe two kinds of layers handle position differently. Sliding-window layers use RoPE, since relative position matters most within a short window. Global layers use no positional encoding. Instead, each query is multiplied by a scaler that grows slowly with the number of visible tokens, (1 + (pos + 1) / 2048) ** 0.1. It acts as a temperature: the softmax keeps its precision as the context lengthens instead of flattening out. The implementation calls this scalable-softmax query scaling.\nAttention uses grouped-query attention with 48 query heads and 8 key-value heads, with RMSNorm on queries and keys. A learned sigmoid gate, computed from the layer input, scales every channel of every head before the output projection.\nMixture of Experts\nThe first 3 layers use a dense SwiGLU MLP. The other 49 replace it with a Mixture-of-Experts block of 256 experts, each a SwiGLU MLP with an intermediate size of 2,560, or about 39M parameters. The experts hold 98.4% of the model's parameters.\nThe router follows DeepSeek-V3's group-limited scheme. It scores all 256 experts with a sigmoid, splits them into 8 groups of 32, keeps the 4 best groups (ranked by the sum of each group's top two scores), then picks the top 8 experts inside them. Beam uses the same group sizes as DeepSeek-V3 but no shared expert. Expert outputs are combined with normalized router weights and scaled by 2.5.\nOnly 8 experts run per token, so the model computes each token with about 23B parameters. All 256 experts stay in memory, so deployment needs the memory of a 501B model but runs at the speed of a 23B one. The BF16 checkpoint is about 1 TB in safetensors format. The NVFP4 checkpoint stores most parameters in 4-bit precision for NVIDIA Blackwell GPUs, some parameters are kept in BF16 for accuracy. There are also FP8 checkpoints on the hub which are ideal for Hopper and Ampere series chips.\nIf you want to deploy Beam yourself, check out the vLLM or SGLang recipes below.\nResidual Stream\nThe residual connections are the most distinctive part. A standard transformer adds each sublayer output to the stream with weight 1, so the stream grows with depth.\nBeam counts the input embedding as step 1. At step k it adds the sublayer output with weight 1/sqrt(k) and keeps the existing stream with weight sqrt((k-1)/k). The squares of the two weights sum to one, so the stream stays at a constant scale from the first layer to the last. After all 104 additions, every sublayer output and the input embedding carry the same weight in the final hidden state.\nEvery sublayer is also normalized before and after, and the final logits pass through a tanh softcap at ±30, computed in FP32. The implementation fixes where it computes in FP32: the router, the SwiGLU product, the norms, RoPE, the query scaling and the softcap.\nLong Context\nHybrid attention works well for long contexts. Each layer caches 2 x 8 KV heads x 128 dims = 2,048 values per token. If all 52 layers kept every token, the cache would grow by 208 KiB per token. Only the 9 global layers keep the whole sequence. The 43 sliding-window layers hold a fixed 512-token window each and stop growing. So the cache grows by 36 KiB per token, roughly a sixth of the naive…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "aws.amazon.com/blogs/machine-learning/introducing-reflection-beam-an-open-weight-model-for-agentic-coding-on-aws",
+          "source": "AWS Machine Learning",
+          "tags": [
+            "infra"
+          ],
+          "title": "Introducing Reflection Beam: an open-weight model for agentic coding on AWS",
+          "url": "https://aws.amazon.com/blogs/machine-learning/introducing-reflection-beam-an-open-weight-model-for-agentic-coding-on-aws/",
+          "discussion_url": null,
+          "published": "2026-10-16T15:23:10Z",
+          "summary": "Reflection AI's Beam is an open-weight model for agentic coding and long-horizon tasks. This post shows how to deploy Beam on AWS: start with an Amazon SageMaker JumpStart real-time endpoint, or use Amazon SageMaker HyperPod Inference with JumpStart, SGLang, or vLLM for Kubernetes-native control over distributed GPU infrastructure.",
+          "content": "Reflection AI introduced Beam, an open-weight model for agentic coding and long-horizon tasks such as maintaining code, using tools, interpreting results, and completing multi-step workflows. The open-weight release gives developers and researchers control over the runtime, deployment environment, and customization process.\n\nIn this post, we explain Reflection’s vision and show how you can deploy Beam on AWS. Start with an Amazon SageMaker JumpStart real-time endpoint for a fully managed path. When you need Kubernetes-native control over distributed GPU infrastructure, use Amazon SageMaker HyperPod Inference with JumpStart, SGLang, or vLLM. We also explain how Beam’s 501 billion total parameters shape checkpoint storage, weight memory, sharding, and parallelism, while its 23 billion active parameters influence per-token compute.\n\nAt launch, Beam is available in Amazon SageMaker JumpStart in US East (N. Virginia) and US East (Ohio).\n\nReflection’s vision for open intelligence\n\nReflection’s mission is to make intelligence open and accessible to all through open model weights, published research, and open source software. Its full AI stack spans models, core software, production infrastructure, and applications. Beam brings this approach to developers building software engineering and agentic systems.\n\nAbout Reflection Beam\n\nBeam is a sparse mixture-of-experts model for resolving software issues, modifying code, calling tools, and acting on intermediate results. It has 501 billion total parameters and 23 billion active parameters, and Reflection reports an effective context length of 1 million tokens.\n\nReflection releases Beam’s weights through Hugging Face under the Apache 2.0 license. Beam 1.0 is available in BF16, FP8, and NVFP4 checkpoint variants. These formats provide different memory footprints and hardware compatibility. You can deploy the model with the AWS managed JumpStart container configuration or inspect and customize the model with SGLang or vLLM in your AWS environment.\n\nUnderstand the deployment architecture\n\nChoose the serving path that meets your control and scaling requirements.\n\nStart with a SageMaker JumpStart real-time endpoint when you want an AWS managed model package, endpoint, and invocation API without operating Kubernetes.\n\nUse JumpStart on HyperPod Inference when you want the AWS managed container and model configuration on a HyperPod cluster orchestrated by Amazon Elastic Kubernetes Service (Amazon EKS).\n\nUse SGLang or vLLM on HyperPod Inference when you need to control the serving image, runtime arguments, quantization, or distributed execution.\n\nSize the deployment for checkpoint storage, weight memory, KV cache, context length, batching, runtime overhead, and the supported parallelism.\n\nDefine the expected concurrency and latency targets, then configure replicas, caching, routing, and autoscaling from measured workload behavior.\n\nThe JumpStart real-time path packages the model, container, and endpoint behind a managed deployment workflow. The HyperPod path exposes the cluster and serving runtime so that you can control distributed execution, caching, routing, and scaling.\n\nThe following diagram shows the components used by the HyperPod path. Beam can be sourced through SageMaker JumpStart, Hugging Face Hub, or an optional Amazon Simple Storage Service (Amazon S3) mirror. The distributed workers use the AWS managed JumpStart container or a custom SGLang or vLLM runtime.\n\nFigure 1: Distributed Beam deployment with Amazon SageMaker HyperPod Inference\n\nPrerequisites\n\nYou need:\n\nAn AWS account with permissions for your selected SageMaker deployment path and its supporting AWS Identity and Access Management (IAM), networking, and storage resources.\n\nAccess to Beam through SageMaker JumpStart or one of the Beam 1.0 checkpoint repositories on Hugging Face.\n\nAcceptance of the model terms, the AWS Command Line Interface (AWS CLI), and Python 3.11 or later.\n\nGPU quota and capacity for a supported Beam configuration.\n\nPlan and obtain GPU capacity\n\nBeam’s 501 billion total parameters require a multi-GPU deployment. BF16 has the largest weight-memory requirement, so plan a multi-node configuration with enough aggregate GPU memory for the weights and runtime overhead. For FP8, use ml.p5.48xlarge with NVIDIA H100 GPUs or ml.p5e.48xlarge and ml.p5en.48xlarge with H200 GPUs. For NVFP4, use ml.p6-b200.48xlarge with NVIDIA B200 GPUs. Confirm that the released checkpoint, runtime, and parallel layout support the selected instance type.\n\nCalculate memory for weights, KV cache, and runtime overhead for one replica, then confirm the estimate with a load test.\n\nChoose an AWS Region that supports the required accelerated instance.\n\nCheck the service quota and available capacity for the selected instance type. Use on-demand capacity when available, or use a SageMaker training plan as a short-term reservation for scheduled work.\n\nAllow time for image transfer, weight download, shard loading, and runtime initialization.\n\nPath 1: Get started with a SageMaker JumpStart real-time endpoint\n\nUse a JumpStart real-time endpoint first when you want the shortest path from the model catalog to a managed HTTPS endpoint. The sample supports the BF16, FP8, and NVFP4 model IDs through one variant-aware command. Its README and Python file are the source of truth for supported instance types, request schema, deployment command, and cleanup command.\n\nClone the sample repository.\n\ngit clone https://github.com/aws-samples/sagemaker-genai-hosting-examples.git\n\nEnter the SageMaker JumpStart deployment sample directory.\n\ncd sagemaker-genai-hosting-examples/01-models/ReflectionAI/Beam-1.0-501B-A23B-NVFP4/\n\nCreate and activate a Python virtual environment.\n\npython3 -m venv .venv\nsource .venv/bin/activate\n\nInstall the sample dependency.\n\npython -m pip install -r requirements.txt\n\nRun the bounded deployment, invocation, and cleanup lifecycle for FP8.\n\npython jumpstart_real_time.py \\\n--variant fp8 \\\n--endpoint-name reflection-beam-fp8-smoke\n\nThe command deploys the FP8 endpoint, sends a short request, prints the response, and cleans up the endpoint. Use bf16  or nvfp4  to select another checkpoint variant; NVFP4 is the default when you omit --variant . Use the Python functions in the README when you need to keep an endpoint running.\n\nPath 2: Deploy with SageMaker HyperPod Inference\n\nUse HyperPod Inference when you need Kubernetes-native control over distributed GPU infrastructure. You can use the AWS managed JumpStart container configuration or deploy Beam with SGLang or vLLM. The HyperPod Inference deployment sample README and its configuration files are the source of truth for released manifests, model and image identifiers, supported runtime versions, and commands.\n\nBefore you begin, configure kubectl access to an EKS-orchestrated HyperPod cluster with the HyperPod Inference Operator and required add-ons. You also need the cluster virtual private cloud (VPC), subnets, security groups, access to the selected Beam and runtime artifacts, and local NVMe capacity if you enable model caching. Use an isolated Hugging Face access token if the selected repository requires authentication.\n\nDeploy a pinned Beam revision from Hugging Face Hub for development and experimentation. For production deployments and model caching, copy the checkpoint to Amazon S3 or Amazon FSx. HyperPod model and image caching can preload weights onto node-local NVMe storage and pre-pull the serving image.\n\nThe HyperPod Inference Gateway provides an OpenAI-compatible interface and routes requests across replicas. HyperPod Inference also supports managed tiered KV caching and intelligent routing . These are among the Amazon SageMaker Inference capabilities introduced in 2026 .\n\nThe next diagram expands the model preparation and runtime request flow. When model caching is enabled, the Inference Operator warms eligible nodes with the selected weights and serving image. At runtime, the Inference Gateway and…",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "github.com/huggingface/transformers/releases/tag/v5.20.1",
+          "source": "Transformers releases",
+          "tags": [
+            "release"
+          ],
+          "title": "Release v5.20.1",
+          "url": "https://github.com/huggingface/transformers/releases/tag/v5.20.1",
+          "discussion_url": null,
+          "published": "2026-10-16T13:02:29Z",
+          "summary": "Release v5.20.1\n\nSpecial surprise including the new model Beam from Reflection AI 🥳\n\nBeam is a token-efficient, frontier-scale model focused on coding and agentic use cases. It is built for teams that want to run a powerful model on their own hardware, infrastructure, or cloud, and customize it to their specific needs.\n\nLinks: Documentation\n\nFix small bug in auto mappings ( #49664 ) by @yonigozlan in #49664\n\nSome real patch fixes\n\nWe broke loading models on older torch versions 😢 should be fixed now. But here is the full list of fixes\n\nFix HunYuan-VL image assignment during batched generation ( #49557 ) by @Arnav66692\n\nFix DeepGEMM Mega MoE under expert parallelism( #49428 ) by @IlyasMoutawwakil\n\nFix from_pretrained on torch 2.7: require torch>=2.8 for distributed checkpointing ( #49652 ) by @naveecode\n\nMake DtensorShardOperation work on torch 2.6 and 2.7 ( #49657 ) by @hazelxue\n\nFull Changelog : v5.20.0...v5.20.1",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Harness-RSI formalizes self-evolving agent scaffolding",
+      "summary": "A new paper presents Harness-RSI, a framework for self-evolving agent harnesses that continuously adapts prompts, memory, workflows, and code without modifying base model weights. The system formalizes feedback-driven evolutionary search by separating interpreted state updates from executable tool and control logic revisions. Grounded in PAC-learning theory, the authors establish theoretical bounds for generalization and conditional retention across persistent changes. The release is accompanied by a 66-page paper detailing update algorithms and evaluation criteria, along with an open-source implementation.",
+      "why_it_matters": "Frameworks that systematically evolve prompts, memory, and tool scaffolding around frozen models formalize how we can build self-improving agent runtimes.",
+      "reason": "This paper introduces a feedback-driven self-evolution framework that automatically optimizes an agent's software scaffolding—including prompts, memory, and executable components—without retraining model weights.",
+      "item": {
+        "key": "arxiv:2610.18813",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Self-Evolving Agent Harness",
+        "url": "https://huggingface.co/papers/2610.18813",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Harness self-evolution revises an agent's software scaffolding, including prompts, memory, workflows, and executable components, while keeping model weights fixed. We formalize a feedback-driven process in which accepted revisions persist across runs. The framework separates update targets from proposal and admission mechanisms. It distinguishes changes to interpreted state from revisions to tools and code, repository-level control logic, and plugin composition. We characterize search through evolutionary optimization and examine its reliability through continual PAC-learning. Under explicit assumptions, the analysis yields an expected generalization bound, a retention bound conditional on historical regression budgets, and a high-probability admission rule using fresh, independent validation data. We examine how persistent harness revisions affect knowledge sharing and organizational workflows, with implications for scientific reliability, physical safety, and institutional accountability. Cases from prior work illustrate model--harness co-design, distributed execution, and plugin reuse. Reliable deployment requires continual validation as task distributions and evaluators…",
+        "content": "Abstract\nA framework for self-evolving agent harnesses uses feedback-driven revisions and evolutionary optimization with theoretical generalization guarantees while keeping model weights fixed.\nHarness self-evolution revises an agent's software scaffolding, including prompts, memory, workflows, and executable components, while keeping model weights fixed. We formalize a feedback-driven process in which accepted revisions persist across runs. The framework separates update targets from proposal and admission mechanisms. It distinguishes changes to interpreted state from revisions to tools and code, repository-level control logic, and plugin composition. We characterize search through evolutionary optimization and examine its reliability through continual PAC-learning. Under explicit assumptions, the analysis yields an expected generalization bound, a retention bound conditional on historical regression budgets, and a high-probability admission rule using fresh, independent validation data. We examine how persistent harness revisions affect knowledge sharing and organizational workflows, with implications for scientific reliability, physical safety, and institutional accountability. Cases from prior work illustrate model--harness co-design, distributed execution, and plugin reuse. Reliable deployment requires continual validation as task distributions and evaluators change, with independent safeguards for learning, runtime privileges, and consequential actions. We provide a comprehensive 66-page discussion of related work, theory, algorithms, evaluation, applications, and the broader impact of Harness RSI, together with continuously updated code and supplementary materials, at https://github.com/zgcagi/Harness-RSI.\nCommunity\nBuilding agents that learn from experience is a central goal of artificial intelligence. Harness self-evolution offers a path toward this goal by adapting the system around a fixed base model. This article develops a unified framework for examining how execution feedback produces persistent harness changes. We organize algorithms by their update targets, distinguishing instructions, memory, and workflow specifications interpreted by fixed components from executable tools and runtime logic, and compare how they propose and admit changes. The theoretical analysis views harness evolution within the framework of evolutionary algorithms and draws on PAC learning theory for continual learning to provide insights into algorithm design. For evaluation, we distinguish four claims behind a reported gain: selection, whether the estimate is independent of the search or accounts for selection; activation, whether the accepted update operated in the scored runs; attribution, whether it caused the difference under controlled evaluation conditions; and improvement, whether the difference holds beyond the tasks that produced it. The reviewed protocols show why held-out performance, component use, and retained gains require different evidence. This article covers applications in personal assistance, enterprise automation, scientific discovery, robotics, and public services. We also discuss potential effects on productivity and skills, economic distribution and market structure, innovation and public services, privacy and security, and institutional governance. Drawing on these analyses, we identify future directions in update algorithms, supporting infrastructure, evaluation, and responsible deployment. The project repository is available at \\url{https://github.com/zgcagi/Harness-RSI}.\nnice work~\n🔥🔥🔥 a nice survey of RSI!\n🔥🔥🔥 a nice survey of RSI!\n🔥🔥🔥 a nice survey of RSI!\n🔥🔥🔥 a nice survey of RSI!\nnice!!!!!!\nGet this paper in your agent:\nhf papers read 2610.18813 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper",
+        "score": 186.0,
+        "comments": 5,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Analysis reveals 90% of US work hours lack AI benchmark coverage",
+      "summary": "An analysis mapping 29 AI benchmarks against 923 O*NET labor occupations found that 90% of US working hours fall into tasks with minimal or no benchmark coverage. Only 208 occupations have a task represented by at least five benchmark prompts, with six entire job families lacking any coverage at all. The evaluation shows benchmark creators heavily favor high-wage, AI-exposed roles like lawyers and software engineers, leaving middle-income knowledge work unmeasured. The authors caution that these provisional estimates highlight a severe structural coverage gap in current model evaluations.",
+      "why_it_matters": "Standard LLM evaluation suites overindex heavily on software engineering and legal tasks, leaving massive blind spots regarding how agents handle routine enterprise workflows.",
+      "reason": "An analysis of labor data highlights severe coverage gaps in current LLM and agent evaluation suites, demonstrating that standard benchmarks fail to measure tasks accounting for 90% of US working hours.",
+      "item": {
+        "key": "mercor.com/research/labor-index/benchmark-map",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "90% of US working hours are spent on tasks not covered well by AI benchmarks",
+        "url": "https://www.mercor.com/research/labor-index/benchmark-map/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50121179",
+        "published": "2026-10-16T17:08:38Z",
+        "summary": "Comments",
+        "content": "AI benchmarks have multiplied in recent years, but coverage of economically valuable work remains limited. To measure this, we compiled relevant benchmarks to measure their coverage of American jobs. This Benchmark Map is our first step toward building a comprehensive, continuously updated resource for understanding AI capabilities across the economy.\nEach tile represents one of the 923 O*NET occupations making up the US labor force, grouped into 22 job families. Occupations are shaded according to the share of their tasks which are represented in our initial list of AI benchmarks. A single benchmark prompt can be mapped to multiple O*NET tasks.\nclick a family to open it\nIn our data set: only 208 of 923 occupations have a task with at least 5 benchmark prompts, and 6 of 22 job families have no such occupations.\nOur findings suggest that 90% of American working hours are spent on tasks with little or no coverage from existing benchmarks. This makes it very hard to know how good AI models are at the work Americans actually do.\nThe coverage of existing benchmarks is not random, either. Our map suggests that the AI community is focusing on the largest labor markets first:\nFor example, benchmarks in our initial list heavily cover AI-exposed lawyers’ tasks, but barely cover any of the O*NET tasks of similarly AI-exposed legal secretaries or court clerks. The long tail of smaller, middle-income knowledge work jobs appears undercovered.\nAs we build out our coverage of model capabilities across the economy, we hope to both surface and help fill more gaps in our understanding of what models can do.\nTo break down the economy into sectors, occupations, and tasks, we used the US Department of Labor’s O*NET taxonomy. O*NET divides the US workforce into 923 occupations; for each occupation, O*NET attempts to provide a comprehensive list of “tasks” which make up the occupation, totaling 18,797 tasks across all occupations.\nTo measure benchmark coverage, we start with a list of 29 benchmarks selected for their quality and economic relevance. (The full list and selection criteria are in the Benchmark Index tab). In selecting benchmarks for this list, we prioritized:\nFollowing work by Wang et al., we then ask an LLM judge to tag each benchmark prompt with as many O*NET tasks as it thinks correspond to that prompt. We validate our LLM tagging with human expert tags on Mercor’s APEX benchmarks, a subset of this list of 29. On the Benchmark Map, an O*NET task counts as “covered” if our LLM judge has mapped it to at least 5 prompts from our 29 benchmarks.\nTo estimate the total share of working hours Americans spend on tasks covered by benchmarks on this list, we combine our coverage estimates with Hatgis-Kessell et al.’s LLM-derived estimates of the working time share of each O*NET task.\nA more detailed account of our methodology can be found in the Methodology tab.\nOur estimates of total economic coverage, and of patterns in coverage, all come from the initial list of 29 benchmarks we chose. This is not a complete or perfectly representative sample of the broader universe of unsaturated, public, agentic economic benchmarks. Any incomplete list will necessarily bias down estimates of economic coverage, and it is difficult to bound that bias. We want to stress, therefore, that these results are provisional. We will update them as we expand the initial benchmark list.\nWe also capped the number of included benchmarks in each job family in order to maximize breadth of coverage. We think this makes our estimate of economy-wide benchmark coverage more accurate, at the cost of biasing down our estimates of coverage in the most-benchmarked job families (e.g. software engineering).\nBy selecting for unsaturated benchmarks, we risk understating benchmark coverage on O*NET tasks which are easier for LLMs to complete. On the other hand, including saturated benchmarks would risk overstating benchmark coverage if saturation is downstream of lower task realism. The latter claim seems likely, given that benchmarks often overstate LLM performance in real-world deployments. We think that the bias from including saturated benchmarks would be greater than the bias from excluding them, but neither option is ideal.\nFinally, while we outline our benchmark selection criteria in the Benchmark Index tab, several criteria (like “Economic Realism”) are difficult to formalize and introduce some subjectivity in our choices.\nThe benchmarks in our index have relatively deep and narrow coverage of the overall economy. They disproportionately focus on the economic tasks most exposed to AI automation (as measured by Eloundou et al.), with O*NET tasks rated as “exposed” about 6x more likely to be represented on benchmarks than tasks rated “unexposed”. This makes sense: benchmarks are designed to measure AI progress, and AI progress is most plausible on the most AI-exposed tasks. This explains why benchmarks are full of tasks in Software Engineering and Financial Analysis while sparse on tasks in Truck Driving and Gas Plant Operation.\nBut even after controlling for AI-exposure, O*NET tasks from occupations with larger wage bills are significantly overrepresented among benchmark prompts:\nAfter controlling for occupation and AI-exposure score, O*NET “task importance” is another predictor of benchmark coverage. In particular, O*NET tasks come with domain expert estimates of the importance of the task for its occupation on a scale of 1-5. We find that the tasks scored most important are about 6–10x more likely to be represented on benchmarks than those scored least important:\nThe plots above suggest a reasonable allocation of the relatively limited resources devoted to high-quality, economically relevant benchmarks so far; it’s natural to prioritize making benchmarks which cover the most important and AI-exposed tasks in the occupations with the largest wage bills. But barring a significant increase in the number and diversity of such benchmarks…",
+        "score": 217.0,
+        "comments": 191,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "SpecAgent speeds up tool-using agents via trajectory speculation",
+      "summary": "SpecAgent introduces trajectory-level speculative execution for tool-using agents by splitting roles between a small drafting model and a large reviewer model. The small model executes read-only tool calls and builds trajectory drafts until it reaches a state-changing operation. A large model then verifies the drafted sequence in a single parallel prefill pass, committing valid steps and repairing errors rather than generating every step autoregressively. On τ²-Bench, the method matched strong-model performance within one percentage point while roughly halving memory traffic and wall-clock time.",
+      "why_it_matters": "Offloading read-only tool execution to small drafters while converting large-model decoding into parallel prefill verification directly targets memory-bandwidth bottlenecks in agent serving.",
+      "reason": "This work introduces trajectory-level speculative execution for tool-using agents, where a small model drafts routine tool calls and a larger model semantically verifies execution steps.",
+      "item": {
+        "key": "arxiv:2610.21463",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Trajectory-Level Speculation with Semantic Verification for Tool-Using Agents",
+        "url": "https://huggingface.co/papers/2610.21463",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Large language model agents solve tasks through long sequences of tool calls, and the prevailing design has a single strong model generate every step, although many steps are routine enough for a much smaller model. Existing ways of sharing this work keep the strong model as the generator: routers and collaborative agents decide which model handles each query or step, and speculative methods check a small model's drafts one step at a time, usually against the strong model's own action. We introduce SpecAgent, a collaboration protocol that turns the strong model from the author of each step into a reviewer of steps drafted by a weak model. The weak model executes read-only tool calls as it drafts, so that every step is grounded in real observations, and holds the first action that would modify the environment. The strong model then verifies the drafted segment in a single prefill pass, commits the longest prefix it judges semantically valid, and repairs the first rejected step. Because verification replaces autoregressive decoding with parallel prefill, the strong model decodes only short verdicts and occasional repairs rather than every step. On τ^2-Bench, SpecAgent comes within…",
+        "content": "Trajectory-Level Speculation with Semantic Verification for Tool-Using Agents\nAbstract\nSpecAgent improves agent efficiency by having a small model draft tool-use steps that a large model verifies in parallel, reducing latency and memory use while preserving quality.\nLarge language model agents solve tasks through long sequences of tool calls, and the prevailing design has a single strong model generate every step, although many steps are routine enough for a much smaller model. Existing ways of sharing this work keep the strong model as the generator: routers and collaborative agents decide which model handles each query or step, and speculative methods check a small model's drafts one step at a time, usually against the strong model's own action. We introduce SpecAgent, a collaboration protocol that turns the strong model from the author of each step into a reviewer of steps drafted by a weak model. The weak model executes read-only tool calls as it drafts, so that every step is grounded in real observations, and holds the first action that would modify the environment. The strong model then verifies the drafted segment in a single prefill pass, commits the longest prefix it judges semantically valid, and repairs the first rejected step. Because verification replaces autoregressive decoding with parallel prefill, the strong model decodes only short verdicts and occasional repairs rather than every step. On τ^2-Bench, SpecAgent comes within one point of the strong model's success rate while roughly halving memory traffic and wall time, and on AutomationBench and VitaBench it recovers 44-75% of the quality gap while lowering both. In an edge-cloud deployment on MCP-Atlas with three cloud models, it closes 53-75% of the weak-strong quality gap while the strong model generates at most half as many tokens. These results suggest that a strong model need not author every step of an agent: reviewing grounded drafts retains most of its quality while cutting both latency and memory traffic.\nCommunity\nTool-using agents spend most of their serving cost on one thing: a large model decoding every step, token by token. But many steps are routine (look up an order, read a record, search again), and checking a step is much cheaper than writing it.\nSpecAgent lets a small Weak model draft the trajectory and a large Strong model review it. The Weak model executes read-only tool calls while drafting, so every step is grounded in real observations, and it holds the first state-changing action. The Strong model then reads the whole drafted segment in one prefill pass, commits the longest prefix it judges semantically valid (not only the steps it would have written itself), and repairs the first rejected step. Most Strong decoding is replaced by prefill.\nWith Qwen3.5-4B drafting and Qwen3.5-397B-A17B reviewing:\n- τ²-Bench: within 1 point of Strong-only success, at 43–57% of its memory traffic and 41–54% of its wall time.\n- AutomationBench and VitaBench: recovers 44% and 75% of the Weak–Strong gap, with lower memory traffic and wall time than Strong-only.\n- MCP-Atlas edge–cloud (local 4B + three cloud Strong models): closes 53–75% of the gap while the Strong model generates 36–50% of its Strong-only tokens and API cost falls to 59–81%.\nThe saving is in decoding, not arithmetic: estimated FLOPs rise, so SpecAgent suits memory-bandwidth-bound serving.\nCode: https://github.com/LARK-AI-Lab/SpecAgent\nProject page: https://lark-ai-lab.github.io/specagent.github.io/\nGet this paper in your agent:\nhf papers read 2610.21463 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 10.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "FDE-Gym benchmarks agents on messy customer engineering tasks",
+      "summary": "FDE-Gym introduces a benchmark of 95 real-world forward-deployed engineering tasks across 20 customer scenarios designed to test agents in messy, live environments. Rather than providing clean task tickets, the benchmark requires agents to interact with scripted stakeholders, uncover unstated constraints, and modify production-like systems. Across 13 evaluated model configurations, the top performer scored a mean of 0.56 and fully resolved only 14 tasks. Uncovering unstated constraints proved to be the main bottleneck, and even when given all key facts, top models achieved target business uplift on fewer than half the tasks.",
+      "why_it_matters": "It shifts evaluation away from neatly packaged issue reports to realistic delivery environments where requirement gathering and actual customer metric gains dictate success.",
+      "reason": "FDE-Gym creates a benchmark for software agents that measures real-world forward-deployed engineering skills like clarifying ambiguous requirements and operating in live systems.",
+      "item": {
+        "key": "arxiv:2610.22350",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "FDE-Gym: The Last Mile of AI Delivery",
+        "url": "https://huggingface.co/papers/2610.22350",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Existing agent benchmarks typically evaluate agents on well-specified tasks defined by issue reports, specifications, or task tickets. Real-world customer delivery is different: forward-deployed engineers (FDEs) must clarify ambiguous requirements, work in live systems, and uncover unstated constraints. We introduce FDE-Gym, a benchmark of 95 end-to-end delivery tasks from 20 customer scenarios across 18 sectors, each adapted by industry experts from real-world delivery projects. In simulated customer environments with scripted stakeholders and modifiable customer systems, agents interact with stakeholders and operate on production-like systems to deliver working solutions. FDE-Gym scores a delivery by how much it improves the customer's own success metric, normalized between 0 (unchanged system) and 1 (reference solution), with penalties for stakeholder interactions (messages, trial runs, and waiting time). An online platform lets humans practice FDE skills under the same grading criteria. We evaluate 13 model configurations from seven providers. In the realistic setting, where unstated constraints must be discovered, the best configuration achieves a mean FDE-Gym score of 0.56…",
+        "content": "Abstract\nFDE-Gym evaluates AI agents on realistic customer delivery tasks requiring clarification of ambiguous requirements and discovery of unstated constraints, revealing a substantial performance gap compared to well-specified benchmarks.\nExisting agent benchmarks typically evaluate agents on well-specified tasks defined by issue reports, specifications, or task tickets. Real-world customer delivery is different: forward-deployed engineers (FDEs) must clarify ambiguous requirements, work in live systems, and uncover unstated constraints. We introduce FDE-Gym, a benchmark of 95 end-to-end delivery tasks from 20 customer scenarios across 18 sectors, each adapted by industry experts from real-world delivery projects. In simulated customer environments with scripted stakeholders and modifiable customer systems, agents interact with stakeholders and operate on production-like systems to deliver working solutions. FDE-Gym scores a delivery by how much it improves the customer's own success metric, normalized between 0 (unchanged system) and 1 (reference solution), with penalties for stakeholder interactions (messages, trial runs, and waiting time). An online platform lets humans practice FDE skills under the same grading criteria. We evaluate 13 model configurations from seven providers. In the realistic setting, where unstated constraints must be discovered, the best configuration achieves a mean FDE-Gym score of 0.56 and resolves only 14 of the 95 tasks (a score of at least 0.8 with no incident). Discovering unstated constraints is the primary bottleneck: performance drops sharply when models must uncover them without explicit guidance. Yet information discovery alone does not account for the gap: even on the 23 tasks where the best configuration obtains every key fact from stakeholders, it reaches a normalized business uplift of 0.8 or above on only 10. These results reveal a substantial gap between solving well-specified tasks and delivering effective AI systems for real customers.\nCommunity\nExisting agent benchmarks hand the agent a well-specified task. Real customer delivery doesn't: the sponsor's request may target the wrong problem, key constraints are unstated, and success is the customer's own business metric.\nFDE-Gym puts agents in the role of a forward-deployed engineer: 95 end-to-end delivery tasks from 20 customer scenarios across 18 sectors, each adapted by industry experts from real projects. Agents question scripted stakeholders (asking has a cost), change production-like systems, and are scored by how much the delivered system moves the customer's KPI on held-out data (0 = unchanged system, 1 = expert reference).\nKey findings across 13 model configurations:\n- The best configuration scores 0.56 and resolves only 14 of 95 tasks.\n- Discovering unstated constraints is the main bottleneck: withholding them costs leading models 0.28; a misdirected request costs little more.\n- Knowing the facts is not enough: with every key fact in hand, the best model reaches 0.8 uplift on only 10 of 23 tasks.\n- Weak models often leave the customer worse off than doing nothing.\nLeaderboard: https://fde-gym.com/paper/#leaderboard · Online gym for humans opens 1 November 2026.\nGet this paper in your agent:\nhf papers read 2610.22350 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper",
+        "score": 228.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Alibaba opens OpenGCUA stack for generalist computer-use agents",
+      "summary": "Alibaba's MAI-UI team introduced OpenGCUA, an open-source full stack for generalist computer-use agents that operates across visual GUIs, accessibility trees, and CLI interfaces. The framework implements harness-to-model decision transfer, giving the model direct control over when to request screenshots or run programmatic code loops. Testing across eight frontier models on OSWorld-v2 demonstrated a 19.6-point average improvement in partial task scores while reducing step counts by 53%. The release includes evaluation trajectories, prompts, a macOS real-device harness, and a cross-device SDK connecting mobile, browser, and desktop environments.",
+      "why_it_matters": "An open computer-use framework that seamlessly blends GUI actions with programmatic code execution offers a useful blueprint for hybrid agent orchestration.",
+      "reason": "OpenGCUA provides a fully open environment and execution stack for generalist computer-use agents that operate across visual GUI elements and programmatic command interfaces.",
+      "item": {
+        "key": "arxiv:2610.22200",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "OpenGCUA: Toward a Fully Open Stack for Generalist Computer Use",
+        "url": "https://huggingface.co/papers/2610.22200",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Computer use has reached a turning point: the focus is expanding from GUI-only interaction to systems that complete tasks on users' computers through visual and programmatic interfaces. We define a generalist computer-use agent (GCUA) as a system in which the model chooses how to observe, act, and organize its work across visual and programmatic interfaces. Yet frontier implementations, such as GPT-6 Astra's computer-use system, remain largely closed, limiting systematic study of their design. We introduce Open Generalist CUA (OpenGCUA), an ongoing project to develop and open the full stack for GCUAs with the community. This report presents the first release of OpenGCUA. Code execution is a key feature of our agent design: it lets intermediate results determine subsequent operations and enables models to apply their existing programming capabilities directly to computer interaction. We also propose harness-to-model decision transfer, moving selected observations and task-state decisions from fixed harness rules to the model. On OSWorld-v2, our full configuration improves task scores across all eight evaluated models, including GPT-6 Astra and Claude Opus 5, raising mean partial…",
+        "content": "Abstract\nOpenGCUA introduces an open generalist computer-use agent that integrates visual and programmatic interfaces, harness-to-model decision transfer, and code execution to improve task performance and efficiency across models.\nComputer use has reached a turning point: the focus is expanding from GUI-only interaction to systems that complete tasks on users' computers through visual and programmatic interfaces. We define a generalist computer-use agent (GCUA) as a system in which the model chooses how to observe, act, and organize its work across visual and programmatic interfaces. Yet frontier implementations, such as GPT-6 Astra's computer-use system, remain largely closed, limiting systematic study of their design. We introduce Open Generalist CUA (OpenGCUA), an ongoing project to develop and open the full stack for GCUAs with the community. This report presents the first release of OpenGCUA. Code execution is a key feature of our agent design: it lets intermediate results determine subsequent operations and enables models to apply their existing programming capabilities directly to computer interaction. We also propose harness-to-model decision transfer, moving selected observations and task-state decisions from fixed harness rules to the model. On OSWorld-v2, our full configuration improves task scores across all eight evaluated models, including GPT-6 Astra and Claude Opus 5, raising mean partial score by +19.6 points and reducing reported steps per task by an average of 53.0% relative to batched GUI-only execution. We release our implementation and prompts, evaluation trajectories from all eight models, and preliminary versions of a real-device harness and a cross-device SDK. The harness addresses real-device challenges not fully captured by benchmarks, while the SDK provides a common programming interface across computers, mobiles and browsers. Across four real macOS tasks under our real-device harness, selected Qwen3.8-Max runs use 19.4 times as many reported reasoning tokens as GPT-6 Astra, highlighting substantial differences between models in real-device execution efficiency.\nCommunity\n🚀 OpenGCUA First Release | Opening the Full Stack for Generalist Computer Use\nGPT-6 made computer use the frontier. We're making it open.\nThe MAI-UI team at Alibaba introduces OpenGCUA (Open Generalist CUA), an ongoing project to develop and open the full stack for generalist computer-use agents (GCUAs), built together with the community.\nThis first release includes:\n- the technical report\n- our GCUA design and its harness\n- evaluation trajectories from 8 frontier models\n- a real-device harness for macOS\n- a Cross-Device SDK\n- an interactive lab you can try online\n🔑 Five Highlights\n1️⃣ GCUA: a new paradigm for computer use\nBeyond \"screenshot → click\": the model decides for itself how to observe, how to act, and how to organize its work. It reads the accessibility tree, calls APIs, runs shell commands, and operates the GUI only when needed. GPT-6 Astra's computer-use system is a typical GCUA.\n2️⃣ Agent design: code execution + harness-to-model decision transfer\nGUI actions are written as code and combined with accessibility, API, and shell operations in a single program, where loops, branches, and intermediate results drive what happens next. Workflow decisions move from fixed harness rules to the model: the harness provides the mechanism, and the model decides when to use it, for example requesting a screenshot only when it needs one.\n3️⃣ All 8 frontier models improve\nOn OSWorld-v2, 8 models, including GPT-6 Astra, Claude Opus 5, and Gemini 3.8 Flash, gain +19.6 points on average while taking 53% fewer steps. The gap between the strongest and weakest model shrinks by more than half. The OpenGCUA harness implementation, prompts, and all evaluation trajectories are open-sourced.\n4️⃣ Real-device harness + Cross-Device SDK (Preview)\nA macOS menu-bar app brings the agent onto the user's own computer, and we solve and document a range of problems that only appear on real devices. The Cross-Device SDK connects computers, browsers, and phones through one programming interface, so a single program can coordinate several devices within one task. In our real-device tests, Qwen3.8-Max uses 19.4× as many reasoning tokens as GPT-6 Astra; on real devices, the gap between models is even larger.\n5️⃣ Interactive lab: every feature of this release, one click away\nSeven labs, one for each of seven questions from the report:\n- take a real Mac apart in 3D\n- compare four ways to act side by side to see what code execution changes\n- break down the challenges unique to real devices\n- run one program across a phone, a browser, and a Mac\n- replay real-device trajectories from five models\n- …and more\nWorks on your phone too.\n🔭 What's Next\nA GCUA model that unifies computer use and browser use, systematic improvements to execution efficiency, and real-device evaluation environments and benchmarks… Come build it with us!\n🔗 Learn More\n🧪 Interactive lab: tongyi-mai.github.io/OpenGCUA\n📄 Technical report: arxiv.org/abs/2610.22200\n💻 GitHub: github.com/Tongyi-MAI/OpenGCUA\n👋 Here's a 90-second tour of OpenGCUA.\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper",
+        "score": 263.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Mosaic introduces multi-session RL for context compaction and forking",
+      "summary": "Mosaic introduces a multi-session reinforcement learning framework designed to train agents whose execution spans context compaction or subagent forking. Standard agent RL broadcasts full-trajectory outcomes uniformly across all sessions, failing to account for session-specific contributions or resource overhead. Mosaic uses critic-free hierarchical optimization to shape session advantages based on marginal information gain while penalizing excessive session allocation. Evaluated on BrowseComp using Qwen3.5-4B, Mosaic improved task performance in both compaction and forking setups while using fewer execution sessions on average.",
+      "why_it_matters": "Standard RL training breaks when agents fork subagents or compact context mid-task; Mosaic offers a principled method for multi-session credit assignment.",
+      "reason": "Mosaic extends agentic reinforcement learning to multi-session execution trajectories involving context compaction and subagent forking.",
+      "item": {
+        "key": "arxiv:2610.22174",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Mosaic: Multi-Session Agentic Reinforcement Learning",
+        "url": "https://huggingface.co/papers/2610.22174",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Most existing agentic reinforcement learning methods assume single-session trajectories, where interaction proceeds within one continuously accumulated context. However, agentic techniques such as context compaction and subagent forking may produce trajectories spanning multiple sessions, creating a mismatch between the single-session training assumption and inference-time execution. Therefore, we introduce Multi-Session Agentic Reinforcement Learning, a more general setting that supports an arbitrary number of sessions within a trajectory. Under this setting, a widely adopted method is to broadcast trajectory-level advantages to all sessions, but this does not distinguish contributions from various sessions or guide session allocation within trajectories. To address this issue, we propose Mosaic, a multi-session agentic RL method with critic-free hierarchical optimization. At the trajectory level, it incorporates session-usage signals into advantage estimation. At the session level, it shapes each session's advantage according to the estimated marginal contribution. Experiments on BrowseComp with Qwen3.5-4B show that Mosaic outperforms broadcasting in both context compaction and…",
+        "content": "Abstract\nMulti-session agentic reinforcement learning is introduced to handle trajectories across multiple sessions, with Mosaic optimizing session-level contributions and allocation via hierarchical advantage estimation.\nMost existing agentic reinforcement learning methods assume single-session trajectories, where interaction proceeds within one continuously accumulated context. However, agentic techniques such as context compaction and subagent forking may produce trajectories spanning multiple sessions, creating a mismatch between the single-session training assumption and inference-time execution. Therefore, we introduce Multi-Session Agentic Reinforcement Learning, a more general setting that supports an arbitrary number of sessions within a trajectory. Under this setting, a widely adopted method is to broadcast trajectory-level advantages to all sessions, but this does not distinguish contributions from various sessions or guide session allocation within trajectories. To address this issue, we propose Mosaic, a multi-session agentic RL method with critic-free hierarchical optimization. At the trajectory level, it incorporates session-usage signals into advantage estimation. At the session level, it shapes each session's advantage according to the estimated marginal contribution. Experiments on BrowseComp with Qwen3.5-4B show that Mosaic outperforms broadcasting in both context compaction and subagent forking scenarios while using fewer sessions on average. Further analyses show that our method achieves improvements in session utility and allocation, which we suggested is a promising target for future advances in multi-session agentic RL.\nCommunity\nIn this paper, we propose a more general setting for agent training: Multi-Session Agentic Reinforcement Learning. In this setting, each rollout may contain an arbitrary number of sessions. Each session consists of agent–environment interactions within one continuously accumulated context. Each session ultimately corresponds to one training segment with its own assigned advantage.\nBeyond that, we propose Mosaic, a general algorithmic improvement for Multi-Session Agentic RL. First, Mosaic adjusts trajectory-level outcome-based advantages using relative session counts within success/failure subgroups, balancing efficiency and exploration. Second, Mosaic measures each session's marginal information gain through changes in the ground-truth answer's log-likelihood, then adds a type-conditioned normalization for different sessions within each prompt group. Finally, trajectory-level advantage and session-level shaping signal are combined together to better estimate the finer-grained advantage for each session. We evaluate on BrowseComp, a benchmark of challenging web-research questions, using Qwen3.5-4B in a ReAct-style agent loop. Training uses 1,000 deep-search tasks from REDSearcher. Training and evaluation use both the context compaction or subagent forking execution loop. Mosaic outperforms the broadcasting baseline in both context compaction and subagent forking scenarios while using fewer sessions on average.\nFeel free to visit our project homepage (https://lark-ai-lab.github.io/Mosaic/) to browse our blog, which provides a vivid overview of our research.\nGet this paper in your agent:\nhf papers read 2610.22174 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 1\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 46.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Anthropic replaces Git with custom source control system Scion",
+      "summary": "Anthropic revealed it built a custom centralized source control system named Scion to replace Git after internal code merges surged from 2,500 per day in May to over 30,000 per day in September. Driven primarily by autonomous coding agents, the repository grew to a 100 GB main branch history that generated 25 million CI checkouts daily. Developed by seven engineers in five months, Scion draws on Meta's Sapling and Mononoke architectures to serve derived code data centrally. The team deliberately skipped offline support, pointing out that autonomous agents are cloud-hosted and inherently online.",
+      "why_it_matters": "When autonomous coding agents generate tens of thousands of commits a day, classic human developer tooling like Git collapses under the traffic.",
+      "reason": "Anthropic details their migration away from Git to a custom internal source control system designed to handle high-frequency commits generated by autonomous coding agents.",
+      "item": {
+        "key": "simonwillison.net/2026/Oct/13/redesigning-source-control-at-anthropic",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "Redesigning source control at Anthropic",
+        "url": "https://simonwillison.net/2026/Oct/13/redesigning-source-control-at-anthropic/",
+        "discussion_url": null,
+        "published": "2026-10-13T23:00:06Z",
+        "summary": "Redesigning source control at Anthropic\n\nInteresting piece from Anthropic describing why and how they built their own custom alternative to Git, based on the dramatic increase in rate of changes to their code after the past six months.\n\nIn May 2026, Anthropic averaged around 2,500 code changes merged per day; as of September, we merged over 30,000 per day.\n\nThey included a chart showing those changes. I had Claude modify their chart ( code here ) to add markers for the public releases of each of their models in 2026:\n\nThis shows public release dates, not the date when models became available for Anthropic's internal use. My guess is that the introduction of Fable/Mythos class models is a key factor in the increased coding velocity.\n\n\"Antique\" is their new code review system. The source control system is called Scion, and sounds to me like a reinvention of centralized source control along the lines of Subversion.\n\n( Update : Anthropic credit Google's Piper and Meta's Sapling as \"prior art\" - it looks like the core concept of \"derived data\" was heavily inspired by Mononoke , the server component of Sapling.)\n\nThey had some pretty extreme requirements:\n\nThe history of our main branch…",
+        "content": "13th October 2026 - Link Blog\nRedesigning source control at Anthropic (via) Interesting piece from Anthropic describing why and how they built their own custom alternative to Git, based on the dramatic increase in rate of changes to their code after the past six months.\nIn May 2026, Anthropic averaged around 2,500 code changes merged per day; as of September, we merged over 30,000 per day.\nThey included a chart showing those changes. I had Claude modify their chart (code here) to add markers for the public releases of each of their models in 2026:\nThis shows public release dates, not the date when models became available for Anthropic's internal use. My guess is that the introduction of Fable/Mythos class models is a key factor in the increased coding velocity.\n\"Antique\" is their new code review system. The source control system is called Scion, and sounds to me like a reinvention of centralized source control along the lines of Subversion.\n(Update: Anthropic credit Google's Piper and Meta's Sapling as \"prior art\" - it looks like the core concept of \"derived data\" was heavily inspired by Mononoke, the server component of Sapling.)\nThey had some pretty extreme requirements:\nThe history of our main branch alone is almost 100 GB, and a compressed working copy is over 25 GB. We perform on the order of 25 million code checkouts per day for CI, before counting developer environments, agent sandboxes, and research jobs. Fetched naively, that would be over 600 PB of git traffic per day.\nThe new system was built by a team of seven people, and the migration from Git was completed in five months.\nWhen asked on Hacker News about the lack of offline support, Scion engineer Nick G replied:\nSince Claude is by far the heaviest user of Scion and is necessarily online, this just wasn't important to do.\nAs an aside, I've been trying adversarial review in my own projects recently, where you have a model try and find flaws (I often play Claude and GPT off against each other). This note from the article reflected my own experience with that:\nAnthropic also makes extensive use of adversarial review, and, while this is incredibly effective in many ways, it can also be myopic, so skilled engineers needed to steer Claude away from over-engineering parts of the system in response to hypothetical concerns.\nRecent articles\n- Hello Python 3.15, goodbye 3.10, and now I can use 3.11 - 12th October 2026\n- A new feature for my blog, built using my voice - 9th October 2026\n- Claude Haiku 5.5 - 7th October 2026\n- We're going to need default hard budget caps on pretty much everything - 3rd October 2026",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Mistral releases Timestral foundation models for CPU forecasting",
+      "summary": "Mistral released Timestral, a family of zero-shot time-series foundation models ranging from 5M to 209M parameters. The top 209M model achieved first place on the GIFT-Eval, TIME, and fev-bench public leaderboards, outperforming larger existing foundation models. Timestral runs natively on standard CPUs without GPU requirements, taking 140 ms to predict a 24-hour horizon from three weeks of 15-minute history on eight threads. The architecture supports multivariate signals, quantile forecasts, and both past and future categorical covariates for zero-shot industrial forecasting.",
+      "why_it_matters": "Lightweight, CPU-friendly time-series models give agent workflows fast numerical forecasting tools without burning expensive GPU inference capacity.",
+      "reason": "Mistral AI released Timestral, a family of CPU-efficient open-weight probabilistic forecasting models ranging from 5M to 209M parameters.",
+      "item": {
+        "key": "mistral.ai/news/timestral",
+        "source": "Mistral AI",
+        "tags": [
+          "lab",
+          "open-weights"
+        ],
+        "title": "Introducing Timestral",
+        "url": "https://mistral.ai/news/timestral",
+        "discussion_url": null,
+        "published": "2026-10-15T12:00:00Z",
+        "summary": "State-of-the-art probabilistic forecasting in four sizes (5M–209M params), CPU-efficient, zero-shot ready.",
+        "content": "Thinking\nSummary\nTimestral, Mistral’s first family of time-series foundation models, delivers state-of-the-art probabilistic, multivariate forecasts with just 209M parameters, outperforming larger models on key benchmarks while supporting past and future covariates. Available in four sizes (5M to 209M parameters), it balances accuracy and efficiency, running efficiently on CPUs and excelling in zero-shot forecasting for diverse domains. The model combines synthetic pre-training, covariate-aware attention, and long-context learning, with fine-tuning options for domain adaptation via Mistral Forge.\nToday, we’re releasing Timestral, our first family of time-series foundation models. Our largest model, at just 209M parameters, ranks first on all three of the field's main public benchmarks, GIFT-Eval, TIME, and fev-bench, outperforming the previous state of the art with only two-thirds of the model parameters.\nTimestral delivers probabilistic, multivariate forecasts and supports past-only and known-future covariates. Our family of models sits on the Pareto front of forecasting accuracy versus model size, delivering leading performance at each size. Results have been submitted to the GIFT-Eval and TIME leaderboards.\nTime Series Foundation Models (TSFM)\nTime series is one of the most common data types in enterprise, from sensor telemetry to observability metrics. Forecasts built on it drive decisions in capacity planning, energy, supply chains, risk and maintenance.\nIndustrial plants forecast process sensors against the production schedule, catch equipment drift before it fails, and plan capacity and spare parts across thousands of assets. Finance teams forecast flows, volumes, and volatility to inform positions, hedging, and treasury across thousands of accounts.\nClassical models such as ARIMA and linear regression remain well-established tools for forecasting time series. These models are usually fitted to a single series and learn only from that series' history.\nDeep learning models such as PatchTST add the capacity to learn nonlinear patterns across many related series, but they are still typically trained from scratch on each dataset, so what they learn doesn't carry over to new domains.\nTime series foundation models bring the pre-training approach to time series. Trained on a large and diverse corpus, our model learns patterns that transfer across series, forecasting zero-shot on data it has never seen, even in domains where data is scarce.\nBenchmark Results\nWe evaluated Timestral on the three main public forecasting benchmarks: GIFT-Eval, TIME and fev-bench. Among pre-trained, zero-shot models, it ranks first across all five metrics. These results come from a single checkpoint, without ensembling.\nGIFT-Eval, top ten of 83 comparable pretrained and zero-shot entries. Lower is better.\nTIME, top ten of the 35 leaderboard entries. Lower is better on both metrics.\nfev-bench, top ten of the 37 leaderboard entries, by SQL skill score. Higher is better.\nFamily of models optimised for every specification\nTimestral has been optimised as a family of four models: 5M, 28M, 123M and 209M parameters. The larger models improve forecast performance, while the smaller ones are faster and cheaper. All four share the same architecture and training recipe. Every size sits on the Pareto front of accuracy versus model size: for each model size, no public model forecasts better.\nScore vs model size on GIFT-Eval, TIME and fev-bench (shown as 1 − skill score). Lower is better. Our 28M model beats Chronos-2, about four times larger, on GIFT-Eval and TIME. Our 209M model beats TimesFM-3 and Falcon-2.0 with fewer parameters.\nTimestral does not need a GPU at inference. On a standard server CPU with 8 threads, forecasting one day ahead from three weeks of 15-minute history takes 10 ms with the 5M model and 140 ms with the 209M model. Smaller models trade some accuracy for speed: the 28M model is five times faster than the 209M model, and the 123M model comes within 0.2% of the 209M score at three quarters of its latency.\nAn industrial example\nConsider an industrial plant with thousands of sensors across its equipment. Timestral can improve the forecasts on that data in several ways.\nMultivariate forecasting. A pump's vibration, temperature and pressure don't move independently. A rise in one often explains or causes a change in another. Timestral models related series jointly, so it can use those dependencies instead of forecasting each sensor in isolation.\nProbabilistic forecasting. A single predicted value may not show the full picture. Timestral predicts a full set of quantiles, so teams can see how wide the uncertainty is, set alert thresholds that reflect it, and plan maintenance around risk rather than a single number.\nCategorical covariates. Some covariates take values from a set of categories rather than continuous numbers, such as the day of the week, or a machine's state (running, idle, under maintenance). Encoding these as numbers would impose an order or scale they don't have. Timestral takes them as categorical inputs directly to improve forecasts.\nKnown-future covariates. Some drivers of sensor behaviour are known in advance, such as production schedules, planned shutdowns, weather forecasts. Timestral can condition on them to improve forecast quality, so a scheduled load increase is expected rather than flagged as a surprise.\nFrom Model to System\nTimestral is a numerical model that can run inside existing monitoring pipelines, or be paired with our language models in multi-modal agentic workflows.\nIn the plant, that could look like this:\n- Timestral running continuously on the plant's sensor streams, detecting anomalies as they occur.\n- When it flags an anomaly on a pump, an agent embeds the signals and compares against embeddings of past sensor data to find similar historical failures.\n- The agent then starts sub-agents to run a root cause analysis, drawing on context from that plant, such as…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "llama.cpp added conversion and execution support for Granite Switch decision models that combine routing decisions with chat capabilities.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b11700",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b11700",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11700",
+        "discussion_url": null,
+        "published": "2026-10-16T18:36:12Z",
+        "summary": "model : Granite Switch Decision ( #30676 )\n\nfeat(convert): Add decision.chat to support decision models that can also chat\n\nBranch: GraniteSwitchDecision\n\nAI-usage: full (Claude + Sonnet 5.5)\n\nSigned-off-by: Gabe Goodhart ghart@us.ibm.com\n\nfeat(convert): Add conversion for Granite Switch as decision model\n\nThe template follows from the usage sample:\n\nhttps://huggingface.co/ibm-granite/granite-switch-4.1-8b#guardian-and-decision-side-by-side\n\nBranch: GraniteSwitchDecision\n\nAI-usage: draft (Claude + Sonnet 5.5)\n\nSigned-off-by: Gabe Goodhart ghart@us.ibm.com\n\nfeat(common): Add support for chat+decision models in common\n\nBranch: GraniteSwitchDecision\n\nAI-usage: full (Claude + Sonnet 5.5)\n\nSigned-off-by: Gabe Goodhart ghart@us.ibm.com\n\nfeat(common): Add granite switch decision model enum\n\nBranch: GraniteSwitchDecision\n\nAI-usage: full (Claude + Sonnet 5.5)\n\nSigned-off-by: Gabe Goodhart ghart@us.ibm.com\n\nfeat(server): Plumb through decision_chat bool to support decision+chat models\n\nBranch: GraniteSwitchDecision\n\nAI-usage: full (Claude + Sonnet 5.5)\n\nSigned-off-by: Gabe Goodhart ghart@us.ibm.com\n\nfeat(server): Add Granite Switch decision support\n\nBranch: GraniteSwitchDecision\n\nAI-usage…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Postgres 19 has been delayed after automated AI code reviewers flagged more bugs than human maintainers could resolve.",
+      "item": {
+        "key": "theregister.com/databases/2026/10/16/postgres-19-delayed-after-ai-reviewers-find-more-bugs-than-humans-can-fix/5303471",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Postgres 19 delayed after AI reviewers find more bugs than humans can fix",
+        "url": "https://www.theregister.com/databases/2026/10/16/postgres-19-delayed-after-ai-reviewers-find-more-bugs-than-humans-can-fix/5303471",
+        "discussion_url": "https://news.ycombinator.com/item?id=50119991",
+        "published": "2026-10-16T15:55:40Z",
+        "summary": "",
+        "content": "",
+        "score": 134.0,
+        "comments": 46,
+        "also_in": []
+      }
+    },
+    {
+      "line": "MAI-Gym launched an open platform for evaluating and training GUI agents via reinforcement learning across mobile and desktop environments.",
+      "item": {
+        "key": "arxiv:2610.20939",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "MAI-Gym: An Open All-in-One Platform for GUI Agent Evaluation and RL Training across Mobile and Computer Environments",
+        "url": "https://huggingface.co/papers/2610.20939",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Online reinforcement learning (RL) with verifiable rewards has driven rapid progress in mathematics, coding, and tool use, but scaling this success to GUI agents remains challenging due to the high cost of interactive environments and the scarcity of realistic training tasks. We introduce MAI-Gym, an open all-in-one platform that unifies GUI agent evaluation, data collection, and online RL training across mobile, computer, and web environments. Through a shared rollout pipeline, MAI-Gym ensures consistent agent behavior across evaluation and training, supports ten established benchmarks, and scales to 20,000 parallel environment instances. Beyond scalable infrastructure, MAI-Gym enables automated synthesis of diverse GUI applications and challenging tasks, including resettable mocked apps and coherent cross-app worlds with execution-validated task verifiers. Using MAI-Gym, we train MAI-Gym-9B, a unified 9B agent for mobile and computer use, achieving state-of-the-art performance among open GUI agents under 10B parameters: 78.4% on MobileWorld and 76.2% on OSWorld-Verified. Importantly, RL in a mocked train-ticketing app transfers to its real-world counterpart, improving task…",
+        "content": "",
+        "score": 92.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new paper introduces reward-decoupled token normalization (GDPO) to improve credit assignment in multi-reward agent reinforcement learning.",
+      "item": {
+        "key": "arxiv:2610.21439",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Each Reward to Its Relevant Tokens: Reward-Specific Token-Level Credit Assignment for Multi-Reward RL",
+        "url": "https://huggingface.co/papers/2610.21439",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Language models are increasingly trained against several verifiable rewards at once, such as the correctness and the format of a tool call, or the individual constraints of a complex instruction. Reward-decoupled normalization (GDPO) normalizes each reward separately so that different reward combinations keep distinct advantages, but it still spreads every reward's advantage evenly over the whole response, although each verifier checks only a few positions. We propose MRTPO, which assigns the advantage of each reward to the tokens relevant to it, using the information its verifier checks, without auxiliary models or token-level annotations. For each reward, the policy replays its own response with and without that reward's verifier information, and the per-token Jensen-Shannon distance between the two next-token distributions measures each token's relevance and reassigns the advantage. On text-to-SQL, multi-constraint instruction following and tool calling, MRTPO converges faster and achieves better performance than the compared methods.",
+        "content": "",
+        "score": 19.0,
+        "comments": 1,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your agents draft clean code and pass semantic verification on the first try.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "Reflection AI Releases Beam, a 501B Open Model",
+      "blurb": "Beam is a 501B open-weight model built for agentic coding and long-horizon tasks that teams can run, customize, and scale on their own hardware.",
+      "item": {
+        "key": "huggingface.co/blog/reflection-beam",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "Welcome Beam: a 501B open model you can own, customize, and scale",
+        "url": "https://huggingface.co/blog/reflection-beam",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Model release",
+      "headline": "NVIDIA Introduces Nemotron 3.5 Super",
+      "blurb": "The 120B vision-language model pairs a hybrid Mamba-2 and Transformer MoE backbone with a vision encoder for complex agentic workflows.",
+      "item": {
+        "key": "developer.nvidia.com/blog/nvidia-nemotron-3-5-super-vl-powers-specialized-agents-with-multimodal-reasoning",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "NVIDIA Nemotron 3.5 Super VL Powers Specialized Agents with Multimodal Reasoning",
+        "url": "https://developer.nvidia.com/blog/nvidia-nemotron-3-5-super-vl-powers-specialized-agents-with-multimodal-reasoning/",
+        "discussion_url": null,
+        "published": "2026-10-15T18:01:00Z",
+        "summary": "Always-on agents are taking on longer, more complex enterprise workflows. A single request can involve reading a document, checking information across sources,...",
+        "content": "Always-on agents are taking on longer, more complex enterprise workflows. A single request can involve reading a document, checking information across sources,...\nAlways-on agents are taking on longer, more complex enterprise workflows. A single request can involve reading a document, checking information across sources, following company policy, and calling several tools. NVIDIA Nemotron 3.5 Super VL is an open, customizable multimodal model for these specialized workflows. Its 120B-parameter mixture-of-experts (MoE) architecture activates 12B…\n\nSource",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Embedded AI",
+      "headline": "PyTorch Brings ExecuTorch to Arm Cortex-M Microcontrollers",
+      "blurb": "ExecuTorch now runs PyTorch models directly on microcontrollers, eliminating intermediate format conversions and separate toolchains.",
+      "item": {
+        "key": "pytorch.org/blog/bringing-executorch-to-arm-cortex-m-cpus",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "Bringing ExecuTorch to Arm Cortex-M CPUs",
+        "url": "https://pytorch.org/blog/bringing-executorch-to-arm-cortex-m-cpus/",
+        "discussion_url": null,
+        "published": "2026-10-15T14:40:35Z",
+        "summary": "TL;DR Deploying PyTorch models on microcontrollers has historically required converting to other framework formats, maintaining separate toolchains, and debugging cross-framework numerical mismatches. ExecuTorch eliminates this conversion step entirely. The Cortex-M...\n\nThe post Bringing ExecuTorch to Arm Cortex-M CPUs appeared first on PyTorch .",
+        "content": "TL;DR\n\nDeploying PyTorch models on microcontrollers has historically required converting to other framework formats, maintaining separate toolchains, and debugging cross-framework numerical mismatches. ExecuTorch eliminates this conversion step entirely.\n\nThe Cortex-M backend enables PyTorch models to run directly on Arm Cortex-M CPUs with Arm CMSIS-NN acceleration. It supports all capability tiers (Scalar, DSP, and MVE/Helium) from a single workflow.\n\nWe benchmark four of the five models from the MLPerf Tiny suite on the Alif Ensemble E8. Each model runs in 21.5 ms or less and uses under 90 KiB of RAM on a single Cortex-M55 core.\n\nFor heterogeneous SoCs, the Cortex-M backend also provides the CPU execution path alongside Ethos-U NPU delegation.\n\nMinimal binary footprint. The ExecuTorch core runtime is under 20 KiB of flash, and operator selective build links only the operators your model needs, so total code size scales with the model rather than the framework.\n\nBackground\n\nMicrocontrollers power billions of always-on devices: wearables, industrial sensors, voice interfaces, and smart home appliances. These devices operate under extreme constraints: often less than 1 MB of SRAM, single-digit megabytes of flash, and power budgets measured in milliwatts. Despite these limitations, there’s growing demand to run meaningful ML workloads on these platforms and the hardware is evolving to meet it. Modern Cortex-M based microcontroller units (MCUs) now include DSP & vector ISAs, large tightly-coupled memories (TCMs), and power-efficient NPUs such as the Arm Ethos-U NPU that make ML inference more practical in resource constrained devices.\n\nUntil now, deploying ML on Cortex-M meant leaving the PyTorch ecosystem. Developers had to convert models to alternative formats, maintain separate toolchains for training and deployment, and debug numerical mismatches introduced during conversion. For teams that train in PyTorch, which accounts for over 90% of the research code published at top ML conferences, this translation step adds friction to every iteration cycle.\n\nExecuTorch was designed to eliminate this gap. Arm MCU support has been available through the Ethos-U NPU, and the Cortex-M backend extends it to Cortex-M CPUs, so a model can run on parts with or without an accelerator. The trained PyTorch model is exported, quantized and lowered for the device within the same stack that serves models on mobile, desktop and server.\n\nThe Cortex-M Backend\n\nThe ExecuTorch Cortex-M backend replaces standard PyTorch operators with CMSIS-NN-backed custom operators through ahead-of-time compiler passes. At inference time, these operators call directly into Arm’s CMSIS-NN library , an open source collection of optimized neural network kernels for Cortex-M processors.\n\nKey properties:\n\nCMSIS-NN accelerated. Quantized operations (linear, conv, add, mul, softmax, activations, etc.) are replaced with optimized implementations that call CMSIS-NN functions and additional optimized Cortex-M implementations directly.\n\nTarget-aware compilation. The CPU variant (M0 through M85) and ISA tier are specified at compile time, so the correct CMSIS-NN backend is selected, eliminating runtime dispatch overhead.\n\nPurpose-built quantizer. Produces INT8 quantized graphs matching the data layout requirements of CMSIS-NN kernels, using PyTorch’s PT2E quantization framework.\n\nSingle compiler toolchain. The Cortex-M lowering path operates directly on the ExecuTorch edge dialect, keeping the compilation pipeline simple and debuggable.\n\nCortex-M Capability Tiers\n\nThe backend targets the full Cortex-M spectrum:\n\nTier\nCores\nKey Feature\nUse Case\n\nScalar\nM0, M0+, M3, M23\nStandard ARM instructions\nUltra-low-cost, minimal silicon\n\nDSP\nM4, M7, M33, M35P\nSIMD multiply-accumulate\nMid-range MCUs, signal processing\n\nMVE (aka Helium)\nM55, M85\n128-bit vector ops, beat-based execution\nHigh-performance MCU ML inference\n\nArm Helium technology is where the biggest performance gains are. CMSIS-NN leverages Helium’s beat-based execution model to pipeline data movement and compute, providing significant throughput gains for the depthwise and pointwise convolutions common in edge ML architectures. That said, the same workflow targets all variants. The target configuration selects the appropriate backend automatically.\n\nExecuTorch is Embedded Friendly\n\nUnlike mobile or cloud environments that must accommodate varied hardware at runtime, microcontroller deployments target a fixed hardware profile. Embedded developers possess precise knowledge of their deployment target, including the exact CPU core, available ISA extensions, SRAM allocation, and flash capacity.\n\nExecuTorch’s ahead-of-time stack is designed to exploit this. ExecuTorch makes target-specific decisions at compile time: graph-level optimizations, memory planning, weight packing, and kernel selection are all target-aware at compile time.\n\nConcretely, for Cortex-M this means:\n\nGraph-level compute elimination. Redundant dtype conversions, quantize/dequantize pairs, and memory format transposes are removed during lowering, so only necessary compute reaches the device.\n\nQuantization parameter folding. Scale and zero-point arithmetic is precomputed into integer multiplier/shift form at export, so quantized kernel inference stays entirely in fixed-point.\n\nAOT weight layout transposition. Convolution weights are transposed from PyTorch’s native layout (OIHW) to CMSIS-NN’s expected format (OHWI) at export time. The permute cost is paid once during compilation and never at inference.\n\nStatic memory planning across heterogeneous memories. All tensor and scratch buffers are allocated and laid out ahead of time, with support for spanning multiple memory regions (e.g., TCM and SRAM). Developers can also customize placement to put latency-critical buffers in fast local memory. No heap allocator, no fragmentation, and no runtime memory management required.\n\nTarget-specific operator replacement. The CortexMPassManager selects CMSIS-NN kernel variants matched to your core’s ISA tier (Scalar, DSP, or MVE) at compile time, not at runtime.\n\nDeveloper Workflow\n\nimport torch\nfrom torchao.quantization.pt2e.quantize_pt2e import convert_pt2e, prepare_pt2e\n\nfrom executorch.backends.cortex_m.edge_compile_config import cortex_m_edge_compile_config\nfrom executorch.backends.cortex_m.passes.cortex_m_pass_manager import CortexMPassManager\nfrom executorch.backends.cortex_m.quantizer.quantizer import CortexMQuantizer\nfrom executorch.backends.cortex_m.target_config import CortexM, CortexMTargetConfig\nfrom executorch.exir import to_edge_transform_and_lower\n\n# 1. Export\nmodel = MyModel().eval()\nexample_inputs = (torch.randn(1, 1, 49, 10),)\nexported = torch.export.export(model, example_inputs)\n\n# 2. Quantize and calibrate\nquantizer = CortexMQuantizer(use_explicit_layout=True)\nprepared = prepare_pt2e(exported.module(), quantizer)\nfor sample in calibration_data:\nprepared(sample)\nquantized = convert_pt2e(prepared)\n\n# 3. Re-export the quantized model\nquantized_exported = torch.export.export(quantized, example_inputs)\n\n# 4. Lower to Edge and apply the Cortex-M passes\npass_manager = CortexMPassManager(\ntarget_config=CortexMTargetConfig(cpu=CortexM.M55),\nuse_explicit_layout=True,\n)\nedge = to_edge_transform_and_lower(\nquantized_exported,\ncompile_config=cortex_m_edge_compile_config(),\ntransform_passes=pass_manager,\n)\n\n# 5. Serialize for integration into firmware\net_program = edge.to_executorch()\nwith open(\"model.pte\", \"wb\") as f:\nf.write(et_program.buffer)\n\nThe resulting .pte binary is linked into firmware alongside the ExecuTorch runtime and CMSIS-NN library, then flashed to the device. At runtime, inference executes the precompiled graph with minimal runtime overhead and no dynamic memory allocation for tensors.\n\nUsing the Cortex-M Backend Alongside Ethos-U\n\nMany Cortex-M MCUs pair the CPU with an Arm Ethos-U NPU such as the U55, U65, or U85. ExecuTorch’s EthosUPartitioner delegates supported operations to…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 19,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 26,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 22,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 880,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1296,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 272,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 179,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 90,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-13T19:26:19.771919Z",
+    "candidates": 142,
+    "triaged": 142,
+    "enriched": 9,
+    "headline_candidates": 159,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 504.8,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 36147,
+      "output_tokens": 11726,
+      "cost_usd": 0.138113
+    }
+  }
+}
