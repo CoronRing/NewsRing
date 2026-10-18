@@ -1,0 +1,665 @@
+{
+  "date": "2026-10-18",
+  "generated_at": "2026-10-18T18:32:27.354232Z",
+  "title": "vLLM 0.32's Fast Paths, Agent Rollout RL, and the Walled Web",
+  "intro": "Today's updates highlight structural improvements to inference engines in vLLM and llama.cpp, alongside DeepSeek packaging its retrieval pipeline as standalone search and fetch primitives. Meanwhile, new research addresses agent reinforcement learning on unreached trajectories, even as public web services increasingly shut their doors to browser agents.",
+  "stories": [
+    {
+      "headline": "vLLM 0.32 introduces dedicated decision endpoints and low-precision KV cache upgrades",
+      "summary": "vLLM release v0.32.0 adds a default `POST /v1/systemone` endpoint designed to answer choice, score, and noul queries over structured state, supported across models like LiquidAI/d1-3B and Cloudflare/clef-omni. Model parsing is simplified via `--tool-call-parser hf` and `--reasoning-parser hf`, which parse response templates straight from checkpoint configs without requiring custom model-specific code. Efficiency improvements include NVFP4 KV cache support expanding across SM8x, SM90, and SM12x, alongside default FP8 KV cache for GLM-5.x on SM100 that halves KV memory per rank. Model Runner V2 also introduces a GPU n-gram speculator with variable-length drafts and replaces MRV1 on ROCm, while security additions restrict default CORS access and cap JSON schema nesting at 64 levels.",
+      "why_it_matters": "Native Hugging Face response-template parsing eliminates fragile custom tool parsers, while the dedicated decision endpoint gives agent orchestrators a standardized low-latency path for state evaluation.",
+      "reason": "vLLM's v0.32.0 release introduces a dedicated endpoint for structured decisions and generic state parsing alongside weight-transfer documentation for RL training.",
+      "item": {
+        "key": "github.com/vllm-project/vllm/releases/tag/v0.32.0",
+        "source": "vLLM releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.32.0",
+        "url": "https://github.com/vllm-project/vllm/releases/tag/v0.32.0",
+        "discussion_url": null,
+        "published": "2026-10-18T10:23:45Z",
+        "summary": "v0.32.0\n\nHighlights\n\nThis release features 814 commits from 363 contributors (121 new)!\n\nStructured decisions and generic parsers : the new POST /v1/systemone endpoint answers choice , noul and score questions over a structured state ( #59299 ), is served by default ( #60677 , #60696 ), and also runs on Cloudflare/clef-omni ( #61064 ), LiquidAI/d1-3B ( #60676 ) and DiffusionGemma ( #60466 ). The new hf tool and reasoning parser ( --tool-call-parser hf , --reasoning-parser hf ) reads the checkpoint's response_template , so models that ship it need no model-specific parser ( #58604 , #58602 ), in both the Python and Rust frontends ( #59005 ).\n\nLow-precision KV cache everywhere : NVFP4 KV cache now runs on SM8x and SM12x ( #46963 ), SM90 ( #60620 ) and with XQA decode on SM12x ( #60452 ), and on MiniMax-M3 sparse attention on SM100 ( #59300 ); GLM-5.x defaults to an FP8 KV cache on SM100, halving KV memory per rank with 2.3-5.5% more throughput at a 7-11% TTFT cost in the PR's benchmark ( #60140 , #60281 ); fp8_ds_mla on SM90 gives GLM-5.3-Flash up to 31% more output throughput ( #59246 ); ROCm gains the 4-bit ultraquant_4bit KV cache with about 2x the density of FP8 ( #57057…",
+        "content": "Repository navigation\nv0.32.0\nHighlights\nThis release features 814 commits from 363 contributors (121 new)!\n- Structured decisions and generic parsers: the new POST /v1/systemone endpoint answers choice, noul and score questions over a structured state (#59299), is served by default (#60677, #60696), and also runs on Cloudflare/clef-omni (#61064), LiquidAI/d1-3B (#60676) and DiffusionGemma (#60466). The new hf tool and reasoning parser (--tool-call-parser hf, --reasoning-parser hf) reads the checkpoint's response_template, so models that ship it need no model-specific parser (#58604, #58602), in both the Python and Rust frontends (#59005).\n- Low-precision KV cache everywhere: NVFP4 KV cache now runs on SM8x and SM12x (#46963), SM90 (#60620) and with XQA decode on SM12x (#60452), and on MiniMax-M3 sparse attention on SM100 (#59300); GLM-5.x defaults to an FP8 KV cache on SM100, halving KV memory per rank with 2.3-5.5% more throughput at a 7-11% TTFT cost in the PR's benchmark (#60140, #60281); fp8_ds_mla on SM90 gives GLM-5.3-Flash up to 31% more output throughput (#59246); ROCm gains the 4-bit ultraquant_4bit KV cache with about 2x the density of FP8 (#57057).\n- Model Runner V2: a GPU n-gram speculator with variable-length drafts (#40704), Elastic EP (#53934), pipeline parallelism with prefill context parallelism for MLA models (#59139), a stock torch.compile mode (#59079), and MRV2 is now the default on ROCm with the model-specific MRV1 exceptions removed (#56360).\n- Faster startup and serving: vllm download-kernels installs FlashInfer's precompiled kernels (#58765); vllm preload --preload-autotune keeps the FlashInfer autotune table warm across restarts (#60085); a shared-memory tensor arena broadcasts large multimodal tensors to workers with one copy (#51207); tokenizers and processors load from the local snapshot (#60825); and with --api-server-count above 1 each connection goes to the least-loaded API worker, for 43-85% more req/s on short requests (Qwen3-0.6B, 32 input / 1 output tokens) in the PR's benchmark (#60723).\n- Model support: new EmbeddingGemma 2 omni-modal embeddings (#60254), MiniCPM-V 4.7 (#58674) and Nemotron 3.5 ASR (#59827); video input in the Transformers modeling backend (#57441); GLM-5.3 sparse MLA index conversions reused across layers (3.5-3.9x on that kernel, #59464) and fused multi-step draft decode (13.3% at concurrency 1, #57443); HiSparse per-request residency caching for up to 58% more throughput on GLM-5.3-NVFP4 on B200 with long, fully GPU-resident contexts at high concurrency (#60083).\n- Security: fixes for GHSA-4hhp-h66f-j5j7 (chat template resource exhaustion, #50300), GHSA-q97c-p368-75c4 (tokenizer max_token_id, #59491) and GHSA-frvg-qw88-hww9 (P2P ZMQ socket exhaustion, #51504); CORS no longer allows every origin by default (#61009); untrusted images are limited to raster formats (#60022); shared-memory multimodal cache handles are signed (#59357); and JSON schemas nested deeper than 64 levels are rejected (#60036).\n- Breaking changes: Python 3.10 dropped (#60402); default CORS origins restricted (#61009); transformers>=5.16.1,<5.20.0 and tokenizers>=0.23.2 (#57387, #59796); torch.compile sequence parallelism and AsyncTP passes removed (#60517); cascade attention removed (#61126); mamba_cache_mode=\"all\" removed (#58997); max_tokens no longer reserved from the context window (#57035); Responses API reasoning stream events renamed (#59652).\nRelease Artifacts\nPython Wheels\nDocker Images\nOther Artifacts\nPre-built release artifacts are available in the Assets section at the bottom of this page, including:\n- Source distribution tarball\n- CUDA 12.9 Python wheels for x86_64 and arm64\n- CUDA 13.0 Python wheels for x86_64 and arm64\n- CPU Python wheels for x86_64, arm64, and macOS\n- XPU Python wheel for x86_64\nModel Support\n- New models: EmbeddingGemma 2 (google/embeddinggemma-2), an omni-modal text/image/audio/video embedding model, with unused modality encoders skipped through --limit-mm-per-prompt (#60254, #60289); MiniCPM-V 4.7 (#58674); Nemotron 3.5 ASR (nvidia/nemotron-3.5-asr-streaming-0.6b) complete-audio transcription; native realtime streaming is not yet supported (#59827); Cloudflare/clef-omni (#61064) and LiquidAI/d1-3B (#60676) on /v1/systemone; PLaMo 3 reasoning and tool parsers (#56575); and the zerank-2 reranker score template (#60415).\n- Transformers modeling backend: video inputs (#57441), and Glm, Arcee, CWM, Mellum (#59679), GPT-NeoX, Phi, Seed-OSS and Jais2 (#59701) now served through it.\n- New model capabilities: LoRA for BERT, RoBERTa and XLM-RoBERTa embedding models (#61033); Granite as an EAGLE3/DFlash target (#60855); Qwen3-ASR EAGLE3 (#52824); Sarvam MLA EAGLE3/DSpark with PP (#55902); GLM-5.3-Flash with the DFlash2 drafter (#56983); and MiniMax-M3 EAGLE3 at PP > 1 on MRV2 (#57197) with MTP sharing target embeddings under PP (#58648).\n- GLM-5.3 and GLM-5.3-Flash: sparse MLA index conversion reused across layers (#59464), fused multi-step draft decode (#57443), FP8 KV cache default on SM100 (#60140, #60281), fp8_ds_mla on SM90 (#59246), qlnorm skipped for MHA (4.4-7.7% TTFT, #58845), long-context indexer prefill sharded across TP (up to 25% lower TTFT at 1M context, #54951), DCP for the kpool indexer (#59211, #60032), KDA prefill checkpoints with FlashKDA (#56960), FP8 KV on SM90 sparse MLA (#55222), --mamba-ssm-cache-dtype honored for KDA state (#59147), a generic packed KV layout (#57169), MTP index sharing restored (#61079), and fixes for vision-tower crashes (#59126), non-square image encoder budgets (#59565), DP startup (#56974), video timestamps (#55647), DFlash2/EAGLE3 aux hidden states (#60763) and null-block writes (#59528).\n- DeepSeek-V4 and V4.1: decoder-side SWA bounded replay (#58132) with replay layers in CUDA graphs and trimmed in PIECEWISE graphs (compilation_config.decoder_replay_trim_threshold, #59532) plus last KV-source layer trimming (+3.6%, #59894), packed FP8 Engram exchange across DP (#59923), faster…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "github.com/vllm-project/vllm/releases/tag/v0.32.1rc0",
+          "source": "vLLM releases",
+          "tags": [
+            "release",
+            "inference"
+          ],
+          "title": "v0.32.1rc0",
+          "url": "https://github.com/vllm-project/vllm/releases/tag/v0.32.1rc0",
+          "discussion_url": null,
+          "published": "2026-10-18T09:26:56Z",
+          "summary": "[Doc][RL] Document the weight-transfer HTTP protocol for trainers wit…",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "SERO bootstraps long-horizon agent RL with executable oracle continuations",
+      "summary": "Standard on-policy distillation for agent reinforcement learning struggles on long tasks because credit assignment cannot supervise useful states that the current behavior policy completely fails to explore. State-Rooted Executable Rollout Optimization (SERO) solves this by taking intermediate states actually reached by the behavior policy and allowing a training-only oracle to continue interacting with the environment. This makes real downstream observations and oracle actions directly available for optimization, using policy-reachability weighting to scale the oracle loss based on how compatible the behavior policy is with earlier oracle steps. Tested on ALFWorld and WebShop with Qwen2.5 models, learning from the full executable branch delivered significantly higher performance than supervising only the immediate root oracle action.",
+      "why_it_matters": "Supervising downstream trajectories directly from an agent's failure points provides a practical mechanism to train long-horizon tool and task agents through RL without inference overhead.",
+      "reason": "SERO tackles a critical bottleneck in long-horizon agent reinforcement learning by using executable oracle continuations to supervise trajectories that the agent fails to discover on its own.",
+      "item": {
+        "key": "arxiv:2610.19397",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "SERO: Learning from Executable Oracle Continuations for Long-Horizon Agentic Reinforcement Learning",
+        "url": "https://huggingface.co/papers/2610.19397",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Long-horizon agentic RL is constrained by the futures visited by the current policy. When rollouts fail to reach useful behaviors, improved credit assignment cannot provide supervision for states and actions that were never encountered. On-policy distillation (OPD) introduces teacher guidance on policy-induced states, and recent multi-turn variants improve how this guidance is scheduled, replayed, refined, or validated. However, they do not directly use the oracle-controlled future itself as the training trajectory. We introduce State-Rooted Executable Rollout Optimization (SERO), which augments on-policy agentic RL with executable oracle continuations. SERO restores a state actually reached by the current policy and lets a training-only oracle continue interacting with the real environment, making the downstream observations and oracle actions themselves available for learning. It then applies policy-reachability weighting, which weights each oracle step by the frozen behavior policy's compatibility with the preceding oracle actions. This allows deeper supervision to become effective as the policy becomes more compatible with the oracle branch. The oracle loss is optimized…",
+        "content": "SERO: Learning from Executable Oracle Continuations for Long-Horizon Agentic Reinforcement Learning\nAbstract\nSERO improves long-horizon agentic reinforcement learning by training on executable oracle continuations from real policy states, weighted by policy compatibility, without inference-time overhead.\nLong-horizon agentic RL is constrained by the futures visited by the current policy. When rollouts fail to reach useful behaviors, improved credit assignment cannot provide supervision for states and actions that were never encountered. On-policy distillation (OPD) introduces teacher guidance on policy-induced states, and recent multi-turn variants improve how this guidance is scheduled, replayed, refined, or validated. However, they do not directly use the oracle-controlled future itself as the training trajectory. We introduce State-Rooted Executable Rollout Optimization (SERO), which augments on-policy agentic RL with executable oracle continuations. SERO restores a state actually reached by the current policy and lets a training-only oracle continue interacting with the real environment, making the downstream observations and oracle actions themselves available for learning. It then applies policy-reachability weighting, which weights each oracle step by the frozen behavior policy's compatibility with the preceding oracle actions. This allows deeper supervision to become effective as the policy becomes more compatible with the oracle branch. The oracle loss is optimized separately from the base RL estimator and no oracle is used at inference time. We evaluate SERO on two challenging interactive-agent benchmarks, ALFWorld and WebShop, using Qwen2.5-1.5B-Instruct and Qwen2.5-7B-Instruct. On ALFWorld, learning the full executable continuation is substantially more effective than supervising only the root oracle action, while policy-reachability weighting further improves out-of-distribution performance.\nCommunity\nLong-horizon agentic RL is constrained by the futures visited by the current policy. When rollouts fail to reach useful behaviors, improved credit assignment cannot provide supervision for states and actions that were never encountered. On-policy distillation (OPD) introduces teacher guidance on policy-induced states, and recent multi-turn variants improve how this guidance is scheduled, replayed, refined, or validated. However, they do not directly use the oracle-controlled future itself as the training trajectory. We introduce State-Rooted Executable Rollout Optimization (SERO), which augments on-policy agentic RL with executable oracle continuations. SERO restores a state actually reached by the current policy and lets a training-only oracle continue interacting with the real environment, making the downstream observations and oracle actions themselves available for learning. It then applies policy-reachability weighting, which weights each oracle step by the frozen behavior policy's compatibility with the preceding oracle actions. This allows deeper supervision to become effective as the policy becomes more compatible with the oracle branch. The oracle loss is optimized separately from the base RL estimator and no oracle is used at inference time. We evaluate SERO on two challenging interactive-agent benchmarks, ALFWorld and WebShop, using Qwen2.5-1.5B-Instruct and Qwen2.5-7B-Instruct. On ALFWorld, learning the full executable continuation is substantially more effective than supervising only the root oracle action, while policy-reachability weighting further improves out-of-distribution performance.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- Reconciling Process Supervision with Outcome-Based Credit in Agentic Policy Optimization (2026)\n- TIDE: Teacher-Student Transition via Informative Distillation and Exploration for Agentic RL (2026)\n- VH-GPO: Verified Handoff for LLM Agent Reinforcement Learning (2026)\n- On the Off-Policy Teacher in On-Policy Distillation (2026)\n- PTGPO: Prefix Tree Group Policy Optimization (2026)\n- MInTRL: Off-policy Intervention can boost On-policy RL (2026)\n- Guide, Then Let Go: Gap-Adaptive Teacher Scheduling for Sparse-Reward Agentic RL (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 5.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "DeepSeek unbundles search and fetch APIs at $0.75 per thousand calls",
+      "summary": "DeepSeek has launched standalone Search and Fetch JSON APIs that expose its internal web search engine and page extractor. The Search API returns structured results with snippets and rerank scores, while the Fetch API downloads web pages and converts their contents directly into Markdown. Usage is billed strictly at $0.75 per 1,000 successful HTTP 200 requests with non-empty results rather than by input or output tokens, with tool calls from DeepSeek Harness, Codex, and Claude Code remaining free until November 1, 2026. Rate limits are handled independently across accounts with separate per-domain QPS throttling enforced on fetch calls.",
+      "why_it_matters": "Token-independent, flat-rate pricing for structured search and clean markdown extraction offers an attractive turnkey retrieval primitive for agent toolsets.",
+      "reason": "DeepSeek has launched dedicated search and fetch endpoints priced at $0.75 per 1,000 requests, providing a cheap hosted retrieval primitive for tool-calling agents.",
+      "item": {
+        "key": "api-docs.deepseek.com/guides/search",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "DeepSeek search and fetch – $0.75 per 1000 successful requests",
+        "url": "https://api-docs.deepseek.com/guides/search/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50138531",
+        "published": "2026-10-18T06:50:36Z",
+        "summary": "Comments",
+        "content": "Search & Fetch\nThe Search API and the Fetch API give agents and RAG applications access to live web content:\n- Search API finds web pages for a query and returns structured results. It is powered by DeepSeek's in-house search engine.\n- Fetch API retrieves a single web page and returns its content as Markdown.\nBoth are raw JSON APIs. They use the same bearer authentication as the DeepSeek API.\nThe base URL is https://api.deepseek.com:\nSee the Search API Reference and Fetch API Reference for the complete request and response schemas.\nAuthentication\nSend your API key and the JSON content type in the request headers:\nSearch API\nRequest\ncurl https://api.deepseek.com/v1/tools/search \\\n-H \"Authorization: Bearer <DeepSeek API Key>\" \\\n-H \"Content-Type: application/json\" \\\n-d '{\n\"query\": \"DeepSeek V4 release\",\n\"count\": 5,\n\"need_content\": true\n}'\nimport requests\nresponse = requests.post(\n\"https://api.deepseek.com/v1/tools/search\",\nheaders={\n\"Authorization\": \"Bearer <DeepSeek API Key>\",\n},\njson={\n\"query\": \"DeepSeek V4 release\",\n\"count\": 5,\n\"need_content\": True,\n},\n)\nresponse.raise_for_status()\nfor result in response.json()[\"results\"]:\nprint(result[\"title\"], result[\"url\"])\nprint(result[\"summary\"])\nRequest fields:\nUnknown fields in the request body are ignored.\nQuery Operators\nThe query is forwarded with its search syntax intact. The examples below combine operators with a search term; you can combine multiple operators in one query.\nFor example:\n{\n\"query\": \"DeepSeek site:github.com OR site:huggingface.co lang:en after:2025\",\n\"count\": 10\n}\nResponse\nA successful request returns HTTP 200 with a results array. A normal search with no matches returns an empty array.\n{\n\"results\": [\n{\n\"rerank_score\": 2.4,\n\"title\": \"DeepSeek V4 model released\",\n\"url\": \"https://example.com/deepseek-v4\",\n\"snippet\": \"DeepSeek V4 is now available, with tool calling and long-context support.\",\n\"summary\": \"DeepSeek has released the V4 model. The release adds improved tool calling and long-context support for agent workflows.\",\n\"content\": \"DeepSeek V4 is now generally available...\",\n\"site_name\": \"Example News\",\n\"site_icon\": \"https://example.com/favicon.ico\",\n\"date\": \"2026-06-01T00:00:00+00:00\",\n\"authority\": 3\n}\n]\n}\nEach item in results contains:\nFetch API\nRequest\ncurl https://api.deepseek.com/v1/tools/fetch \\\n-H \"Authorization: Bearer <DeepSeek API Key>\" \\\n-H \"Content-Type: application/json\" \\\n-d '{\n\"url\": \"https://example.com/article\"\n}'\nimport requests\nresponse = requests.post(\n\"https://api.deepseek.com/v1/tools/fetch\",\nheaders={\n\"Authorization\": \"Bearer <DeepSeek API Key>\",\n},\njson={\"url\": \"https://example.com/article\"},\n)\nresponse.raise_for_status()\npage = response.json()\nprint(page[\"title\"])\nprint(page[\"content\"])\nRequest fields:\nResponse\n{\n\"title\": \"Example article\",\n\"content\": \"# Example article\\n\\nArticle content.\"\n}\nFetching is subject to the target site's availability and access policies.\nErrors\nErrors follow the OpenAI-compatible error format. The param field is always null.\n{\n\"error\": {\n\"message\": \"'count' must be between 1 and 50\",\n\"type\": \"invalid_request_error\",\n\"param\": null,\n\"code\": \"invalid_request_error\"\n}\n}\nSearch and Fetch are read-only. For HTTP 408, 429, or 5xx errors, wait and retry. For HTTP 402, top up your account before retrying. Do not retry other 4xx errors without changing the request.\nBilling\nSearch and Fetch are billed per successful request, not by tokens or by the number of returned results:\nA request is billable only when it returns HTTP 200 and produces a result (Search must return a non-empty results array, and Fetch must return page content). Failed requests, empty search results, and timeouts are not billed. count only controls how many results are returned and does not affect the per-request price.\nNote: when you use the DeepSeek API through DeepSeek Harness, Claude Code, or Codex, server-side tool calls already hit the Search and Fetch APIs. These calls are currently free of charge; per-request billing starts at 00:00 Beijing time on November 1, 2026.\nRate Limits\nFor each account, Search and Fetch are limited independently, and traffic to one does not consume the other's quota:\nThe QPS (requests per second) limits are calculated at the account level, regardless of which API key is used, and are separate from the model concurrency limits. Requests above the account-level QPS limit receive HTTP 429. In addition to the account-level limit, Fetch is also subject to a per-domain QPS limit, and requests above that limit also receive HTTP 429.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Ollama v0.40.7 delegates speculative draft inference",
+      "summary": "Ollama v0.40.7 updates its runtime to allow the underlying `llama-server` to automatically infer draft speculative decoding types. The release also integrates support for PPLX Decider v1.2 within MLX. Additionally, the OpenAI-compatible endpoint now allows Responses effort parameters to be passed to non-thinking models.",
+      "why_it_matters": "Automatic inference of speculative draft configurations removes manual tuning overhead when serving local models for fast agent inference.",
+      "reason": "Ollama v0.40.7 enables llama-server to automatically infer draft speculative decoding types and integrates support for PPLX Decider v1.2.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.7-rc0",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.7",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.7-rc0",
+        "discussion_url": null,
+        "published": "2026-10-18T00:28:57Z",
+        "summary": "What's Changed\n\nopenai: allow Responses effort on non-thinking models by @hoyyeva in #19010\n\nllama-server: let llama-server infer the draft speculative type by @dhiltgen in #19064\n\nmlx: add PPLX Decider v1.2 support by @dhiltgen in #19072\n\nFull Changelog : v0.40.6...v0.40.7-rc0",
+        "content": "What's Changed\n- openai: allow Responses effort on non-thinking models by @hoyyeva in #19010\n- llama-server: let llama-server infer the draft speculative type by @dhiltgen in #19064\n- mlx: add PPLX Decider v1.2 support by @dhiltgen in #19072\nFull Changelog: v0.40.6...v0.40.7-rc0",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "llama.cpp fuses Qwen activation chains into a single CUDA kernel",
+      "summary": "Release b11721 in llama.cpp ports Vulkan-based post-gate kernel fusions directly to CUDA for Qwen4exp architectures. The update fuses the four-step sequence of scale, sigmoid, scale, and `hc_post` into a single unified kernel (`dsv4_hc_post_f32`) using a gated template flag. This allows the operation to compute the final scaled output directly from raw weights without launching four separate GPU kernels.",
+      "why_it_matters": "Fusing activation layers reduces kernel dispatch latency and intermediate tensor allocations, speeding up local execution of Qwen-based models.",
+      "reason": "llama.cpp adds CUDA kernel fusion for Qwen model activation chains alongside support for non-contiguous SUM tensor operations across CPU, CUDA, and Vulkan backends.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b11721",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b11721",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11721",
+        "discussion_url": null,
+        "published": "2026-10-18T18:08:15Z",
+        "summary": "cuda : fuse qwen4exp's SCALE -> SIGMOID -> SCALE -> hc_post chain ( #30602 )\n\nPort of the Vulkan HC_POST_GATE fusion ( #29520 ). hc_combine builds the\n\nhc_post weights as 2 sigmoid(inject/hc); dsv4_hc_post_f32 now takes a\n\ngated template flag and computes scale_out sigmoid(scale_in*p) from the\n\nraw weights, so the chain runs as one kernel instead of four.\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/57168730\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows…",
+        "content": "Repository navigation\nb11721\nPre-release\n      Pre-release\n    \ncuda : fuse qwen4exp's SCALE -> SIGMOID -> SCALE -> hc_post chain (#30602)\nPort of the Vulkan HC_POST_GATE fusion (#29520). hc_combine builds the\nhc_post weights as 2sigmoid(inject/hc); dsv4_hc_post_f32 now takes a\ngated template flag and computes scale_outsigmoid(scale_in*p) from the\nraw weights, so the chain runs as one kernel instead of four.\nWebsite:\nAttestations:\nmacOS/iOS:\n- macOS Apple Silicon (arm64)\n- macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n- macOS Intel (x64)\n- iOS XCFramework\nLinux:\nAndroid:\nWindows:\nopenEuler:\n- DISABLED\n- openEuler x86 (310p)\n- openEuler x86 (910b, ACL Graph)\n- openEuler aarch64 (310p)\n- openEuler aarch64 (910b, ACL Graph)\nUI:",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "github.com/ggml-org/llama.cpp/releases/tag/b11720",
+          "source": "llama.cpp releases",
+          "tags": [
+            "release",
+            "inference"
+          ],
+          "title": "b11720",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11720",
+          "discussion_url": null,
+          "published": "2026-10-18T17:40:31Z",
+          "summary": "ggml: support non-contiguous SUM (CPU, CUDA, Vulkan, WebGPU) ( #28851 )\n\nggml: support non-contiguous SUM (CPU, CUDA)\n\ntests: add non-contiguous SUM cases\n\ntests: SUM over non-contiguous views\n\nvulkan: support non-contiguous SUM\n\nwebgpu: support non-contiguous SUM\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/57164866\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows arm64 (CUDA…",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "FlashMask-3 eliminates mask communication in distributed context-parallel attention",
+      "summary": "Structured attention masks for document packing, prefix-LM, and sliding windows create severe memory and communication bottlenecks when distributed across context parallelism. FlashMask-3 implements a Hopper-optimized kernel using three-role warp specialization on top of FlashAttention-3's TMA/WGMMA pipeline, pairing it with zero-communication mask localization via four query-axis boundary vectors. The architecture introduces an HCC-IPO sparsity load balancer and compute-communication overlap that prunes communication using mask structure. In 128-GPU H100 benchmarks training a 118B-A14B MoE at 128K context, FlashMask-3 achieved 7.3–11.0% higher end-to-end throughput and cut attention passes by up to 44.9%.",
+      "why_it_matters": "Scaling agent context windows across multiple nodes requires distributed attention implementations that don't choke on complex multi-turn document masks.",
+      "reason": "FlashMask-3 resolves a major memory and communication bottleneck when using complex structured attention masks across multi-node context parallelism for long-context LLMs.",
+      "item": {
+        "key": "arxiv:2610.17901",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "FlashMask-3: Efficient and Expressive Mask-Aware Distributed Attention",
+        "url": "https://huggingface.co/papers/2610.17901",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Long-context training of large language and multimodal models couples structured attention masks (document, prefix-LM, share-question, sliding-window, block-sparse) with multi-node context parallelism, making the mask a dominant bottleneck. FlashMask's column-wise sparse mask compresses them from O(n^2) to O(n) via four query-axis boundary vectors, covering broad structured patterns. Implemented for Ampere GPUs, it neither exploits FlashAttention-3's TMA/WGMMA warp-specialized pipeline on Hopper nor supports distribution. The column-wise sparse mask is indexed by key positions but stores query-axis interval boundaries. Under any multi-chunk context-parallel assignment, it reduces per-rank mask localization to a provably zero-communication clip--shift--max on the boundary vectors, compatible with the single-GPU kernel. FlashMask-3 introduces a mask-aware Hopper kernel with three-role warp specialization atop FlashAttention-3's TMA/WGMMA pipeline, plus a mask-aware distributed extension: zero-communication mask localization, a sparsity-aware load balancer (HCC-IPO), and a mask-aware compute-communication overlap with mask-driven communication pruning, whose forward all-gather uses…",
+        "content": "FlashMask-3: Efficient and Expressive Mask-Aware Distributed Attention\nAbstract\nFlashMask-3 accelerates long-context attention via a Hopper-optimized sparse-mask kernel and distributed context-parallel extensions that eliminate mask-communication overhead and improve training throughput.\nLong-context training of large language and multimodal models couples structured attention masks (document, prefix-LM, share-question, sliding-window, block-sparse) with multi-node context parallelism, making the mask a dominant bottleneck. FlashMask's column-wise sparse mask compresses them from O(n^2) to O(n) via four query-axis boundary vectors, covering broad structured patterns. Implemented for Ampere GPUs, it neither exploits FlashAttention-3's TMA/WGMMA warp-specialized pipeline on Hopper nor supports distribution. The column-wise sparse mask is indexed by key positions but stores query-axis interval boundaries. Under any multi-chunk context-parallel assignment, it reduces per-rank mask localization to a provably zero-communication clip--shift--max on the boundary vectors, compatible with the single-GPU kernel. FlashMask-3 introduces a mask-aware Hopper kernel with three-role warp specialization atop FlashAttention-3's TMA/WGMMA pipeline, plus a mask-aware distributed extension: zero-communication mask localization, a sparsity-aware load balancer (HCC-IPO), and a mask-aware compute-communication overlap with mask-driven communication pruning, whose forward all-gather uses topology-aware hierarchical routing. On a single H100 across 12 masks at 4K--128K context, it improves achieved TFLOPs over FlashMask, FlexAttention, and MagiAttention by 45--141%, 34--71%, and 2--44%. At context-parallel degrees 4--32 with 8K sequence per device, it attains 31--75% compute-communication overlap efficiency and improves throughput over Megatron-Core CP ring, Megatron-Core CP all-gather, and MagiAttention by 1.80times--3.71times, 1.71times--2.92times, and 1.09times--1.46times. In end-to-end training of a 118B-A14B MoE at 128K on 128 H100 GPUs, it raises throughput by 7.3--11.0% over a Dual Chunk all-gather baseline, with attention forward+backward 24.5--44.9% faster.\nCommunity\nThe next Ernie version is coming.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2610.17901 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 9.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Commercial websites ramp up blocking against autonomous web agents",
+      "summary": "Production computer-use and autonomous browsing agents are running into widespread barriers as consumer web platforms aggressively block automated access. Providers like Meta, OpenAI, xAI, and Instinct have seen their agents blocked by Amazon, Delta Air Lines, Yelp, and major financial institutions like Charles Schwab and JPMorgan Chase. Beyond explicit corporate policies, agents are frequently caught in generalized anti-bot infrastructure like Cloudflare, causing standard checkout and search sequences to fail. The friction has prompted Meta to sidestep public web interfaces by negotiating formal shopping partnerships with select retailers like Walmart and Sephora.",
+      "why_it_matters": "Relying on raw DOM and browser-automation agents for end-to-end workflows is increasingly brittle as websites treat personal assistants as hostile bot traffic.",
+      "reason": "Widespread web blocking of autonomous agents creates immediate reliability and design challenges for production computer-use and web-browsing agent pipelines.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1013195/ai-agents-blocked-web",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Websites are closing their doors to AI agents",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1013195/ai-agents-blocked-web",
+        "discussion_url": "https://news.ycombinator.com/item?id=50141657",
+        "published": "2026-10-18T14:58:10Z",
+        "summary": "Autonomous agents are the hottest thing in AI. OpenAI, Meta, Google, Instinct, and others promise their agents can scour the internet on your behalf, doing anything from booking a dinner reservation and cleaning out your inbox to buying new shoes. But what happens when the rest of the internet won't play nice? In recent weeks, […]",
+        "content": "Autonomous agents are the hottest thing in AI. OpenAI, Meta, Google, Instinct, and others promise their agents can scour the internet on your behalf, doing anything from booking a dinner reservation and cleaning out your inbox to buying new shoes. But what happens when the rest of the internet won’t play nice?\nWebsites are closing their doors to AI agents\nOpenAI, Meta, and Google want AI agents to do everything for you. But popular services on the web aren’t letting that happen.\nIn recent weeks, users of services like Meta’s Muse, xAI’s Grok, OpenAI’s Dots, and Instinct have reported blocks preventing their AI agents from performing tasks across top websites. Yelp told TechCrunch that it only allows AI agents that pay for its data licensing program, while Delta Air Lines is preventing them from booking tickets on behalf of users. JPMorgan Chase and Charles Schwab have also confirmed that they’re blocking AI agents from accessing accounts due to security concerns. Some users say sites that previously worked with their AI agent are no longer accessible, including Cars.com and Amtrak, suggesting other companies could be quietly blocking them.\nAmazon was already fighting off AI agents last year when it banned Perplexity’s agentic shopping feature and sued the AI startup, raising legal and practical questions about the future of agents on the web. At the time, Amazon claimed it “repeatedly requested” that Perplexity stop allowing its AI agents to shop on its website, adding that third-party companies that purchase items on behalf of customers “should operate openly and respect service provider decisions whether or not to participate.”\nPerplexity responded by pointing out that Amazon doesn’t want AI agents roaming its platform because it won’t get as many human eyeballs in front of its ads — which is an actual issue for the ecommerce giant. The AI startup likened its AI agent to an extension of the user, arguing that Amazon “does not believe in your right to hire labor, to have an assistant or an employee acting on your behalf.” While a judge later ordered Perplexity to stop its AI agents from shopping on its website, an appeals court overturned this ruling in August. Amazon has since filed an amended complaint.\nEven if websites aren’t banning AI agents outright, agents may still be clashing with anti-bot systems\nThis ongoing legal battle didn’t stop OpenAI, Meta, and Google from rolling out agents of their own. But they’re dealing with the same problems as Perplexity. Muse, Meta’s deceptively cute AI assistant, most recently faced the wrath of Amazon, which said its “continued access” violates its site policies. There are reports of xAI’s Grok, Instinct’s AI agent, and OpenAI’s Dots being unable to use Amazon as well. xAI owner Elon Musk responded by saying that maybe he “should start a competitor to Amazon.” The more places bots struggle to access, the greater the questions about how useful they are.\n“Does this impact the perceived value of the Anthropics and the OpenAIs? I would say absolutely,” Chris Canal, the CEO of the AI safety evaluator EquiStamp, tells The Verge. “One of the claims is that they’re going to permeate every aspect of our lives and be able to do anything that we could do online. If there are companies that are actively working to make that not happen, there are just fewer useful things the agents can do.”\nMeta responded to instances of websites blocking Muse in a post earlier this month. “Turning away a personal agent means turning away the customer behind it,” the company says. “We’d rather work with businesses to address the underlying concerns than see them lose that customer.” Instead of trying to fight Amazon, the company has partnered with retailers like Walmart, Gap, Sephora, Best Buy, and others, allowing Muse to shop on their sites. At the same time, Shopify has also opened its network of storefronts to AI agents.\nThe Verge reached out to OpenAI and Google with requests for comments on the roadblocks their AI agents are facing but didn’t immediately hear back. Instinct declined to comment.\nEven if websites aren’t banning AI agents outright, agents may still be clashing with anti-bot systems, which have become ubiquitous across the web. Reports on Reddit suggest that Google is blocking some accounts that use Muse due to “suspicious activity,” while others have reported issues checking out on Walmart despite its Meta partnership. “There are all kinds of things that are set up not even to block agents, but to block in general bots or programs that are trying to scam or hack,” Canal adds. “These AI agents trigger those same safeguards.”\nThe web architecture provider Cloudflare has also played a role in helping sites clamp down on unwanted AI visitors. After introducing a one-click block for AI crawlers in 2025, Cloudflare began blocking crawlers that simultaneously scrape websites for both search indexing and AI training. The move is part of Cloudflare’s efforts to save the web from an influx of AI bots, which is putting a strain on internet infrastructure and wreaking havoc on email inboxes, and which could eventually make it even harder than it already is to compete against bots when purchasing concert tickets, booking reservations, or trying to get ahold of certain products.\nWhile these blocks may help keep some AI agents and bots out of a website, Canal says they will ultimately make the web more “annoying” to use as more sites roll out interfaces to confirm you’re not a robot. “We could see them on a simple grocery shopping website soon, where you’re having to jump through a bunch of hoops to prove that you’re a human using the computer or your phone.”",
+        "score": 121.0,
+        "comments": 109,
+        "also_in": [
+          "The Verge (AI)"
+        ]
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "Granite Switch 4.1 unifies chat, decision classification, and speech capabilities into a single model endpoint.",
+      "item": {
+        "key": "huggingface.co/blog/ibm-granite/granite-switch-4-1",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "Granite Switch 4.1: Chat, Decisions, and Speech from One Endpoint",
+        "url": "https://huggingface.co/blog/ibm-granite/granite-switch-4-1",
+        "discussion_url": null,
+        "published": "2026-10-15T20:34:01Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "MLExpert investigates a generalist agent model designed to autonomously execute end-to-end machine learning engineering workflows.",
+      "item": {
+        "key": "arxiv:2610.22344",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "MLExpert: Towards a Generalist Agentic Model for Autonomous Machine Learning Engineering",
+        "url": "https://huggingface.co/papers/2610.22344",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Large language models (LLMs) are expanding from assisting scientific research and engineering to autonomously developing and improving AI systems, advancing AI for AI (AI4AI) as a pathway toward recursive self-improvement (RSI). Workflow-driven machine learning engineering (MLE) systems provide a practical path toward this pursuit through complex orchestration that manages long-horizon experimentation, while recent MLE systems adopt model-directed interaction, allowing models to autonomously organize experiments and adapt optimization strategies based on execution feedback. However, feedback from each experiment reflects several preceding decisions, and a long MLE run contains many such costly experiments. Training must therefore select useful supervision from long interaction trajectories and learn from intermediate outcomes. We propose a post-training method for autonomous long-horizon MLE optimization and apply it to train MLExpert, a 35B Mixture-of-Experts agentic model. We design the Kaggle-MLE Factory to construct executable tasks and an interaction harness for model-directed experimentation. Hierarchical agentic SFT transfers general tool-use and coding capabilities to MLE…",
+        "content": "",
+        "score": 25.0,
+        "comments": 2,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LeanPRM uses Lean formalization ground-truth to generate step-by-step process supervision for verifying natural language mathematical proofs.",
+      "item": {
+        "key": "arxiv:2610.17697",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "LeanPRM: Lean-Grounded Process Supervision for Natural Language Proof Verification",
+        "url": "https://huggingface.co/papers/2610.17697",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "AI systems now write long and difficult mathematical proofs, and checking their step-by-step validity is becoming a bottleneck. A learned verifier could check proofs cheaply, but training one requires a correctness label on every step, and such labels are hard to obtain for open-ended proofs. Existing methods take them from human annotators, which is costly, or derive them from final answers, which proofs do not have, and formalizing each proof in Lean requires expert effort. We introduce LeanPRM, a framework that uses the Lean proof assistant to create step-level labels for natural-language proofs. A model writes a natural-language proof together with a paired formal proof, without feedback from Lean. Lean then labels every step, and a second model discards failures caused only by the formal syntax, so that the negative labels mark errors in the mathematics. LeanPRM contains 10,634 proofs with 152K labeled steps and no human annotation. A Qwen3-4B verifier trained on LeanPRM raises exact step-label accuracy on a held-out set of 200 proofs (LeanPRM-Bench) from 48.2 to 74.7, as opposed to 60.3 when the same base model is trained on PRM800K. It also selects better proofs in…",
+        "content": "",
+        "score": 5.0,
+        "comments": 2,
+        "also_in": []
+      }
+    },
+    {
+      "line": "CarryOn proposes a dual-loop harness to improve personalization and reliable execution in vision-language-action robot policies.",
+      "item": {
+        "key": "arxiv:2610.21453",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "CarryOn: A Dual-Loop Harness for Personalized and Reliable Robot Assistance",
+        "url": "https://huggingface.co/papers/2610.21453",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "While generalist vision-language-action (VLA) models have enabled diverse open-world manipulation, real-world robotic assistance requires two critical capabilities they currently lack: personalization and reliable execution. First, executing an instruction like \"make me a sandwich\" requires grounding subtask decomposition in persistent user preferences rather than relying on a single generic solution. Second, reliable deployment demands explainable safety assurance that proactively prevents hazards and gracefully recovers from occasional physical failures. To address these gaps, we present CarryOn, a dual-loop harness designed to augment a frozen VLA policy. The planning loop maintains persistent user-level and scene-level context that is continually grounded against new observations and revised through interaction, enabling personalized task selection and execution grounding across conversations and changing scenes. The execution loop actively supervises policy rollouts, shielding actions from predicted hazardous contact. When execution fails, the system invokes reusable control-based recovery skills that restore task progress and are refined through reflection on earlier…",
+        "content": "",
+        "score": 10.0,
+        "comments": 2,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Sphinx is an open-source pre-push hook that quizzes engineers on AI-generated code to verify understanding before shipping to production.",
+      "item": {
+        "key": "sphinx-six-theta.vercel.app/",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: Sphinx – A hook that quizzes you on your AI's code before shipping",
+        "url": "https://sphinx-six-theta.vercel.app/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50137950",
+        "published": "2026-10-18T04:33:49Z",
+        "summary": "FOSS, Basically it plugs into your existing coding agent workflow and every time you push to prod it'll throw up a questionnaire that checks if you understand how the code you're pushing works.",
+        "content": "",
+        "score": 219.0,
+        "comments": 74,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    },
+    {
+      "line": "Waypoint-OPD tracks intermediate policy shifts to preserve local action preferences during on-policy distillation from reinforcement-learned teachers.",
+      "item": {
+        "key": "arxiv:2610.21601",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Waypoint-OPD: Transferring RL-Induced Policy Shifts via Gated On-Policy Distillation",
+        "url": "https://huggingface.co/papers/2610.21601",
+        "discussion_url": null,
+        "published": "2026-10-16T00:00:00Z",
+        "summary": "Policy-shift distillation reuses the difference between a teacher's log probabilities before and after reinforcement learning (RL) as supervision on student-generated trajectories. However, this endpoint policy shift cannot reveal whether local action preferences evolved consistently during teacher training. The same endpoint shift can result from early and late shifts that reinforce or partially cancel each other. We investigate whether agreement between early and late teacher policy shifts can guide selective transfer. We introduce Waypoint-guided On-Policy Distillation (Waypoint-OPD), which uses an intermediate teacher checkpoint from the same RL run to compare early and late shifts in relative action preferences at student-visited prefixes. We gate the endpoint shift according to the directional agreement between the early and late shifts, suppressing it when they point in opposing directions. Compared with endpoint-only transfer, our method requires only one additional frozen-teacher scoring pass. Using RL-trained Qwen3-4B teachers, we evaluate our method with Qwen3-8B, Qwen3-14B, and Qwen3-30B-A3B as student models in mathematical and code reasoning. In all six…",
+        "content": "",
+        "score": 667.0,
+        "comments": 4,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your tool calls parse cleanly and your IP addresses stay unblocked.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Inference engine",
+      "headline": "vLLM v0.32.0 Adds Structured Decision System One Endpoint",
+      "blurb": "The release features 814 commits and serves a new default /v1/systemone endpoint for choice, score, and structured state queries.",
+      "item": {
+        "key": "github.com/vllm-project/vllm/releases/tag/v0.32.0",
+        "source": "vLLM releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.32.0",
+        "url": "https://github.com/vllm-project/vllm/releases/tag/v0.32.0",
+        "discussion_url": null,
+        "published": "2026-10-18T10:23:45Z",
+        "summary": "v0.32.0\n\nHighlights\n\nThis release features 814 commits from 363 contributors (121 new)!\n\nStructured decisions and generic parsers : the new POST /v1/systemone endpoint answers choice , noul and score questions over a structured state ( #59299 ), is served by default ( #60677 , #60696 ), and also runs on Cloudflare/clef-omni ( #61064 ), LiquidAI/d1-3B ( #60676 ) and DiffusionGemma ( #60466 ). The new hf tool and reasoning parser ( --tool-call-parser hf , --reasoning-parser hf ) reads the checkpoint's response_template , so models that ship it need no model-specific parser ( #58604 , #58602 ), in both the Python and Rust frontends ( #59005 ).\n\nLow-precision KV cache everywhere : NVFP4 KV cache now runs on SM8x and SM12x ( #46963 ), SM90 ( #60620 ) and with XQA decode on SM12x ( #60452 ), and on MiniMax-M3 sparse attention on SM100 ( #59300 ); GLM-5.x defaults to an FP8 KV cache on SM100, halving KV memory per rank with 2.3-5.5% more throughput at a 7-11% TTFT cost in the PR's benchmark ( #60140 , #60281 ); fp8_ds_mla on SM90 gives GLM-5.3-Flash up to 31% more output throughput ( #59246 ); ROCm gains the 4-bit ultraquant_4bit KV cache with about 2x the density of FP8 ( #57057…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Model release",
+      "headline": "Granite Switch 4.1 Unifies Chat, Decisions, and Speech",
+      "blurb": "The new Granite Switch 4.1 model brings conversational chat, structured decision-making, and speech capabilities into a single endpoint.",
+      "item": {
+        "key": "huggingface.co/blog/ibm-granite/granite-switch-4-1",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "Granite Switch 4.1: Chat, Decisions, and Speech from One Endpoint",
+        "url": "https://huggingface.co/blog/ibm-granite/granite-switch-4-1",
+        "discussion_url": null,
+        "published": "2026-10-15T20:34:01Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Product update",
+      "headline": "ChatGPT Extension Can Now Inspect Open Chrome Tabs",
+      "blurb": "OpenAI updated its Chrome extension to let ChatGPT read content from active browser tabs whenever Chrome is tagged in a conversation.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1012510/openai-chatgpt-google-chrome-tabs",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "ChatGPT can peek at your Chrome tabs now",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1012510/openai-chatgpt-google-chrome-tabs",
+        "discussion_url": null,
+        "published": "2026-10-15T22:43:23Z",
+        "summary": "OpenAI's ChatGPT Atlas browser is gone, but now ChatGPT's Google Chrome extension is getting some upgrades that allow it to use the browser tabs you already have open. With the extension installed, OpenAI says ChatGPT can now view your browser tabs when you tag Chrome in ChatGPT's web or desktop app, posting a demo video […]",
+        "content": "OpenAI's ChatGPT Atlas browser is gone , but now ChatGPT's Google Chrome extension is getting some upgrades that allow it to use the browser tabs you already have open. With the extension installed, OpenAI says ChatGPT can now view your browser tabs when you tag Chrome in ChatGPT's web or desktop app, posting a demo video showing someone asking ChatGPT to compare the three tabs they have open with sofas they're considering.\n\nA few big upgrades for Chrome users today! We're bringing the power of computer use to anyone who uses Chrome.\n\nFirst up: ChatGPT can now use your tabs in Chrome to make answers more useful and get things done for you.\n\nIf …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 13,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 27,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 32,
+      "kept": 19,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 880,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1299,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 272,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 183,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 90,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-15T18:31:08.421117Z",
+    "candidates": 105,
+    "triaged": 105,
+    "enriched": 7,
+    "headline_candidates": 115,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 78.9,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 28069,
+      "output_tokens": 11215,
+      "cost_usd": 0.063108
+    }
+  }
+}
