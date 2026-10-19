@@ -1,86 +1,86 @@
-# vLLM 0.32's Fast Paths, Agent Rollout RL, and the Walled Web
+# Bi-Directional KV Transfers, Agent Trace Judges, and Prefix Cache Surgery
 
-*2026-10-18 · 7 stories*
+*2026-10-19 · 7 stories*
 
-![Top AI stories for 2026-10-18](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-10-19](https://coronring.github.io/NewsRing/today.png)
 
-Today's updates highlight structural improvements to inference engines in vLLM and llama.cpp, alongside DeepSeek packaging its retrieval pipeline as standalone search and fetch primitives. Meanwhile, new research addresses agent reinforcement learning on unreached trajectories, even as public web services increasingly shut their doors to browser agents.
+Today's highlights focus on closing the latency and cost loops in agent architectures, from reversing KV cache flow in vLLM to auditing prompt-caching breakpoints. We also look at specialized evaluators for multi-step agent traces and a real-world multi-agent intrusion campaign.
 
 ## Across AI today
 
-- **vLLM v0.32.0 Adds Structured Decision System One Endpoint** The release features 814 commits and serves a new default /v1/systemone endpoint for choice, score, and structured state queries. ([github.com](https://github.com/vllm-project/vllm/releases/tag/v0.32.0))
-- **Granite Switch 4.1 Unifies Chat, Decisions, and Speech** The new Granite Switch 4.1 model brings conversational chat, structured decision-making, and speech capabilities into a single endpoint. ([huggingface.co](https://huggingface.co/blog/ibm-granite/granite-switch-4-1))
-- **ChatGPT Extension Can Now Inspect Open Chrome Tabs** OpenAI updated its Chrome extension to let ChatGPT read content from active browser tabs whenever Chrome is tagged in a conversation. ([theverge.com](https://www.theverge.com/ai-artificial-intelligence/1012510/openai-chatgpt-google-chrome-tabs))
+- **PyTorch Adds Native TorchNeuron Backend for AWS Trainium** TorchNeuron provides a native PyTorch backend for AWS Trainium, streamlining the execution of frontier architectures on the hardware. ([pytorch.org](https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/))
+- **Autonomous Agent Army Breaches Over 100 Corporate Sites** A hacker used an army of largely autonomous AI agents to breach more than 100 targets, including John Deere and SharkNinja. ([theverge.com](https://www.theverge.com/ai-artificial-intelligence/1013643/ai-agents-hack-john-deere-shark-ninja-cummins))
+- **CERN and Mistral Sign AI Partnership Agreement** CERN and Mistral AI have signed a statement of intent to establish a strategic research partnership. ([home.cern](https://home.cern/cern-and-mistral-join-forces-to-accelerate-ai-for-science/))
 
-## 1. vLLM 0.32 introduces dedicated decision endpoints and low-precision KV cache upgrades
+## 1. vLLM adds bi-directional KV cache transfers to tame multi-turn TTFT
 
-vLLM release v0.32.0 adds a default `POST /v1/systemone` endpoint designed to answer choice, score, and noul queries over structured state, supported across models like LiquidAI/d1-3B and Cloudflare/clef-omni. Model parsing is simplified via `--tool-call-parser hf` and `--reasoning-parser hf`, which parse response templates straight from checkpoint configs without requiring custom model-specific code. Efficiency improvements include NVFP4 KV cache support expanding across SM8x, SM90, and SM12x, alongside default FP8 KV cache for GLM-5.x on SM100 that halves KV memory per rank. Model Runner V2 also introduces a GPU n-gram speculator with variable-length drafts and replaces MRV1 on ROCm, while security additions restrict default CORS access and cap JSON schema nesting at 64 levels.
+Standard prefill-decode disaggregation sends KV cache in only one direction, leaving prefill nodes to redundantly recompute prior responses and history as agent conversations grow. AWS contributed an accelerator-agnostic bi-directional KV transfer mechanism to vLLM via extensions to the NIXL connector and a KV-cache-aware proxy router. Under this flow, decode nodes retain KV blocks, stream back metadata, and let prefill nodes execute a remote read over RDMA before computing remaining suffixes. In benchmark tests on EC2 P5en instances using AWS EFA, this cut time-to-first-token by up to 1.6x on Qwen3-32B and up to 3.3x on GLM-5-FP8.
 
-**Why it matters:** Native Hugging Face response-template parsing eliminates fragile custom tool parsers, while the dedicated decision endpoint gives agent orchestrators a standardized low-latency path for state evaluation.
+**Why it matters:** Multi-turn tool-use loops suffer heavy prefill latency penalties as context accumulates, making reverse KV reuse essential for responsive agent harnesses.
 
-[github.com](https://github.com/vllm-project/vllm/releases/tag/v0.32.0) · [github.com](https://github.com/vllm-project/vllm/releases/tag/v0.32.1rc0) · via vLLM releases
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/improve-ttft-for-multi-turn-agentic-workloads-with-bi-directional-kv-transfer-in-vllm/) · [aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/push-based-kv-transfer-to-improve-ttft-and-tpot-for-disaggregated-inference-in-vllm/) · via AWS Machine Learning
 
-## 2. SERO bootstraps long-horizon agent RL with executable oracle continuations
+## 2. Laminar releases flow-1, an RL-tuned model targeting agent execution traces
 
-Standard on-policy distillation for agent reinforcement learning struggles on long tasks because credit assignment cannot supervise useful states that the current behavior policy completely fails to explore. State-Rooted Executable Rollout Optimization (SERO) solves this by taking intermediate states actually reached by the behavior policy and allowing a training-only oracle to continue interacting with the environment. This makes real downstream observations and oracle actions directly available for optimization, using policy-reachability weighting to scale the oracle loss based on how compatible the behavior policy is with earlier oracle steps. Tested on ALFWorld and WebShop with Qwen2.5 models, learning from the full executable branch delivered significantly higher performance than supervising only the immediate root oracle action.
+Observability startup Laminar released flow-1, an open-source small model post-trained with reinforcement learning specifically to diagnose step-level faults across multi-turn agent runs. The model operates within a harness called Signals, which treats spans like repository files and navigates compressed traces using targeted string search rather than brute-force context windows. Laminar claims the model matches GPT-6-sol in error detection quality at a 23x lower serving cost while outputting structured JSON signals. Traces with matching signal events are grouped into clusters to assist engineers in turning production failures into local eval regression datasets.
 
-**Why it matters:** Supervising downstream trajectories directly from an agent's failure points provides a practical mechanism to train long-horizon tool and task agents through RL without inference overhead.
+**Why it matters:** General-purpose LLM judges are often either too noisy or too expensive to run over every multi-step tool call in production traces.
 
-[huggingface.co](https://huggingface.co/papers/2610.19397) · via HF Daily Papers
+[news.ycombinator.com](https://news.ycombinator.com/item?id=50154029) · via Hacker News front page
 
-## 3. DeepSeek unbundles search and fetch APIs at $0.75 per thousand calls
+## 3. Autonomous agent swarm breaches enterprise sites via exposed Cairn platform
 
-DeepSeek has launched standalone Search and Fetch JSON APIs that expose its internal web search engine and page extractor. The Search API returns structured results with snippets and rerank scores, while the Fetch API downloads web pages and converts their contents directly into Markdown. Usage is billed strictly at $0.75 per 1,000 successful HTTP 200 requests with non-empty results rather than by input or output tokens, with tool calls from DeepSeek Harness, Codex, and Claude Code remaining free until November 1, 2026. Rate limits are handled independently across accounts with separate per-domain QPS throttling enforced on fetch calls.
+AI security firm Norforge reported that a hacker compromised over 100 enterprise websites using autonomous agent networks orchestrated through exposed instances of Cairn, an open-source task-solving engine. According to reports confirmed by Cummins and covered by Reuters, targeted victims also included John Deere and SharkNinja, primarily hitting product support and third-party vendor sites. The campaign relied on fewer than 100 Chinese characters of operational instructions defining preferred intrusion tactics, with individual breaches taking roughly 23 hours of mostly autonomous execution. Norforge identified more than 20 exposed Cairn deployments with probable malicious intent, while Cairn's author reiterated that the project was designed as a general problem solver rather than an exploit framework.
 
-**Why it matters:** Token-independent, flat-rate pricing for structured search and clean markdown extraction offers an attractive turnkey retrieval primitive for agent toolsets.
+**Why it matters:** This represents one of the clearest production demonstrations of autonomous multi-agent task engines being weaponized for long-horizon reconnaissance and exploitation with minimal human guidance.
 
-[api-docs.deepseek.com](https://api-docs.deepseek.com/guides/search/) · [discussion](https://news.ycombinator.com/item?id=50138531) · via Hacker News front page
+[theverge.com](https://www.theverge.com/ai-artificial-intelligence/1013643/ai-agents-hack-john-deere-shark-ninja-cummins) · [discussion](https://news.ycombinator.com/item?id=50152877) · via Hacker News (AI)
 
-## 4. Ollama v0.40.7 delegates speculative draft inference
+## 4. Cloudflare cuts agent review spend 68% by repairing prompt cache breakpoints
 
-Ollama v0.40.7 updates its runtime to allow the underlying `llama-server` to automatically infer draft speculative decoding types. The release also integrates support for PPLX Decider v1.2 within MLX. Additionally, the OpenAI-compatible endpoint now allows Responses effort parameters to be passed to non-thinking models.
+Cloudflare published an optimization postmortem after costs for its automated code review agents doubled between April and August, climbing from $1.19 to $2.46 per review. While moving reviewers to Claude Opus 4.7 drove up raw rates, the core bottleneck was poor prompt caching in OpenCode v1, where session-opening system prompts had only a 14% to 26% cache hit rate. Because the harness combined static tool definitions with dynamic environment variables in a single system block with a trailing breakpoint, cross-repository prefix sharing broke entirely. By restructuring prompt prefixes, splitting cache breakpoints, and optimizing call frequency, Cloudflare dropped costs down to $0.77 per review while cutting median turnaround from 4m 09s to 1m 32s.
 
-**Why it matters:** Automatic inference of speculative draft configurations removes manual tuning overhead when serving local models for fast agent inference.
+**Why it matters:** Even tiny structural flaws in how your agent harness serializes system prompts and tool schemas can silently nullify prefix caching and triple your provider bills.
 
-[github.com](https://github.com/ollama/ollama/releases/tag/v0.40.7-rc0) · via Ollama releases
+[blog.cloudflare.com](https://blog.cloudflare.com/obsessive-inference-optimization/) · via Cloudflare AI
 
-## 5. llama.cpp fuses Qwen activation chains into a single CUDA kernel
+## 5. LiveMACE evaluates persistent agent decision traces in non-stationary markets
 
-Release b11721 in llama.cpp ports Vulkan-based post-gate kernel fusions directly to CUDA for Qwen4exp architectures. The update fuses the four-step sequence of scale, sigmoid, scale, and `hc_post` into a single unified kernel (`dsv4_hc_post_f32`) using a gated template flag. This allows the operation to compute the final scaled output directly from raw weights without launching four separate GPU kernels.
+A new benchmark paper introduces LiveMACEBench, an evaluation framework that pits persistent LLM agents against live cryptocurrency and US equity markets to diagnose execution capabilities over time. Rather than relying purely on outcome metrics like financial returns, the benchmark evaluates full decision trajectories across tool use, persistent memory, rule adherence, and multi-agent coordination. Over a 30-day live deployment across five frontier models, the researchers observed a marked divergence between realized profit and underlying mechanism competency. Traces revealed that identical market outcomes often stemmed from drastically different internal strategies, demonstrating that raw return leaderboards hide severe behavioral bottlenecks.
 
-**Why it matters:** Fusing activation layers reduces kernel dispatch latency and intermediate tensor allocations, speeding up local execution of Qwen-based models.
+**Why it matters:** This provides rigorous empirical evidence that outcome-based agent evals fail to reflect genuine tool and memory competency in non-stationary environments.
 
-[github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b11721) · [github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b11720) · via llama.cpp releases
+[huggingface.co](https://huggingface.co/papers/2610.09872) · via HF Daily Papers
 
-## 6. FlashMask-3 eliminates mask communication in distributed context-parallel attention
+## 6. OpenMobile-2 pairs Android environments with app-native tool APIs
 
-Structured attention masks for document packing, prefix-LM, and sliding windows create severe memory and communication bottlenecks when distributed across context parallelism. FlashMask-3 implements a Hopper-optimized kernel using three-role warp specialization on top of FlashAttention-3's TMA/WGMMA pipeline, pairing it with zero-communication mask localization via four query-axis boundary vectors. The architecture introduces an HCC-IPO sparsity load balancer and compute-communication overlap that prunes communication using mask structure. In 128-GPU H100 benchmarks training a 118B-A14B MoE at 128K context, FlashMask-3 achieved 7.3–11.0% higher end-to-end throughput and cut attention passes by up to 44.9%.
+OpenMobile-2 introduces an open mobile agent framework trained across MobileGym++, an environment featuring 35 simulated commercial apps alongside traditional Android emulators covering 110 total applications. Crucially, the system moves beyond pure vision-and-touch GUI loops by introducing hybrid execution, exposing over 300 app-native tool APIs across more than 50 apps so models can interleave direct function calls with UI taps. The release includes 12,000 fine-tuning trajectories and 2,000 verifiable RL tasks with automated reward signals. On standardized benchmarks, the model reached 79.9 on AndroidWorld and jumped from 31.9 to 59.6 on the real-device SPA-Bench suite.
 
-**Why it matters:** Scaling agent context windows across multiple nodes requires distributed attention implementations that don't choke on complex multi-turn document masks.
+**Why it matters:** Exposing structured tool endpoints directly alongside OS GUI actions is a far more efficient architectural paradigm for mobile agents than relying strictly on multimodal screenshot scraping.
 
-[huggingface.co](https://huggingface.co/papers/2610.17901) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2610.14157) · via HF Daily Papers
 
-## 7. Commercial websites ramp up blocking against autonomous web agents
+## 7. TorchNeuron brings native PyTorch PrivateUse1 support to AWS Trainium
 
-Production computer-use and autonomous browsing agents are running into widespread barriers as consumer web platforms aggressively block automated access. Providers like Meta, OpenAI, xAI, and Instinct have seen their agents blocked by Amazon, Delta Air Lines, Yelp, and major financial institutions like Charles Schwab and JPMorgan Chase. Beyond explicit corporate policies, agents are frequently caught in generalized anti-bot infrastructure like Cloudflare, causing standard checkout and search sequences to fail. The friction has prompted Meta to sidestep public web interfaces by negotiating formal shopping partnerships with select retailers like Walmart and Sephora.
+AWS announced TorchNeuron, an open-source PyTorch backend targeting Trainium2 and Trainium3 silicon that integrates via PyTorch's native `PrivateUse1` device registration. Developers can switch hardware execution paths directly using `.to('neuron')` or `torch.accelerator` without rewriting standard models or distributed code. The integration supports both eager execution (along with an experimental adaptive eager mode) and `torch.compile(backend='neuron')`, which lowers Dynamo graphs via Torch-MLIR to StableHLO and compiles NEFF binaries. Serving runtimes including vLLM Neuron rely directly on this compilation path, offering immediate support for FP16, BF16, and FP8 through TorchAO.
 
-**Why it matters:** Relying on raw DOM and browser-automation agents for end-to-end workflows is increasingly brittle as websites treat personal assistants as hostile bot traffic.
+**Why it matters:** Native device registration reduces the integration friction for porting vLLM inference engines and custom agent serving stacks to Trainium without relying on bespoke vendor SDKs.
 
-[theverge.com](https://www.theverge.com/ai-artificial-intelligence/1013195/ai-agents-blocked-web) · [discussion](https://news.ycombinator.com/item?id=50141657) · via Hacker News (AI)
+[pytorch.org](https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/) · [huggingface.co](https://huggingface.co/blog/hf-torchneuron) · via PyTorch
 
 ## Quick hits
 
-- Granite Switch 4.1 unifies chat, decision classification, and speech capabilities into a single model endpoint. ([huggingface.co](https://huggingface.co/blog/ibm-granite/granite-switch-4-1))
-- MLExpert investigates a generalist agent model designed to autonomously execute end-to-end machine learning engineering workflows. ([huggingface.co](https://huggingface.co/papers/2610.22344))
-- LeanPRM uses Lean formalization ground-truth to generate step-by-step process supervision for verifying natural language mathematical proofs. ([huggingface.co](https://huggingface.co/papers/2610.17697))
-- CarryOn proposes a dual-loop harness to improve personalization and reliable execution in vision-language-action robot policies. ([huggingface.co](https://huggingface.co/papers/2610.21453))
-- Sphinx is an open-source pre-push hook that quizzes engineers on AI-generated code to verify understanding before shipping to production. ([sphinx-six-theta.vercel.app](https://sphinx-six-theta.vercel.app/))
-- Waypoint-OPD tracks intermediate policy shifts to preserve local action preferences during on-policy distillation from reinforcement-learned teachers. ([huggingface.co](https://huggingface.co/papers/2610.21601))
+- Discussions emerge around Rome-style memory attacks that tamper with active model weights directly inside GPU VRAM. ([stealthium.io](https://stealthium.io/blog/hands-off-detecting-model-weight-tampering))
+- A massive 26,000-word post from Goodfire researcher Nick Cammarata is driving debate around new interpretability claims regarding neural network representations. ([technologyreview.com](https://www.technologyreview.com/2026/10/19/1147149/we-were-looking-at-it-wrong-the-explosive-claim-thats-upended-the-ai-world/))
+- Practitioners share workflows and operational ceilings when scripting Claude Code via tmux sessions and send-keys commands. ([crystl.dev](https://crystl.dev/guides/tmux-for-ai-agents/))
+- llama.cpp release b11741 adds cooperative-k dp4a GEMM OpenCL kernels optimizing quantized q4_0, q4_k, and q6_k inference. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b11741))
+- The SciΠvot benchmark evaluates LLM agent judgment at high-leverage decision nodes during long-horizon autonomous scientific research. ([huggingface.co](https://huggingface.co/papers/2610.21082))
+- Community discussions cover the release of the MiniMax M3.1 Flash model. ([minimax.io](https://www.minimax.io/blog/minimax-m31f))
 
-May your tool calls parse cleanly and your IP addresses stay unblocked.
+Check your prompt breakpoints before your provider invoices check them for you.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 105 candidates, 105 reviewed, gemini/gemini-3.8-flash, 79s, 3 model calls, $0.0631.</sub>
+<sub>35 of 35 sources read. 99 candidates, 99 reviewed, gemini/gemini-3.8-flash, 337s, 3 model calls, $0.0492.</sub>
