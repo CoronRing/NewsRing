@@ -1,0 +1,688 @@
+{
+  "date": "2026-10-20",
+  "generated_at": "2026-10-20T19:55:56.665956Z",
+  "title": "Voice Agents, TPU Backends, and Trace Verification",
+  "intro": "Today's highlights focus on running models everywhere from native TPUs to production inference engines, paired with practical evolutions in agent scaffolding. We look at full-duplex voice SDKs, trace-grounded evaluation judges, and the privacy hazards of generative share links.",
+  "stories": [
+    {
+      "headline": "Mistral releases Voxtral 3 with end-to-end voice and tool execution",
+      "summary": "Mistral announced Voxtral 3, a suite comprising multilingual speech models alongside a real-time voice agent SDK. The stack unifies speech-to-text, semantic reasoning, tool calling, and text-to-speech within a single streaming pipeline, sporting sub-500ms transcription latency and built-in end-of-turn detection based on both acoustic and semantic cues. The underlying Voxtral Small Transcribe 3 model covers 50 languages with context-biasing capabilities, while the Mini TTS 3.0 model generates adaptive expressive speech across 35 languages. Crucially for enterprise orchestration, the agent framework supports multi-step tool calls mid-conversation and allows full self-deployment on internal infrastructure to maintain data sovereignty.",
+      "why_it_matters": "It bundles low-latency audio streaming directly with native multi-step tool calling into an on-premise capable pipeline, bypassing traditional brittle STT-to-LLM-to-TTS glue code.",
+      "reason": "Mistral's new voice agent SDK combines real-time speech and emotional TTS with deep native tool calling for conversational agents.",
+      "item": {
+        "key": "mistral.ai/news/voxtral-3",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Voxtral 3",
+        "url": "https://mistral.ai/news/voxtral-3/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50168396",
+        "published": "2026-10-20T16:02:07Z",
+        "summary": "Voxtral 3: Mistral's voice agent SDK for real-time speech in 50+ languages — accurate transcription, emotional TTS, deep tool use. EU-hosted or self-deployed.",
+        "content": "Merci de recevoir ce patient pour un avis dermatologique. Traitement en cours : crème à l’hydrocortisone. Dr Martin, Clinique du Parc.\nAgent\nIt says, \"Merci de recevoir ce patient pour un avis dermatologique.\" Your doctor is asking a dermatologist, Dr Martin, to see you. The next slot is Tuesday at 5:45 pm. Shall I book it?\nTool call\nbook_appointment(slot=\"Nov 3 17:45\")\nResult\nconfirmed\nAgent\nDone. Bring the letter, your carte Vitale, and I'll text you the details in English.\nVoxtral 3\nBéatrice\nHi, my doctor gave me a referral letter in French. Can you book it for me?\nBéatrice\n4402... sorry, 4420 1187.\nBéatrice\nYes, please.\nThinking\nSummary\nVoxtral 3 introduces a cutting-edge voice agent SDK and state-of-the-art speech models designed for real-time, multi-step conversations across 50+ languages. It combines accurate transcription, natural speech synthesis with emotional adaptability, and deep tool integration for seamless workflow automation. Available via Mistral’s EU-hosted API or self-deployment, it ensures data sovereignty while delivering low-latency, human-like interactions for contact centers, virtual assistants, and hands-free copilots.\nSpeech transcription and voice generation have come a long way, but building end-to-end voice agents that can listen, reason, interact, and handle complex workflows remains difficult.\nA reliable voice agent needs to do four things very well (and simultaneously):\nListen accurately across languages, accents, speakers, and interruptions,\nReasondeeply about what users mean in specific contexts,\nSpeak naturally with emotion and expression, and\nTake action over multiple steps through connected systems.\nGetting all four to work together reliably in real time remains a challenge.\nTo address this, we introduce Voxtral 3: a new family of state-of-the-art speech-to-text and text-to-speech models, alongside a voice agent SDK that brings listening, thinking, tool calling, and speaking into a single real-time streaming pipeline.\nVoxtral 3 is built to create natural conversational experiences, from contact-center agents and service desks to virtual assistants and hands-free copilots. With support for dozens of languages, expressive speech, complex reasoning, and deep integration with your own tools and data, agents built with Voxtral can interpret nuanced intent, reason through sophisticated requests, and execute multi-step actions across connected systems.\nAs with other Mistral models, the Voxtral 3 family is designed for sovereign deployment. Available today through Mistral's EU-hosted API or for self-deployment on your own infrastructure, it gives organizations control over where audio is processed, how data is handled, and whether conversations are retained.\nHighlights\nAccurate transcription across 50+ languages. The speech-to-text model, Voxtral Small Transcribe 3, is state-of-the-art in multilingual transcription, identifying who said what (diarization), using keyphrases to improve its accuracy (context-biasing). It detects when someone has finished speaking so agents can respond without delay (end-of-turn detection).\nNatural speech that adapts to the conversation. The text-to-speech model, Voxtral Mini TTS 3, introduces new voices that adjust their emotion, pace, and emphasis based on conversational context, with support for 35+ languages and 50+ dialects.\nHuman-like intelligence at your (spoken) command. The new voice agent SDK combines listening, reasoning, tool calling, and speaking into a real-time experience. Agents can retrieve information, interact with business systems, and complete tasks during live conversations over phone or web.\nPro Voice for distinctly accurate voice adaptation. For professional use cases where basic voice cloning does not suffice, Voxtral’s Pro Voice adaptation is able to reproduce a speaker’s distinctive character, emotional range, and speaking style across languages, using just 30 minutes of audio.\nYour voice AI, on your infrastructure. Use Mistral's EU-hosted API or deploy Voxtral 3 on your own infrastructure. Keep sensitive conversations within your environment and control whether any audio is retained.\nIt hears 50+ languages, with state-of-the-art accuracy.\nVoxtral Transcribe 3 represents a significant milestone across transcription, diarization (who spoke when) and context biasing capabilities. The supported list of languages is expanded to 50, including 24 official EU languages and many low-resource Asian and Indic languages.\nThe Small version achieves state-of-the-art results across diarization and multilingual transcription, including in English, French and Spanish. It outperforms Whisper, Scribe v2 and Gemini 3.5 Transcribe. The Mini variant is 4B parameters, enabling fast and accurate transcriptions at a price of $0.0035/min.\nBoth models support context biasing, where key terms and free-form text can be given to bias the transcription and improve recall on technical terms. This enables them to be used in production settings with domain-specific vocabulary without the need for fine-tuning.\nVoxtral Realtime Transcribe 3 is a realtime transcription model built for agentic use-cases. It achieves high-quality transcriptions at sub-500ms latency in over 35 languages, including with diarization and context biasing.\nEnd-of-turn prediction is natively supported, incorporating both acoustic and semantic information to accurately predict when a user is finished speaking. This allows for low-latency voice agent applications, while minimizing false cut-off rates when the user is prematurely interrupted.\nIt answers with the right emotion, in your or your customer’s brand's own voice and local dialect.\nVoxtral Mini TTS 3.0, available in batch and realtime, achieves state-of-the-art expressiveness and instruction following for 35+ languages and 50+ dialects. At $13 per 1M characters, Voxtral Speech 3 costs less to run than comparable models from OpenAI TTS-1, Deepgram, ElevenLabs Flash and Gemini Flash.\nThe speech model…",
+        "score": 358.0,
+        "comments": 98,
+        "also_in": [
+          "Hacker News front page",
+          "Mistral AI"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "DeepSeek open-sources DeepInfer for dedicated V4.1 serving",
+      "summary": "DeepSeek released DeepInfer, the dedicated inference framework that powers their large-scale production workloads, under an Apache 2.0 license. Initially targeting DeepSeek-V4.1-Flash on NVIDIA SM100 GPUs and Huawei Ascend 950 NPUs, the engine was built off vLLM with cues from SGLang and TensorRT-LLM. It packages low-level kernels including FlashMLA, DeepGEMM, and DeepEP, alongside advanced scheduling techniques like DSpark confidence-scheduled draft token verification, sliding-window attention (SWA) bounded replay to minimize prefill work, and asynchronous CPU/device scheduling. Notably for reliable tool calling, it supports structured outputs conforming to JSON schemas or EBNF grammars, alongside deterministic sampling and batch-invariant execution.",
+      "why_it_matters": "Provides a production-grade look into DeepSeek's optimized serving internals, including custom kernels for multi-head latent attention (MLA) and speculative draft verification.",
+      "reason": "A high-performance dedicated inference framework built specifically for serving DeepSeek model families at scale.",
+      "item": {
+        "key": "github.com/deepseek-ai/DeepInfer",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "DeepInfer: High-performance inference framework for DeepSeek models",
+        "url": "https://github.com/deepseek-ai/DeepInfer",
+        "discussion_url": "https://news.ycombinator.com/item?id=50163277",
+        "published": "2026-10-20T09:08:54Z",
+        "summary": "Comments",
+        "content": "DeepInfer is the high-performance inference framework that powers DeepSeek's large-scale production services. This open-source release provides offline inference with the core features needed for serving at scale.\nSupported models:\n- DeepSeek-V4.1-Flash\nSupported features:\n- Optimized kernels, model and sampler runtime\n- Parallelism: Attention DP / balanced CP, MoE EP + EPLB\n- DSpark and confidence-scheduled verification\n- SWA bounded replay\n- Asynchronous scheduling (zero-overhead batch scheduler)\n- Batch-invariant inference\n- Deterministic sampling\n- Structured outputs\nFeature details and configuration\n- Optimized kernels: FlashMLA, DeepGEMM, DeepEP, TileKernels, DeepSelect, and custom TileLang kernels.\n- DSpark and confidence-scheduled verification: accelerate decoding with draft tokens and use confidence estimates to schedule verification. Set DEEPINFER_ENABLE_MTP_VARLEN=1; DEEPINFER_USE_NEXTN_DECODE controls the maximum draft length (default: 5).\n- Decoder SWA bounded replay: reduce decoder prefill work by replaying only a bounded suffix. Set DEEPINFER_YOCO_PREFILL_TRUNCATION_MODE=compact and DEEPINFER_YOCO_PREFILL_KEEP_TOKENS=140 for the default V4.1 settings; the retained suffix must cover the SWA window plus the maximum backtracking length.\n- Asynchronous scheduling: overlap CPU batch scheduling with device execution. Enabled by default.\n- Batch-invariant inference: keep model results identical across different batch compositions. Enable with DEEPINFER_BATCH_INVARIANT=1 (NVIDIA only).\n- Deterministic sampling: produce identical outputs for identical input tokens and sampling parameters. Set DEEPINFER_BATCH_INVARIANT=1 DEEPINFER_ENABLE_MTP_VARLEN=0 and pass a fixed seq_seed to SamplingParams (NVIDIA only).\n- Structured outputs: constrain generation to a regex, JSON schema, or EBNF grammar. Pass so_args={\"schema_type\": ..., \"schema\": ...} to SamplingParams; see examples.\nSupported hardware:\n- NVIDIA SM100 GPUs\n- Huawei Ascend 950 NPUs\nRequired for a complete inference service (not included in this release):\n- A KV cache system\n- VE/Prefill/Decode disaggregation (most required engine functionality is already implemented)\n- Load balancing across data-parallel replicas for both prefill and decode\n- Linux\n- GCC >= 13.0\n- Python 3.12\n- CUDA 13 (NVIDIA only)\n- CANN 9.2 (Ascend only)\nBefore building DeepInfer, please create and activate an empty Python 3.12 environment.\n# Use `ascend` instead for the Ascend platform\n# Keep it exported in the environment where you run DeepInfer\nexport DEEPINFER_ACCELERATOR=nvidia\n./build.sh\nThe default checkpoint, deepseek-ai/DeepSeek-V4.1-Flash-1017, is\ndownloaded into the Hugging Face cache on the first run; set DEEPINFER_HF_MODEL_DIR=/path/to/DeepSeek-V4.1-Flash-1017 to\nrun from a local copy instead.\npython examples/offline_inference.py\nSee examples for details.\nMeasured on 4 SM100 GPUs for prefill and 64 for decode — each within one scale-up domain. To reproduce the benchmarks, see run_sweep.sh.\nSee eval/README.md.\nDeepInfer is released under the Apache License 2.0. See LICENSE for details.\nDeepInfer was originally built primarily on vLLM, with additional inspiration from SGLang and TensorRT-LLM. We thank their developers.\n@misc{deepinfer2026,\n  title = {DeepInfer: High-performance, large-scale inference framework for DeepSeek models},\n  author = {DeepSeek-AI},\n  year = {2026},\n  publisher = {GitHub},\n  howpublished = {\\url{https://github.com/deepseek-ai/DeepInfer}},\n}",
+        "score": 1966.0,
+        "comments": 762,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "Meta and Google debut TorchTPU as a native PyTorch backend",
+      "summary": "Meta and Google open-sourced TorchTPU, an upstream collaboration providing a first-class, principled PyTorch backend for Google TPUs. Unlike historical PyTorch/XLA and TorchAX implementations that forced workloads into Lazy Tensors or JAX runtime abstractions, TorchTPU prioritizes native eager execution through a custom DeferAndFuse JIT and hooks directly into Torch Dynamo via `torch.compile()`. The runtime supports approximately 450 ATen operators, PyTorch distributed primitives like DTensor and FSDP, and standard ecosystem tools like Ray and vLLM without JAX runtime dependencies. Migrating basic workloads requires as little as swapping `.to(\"cuda\")` for `.to(\"tpu\")`, validated across 5,000 top Hugging Face architectures.",
+      "why_it_matters": "Lowers the engineering friction of serving and evaluating PyTorch-based agent models on non-NVIDIA TPU clusters without rewriting pipelines for JAX.",
+      "reason": "Google and Meta have officially open-sourced a native, principled PyTorch backend for TPUs, simplifying non-GPU serving and execution.",
+      "item": {
+        "key": "pytorch.org/blog/introducing-torchtpu",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "Introducing TorchTPU",
+        "url": "https://pytorch.org/blog/introducing-torchtpu/",
+        "discussion_url": null,
+        "published": "2026-10-20T16:02:30Z",
+        "summary": "TL;DR TorchTPU is an open source collaboration between Google and Meta that introduces a native and principled PyTorch backend for Google TPUs. It enables seamless out-of-the-box model execution and TPU...\n\nThe post Introducing TorchTPU appeared first on PyTorch .",
+        "content": "TL;DR\n\nTorchTPU is an open source collaboration between Google and Meta that introduces a native and principled PyTorch backend for Google TPUs. It enables seamless out-of-the-box model execution and TPU migration while delivering industry-competitive inference and training performance through eager execution optimizations, torch.compile integration, and native hardware acceleration.\n\nIntroducing TorchTPU\n\nGoogle TPUs have been used very successfully, both within and outside of Google, to train and deploy large ML models at massive scale. They are specifically designed for ML and, as such, they provide significant benefits in terms of performance, energy, and cost. While TPUs have been historically associated with the TensorFlow and the JAX ecosystems, we’re excited to introduce TorchTPU , a new effort started at Google in mid 2025, in collaboration with the PyTorch Team at Meta, to run PyTorch natively on TPUs.\n\nTo program Google’s TPU at a level below the Python framework, developers utilize the XLA compiler stack. In 2020, Google introduced the first compiled version of PyTorch for TPU, PyTorch/XLA, based on Lazy Tensors. While foundational, this initial integration struggled to keep pace with the rapid, community-driven evolution of PyTorch. Crucially, PyTorch/XLA required intrusive source-code modifications to explicitly define compilable regions, suffered from severe compile-time latency, lacked support for PyTorch’s native imperative (“eager”) execution mode, and lagged in supporting emerging distributed computing primitives within the PyTorch ecosystem. In contrast with previous efforts such as PyTorch/XLA and TorchAX, which shoehorn PyTorch into JAX’s modus operandi, TorchTPU was built as a principled TPU backend for PyTorch: eager execution is a top priority, and existing PyTorch workloads run out of the box with trivial code changes (e.g., .to(\"cuda\") → .to(\"tpu\") ).\n\nMore specifically, as we started TorchTPU we deliberately formulated a set of principles to follow:\n\nPyTorch Citizenship :\n\nNo JAX dependencies in the runtime;\n\nSolid eager mode;\n\nTorch.compile() based on Torch Dynamo (not Lazy Tensor) and with similar performance to JAX compile;\n\nWide support for PyTorch distributed idioms (DDP, FSDP, DTensor, …) by providing TPU collectives at the lowest level in the PyTorch stack (e.g. Process Group API);\n\nSeamless integration into the PyTorch ecosystem;\n\nCommunity engagement.\n\nFocus on the User:\n\nPorting a workload to TPU should be as simple as changing model.to(\"cuda\") to model.to(\"tpu\") . (One cannot achieve peak TPU performance with that simple change, since a model’s shapes, sharding and ops may be skewed toward a GPU architecture; however, the model should run out of the box.)\n\nProvide user-friendly and actionable messages for runtime/compiler errors;\n\nIntegrate with the tools and frameworks that the PyTorch community already uses (e.g., torch.profiler, DTensor, Ray).\n\nImprove the State of the Art :\n\nBuild a solution that can compete with PyTorch on GPUs for large scale workloads;\n\nIntroduce a JIT compilation approach for eager execution, with runtime optimizations that can bridge the performance gap between op-by-op execution and compiled execution;\n\nImprove the TPU programming stack by introducing bounded dynamism, by avoiding XLA recompilation due to shape changes, and by exploring dynamic TPU kernels that can be precompiled ahead of time.\n\nTorchTPU is in active development, it is used in production for both inference and training workloads for some of the largest Google Cloud customers, and can be found as an Open Source project in this GitHub repo . At the time of this writing, we have:\n\nAdded support for both eager and compiled modes, including a new DeferAndFuse eager mode;\n\nAdded support for ~450 Aten ops (skipping ops with structural or composite delegates), including forward and backward pass for all Core ATen ops required for the major deep learning architectures;\n\nAdded ability to author custom kernels via JAX/Pallas and via Helion DSL;\n\nValidated out-of-box execution on the 5,000 most downloaded Hugging Face models, including:\n\nLLMs: Qwen, DeepSeek, Gemma, LLama, Mistral, GPT, OPT, BLOOM, Falcon, StableML\n\nAudio/Speech: Whisper, Wav2Vec2, HuBERT, MMS\n\nVision: DinoV2, SigLIP, CLIP, Swin Transformer, ConvNeXt, ViT, ResNet, DETR\n\nText Encoders & Search: BERT, ALBERT & Electra, RoBERTa, DeBERTa, T5, MT5, Flan-T5\n\nValidated DTensor-based sharding;\n\nValidated multi-host inference (vLLM and SGLang) and fine-tuning / training workloads (TorchTitan), with Ray-based orchestration;\n\nValidated integration with vLLM, SGLang, TorchTitan, Ray, and TorchRec.\n\nIn the remainder of this document we discuss key aspects of the TorchTPU architecture and some initial results.\n\nArchitecture Deep Dive\n\nA TPU Primer\n\nGoogle TPUs are specialized ASICs designed specifically to perform the massive tensor operations that are the foundation of deep learning. From a HW architecture perspective , a TPU chip contains (depending on the generation):\n\nOne or more TensorCores , each comprising one or more matrix-multiply units (MXUs), a vector unit (VPU), and a scalar unit (see this link ). Based on the TPU generation, an MXU can include 256×256 multiply-accumulators, which are arranged as a systolic array .\n\nOne or more SparseCores , which are specialized units for sparse operations (e.g., gather, scatter, embeddings) and for collectives. They can run in parallel with a TensorCore, enabling compute-compute and compute-communication overlaps.\n\nA large High Bandwidth Memory (HBM) – 288 GB at 8.6 TB/s in TPU 8i , which can be used to store ML data and share that with the CPU.\n\nBidirectional Inter-Chip Interconnect (ICI) – 19.2 TBps in TPU 8t and 8i , allowing fast communication between TPU chips within user-configured TPU Slices , which are logical subgroups of a TPU Pod , comprising of a preconfigured number of TPU chips connected in a 3D torus (for TPU 7, TPUv 8t) or Boardfly (TPU 8i) configuration.\n\nBidirectional Data-Center-Network (DCN) – 400 GBps in TPU 8t , allowing communication between TPU chips across Slices.\n\nTPUs are programmed with the XLA compiler stack through two different entry points: StableHLO (higher-level IR for ML ops) and Mosaic (lower-level IR for custom kernels). The actual TPU ISA is proprietary, subject to change, and not publicly available. Effectively, one can think of StableHLO and (even more so) of Mosaic as equivalent to PTX. See picture below for a high-level sketch.\n\n-->\n\nA C++ program can access a local TPU by instantiating a PjRT Client , whose API provides methods to compile MLIR (StableHLO or Mosaic) into a TPU executable, to launch that executable, and to copy data to-from the TPU. Note that TPU execution is asynchronous and the CPU can wait for a TPU result to be ready by waiting on the associated PjRTBuffer.\n\nNotable features of the TPU programming model:\n\nA TensorCore device can be thought of as a single-threaded processor with one or more massive matrix-multiply units (MXU). Consequently, to reach peak performance it is key that a model’s shapes be sufficiently wide to exploit the full potential of the MXU. This differs from GPUs where launching multiple smaller kernels in parallel can help maximize HW utilization.\n\nThe XLA compiler can instruct a TensorCore to offload sparse and collective operations to SparseCore, for more efficient and/or parallel execution. This happens either automatically or through user-supplied MLIR annotation in a compiled StableHLO module.\n\nA TPU device can be accessed by only one user-space process. Following our goal of seamless integration in the PyTorch ecosystem, for distributed TorchTPU workloads we adopt a one-process-per-device model in contrast with JAX’s one-process-per-host model. However, because a TPU can be accessed by only one user-space process, RL colocation can’t be supported out of the box and we are investigating ways to relax or workaround this TPU…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "github.com/google-pytorch/torch_tpu",
+          "source": "Hacker News front page",
+          "tags": [
+            "community"
+          ],
+          "title": "Google open-sources TorchTPU, a native PyTorch back end for TPUs",
+          "url": "https://github.com/google-pytorch/torch_tpu",
+          "discussion_url": "https://news.ycombinator.com/item?id=50169053",
+          "published": "2026-10-20T16:40:24Z",
+          "summary": "Comments",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "huggingface.co/blog/hf-torchtpu",
+          "source": "Hugging Face Blog",
+          "tags": [
+            "lab",
+            "open-source"
+          ],
+          "title": "Hugging Face ❤️ TorchTPU: TPUs, Natively",
+          "url": "https://huggingface.co/blog/hf-torchtpu",
+          "discussion_url": null,
+          "published": "2026-10-20T00:00:00Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Sauron tackles judge failure modes using evidence-first trace audits",
+      "summary": "A new paper introduces Sauron, an agentic verifier designed to fix faulty LLM-as-judge scoring in long-horizon agent benchmarks where agents can fabricate success reports to game RL rewards. Rather than passively evaluating ungrounded execution logs, Sauron queries both environment state and trace steps independently, accepting claims only after extracting verifiable receipts from the source. On a benchmark of 2,586 personal-assistant criteria, Sauron scored an F1 of 0.96 with GPT-5.6 Sol—beating the Gandalf baseline at 23% lower cost—while catching 97% of injected failure modes across 13 fault families.",
+      "why_it_matters": "Directly targets reward hacking and hallucinations in LLM-as-judge evals by binding rubric grading to auditable state receipts.",
+      "reason": "Directly tackles critical LLM-as-judge failure modes in long-horizon agent evals by enforcing evidence extraction from execution traces.",
+      "item": {
+        "key": "arxiv:2610.17724",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Evidence-First Agentic Verification",
+        "url": "https://huggingface.co/papers/2610.17724",
+        "discussion_url": null,
+        "published": "2026-10-20T00:00:00Z",
+        "summary": "Long-horizon, semi-verifiable agentic tasks often rely on rubric-based evaluation, but the evidence needed to assess these tasks can be spread across the environment state and the execution trace. A judge may overlook this evidence or accept unsupported claims, including an agent's own reports of success. When rubric verdicts serve as reinforcement-learning rewards, such errors can reinforce undesirable behavior. We introduce Sauron, an evidence-first agentic verifier that investigates both state and trace and relies on a claim only after independently validating it against its source. Bounded queries and joint investigation of related criteria reduce context use and redundant work, and each verdict carries an auditable receipt of its supporting evidence. Across 2,586 human-labeled criteria from 100 personal-assistant episodes, Sauron achieves the highest F1 of five verifiers on all eight backbones tested while costing less than Gandalf, the strongest baseline. With GPT-5.6 Sol, it reaches 0.96 F1 versus Gandalf's 0.92 at 23% lower cost, with a wider margin on process criteria. On a paired fault-injection suite covering 13 families, several of which simulate reward hacking, Sauron…",
+        "content": "Abstract\nSauron is an evidence-first agentic verifier that independently validates claims against environment state and execution traces to improve rubric-based evaluation accuracy and reduce reinforcement-learning reward errors.\nLong-horizon, semi-verifiable agentic tasks often rely on rubric-based evaluation, but the evidence needed to assess these tasks can be spread across the environment state and the execution trace. A judge may overlook this evidence or accept unsupported claims, including an agent's own reports of success. When rubric verdicts serve as reinforcement-learning rewards, such errors can reinforce undesirable behavior. We introduce Sauron, an evidence-first agentic verifier that investigates both state and trace and relies on a claim only after independently validating it against its source. Bounded queries and joint investigation of related criteria reduce context use and redundant work, and each verdict carries an auditable receipt of its supporting evidence. Across 2,586 human-labeled criteria from 100 personal-assistant episodes, Sauron achieves the highest F1 of five verifiers on all eight backbones tested while costing less than Gandalf, the strongest baseline. With GPT-5.6 Sol, it reaches 0.96 F1 versus Gandalf's 0.92 at 23% lower cost, with a wider margin on process criteria. On a paired fault-injection suite covering 13 families, several of which simulate reward hacking, Sauron detects 97% of injected failures while flagging only 2% of clean controls, outperforming baselines even when they are given the full trace. On TRAIL, a benchmark for detecting and localizing real agent errors, Sauron leads both Gandalf and TRAIL's own judge on all three quality metrics.\nCommunity\nWhen agent evaluations become post-training rewards, unreliable verdicts can reinforce failures.\nWe introduce Sauron, an evidence-first agentic verifier that scales long-horizon evaluation through shared-evidence clustering, targeted trace/state queries, and independent claim verification.\nAcross 2,586 human-labeled criteria, Sauron achieves 0.96 F1 with lower cost and latency than competing verifiers.\nGet this paper in your agent:\nhf papers read 2610.17724 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 16.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS Agent Registry enables dynamic tool discovery at runtime",
+      "summary": "AWS introduced a pattern centered around AWS Agent Registry and Amazon Bedrock AgentCore to manage large catalogs of tools without bloating orchestrator prompts. Instead of hardcoding hundreds of APIs into an agent's static definition, an orchestrator queries the registry's semantic search plane per request, retrieves protocol-level descriptors for matched MCP servers and agent-to-agent (A2A) endpoints, and instantiates an ephemeral inner agent solely with the relevant tool subset. Invocation credentials remain decoupled, resolved via Bedrock Gateways or IAM rather than being dumped into the registry or LLM context, which tears down immediately once the task finishes.",
+      "why_it_matters": "Solves the token-bloat and tool-selection degradation that occurs when exposing agents to enterprise-scale catalogs with hundreds of MCP endpoints.",
+      "reason": "Provides a runtime discovery and dynamic execution loop for orchestrators managing hundreds of MCP servers and agent-to-agent endpoints.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/discover-tools-at-runtime-with-aws-agent-registry",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Discover tools at runtime with AWS Agent Registry",
+        "url": "https://aws.amazon.com/blogs/machine-learning/discover-tools-at-runtime-with-aws-agent-registry/",
+        "discussion_url": null,
+        "published": "2026-10-20T16:22:24Z",
+        "summary": "Hardcoded tool wiring breaks down as an agent's catalog grows from a handful of tools to hundreds. This post walks through a runtime Discover, Instantiate, Execute loop built on AWS Agent Registry, where an orchestrator discovers MCP servers and A2A agents through semantic search at runtime instead of compiling every tool at build time.",
+        "content": "Runtime discovery with AWS Agent Registry can help address a problem that agent demos might hide. Hardcoded tools work fine for a handful, start to degrade at a few dozen, and become unmanageable beyond that. Enterprise systems expose hundreds of internal APIs for pricing, support, orders, inventory, and customer data. In these systems, the model can spend more tokens disambiguating tool names than reasoning about the user’s request. Each new capability requires a code change in the orchestrator, a redeploy, and a coordinated release across teams that would much rather ship on their own cadence.\n\nThis pattern can arise across enterprise software as a service (SaaS) engagements where teams expose large internal API surfaces to agentic consumers. Build-time wiring can become a bottleneck as the catalog expands. One approach is to change how the orchestrator accesses its tools: instead of compiling every tool into the agent, the agent can discover relevant tools at runtime.\n\nAWS Agent Registry is a managed service for cataloging and discovering Model Context Protocol (MCP) servers, agents, and agent skills. Publishers register protocol-specific descriptors and searchable descriptions. At runtime, an orchestrator can search approved, discoverable records and use the returned endpoint and descriptor content to construct a client. Registry search results do not return the capability’s invocation credentials or authentication scheme.\n\nThis post walks through the Discover → Instantiate → Execute loop demonstrated by the refactored Python sample. The code deploys an order-management MCP server through Amazon Bedrock AgentCore Gateway , a capability of Amazon Bedrock AgentCore, two agent-to-agent (A2A) agents on AgentCore runtime , a Registry, and an orchestrator. The sample directory contains the deployment script, orchestrator, helper modules, and cleanup script.\n\nSolution overview: discover, instantiate, execute\n\nThe orchestrator agent in this sample has no built-in knowledge of tools or agents.\n\nFigure 1: Without AWS Agent Registry (left), endpoints are hardcoded and adding a new agent means code changes plus redeployment. With AWS Agent Registry (right), the orchestrator discovers capabilities through semantic search and new integrations are usable after registration and approval\n\nDiscover\n\nThe orchestrator sends a natural-language query to the AWS Agent Registry data plane. The search response includes record identity, name, description, record type, status, version, and protocol descriptors such as MCP server metadata or an A2A agent card. It does not include invocation credentials. The application must obtain and apply the appropriate credentials through a separate, trusted configuration path.\n\nInstantiate\n\nFor each returned record, the orchestrator constructs a client from the descriptor type. In this sample, the registered MCP server represents tools that were first added as targets to Amazon Bedrock AgentCore Gateway. The MCP descriptor therefore points to the Gateway endpoint. The orchestrator fetches a Cognito OAuth access token separately and uses it when creating the MCPClient . A2A records contain an agent card whose URL identifies an AgentCore runtime endpoint. The wrapper invokes that runtime through the boto3 data-plane client, which signs the request with the caller’s AWS credentials. Registry discovery supplies connection metadata, not the authentication material.\n\nExecute\n\nAn ephemeral inner agent is built with only the dynamically-discovered tools. The large language model (LLM) picks the right one(s) for the request, and the result is synthesized back to the user. After the turn finishes, the inner agent and its clients are torn down. The next request gets a fresh search and a fresh tool set.\n\nFigure 2: End-to-end architecture. A single orchestrator on Amazon Bedrock AgentCore runtime queries AWS Agent Registry. Matched MCP servers are invoked through Amazon Bedrock AgentCore Gateway, and matched A2A agents are invoked on Amazon Bedrock AgentCore runtime\n\nThe reference architecture used in the sample includes AWS Agent Registry , Amazon Bedrock AgentCore Gateway , Amazon Bedrock AgentCore runtime , Amazon Bedrock, Amazon Cognito, AWS Lambda, and AWS Secrets Manager.\n\nAWS Agent Registry provides the governed, searchable catalog queried by the orchestrator. Only records that complete the configured approval workflow are available through the discoverable data plane.\n\nAmazon Bedrock AgentCore Gateway exposes the order-management Lambda tools as an MCP server. The sample configures Cognito JWT authorization for inbound Gateway calls and uses the Gateway AWS Identity and Access Management (IAM) role to invoke the Lambda target.\n\nAmazon Bedrock AgentCore runtime hosts the orchestrator and the Pricing and Customer Support A2A agents. Runtime invocations use IAM-authorized Boto3 calls.\n\nAmazon Bedrock provides the foundation model (FM) used by the orchestrator and A2A agents. The sample currently configures an Anthropic Claude Sonnet model through a cross-Region model ID. See Supported models by AWS Region in Amazon Bedrock .\n\nThree demo scenarios exercise the discovery loop with different capability combinations. The first is an MCP-only call (order status). The second chains MCP + A2A (pricing and discounts). The third tests a pure semantic match against ambiguous user intent: return and refund, where those words don’t appear in the matched A2A agent’s name.\n\nTechnical implementation\n\nThe linked runtime-discovery sample deploys the dependencies, creates and populates the Registry, verifies discovery, deploys the orchestrator, and runs three demos. orchestrator_agent.py contains the per-request discovery loop. utils.py parses Registry descriptors and creates MCP and A2A clients. cleanup.py removes resources.\n\n1. The registration model\n\nA Registry record contains a searchable description plus a protocol-specific descriptor. The sample uses the Agent Registry control-plane client for Registry and record lifecycle operations and the Agent Registry data-plane client for runtime discovery.\n\nCreating a Registry with manual approval and IAM authorization.\n\nregistry_client = session.client(\"agent-registry-control\")\ndp_client = session.client(\"agent-registry\")\nreg = registry_client.create_registry(\nname=\"OrderManagementRegistry\",\ndescription=(\n\"Registry for Order Management & Customer Service — \"\n\"agent discovers tools and agents via semantic search\"\n),\napprovalConfiguration={\"autoApprovalRules\": []},\n)\nREGISTRY_ARN = reg[\"registryArn\"]\nREGISTRY_ID = REGISTRY_ARN.split(\"/\")[-1]\n\nThe recordType field is required when creating a record. In this sample, MCP servers use recordType=\"MCP\" and A2A-backed agents use recordType=\"AGENT\" . Protocol metadata is stored under mcpServer or a2aAgentCard in the descriptors object. An MCP descriptor contains server metadata and tool definitions. An A2A descriptor contains the agent card. The descriptors contain connection metadata but not the credentials that a consumer must present when invoking the capability.\n\nBuilding current public-SDK descriptor shapes for MCP and A2A records.\n\n# MCP descriptor\nmcp_descriptors = {\n\"mcpServer\": {\n\"data\": json.dumps(server_metadata),\n\"dataSchemaVersion\": \"2025-12-11\",\n\"additionalData\": {\n\"tools\": {\n\"data\": json.dumps({\"tools\": tool_schemas}),\n\"dataSchemaVersion\": \"2025-06-18\",\n}\n},\n}\n}\n\n# A2A descriptor\na2a_descriptors = {\n\"a2aAgentCard\": {\n\"data\": json.dumps(agent_card),\n\"dataSchemaVersion\": \"0.3\",\n}\n}\n\nWrite descriptions in user-facing language that distinguishes the capability from neighboring records. Descriptor content supplies the protocol-specific server, tool, or agent-card data. Search quality should be evaluated with representative queries. This post does not assume that catalog growth automatically improves ranking.\n\nCreating a Registry record with the current control-plane shape.\n\ndescriptors = (\nmcp_descriptors\nif cfg[\"protocol\"] == \"MCP\"\nelse…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Hardening multi-agent MCP communications with X.509 PKI",
+      "summary": "A joint reference architecture from AWS and Keyfactor addresses the zero-trust security gaps in the transport-agnostic Model Context Protocol (MCP) by introducing X.509 certificates and short-lived credentials. The design splits trust into three boundaries: user authentication via OAuth and delegation tokens, agent-to-agent calls authenticated through cryptographic signed envelopes with nonces, and MCP tool execution authorized by audience-scoped tokens validated against real-time OCSP certificate revocation. The pattern prevents credential replay and impersonation across autonomous tool calls while maintaining an auditable trail of which user authorized which autonomous agent action.",
+      "why_it_matters": "Provides a robust enterprise blueprint for securing MCP tool connections against impersonation without resorting to shared static API keys.",
+      "reason": "Presents a concrete security architecture for multi-agent systems using X.509 PKI, user-signed delegation tokens, and runtime revocation.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/securing-ai-agent-identity-with-x-509-pki-on-aws",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Securing AI agent identity with X.509 PKI on AWS",
+        "url": "https://aws.amazon.com/blogs/machine-learning/securing-ai-agent-identity-with-x-509-pki-on-aws/",
+        "discussion_url": null,
+        "published": "2026-10-20T16:03:48Z",
+        "summary": "Learn how to secure multi-agent AI systems with cryptographic identity using Keyfactor EJBCA and AWS services. This reference architecture combines signed request envelopes, user-signed delegation assertions, RFC 8693 audience-scoped tokens, and real-time OCSP revocation to prove agent identity and prevent request forgery across agent-to-agent and MCP tool calls.",
+        "content": "When AI agents access databases, APIs, and sensitive business operations, establishing cryptographic identity through X.509 public key infrastructure (PKI) becomes a critical requirement. The core challenge is proving which agent made a request, preventing forgery between agents, and confirming that each agent acts only on behalf of an authorized user. Traditional approaches such as sharing API keys between components or passing OAuth tokens through agent chains fall short of the zero-trust requirements that enterprise deployments demand.\n\nMulti-agent AI frameworks increasingly use the Model Context Protocol (MCP) to connect agents to external tools and data sources. MCP defines how a large language model (LLM)-powered agent invokes tools such as database queries or email operations. However, MCP has no built-in authentication standard. It is transport-agnostic by design. This creates a critical gap: Without proper identity mechanisms, any component could impersonate an agent, replay intercepted credentials, or invoke tools without authorization.\n\nIn this post, we show you how to address this gap using Keyfactor EJBCA combined with AWS services. EJBCA is a PKI platform that supports high-availability deployment, REST API automation, and Online Certificate Status Protocol (OCSP) validation. The reference architecture uses four complementary security mechanisms. First, signed request envelopes provide cryptographic proof-of-possession on every agent call. Second, user-signed delegation assertions authorize agents without sharing credentials. Third, RFC 8693 audience-scoped tokens limit the scope of exposure from any single token disclosure. Fourth, real-time OCSP revocation checking propagates credential changes immediately across all agents.\n\nThe solution uses Amazon Bedrock for LLM inference through the AWS Strands Agents SDK . While this reference architecture uses a database as the protected resource, the same authentication pattern applies to any MCP-compatible tool server. Complete source code for all examples is available in the accompanying GitHub repository.\n\nAbout Keyfactor EJBCA\n\nKeyfactor provides a widely adopted machine identity management platform used by more than 1,500 enterprise customers worldwide, according to Keyfactor. These organizations span financial services, healthcare, manufacturing, and government. Keyfactor helps organizations establish and maintain cryptographic trust through certificate lifecycle management, PKI operations, and machine identity governance.\n\nEJBCA Enterprise is Keyfactor’s Certificate Authority (CA) and PKI platform, designed for high-availability deployment and REST API automation. Available as an enterprise product, EJBCA provides X.509 certificate issuance, OCSP validation, certificate revocation list (CRL) distribution, and full certificate lifecycle management through both a web console and REST API. EJBCA supports deployment on-premises, in containers, or on Amazon Elastic Compute Cloud (Amazon EC2).\n\nThe partnership between AWS and Keyfactor brings together AWS managed services (Amazon Bedrock, AWS Secrets Manager, Amazon Relational Database Service (Amazon RDS)) with PKI infrastructure that supports certificate lifecycle management, automated enrollment, and real-time revocation. This combination addresses a gap in the AI agent ecosystem. While AWS provides the compute, storage, and AI inference layers, Keyfactor provides the cryptographic identity layer that binds agents to verifiable, revocable, short-lived credentials. This joint reference architecture, developed collaboratively by the AWS and Keyfactor engineering teams, demonstrates how to integrate these technologies. You can adapt the patterns shown here to your own multi-agent deployments.\n\nSolution overview\n\nThe architecture implements three authentication layers, each addressing a different trust boundary in the agent communication chain. These three layers use the four security mechanisms introduced earlier: signed envelopes for proof-of-possession, delegation assertions for credential-free authorization, audience-scoped tokens for exposure limitation, and OCSP for real-time revocation. The mechanisms combine across layers as shown in the following table.\n\nLayer\nTrust boundary\nMechanism\nValidates\n\n1. User Auth\nUser to System\nOAuth + X.509 cert + delegation minting\nUser identity, credential binding\n\n2. Agent-to-Agent\nAgent to Agent\nSigned envelopes (PoP + nonce + timestamp)\nCaller identity, request freshness, no replay\n\n3. MCP Auth\nAgent to Tool Server\nScoped token + envelope + delegation\nAll identities, authorization chain, OCSP\n\nFigure 1 shows the three authentication layers and how credentials flow between the user, agents, and the MCP tool server. The diagram illustrates the separation between user credentials (which stay in the login flow), agent credentials (scoped per agent), and the delegation chain that connects them.\n\nFigure 1: Three-layer PKI authentication architecture for AI agent systems on AWS\n\nFigure 2 illustrates the detailed traffic flow during a typical user session. It shows the sequence of authentication steps from login through certificate issuance, agent delegation, tool invocation, and session cleanup.\n\nFigure 2: Authentication traffic flow from user login through agent delegation, tool invocation, and session cleanup\n\nAWS services used\n\nThe following AWS services form the foundation of the reference architecture.\n\nService\nPurpose\n\nAmazon Bedrock\nLLM inference through Strands Agents SDK\n\nAmazon RDS for MySQL\nApplication database accessed through MCP tools\n\nAmazon Simple Email Service (Amazon SES)\nEmail delivery for the Email Agent\n\nAWS Secrets Manager\nSecure storage for PKCS12 bundles, tokens, and metadata\n\nAmazon EC2\nHosts Keycloak IDP and EJBCA PKI server\n\nSolution walkthrough\n\nThe following steps walk through each component of the architecture, from initial user login through to session cleanup. Each step builds on the previous one, establishing a chain of trust that connects the human user to the final tool execution.\n\nPrerequisites\n\nAn active AWS account with access to Amazon Bedrock, Amazon RDS for MySQL, Amazon SES, and AWS Secrets Manager.\n\nKeycloak 26.2 or later (required for RFC 8693 standard token exchange. Previous versions use a legacy exchange that is incompatible).\n\nKeyfactor EJBCA Enterprise with REST API V1 and an OCSP responder configured.\n\nEJBCA API administrator certificate ( api-admin.p12 ) for REST API authentication.\n\nPython 3.9+ development environment.\n\nFamiliarity with X.509 certificates, OCSP, OAuth 2.0, RSA digital signatures, and PKCS#12 key stores.\n\nStep 1: User login, certificate issuance, and delegation minting\n\nThe login flow establishes the user’s identity through three mechanisms and then delegates authority to the AI agents without sharing the user’s credentials. This separation is critical: Agents receive proof of authorization without ever holding the user’s private key or full-session OAuth token.\n\nFirst, the application authenticates the user against Keycloak using an OAuth 2.0 password grant, receiving a full-session access token and refresh token. Immediately after, the application performs an RFC 8693 token exchange to obtain a downscoped token. This token’s audience is restricted to the MCP server. Only this limited token is handed to agents. If it’s inadvertently exposed, it can’t access any other service in the organization.\n\nSecond, the application generates an RSA 2048+ key pair locally and submits a Certificate Signing Request (CSR) to EJBCA through the pkcs10enroll REST API endpoint. EJBCA signs the CSR and returns the certificate. The application bundles the certificate and private key into a PKCS12 container and stores it in AWS Secrets Manager. The private key never leaves the application boundary. It is not sent to EJBCA, not shared with agents, and not stored on the filesystem. Three agent certificates are issued using the same CSR-based flow, one per agent…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Passive DNS leakage exposes shared chats in Meta Muse",
+      "summary": "Meta temporarily disabled the conversation-sharing feature of its Muse assistant after security researchers discovered shared links were easily discoverable on the public web. While the URLs themselves relied on unguessable random strings, researchers from Claroc used passive DNS query aggregation to enumerate 6,800 public share links generated when users clicked the share feature. An inspection of a sample revealed exposed executive search notes, internal revenue reviews, and small-business loan details indexed across public databases. Meta confirmed it has paused artifact sharing through bug bounty feedback while it redesigns link routing.",
+      "why_it_matters": "Highlights a major failure mode in user-facing agent systems where shared artifacts can inadvertently expose private context and prompts to passive network scanners.",
+      "reason": "A significant production privacy incident where assistant chat-sharing functionality indexed sensitive user and business prompts to the public web.",
+      "item": {
+        "key": "arstechnica.com/security/2026/10/meta-muse-exposes-users-personal-and-business-secrets-when-they-share-conversations",
+        "source": "Ars Technica",
+        "tags": [
+          "press"
+        ],
+        "title": "Meta Muse exposes users' personal and business secrets when they share conversations",
+        "url": "https://arstechnica.com/security/2026/10/meta-muse-exposes-users-personal-and-business-secrets-when-they-share-conversations/",
+        "discussion_url": "https://arstechnica.com/security/2026/10/meta-muse-exposes-users-personal-and-business-secrets-when-they-share-conversations/#comments",
+        "published": "2026-10-20T12:33:13Z",
+        "summary": "Meta is suspending the sharing feature while it investigates its privacy.",
+        "content": "Muse, the new general-purpose AI agent from Meta, can expose sensitive information when users share conversations through web links, researchers reported Monday. In response to questions from Ars about the behavior, Meta said it’s suspending the sharing feature while the company reviews it and considers making changes.\nLike many online services, Muse has allowed users to share searches, conversations, images, and similar content with other people. Such share features usually involve clicking an option to create a unique URL that anyone can use to load a page hosting the content. To keep potentially sensitive information from being accessible to unintended people, the URLs typically contain a long sequence of text that can’t be easily guessed.\nA single query is all that’s required\nMuse, which Meta CEO Mark Zuckerberg said last month was “built from the ground up for privacy and security,” seems to take the same precautions. But a central design decision for constructing URLs has made the links easy to discover. As a result, researchers from security firm Claroc said they were able to enumerate 6,800 links Muse users created for sharing conversations with others. After opening a few hundred of them, the researchers found information that was clearly not intended to be publicly available, including:\n- a candidate’s notes preparing for a confidential executive-search call with a frontier AI lab, naming the lab’s internal contact and the meeting time\n- a national marketing company’s internal revenue review, marked for its CEO\n- a small-business owner’s loan application, with the amount requested\n- a to-do list that included a bank fraud alert, with a partial account number and a transaction amount and time\n- a real-estate investor’s internal performance report, with two property addresses and exact return, income, and mortgage figures\n- a workplace’s full-year staff vacation calendar, listing dozens of employees against the week each one would be away\n“If you had asked us beforehand, we would have guessed that gathering these would take real effort,” the researchers wrote. “It took one query.”\nIn an emailed statement responding to questions from Ars, Meta said:\nWe opened the Muse bug bounty program so researchers could raise different scenarios and help us continue improving the product. People have the ability to share specific Muse artifacts, which creates a page that can be accessed by those with the link. However, we’ve paused this functionality while we review this report and consider changes to how these links can be discovered.\nAsaf Aprozper, the co-founder and CTO of Claroc, said he reported the findings through Meta’s bug bounty program on October 8 and also tried reaching people at Meta on LinkedIn, but got no reply either way.\nThe easiest way to discover the URLs is to perform a passive DNS search through one of many available commercial services. Passive DNS records store the historical resolution of domain names to IP addresses, as well as nameserver, and mail-server records over time. Passive DNS systems typically collect DNS responses from sensors positioned at recursive DNS resolvers or other infrastructure. A passive DNS record is generally created when a monitoring system observes a DNS response. In the case here, once the intended party clicks on the share link, the DNS information is recorded in a searchable database.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "theverge.com/tech/1014627/meta-muse-ai-sharing-ai-chats",
+          "source": "The Verge (AI)",
+          "tags": [
+            "press"
+          ],
+          "title": "Meta pauses Muse sharing after researchers find AI chats on the web",
+          "url": "https://www.theverge.com/tech/1014627/meta-muse-ai-sharing-ai-chats",
+          "discussion_url": null,
+          "published": "2026-10-20T18:07:34Z",
+          "summary": "Meta says it paused a Muse feature that lets you share conversations with the AI assistant after researchers found the URLs publicly available on the web, as reported by Ars Technica. In a report published this week, researchers at the security firm Claroc say they found more than 6,800 Muse links through public DNS records. […]",
+          "content": "Meta says it paused a Muse feature that lets you share conversations with the AI assistant after researchers found the URLs publicly available on the web, as reported by Ars Technica . In a report published this week , researchers at the security firm Claroc say they found more than 6,800 Muse links through public DNS records.\n\n\"People have the ability to share specific Muse artifacts, which creates a page that can be accessed by those with the link,\" Muse spokesperson Tracy Clayton says in an emailed statement to The Verge . \"However, we've paused this functionality while we review this report and consider changes to how these links can be dis …\n\nRead the full story at The Verge.",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Learned memory outscores frontier models on the τ² customer service benchmark",
+      "summary": "Researchers demonstrated that an older, non-reasoning GPT-4.1 model wrapped in an evolving memory harness could claim top scores on the customer-service oriented τ²-bench retail benchmark. The system, ALTK-Evolve, iteratively distills past execution successes and failures into operational markdown rules—such as strict identity verification and transactional user-confirmation steps—and appends them directly into the system prompt of a stock ReAct agent. On τ²-bench, this approach boosted strict four-trial reliability (Pass^4) from 57.5% to 67.5% in retail, outperforming unguided frontier baselines without requiring fine-tuning or human annotations.",
+      "why_it_matters": "Shows that automated prompt-level memory distillation on basic ReAct loops can close substantial reliability gaps on tool-use benchmarks without fine-tuning.",
+      "reason": "Shows that evolving learned agent memory mechanisms can outperform frontier foundation models on the τ²-bench customer support benchmark.",
+      "item": {
+        "key": "huggingface.co/blog/ibm-research/altk-evolve-bc",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "ALTK-Evolve: How learned memory tops the τ²-bench leaderboard on customer service tasks without a frontier model",
+        "url": "https://huggingface.co/blog/ibm-research/altk-evolve-bc",
+        "discussion_url": null,
+        "published": "2026-10-20T15:19:48Z",
+        "summary": "",
+        "content": "ALTK-Evolve: How learned memory tops the τ²-bench leaderboard on customer service tasks without a frontier model\nLearned memory takes a basic ReAct agent with GPT-4.1 to the top\nUsing GPT-4.1, an older, non-reasoning model, a basic customer-service agent reaches 67.5% Pass^4 on τ²-bench retail — meaning it solves the task on all four independent attempts for 67.5% of tasks. It scores above every retail entry in our October 12, 2026 leaderboard snapshot. It runs on the benchmark's stock ReAct scaffold, with learned guidelines appended to its system prompt.\nALTK-Evolve builds that playbook using GPT-4.1. It analyzes the agent's training-task attempts and uses the model to distill successes and failures into short behavioral rules: how to authenticate a customer, confirm a transaction, or handle a return. Those guidelines are then added to the agent's prompt for subsequent conversations. The same model powers both guideline extraction and the agent; no weight updates or human annotation are needed.\nOur previous work demonstrated this approach on coding agents. Here, we test it on customer service, where success requires following domain policies, understanding a customer's request, and executing the right tool actions.\nτ²-bench tests policy-bound customer service\nτ²-bench (from Sierra) measures how well an agent handles customer-service conversations under real constraints. Each task pairs the agent with an LLM-simulated customer who has a goal in mind, a set of domain tools (look up an order, issue a refund, rebook a flight), and a written policy document the agent must follow. The agent has to draw out the right details, stay within policy, and take the correct — often irreversible — actions; a task counts as solved only when the final database state matches the expected outcome, a strict binary reward. We use its two customer-service domains, retail and airline.\nWe run τ²-bench's own implementation of a basic ReAct agent with a two-phase THINK → ACT loop, using gpt-4.1 as the agent model and gpt-5.5 as the customer-simulator model; 4 trials per task. The only change we make is a block of learned guidelines appended to the system prompt — everything else (policy, tools, scaffold) is stock τ²-bench. Concretely, the learned guidelines are tacked on after the domain policy as a plain markdown list:\nYou are a customer service agent that helps users according to the policy below.\nAlways follow the policy strictly. Use the provided tools when needed.\n<policy>\n# Retail agent policy\nAs a retail agent, you can help users:\n- cancel or modify pending orders\n- return or exchange delivered orders\n- modify their default user address\n…\n</policy>\n## Guidelines learned from past task attempts (follow these carefully):\n- Authenticate the user before taking any order-related action. If email is unavailable, verify identity via full name and zip code using the find_user_id_by_name_zip API.\n- Always confirm all intended changes (modify, cancel, return, exchange) with a clear, structured summary, and require explicit user approval before executing any database-updating action.\n- When processing a return or exchange, communicate the refund with an itemized breakdown and clarify refund timing — don't wait for the user to ask.\n- Take one action per step: never combine a tool call with a user-facing message in the same turn, and wait for the tool's result before replying.\n- Before looking a user up, parse and clean their name — e.g. split a combined handle like `daiki_johnson_9523` into first/last name — and after a couple of failed lookups, state the exact format you need.\n…\nWe extract guidelines from the agent's trajectories on τ²-bench train tasks using gpt-4.1, the same model that powers the agent, then apply them unchanged on the held-out test set.\nGuidelines improve capability and reliability\nIn a prior post, we talked about how different models / tasks require different dosage of guidance. Inline with the idea, we also evaluate different amounts of guidelines provided to the model.\nEach guideline carries a support count — the number of distinct training tasks it was extracted from, so higher support means a rule that generalized across more tasks rather than a one-off. We compare three configurations: baseline (no guidelines), sup3 (keep only guidelines with support ≥ 3 — a small, high-confidence core), and lossless (keep every guideline retained after consolidation, i.e. support ≥ 1).\nTable 1. Guideline configurations and retained guideline counts by domain.\nThe metrics we track. Every task is attempted 4 times, and we read those trials two ways:\n- Mean Accuracy — the average success rate across the 4 trials. This is the capability axis: how often does the agent get this right?\n- Pass^4 — the percentage of tasks that passed across all 4 trials. This measures along the reliability axis and the metric the τ²-bench leaderboard reports. It matters here because a support agent that resolves a refund 3 times out of 4 still fails a quarter of real customers — Pass^4 asks whether you can trust the agent every time, not just on average.\nFigure 1. Mean Accuracy and Pass^4 on held-out retail and airline tasks for agents using gpt-4.1 across four trials per task.\nAgent model: gpt-4.1 (user simulator: gpt-5.5).\nTable 2. Held-out agent performance using gpt-4.1 across four trials per task. Parentheses show percentage-point changes from baseline.\nMean Accuracy climbs in both domains — retail +4.4 pts (78.1 → 82.5) and airline +7.5 pts (57.5 → 65.0). Reliability moves further: the strict Pass^4 rises +10 pts in retail (57.5 → 67.5) and +10 pts in airline (35.0 → 45.0). And the gains come from better-informed calls, not longer conversations — we look at conversation length directly in Better performance costs more tokens, not more turns below.\nThe best amount of guidance depends on the domain\nThe two domains disagree about how much guidance pays off. In retail, more is better on every metric — the small sup3 core barely…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "AdaExploreBench introduces a benchmark specifically testing how well LLM agents adapt to changing rules and proactively explore unfamiliar environments.",
+      "item": {
+        "key": "arxiv:2610.25950",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "AdaExploreBench: Benchmarking LLM Agents for Proactive Exploration and Test-time Adaptation in Evolving Environments",
+        "url": "https://huggingface.co/papers/2610.25950",
+        "discussion_url": null,
+        "published": "2026-10-20T00:00:00Z",
+        "summary": "Large Language Model (LLM) agents are increasingly deployed in unfamiliar and evolving environments, requiring them to proactively explore, understand, and adapt to environmental dynamics. However, existing benchmarks rarely test whether agents can proactively discover how an environment works and adapt as it evolves. To address this gap, we introduce AdaExploreBench, a benchmark for proactive exploration and test-time adaptation in evolving environments. By instantiating environmental dynamics as hidden rules, AdaExploreBench requires agents to actively acquire evidence and infer the rules. Under implicit rule drift, the latent rule changes without announcement, requiring agents to detect from degraded performance that prior knowledge is stale and re-explore. Experiments on eight leading LLMs show that proactive and adaptive exploration remain challenging: GPT-6 Sol achieves only 61.9% calibrated accuracy, while providing sufficient evidence or removing rule drift improves average performance significantly by close to 10%. These results reveal a critical bottleneck in current LLM agents: they can often reason effectively from informative evidence once it is available, but…",
+        "content": "",
+        "score": 27.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Eon published an implementation case study replacing multi-cloud local tool credentials with Bedrock AgentCore MCP gateways.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/how-eon-built-multi-cloud-investigation-with-an-mcp-gateway-on-amazon-bedrock-agentcore",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "How Eon built multi-cloud investigation with an MCP Gateway on Amazon Bedrock AgentCore",
+        "url": "https://aws.amazon.com/blogs/machine-learning/how-eon-built-multi-cloud-investigation-with-an-mcp-gateway-on-amazon-bedrock-agentcore/",
+        "discussion_url": null,
+        "published": "2026-10-20T15:57:57Z",
+        "summary": "Learn how Eon replaced per-tool credentials and local MCP processes across AWS, GCP, and Azure with a single authenticated Amazon Bedrock AgentCore gateway, giving more than 100 developers and autonomous agents unified access to production investigation and cutting new-engineer onboarding from two days to two minutes.",
+        "content": "This is a guest post co-written with Roei Zavida from Eon.\n\nIndependent software vendors (ISVs) building AI-powered products need to connect agents and humans to dozens of operational tools across clouds, each with different authentication models, network boundaries, and access policies. When those tools span AWS, GCP, and Azure simultaneously, the integration surface multiplies.\n\nThis post describes how Eon used Amazon Bedrock AgentCore, a platform to build, connect, and optimize agents at scale, with any framework or model. Eon used it to replace per-tool credentials and local Model Context Protocol (MCP) processes with a single authenticated gateway. The result gives developers and autonomous agents unified access to investigation tooling across three clouds. New engineers now reach all their investigation tools in about two minutes instead of the two days it previously took to configure credentials and local MCP servers.\n\nAbout Eon\n\nEon provides the Autonomous Data Foundation for the AI era. The platform discovers and classifies cloud resources across AWS, Azure, and GCP. It provides continuous deduplicated backup that reduces storage costs by up to 50 percent in Eon’s internal measurements. It also detects ransomware and rogue-agent damage and delivers live grounded context for AI agents. All of this runs from a single read-only AWS Identity and Access Management (IAM) role, storing data in Apache Parquet and Apache Iceberg formats. Founded by former AWS engineers, Eon runs its software as a service (SaaS) infrastructure on AWS.\n\nThe challenge\n\nEon’s internal engineering team investigates production incidents across multiple clouds and dozens of operational systems. A crashed Kubernetes pod requires checking container logs, Grafana metrics, the deployment’s GitHub pull request (PR), and cloud-provider health status within the same session.\n\nEon needed to address several key requirements:\n\nCredential consolidation — Each new tool added another integration to configure, secure, and rotate, which got harder to keep consistent as the toolset grew.\n\nEliminate local MCP processes — Each developer ran several MCP servers locally, which was hard to standardize and keep current.\n\nIdentity separation — Engineers accessed each system with role-based permissions, but there was no single place to decide which tools each person or agent could call.\n\nCross-account access without networking overhead — Hosting MCP servers across multiple AWS accounts required virtual private cloud (VPC) peering or AWS PrivateLink per account, multiplying operational cost and setup time.\n\nDeveloper onboarding — New engineers spent roughly 2 days configuring credentials and local MCP servers before investigating their first incident.\n\nAgent access — Eon’s autonomous site reliability engineering (SRE) agent (running Claude on Amazon Bedrock) needed the same tool access as humans, but with different permissions.\n\nGrowing engineering headcount combined with a fast-expanding set of AI tools and MCPs made maintaining credentials and local MCP servers increasingly costly. This pushed Eon toward a centralized solution.\n\nApproaches considered\n\nBefore building on AgentCore, Eon evaluated alternatives:\n\nOption 1: Centralized proxy with custom auth\n\nEvery harness had its own proxy configuration with all the targets. A single reverse proxy aggregating all tools, with a custom authentication layer. This handled credential consolidation but only supported remote MCP and required building and maintaining tool protocol translation, session management, and authorization logic from scratch. The implementation and maintenance burden was significant.\n\nOption 2: Amazon Bedrock AgentCore Gateway\n\nAmazon Bedrock AgentCore Gateway , a capability of Amazon Bedrock AgentCore, is a managed gateway with built-in identity federation, Cedar-based authorization policies, and Runtime hosting that converts local MCP servers to remote HTTP endpoints. This addressed all requirements without custom infrastructure.\n\nEon chose Option 2 because it provided identity separation, cross-account connectivity, and policy enforcement as managed capabilities rather than code they would need to build and maintain. These were the only two options on the table.\n\nSolution overview\n\nEon deployed the full Amazon Bedrock AgentCore stack: AgentCore Gateway, Policy in Amazon Bedrock AgentCore, AgentCore Runtime, and AgentCore Identity, all capabilities of Amazon Bedrock AgentCore. The following diagram shows how client requests flow through the authentication layer to a single gateway. The gateway routes authorized tool calls to targets hosted on AgentCore Runtimes across multiple AWS accounts.\n\nFigure 1: Eon’s centralized gateway architecture on Amazon Bedrock AgentCore\n\nThe architecture has five layers:\n\nClients\n\nDevelopers using Claude Code, Cursor, or OpenAI Codex connect to a single MCP URL. An autonomous SRE agent running Claude on Amazon Bedrock connects to the same gateway with a different identity.\n\nIdentity plane\n\nCorporate single sign-on (SSO) federates through Amazon Cognito, which mints the JSON Web Token (JWT) and hands it to the gateway. Amazon API Gateway sits in front as the OAuth entry point for humans, proxying the MCP session. Agents authenticate with Cognito client_credentials grants directly against the gateway.\n\nOne gateway, least-privilege access\n\nA single AgentCore MCP Gateway serves as the company-wide front door. Cedar policies in ENFORCE mode control which principals can invoke which tools. Read operations are available to selected groups, not every authenticated user. Write operations are limited to low-impact collaboration actions, such as commenting on a PR or ticket, and production tools are read-only.\n\nPolicy in Amazon Bedrock AgentCore\n\nCedar policies map each principal to permitted tools. Write operations are limited to low-impact collaboration actions, such as commenting on a PR or ticket, and production tools are read-only. The gateway evaluates every tools/call request against Cedar before forwarding to the target.\n\nTargets\n\nDozens of target MCP servers exposing hundreds of tools on the one gateway, served by AgentCore Runtimes distributed across multiple AWS accounts. Each Runtime converts local stdio-based MCP servers into Streamable HTTP endpoints accessible through the gateway.\n\nA developer opens their integrated development environment (IDE), configures one MCP URL, authenticates through corporate SSO, and the gateway aggregates hundreds of tools into a single tools/list response. No local setup and no per-tool tokens.\n\nIdentity and access separation\n\nThe core security decision was enforcing read and write boundaries through Cedar policy at the gateway level.\n\nSingle gateway, policy-enforced separation:\n\nThe gateway accepts both JWT tokens (humans through corporate SSO and Cognito) and client_credentials tokens (agents). Cedar policies determine what each principal can do. Humans in approved groups get read access. Write operations require explicit Cedar permits granted only to specific agent identities.\n\nCedar reinforces per-tool granularity:\n\n// Agent \"sre-bot\" can add comments on GitHub PRs\npermit(\nprincipal == Agent::\"sre-bot\",\naction == Action::\"tools/call\",\nresource == Tool::\"github_add_pr_comment\"\n);\n\n// No human principal can invoke mutation tools\nforbid(\nprincipal in Group::\"humans\",\naction == Action::\"tools/call\",\nresource in ResourceGroup::\"write-tools\"\n);\n\nCedar policies are managed as code through GitHub PRs with review comments, giving the team version control and audit trail on every permission change.\n\nWithin the gateway, Cedar policies scope tool access by SSO group, and groups map to job role. Engineers have access to development and testing environments by default. Production access follows Eon’s security and compliance controls: it is read-only, granted just-in-time through an approval process, and audited. A new team member’s group is scoped the same way, by role rather…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "AWS outlined fine-tuning GPT-OSS-20B on SageMaker HyperPod, finding supervised fine-tuning bridged reasoning-language accuracy from 22% to 100% before applying GRPO.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/fine-tuning-gpt-oss-20b-for-multilingual-reasoning-on-amazon-sagemaker-hyperpod",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Fine-tuning GPT-OSS-20B for multilingual reasoning on Amazon SageMaker HyperPod",
+        "url": "https://aws.amazon.com/blogs/machine-learning/fine-tuning-gpt-oss-20b-for-multilingual-reasoning-on-amazon-sagemaker-hyperpod/",
+        "discussion_url": null,
+        "published": "2026-10-20T17:48:27Z",
+        "summary": "Learn how we fine-tuned GPT-OSS-20B for multilingual reasoning on Amazon SageMaker HyperPod, and how to decide between supervised fine-tuning (SFT) and reinforcement learning with GRPO. SFT took reasoning-language accuracy from 22% to 100%, and GRPO added measurable gains where headroom existed.",
+        "content": "GPT-OSS-20B is an open-weight reasoning model that thinks in English. Ask it to reason in French, German, Spanish, or Italian and it acknowledges the instruction, then produces its chain-of-thought in English anyway. On a 50-example multilingual reasoning test, the base model reasoned in the correct target language only 22 percent of the time. That 22 percent was almost entirely the English examples (English 100 percent, French 0 percent, German 10 percent, Spanish 0 percent, Italian 0 percent).\n\nFor teams deploying reasoning models for non-English users, that gap matters. A user who asks a question in French expects the model to reason and answer in French, not to switch to English mid-thought. Closing that gap is a fine-tuning problem. It raises a question every team faces once they start customizing open-weight models: supervised fine-tuning (SFT), reinforcement learning with Group Relative Policy Optimization (GRPO), or both?\n\nIn this post, we walk through how we fine-tuned GPT-OSS-20B for multilingual reasoning on Amazon SageMaker HyperPod . We show when SFT alone was sufficient and when GRPO added measurable value on top. To understand more broadly when GRPO helps, we also ran a controlled Qwen2.5-7B experiment across two tasks with different capability gaps. The short answer: SFT does most of the work, GRPO refines when there is headroom to refine, and matching the technique to the capability gap is what decides the outcome.\n\nSolution overview\n\nThis section covers the multilingual reasoning task and dataset, how SFT and GRPO complement each other, and the training stack we ran on Amazon SageMaker HyperPod.\n\nThe task and dataset\n\nThe dataset is HuggingFaceH4/Multilingual-Thinking — a chain-of-thought reasoning dataset translated into French, Spanish, German, and Italian alongside English, roughly 949 training and 50 validation examples. The model receives a reasoning language: system-prompt instruction and must both reason and answer in that target language, overriding its strong English prior. The evaluation is 50 test cases: 10 math/logic problems across 5 languages (EN/FR/DE/ES/IT).\n\nTwo metrics matter:\n\nReasoning-language correct – is the chain-of-thought in the requested language?\n\nAnswer-language correct – is the final answer in the requested language?\n\nHow SFT and GRPO fit together\n\nThe clearest way to think about the two techniques: SFT teaches a behavior the model doesn’t have. GRPO optimizes a behavior the model can already sometimes produce. GRPO works by sampling a group of responses per prompt and pushing the policy toward the above-average ones. If the desired behavior has zero probability in the base distribution, there is very little for GRPO to reinforce. That single idea explains almost every result in this post.\n\nThe training stack\n\nWe ran on Amazon SageMaker HyperPod with Amazon Elastic Kubernetes Service (Amazon EKS) orchestration. For the initial SFT and GRPO runs on GPT-OSS-20B, we used the PyTorch TRL library. For the Qwen control experiment, we switched to veRL as the trainer, with Ray and KubeRay for distributed orchestration and vLLM for fast rollout generation. Checkpoints and datasets lived on Amazon FSx for Lustre, and the inter-node fabric used Elastic Fabric Adapter (EFA). All fine-tuning used Low-Rank Adaptation (LoRA), which is parameter-efficient and well-suited to both SFT and GRPO.\n\nThe following diagram shows the training data path end-to-end. A submission from the user lands on the Amazon EKS control plane of the Amazon SageMaker HyperPod cluster. Amazon EKS schedules a Ray head pod plus worker pods that run the veRL trainer and vLLM rollout workers. Both sets of pods mount Amazon FSx for Lustre for the base model, training data, and checkpoints. Inter-node collectives use EFA. Rollouts stream from vLLM back to the veRL trainer, and the trainer writes checkpoints back to Amazon FSx for Lustre.\n\nFigure 1: End-to-end training data path for SFT and GRPO fine-tuning on Amazon SageMaker HyperPod with veRL, Ray, KubeRay, vLLM, and Amazon FSx for Lustre for Qwen control experiments\n\nThe following describes each hop in more detail. The submitter starts the run from Amazon SageMaker Studio or the AWS Command Line Interface (AWS CLI). The Amazon EKS control plane on Amazon SageMaker HyperPod places pods on GPU nodes and starts a Ray head with worker pods for the veRL trainer and the vLLM rollout workers. Amazon FSx for Lustre provides shared, high-throughput storage for the base model, the training data, and the checkpoints. When training completes, the trainer writes the LoRA adapter back to Amazon FSx for Lustre for downstream evaluation or serving.\n\nPrerequisites\n\nTo follow along, you need:\n\nAn Amazon SageMaker HyperPod cluster with Amazon EKS orchestration. GPT-OSS SFT used 4× ml.g6e.12xlarge (16× L40S 48GB). The Qwen control used 2× g6e.48xlarge (16× L40S).\n\nAn Amazon FSx for Lustre file system mounted on the cluster with a PersistentVolumeClaim named fsx-claim at /fsx .\n\nEFA-enabled instances and a working NVIDIA Collective Communications Library (NCCL) and aws-ofi-nccl stack for multi-node SFT.\n\nA container registry such as Amazon Elastic Container Registry (Amazon ECR) to hold the training image built from the reference repository.\n\nA HuggingFace access token for openai/gpt-oss-20b and the HuggingFaceH4/Multilingual-Thinking dataset.\n\nThe AWS Command Line Interface (AWS CLI), kubectl , docker , and envsubst available on your workstation.\n\nSet up the training environment\n\nAll of the commands, manifests, and scripts referenced below live in the awsome-distributed-ai GitHub repository under 3.test_cases/pytorch/trl/gpt-oss-lora-grpo/ . Clone the repository and change into the test case directory:\n\ngit clone https://github.com/awslabs/awsome-distributed-ai\ncd awsome-distributed-ai/3.test_cases/pytorch/trl/gpt-oss-lora-grpo\n\nCopy the environment template, then edit env_vars to set your ECR registry, image name, tag, and HuggingFace token:\n\ncp env_vars.example env_vars\nsource env_vars\n\nBuild the training image and push it to your registry. The image bundles PyTorch, TRL, HuggingFace Transformers, PEFT, and the training and inference scripts:\n\ncd artifacts && ./build_push.sh && cd ..\n\nPoint kubectl at your cluster and apply the FSx storage manager pod. The storage manager gives you a shell into the shared file system for checkpoint conversion and eval-log inspection:\n\naws eks update-kubeconfig --name <YOUR_CLUSTER_NAME> --region us-east-2\nenvsubst '$REGISTRY $IMAGE $TAG $HF_TOKEN' \\\n< kubernetes/fsx-storage-manager.yaml | kubectl apply -f -\n\nFine-tune GPT-OSS-20B with SFT and LoRA\n\nWe begin by measuring the base model, then configure the SFT run and examine the results.\n\nThe base-model gap\n\nBase GPT-OSS-20B on the 50-case eval scored 22 percent reasoning-language correct (11/50). Per-language: English 100 percent, French 0 percent, German 10 percent, Spanish 0 percent, Italian 0 percent. The model defaults to English reasoning regardless of the instruction.\n\nSFT configuration\n\nThe SFT setup used LoRA r=8, α=16, trained for 1,000 steps on 4× ml.g6e.12xlarge (16× L40S 48GB) with Fully Sharded Data Parallel (FSDP) full-shard, bf16 precision, and gradient checkpointing. The job runs as an elastic HyperPodPyTorchJob managed by Kueue, launched with hyperpodrun .\n\nApply the SFT manifest:\n\nenvsubst '$REGISTRY $IMAGE $TAG $HF_TOKEN' \\\n< hyperpod-eks/train-lora-hyperpod-elastic-g6e.yaml | kubectl apply -f -\n\nWatch training progress:\n\nkubectl get pods -l app=gpt-oss-lora-elastic\nkubectl logs -f -l app=gpt-oss-lora-elastic\n\nLoss and gradient norm print each step. A healthy run looks like this:\n\n{'loss': 1.035, 'grad_norm': 0.163, 'learning_rate': 0.0002, 'mean_token_accuracy': 0.716, 'epoch': 3.25}\n{'loss': 1.003, 'grad_norm': 0.171, 'lr': 0.0002, 'acc': 0.722, 'epoch': 3.32}\n{'loss': 0.976, 'grad_norm': 0.159, 'lr': 0.0002, 'acc': 0.726, 'epoch': 3.57}\n\nWhen training completes, convert the FSDP checkpoint to the…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "llama.cpp release b11756 adds Anthropic-to-OpenAI conversion support for forwarding slot IDs in messages.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b11756",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b11756",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11756",
+        "discussion_url": null,
+        "published": "2026-10-20T13:52:00Z",
+        "summary": "server : pass id_slot through the Anthropic /v1/messages conversion ( #28554 )\n\nserver : pass id_slot through the Anthropic /v1/messages conversion\n\nserver_chat_convert_anthropic_to_oai copies a small whitelist of common\n\nparams from the Anthropic request into the internal OAI-style body and\n\nleft id_slot out. Every other completion endpoint honours id_slot; a\n\nproxy that pins a session to the slot holding its KV cache needs the\n\nsame on /v1/messages, or it silently falls back to automatic slot\n\nselection and, on hybrid/recurrent models, pays a full re-prefill.\n\nAdds a test asserting a request with id_slot set is served by that\n\nslot, observed via GET /slots.\n\nserver : shorten comments\n\nrm test\n\nCo-authored-by: Xuan Son Nguyen son@huggingface.co\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/57810098\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "NVIDIA demonstrated accelerated Mamba-2 forward pass kernels written in its high-level cuTile DSL for custom GPU parallelism.",
+      "item": {
+        "key": "developer.nvidia.com/blog/accelerating-mamba-2-with-high-performance-forward-pass-kernels-in-nvidia-cuda-tile",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "Accelerating Mamba-2 with High-Performance Forward Pass Kernels in NVIDIA CUDA Tile",
+        "url": "https://developer.nvidia.com/blog/accelerating-mamba-2-with-high-performance-forward-pass-kernels-in-nvidia-cuda-tile/",
+        "discussion_url": null,
+        "published": "2026-10-19T17:00:00Z",
+        "summary": "NVIDIA CUDA Tile (cuTile) is a Python-based DSL and parallel programming model for NVIDIA GPUs that automatically leverages advanced hardware capabilities to...",
+        "content": "NVIDIA CUDA Tile (cuTile) is a Python-based DSL and parallel programming model for NVIDIA GPUs that automatically leverages advanced hardware capabilities to...\nNVIDIA CUDA Tile (cuTile) is a Python-based DSL and parallel programming model for NVIDIA GPUs that automatically leverages advanced hardware capabilities to deliver peak performance for tile-level GPU programming. By abstracting thread- and warp-level scheduling behind high-level, tile-centric primitives, cuTile enables you to write GPU kernels in Python while compiler optimizations automatically…\n\nSource",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your evaluators stay grounded and your share links unindexed.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "Mistral Launches Voxtral 3 Real-Time Voice Agent SDK",
+      "blurb": "Voxtral 3 provides real-time speech in over 50 languages with emotional TTS, transcription, and tool use for EU cloud or self-deployment.",
+      "item": {
+        "key": "mistral.ai/news/voxtral-3",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Voxtral 3",
+        "url": "https://mistral.ai/news/voxtral-3/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50168396",
+        "published": "2026-10-20T16:02:07Z",
+        "summary": "Voxtral 3: Mistral's voice agent SDK for real-time speech in 50+ languages — accurate transcription, emotional TTS, deep tool use. EU-hosted or self-deployed.",
+        "content": "",
+        "score": 358.0,
+        "comments": 98,
+        "also_in": [
+          "Hacker News front page",
+          "Mistral AI"
+        ]
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "Google and Meta Launch Native PyTorch Backend for TPUs",
+      "blurb": "TorchTPU introduces a native, principled PyTorch backend for Google TPUs to enable seamless, out-of-the-box model execution.",
+      "item": {
+        "key": "pytorch.org/blog/introducing-torchtpu",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "Introducing TorchTPU",
+        "url": "https://pytorch.org/blog/introducing-torchtpu/",
+        "discussion_url": null,
+        "published": "2026-10-20T16:02:30Z",
+        "summary": "TL;DR TorchTPU is an open source collaboration between Google and Meta that introduces a native and principled PyTorch backend for Google TPUs. It enables seamless out-of-the-box model execution and TPU...\n\nThe post Introducing TorchTPU appeared first on PyTorch .",
+        "content": "TL;DR\n\nTorchTPU is an open source collaboration between Google and Meta that introduces a native and principled PyTorch backend for Google TPUs. It enables seamless out-of-the-box model execution and TPU migration while delivering industry-competitive inference and training performance through eager execution optimizations, torch.compile integration, and native hardware acceleration.\n\nIntroducing TorchTPU\n\nGoogle TPUs have been used very successfully, both within and outside of Google, to train and deploy large ML models at massive scale. They are specifically designed for ML and, as such, they provide significant benefits in terms of performance, energy, and cost. While TPUs have been historically associated with the TensorFlow and the JAX ecosystems, we’re excited to introduce TorchTPU , a new effort started at Google in mid 2025, in collaboration with the PyTorch Team at Meta, to run PyTorch natively on TPUs.\n\nTo program Google’s TPU at a level below the Python framework, developers utilize the XLA compiler stack. In 2020, Google introduced the first compiled version of PyTorch for TPU, PyTorch/XLA, based on Lazy Tensors. While foundational, this initial integration struggled to keep pace with the rapid, community-driven evolution of PyTorch. Crucially, PyTorch/XLA required intrusive source-code modifications to explicitly define compilable regions, suffered from severe compile-time latency, lacked support for PyTorch’s native imperative (“eager”) execution mode, and lagged in supporting emerging distributed computing primitives within the PyTorch ecosystem. In contrast with previous efforts such as PyTorch/XLA and TorchAX, which shoehorn PyTorch into JAX’s modus operandi, TorchTPU was built as a principled TPU backend for PyTorch: eager execution is a top priority, and existing PyTorch workloads run out of the box with trivial code changes (e.g., .to(\"cuda\") → .to(\"tpu\") ).\n\nMore specifically, as we started TorchTPU we deliberately formulated a set of principles to follow:\n\nPyTorch Citizenship :\n\nNo JAX dependencies in the runtime;\n\nSolid eager mode;\n\nTorch.compile() based on Torch Dynamo (not Lazy Tensor) and with similar performance to JAX compile;\n\nWide support for PyTorch distributed idioms (DDP, FSDP, DTensor, …) by providing TPU collectives at the lowest level in the PyTorch stack (e.g. Process Group API);\n\nSeamless integration into the PyTorch ecosystem;\n\nCommunity engagement.\n\nFocus on the User:\n\nPorting a workload to TPU should be as simple as changing model.to(\"cuda\") to model.to(\"tpu\") . (One cannot achieve peak TPU performance with that simple change, since a model’s shapes, sharding and ops may be skewed toward a GPU architecture; however, the model should run out of the box.)\n\nProvide user-friendly and actionable messages for runtime/compiler errors;\n\nIntegrate with the tools and frameworks that the PyTorch community already uses (e.g., torch.profiler, DTensor, Ray).\n\nImprove the State of the Art :\n\nBuild a solution that can compete with PyTorch on GPUs for large scale workloads;\n\nIntroduce a JIT compilation approach for eager execution, with runtime optimizations that can bridge the performance gap between op-by-op execution and compiled execution;\n\nImprove the TPU programming stack by introducing bounded dynamism, by avoiding XLA recompilation due to shape changes, and by exploring dynamic TPU kernels that can be precompiled ahead of time.\n\nTorchTPU is in active development, it is used in production for both inference and training workloads for some of the largest Google Cloud customers, and can be found as an Open Source project in this GitHub repo . At the time of this writing, we have:\n\nAdded support for both eager and compiled modes, including a new DeferAndFuse eager mode;\n\nAdded support for ~450 Aten ops (skipping ops with structural or composite delegates), including forward and backward pass for all Core ATen ops required for the major deep learning architectures;\n\nAdded ability to author custom kernels via JAX/Pallas and via Helion DSL;\n\nValidated out-of-box execution on the 5,000 most downloaded Hugging Face models, including:\n\nLLMs: Qwen, DeepSeek, Gemma, LLama, Mistral, GPT, OPT, BLOOM, Falcon, StableML\n\nAudio/Speech: Whisper, Wav2Vec2, HuBERT, MMS\n\nVision: DinoV2, SigLIP, CLIP, Swin Transformer, ConvNeXt, ViT, ResNet, DETR\n\nText Encoders & Search: BERT, ALBERT & Electra, RoBERTa, DeBERTa, T5, MT5, Flan-T5\n\nValidated DTensor-based sharding;\n\nValidated multi-host inference (vLLM and SGLang) and fine-tuning / training workloads (TorchTitan), with Ray-based orchestration;\n\nValidated integration with vLLM, SGLang, TorchTitan, Ray, and TorchRec.\n\nIn the remainder of this document we discuss key aspects of the TorchTPU architecture and some initial results.\n\nArchitecture Deep Dive\n\nA TPU Primer\n\nGoogle TPUs are specialized ASICs designed specifically to perform the massive tensor operations that are the foundation of deep learning. From a HW architecture perspective , a TPU chip contains (depending on the generation):\n\nOne or more TensorCores , each comprising one or more matrix-multiply units (MXUs), a vector unit (VPU), and a scalar unit (see this link ). Based on the TPU generation, an MXU can include 256×256 multiply-accumulators, which are arranged as a systolic array .\n\nOne or more SparseCores , which are specialized units for sparse operations (e.g., gather, scatter, embeddings) and for collectives. They can run in parallel with a TensorCore, enabling compute-compute and compute-communication overlaps.\n\nA large High Bandwidth Memory (HBM) – 288 GB at 8.6 TB/s in TPU 8i , which can be used to store ML data and share that with the CPU.\n\nBidirectional Inter-Chip Interconnect (ICI) – 19.2 TBps in TPU 8t and 8i , allowing fast communication between TPU chips within user-configured TPU Slices , which are logical subgroups of a TPU Pod , comprising of a preconfigured number of TPU chips connected in a 3D torus (for TPU 7, TPUv 8t) or Boardfly (TPU 8i) configuration.\n\nBidirectional Data-Center-Network (DCN) – 400 GBps in TPU 8t , allowing communication between TPU chips across Slices.\n\nTPUs are programmed with the XLA compiler stack through two different entry points: StableHLO (higher-level IR for ML ops) and Mosaic (lower-level IR for custom kernels). The actual TPU ISA is proprietary, subject to change, and not publicly available. Effectively, one can think of StableHLO and (even more so) of Mosaic as equivalent to PTX. See picture below for a high-level sketch.\n\n-->\n\nA C++ program can access a local TPU by instantiating a PjRT Client , whose API provides methods to compile MLIR (StableHLO or Mosaic) into a TPU executable, to launch that executable, and to copy data to-from the TPU. Note that TPU execution is asynchronous and the CPU can wait for a TPU result to be ready by waiting on the associated PjRTBuffer.\n\nNotable features of the TPU programming model:\n\nA TensorCore device can be thought of as a single-threaded processor with one or more massive matrix-multiply units (MXU). Consequently, to reach peak performance it is key that a model’s shapes be sufficiently wide to exploit the full potential of the MXU. This differs from GPUs where launching multiple smaller kernels in parallel can help maximize HW utilization.\n\nThe XLA compiler can instruct a TensorCore to offload sparse and collective operations to SparseCore, for more efficient and/or parallel execution. This happens either automatically or through user-supplied MLIR annotation in a compiled StableHLO module.\n\nA TPU device can be accessed by only one user-space process. Following our goal of seamless integration in the PyTorch ecosystem, for distributed TorchTPU workloads we adopt a one-process-per-device model in contrast with JAX’s one-process-per-host model. However, because a TPU can be accessed by only one user-space process, RL colocation can’t be supported out of the box and we are investigating ways to relax or workaround this TPU…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "AI biology",
+      "headline": "Claude Designs Protein Binders for Scorpion Neurotoxins",
+      "blurb": "Anthropic researchers used an internal Claude model to design small protein minibinders that bind tightly to scorpion neurotoxins.",
+      "item": {
+        "key": "anthropic.com/research/claude-scorpion-toxin-binder-design",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Claude designed protein binders against scorpion neurotoxins",
+        "url": "https://www.anthropic.com/research/claude-scorpion-toxin-binder-design",
+        "discussion_url": "https://news.ycombinator.com/item?id=50170021",
+        "published": "2026-10-20T17:48:29Z",
+        "summary": "We asked an internal research Claude model to design minibinders (small proteins that attach tightly to a target) against scorpion neurotoxins.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "Anthropic Research"
+        ]
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 22,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 27,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 31,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 886,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1302,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 279,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 187,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 91,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 5,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-17T19:54:06.394351Z",
+    "candidates": 128,
+    "triaged": 128,
+    "enriched": 5,
+    "headline_candidates": 136,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 110.3,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 34640,
+      "output_tokens": 6669,
+      "cost_usd": 0.050989
+    }
+  }
+}
