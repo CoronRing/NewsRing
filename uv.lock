@@ -2535,7 +2535,7 @@ wheels = [
 
 [[package]]
 name = "railtracks"
-version = "1.5.7"
+version = "1.5.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama" },
@@ -2546,9 +2546,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d1/e4/e2ed0e14983c9655952842e5118454b776f1b57db5f512ea20170464700a/railtracks-1.5.7.tar.gz", hash = "sha256:61763408e1200ae41172f3fdede18deddc8c34bcdc1a4ce1c7a150e4c0ff770e", size = 401591, upload-time = "2026-10-07T18:16:53.102Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/87/b3/0267e8db6776d3f78057ea7236fa393f915a11242e72b8da114ef2a0744a/railtracks-1.5.8.tar.gz", hash = "sha256:d40342e2cb5429f295efdaf57303bc6cde72e3e6b2b101808ffc88e145d19427", size = 415756, upload-time = "2026-10-15T23:19:57.246Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/10/8f/15b4a83e135909c7b21b9ebb44fff5d969cfbdd970481f5a414648c81cc1/railtracks-1.5.7-py3-none-any.whl", hash = "sha256:9d2787f0d1282b0cc23bab6d7b598b1ff06ae37598ff47710d5ffd6295a1e9c1", size = 547990, upload-time = "2026-10-07T18:16:51.188Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/2e/d572f5f2982a190fd66dac38771584c1fbba4007c4a7508544f798eae4ae/railtracks-1.5.8-py3-none-any.whl", hash = "sha256:510a1a0401fa6d124904addcea4cc6e5a66ccc9fc9feca17f02a9eff08a9fd8e", size = 565708, upload-time = "2026-10-15T23:19:55.154Z" },
 ]
 
 [[package]]
