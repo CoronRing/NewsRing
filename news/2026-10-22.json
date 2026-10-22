@@ -1,0 +1,643 @@
+{
+  "date": "2026-10-22",
+  "generated_at": "2026-10-22T20:03:02.660609Z",
+  "title": "Agent Cache Surgery, Hardware Jails, and Breaking Loops",
+  "intro": "Today's selection focuses on making agent runtimes survive production: from open standards and KV cache operations to self-supervised loop breaking and DPU-level hardware sandboxing. If you enjoy watching systems engineers solve problems caused by models being stubborn, there is plenty here.",
+  "stories": [
+    {
+      "headline": "Anthropic hands Agent Skills to the Linux Foundation",
+      "summary": "Anthropic has formally donated the Agent Skills specification to the Linux Foundation’s Agentic AI Foundation, the same vendor-neutral umbrella holding the Model Context Protocol. Built originally for Claude Code before spreading across platforms like Cursor and VS Code, the standard packages modular instructions and local tool scripts into a directory with a SKILL.md manifest. Governance transitions to independent maintainers from Anthropic, Google, and OpenAI, with a roadmap planned around versioning, formal specification proposals, and installation security guidelines. It is a welcome move toward cementing modular tool layouts as open infrastructure instead of a vendor-owned lock-in.",
+      "why_it_matters": "Solidifies a common, platform-agnostic standard for packaging domain instructions and scripts across different agent harnesses.",
+      "reason": "Anthropic has donated the open Agent Skills specification to the Linux Foundation's Agentic AI Foundation, solidifying a cross-platform standard for modular agent workflows and capabilities.",
+      "item": {
+        "key": "anthropic.com/news/donating-agent-skills-to-the-agentic-ai-foundation",
+        "source": "Anthropic News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Donating Agent Skills to the Agentic AI Foundation",
+        "url": "https://www.anthropic.com/news/donating-agent-skills-to-the-agentic-ai-foundation",
+        "discussion_url": null,
+        "published": "2026-10-22T00:00:00Z",
+        "summary": "We’re donating Agent Skills, the open standard that gives AI agents specialized knowledge and workflows, to the Agentic AI Foundation. More than 70 agent platforms, including ChatGPT, Cursor, GitHub Copilot, and VS Code, have integrated Agent Skills since we published the standard in December 2025.",
+        "content": "Today, we’re donating Agent Skills, the open standard that gives AI agents specialized knowledge and workflows, to the Agentic AI Foundation (AAIF). More than 70 agent platforms, including ChatGPT, Cursor, GitHub Copilot, and VS Code, have integrated Agent Skills since we published the standard in December 2025.\nAgent interoperability through simplicity\nA skill is a folder containing a SKILL.md file that teaches an agent a specific task or domain, along with any scripts or reference material it needs. We developed skills while working on Claude Code. It handled general knowledge work well, but often lacked the procedural knowledge that real business tasks need. Within weeks of our October 2025 launch, developers published thousands of skills on GitHub and wrote loaders for Codex, Cursor, and OpenCode. We then published Agent Skills as an open standard, under its own GitHub organization and domain, so any agent could use it. So far, 1 million skills have been published and nearly 280 million installed.\nDonating Agent Skills to AAIF\nWe’re committed to keeping Agent Skills open, community-driven, and vendor-neutral. Today, we are donating the standard to the Agentic AI Foundation (AAIF) under the Linux Foundation, which we co-founded with Block and OpenAI last year, and to which we donated the Model Context Protocol (MCP). The AAIF will provide a neutral home to the standard going forward, ensuring the community has a say in where Agent Skills go next.\nWe are donating the Agent Skills name and logo, the GitHub organization, and the agentskills.io domain. You can continue to use the standard or contribute to it without joining the AAIF.\nEngineers from Anthropic, Google, OpenAI, and other companies will maintain the standard as individuals, with David Soria Parra and Mahesh Murag as Lead Maintainers.\nWhat comes next\nWe’ve proposed starting with a roadmap covering versioned releases, a formal proposal process, and security guidance for people who write and install skills. As with MCP, the project will continue to prioritize community input and transparent decision-making. You can join the project’s Discord to give feedback on proposed specification changes.\nThank you to the developers who built with Agent Skills from the start, and to the teams who brought skills into their products. Read the specification at agentskills.io and join the discussion on GitHub.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "simonwillison.net/2026/Oct/22/donating-agent-skills",
+          "source": "Simon Willison",
+          "tags": [
+            "practitioner"
+          ],
+          "title": "Donating Agent Skills to the Agentic AI Foundation",
+          "url": "https://simonwillison.net/2026/Oct/22/donating-agent-skills/",
+          "discussion_url": null,
+          "published": "2026-10-22T18:09:56Z",
+          "summary": "Donating Agent Skills to the Agentic AI Foundation\n\nNews today from Anthropic:\n\nWe’re committed to keeping Agent Skills open, community-driven, and vendor-neutral. Today, we are donating the standard to the Agentic AI Foundation (AAIF) under the Linux Foundation, which we co-founded with Block and OpenAI last year, and to which we donated the Model Context Protocol (MCP).\n\nI'm pleased to note I called this one last December , when Anthropic first declared skills to be an \"open standard\":\n\nI wouldn't be surprised to see this end up in the AAIF , recently the new home of the MCP specification.\n\nFun side note: since my blog content is available to Claude via the datasette-mcp\nplugin I found that post by prompting Claude to \" Use simonwillison.net MCP to find if I ever talked about how I want skills to be donated to a standards body \".\n\nTags: standards , ai , generative-ai , llms , anthropic , model-context-protocol , skills",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Managing KV caches without trajectory rewriting",
+      "summary": "A paper from Tsinghua researchers introduces AKV, proposing direct cache engineering over standard context summarization to handle long agent trajectories. Truncating or summarizing conversational prefixes typically invalidates downstream KV caches and forces expensive re-prefills, so AKV instead adds proactive drop and repos operations to prune keys and adjust positional encodings directly in the cache. Because history-dependent cache modifications break standard prefix caching, the authors co-designed an engine that handles stateful cache reuse behind a stateless API. In evaluation, a tool-response rolling-drop policy reduced costs by 27.7%, bumped benchmark accuracy by 1.7 points, and achieved a 1.5x speedup in P95 latency.",
+      "why_it_matters": "Addresses the severe memory and re-prefill bottlenecks of long multi-turn tool trajectories directly at the inference engine level.",
+      "reason": "This paper tackles one of the biggest bottlenecks in production agent frameworks: optimizing KV cache I/O, compression, and retention across long multi-turn tool trajectories.",
+      "item": {
+        "key": "arxiv:2610.28577",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Cache Engineering for Agents",
+        "url": "https://huggingface.co/papers/2610.28577",
+        "discussion_url": null,
+        "published": "2026-10-22T00:00:00Z",
+        "summary": "Large Language Model (LLM) agents can handle increasingly complex tasks, navigating long trajectories of observations and actions. As these trajectories grow, key-value (KV) cache I/O and storage become the dominant cost. Trajectories can also exceed the LLM's maximum context length, requiring control over active cache growth. Prior work uses context engineering to reduce cache size by trimming or summarizing history. However, modifying the trajectory prefix invalidates subsequent cached states and triggers costly re-prefilling of retained context. Task accuracy can also suffer when too little context is retained to limit re-prefill costs. We propose cache engineering as a new scheme. It allows agents to directly control their active KV cache without modifying the trajectory or re-prefilling retained context. Specifically, agents can proactively use drop to exclude selected cache from future attention and repos to adjust retained keys' position encodings. We formalize these cache operations and identify history dependence as a serving challenge: identical token sequences can yield different cache states under different cache operation sequences, making prefix matching insufficient…",
+        "content": "Abstract\nAKV introduces cache engineering to manage LLM agent key-value caches without altering trajectories, improving efficiency and accuracy via drop and repos operations with a co-designed serving engine.\nLarge Language Model (LLM) agents can handle increasingly complex tasks, navigating long trajectories of observations and actions. As these trajectories grow, key-value (KV) cache I/O and storage become the dominant cost. Trajectories can also exceed the LLM's maximum context length, requiring control over active cache growth. Prior work uses context engineering to reduce cache size by trimming or summarizing history. However, modifying the trajectory prefix invalidates subsequent cached states and triggers costly re-prefilling of retained context. Task accuracy can also suffer when too little context is retained to limit re-prefill costs. We propose cache engineering as a new scheme. It allows agents to directly control their active KV cache without modifying the trajectory or re-prefilling retained context. Specifically, agents can proactively use drop to exclude selected cache from future attention and repos to adjust retained keys' position encodings. We formalize these cache operations and identify history dependence as a serving challenge: identical token sequences can yield different cache states under different cache operation sequences, making prefix matching insufficient for correct cache reuse. Thus, we co-design the AKV serving engine. It provides a stateless interface compatible with existing serving APIs, while internally managing stateful cache reuse, eviction, and restoration. Experiments show that a tool-response rolling-drop cache policy improves average benchmark scores by 1.7 points and reduces average cost by 27.7%, compared with conventional threshold-triggered summarization. With AKV, it achieves up to 1.2x the output throughput and a 1.5x speedup in P95 request latency. Recursive self-improvement of cache policies further reduces cost by 7.1% over expert design. Our code is at https://github.com/thu-nics/AKV.\nCommunity\nWe let agents manage their KV cache directly, proactively dropping what they no longer need without rewriting their conversation history or recomputing the remaining cache. We built AKV serving system to support this efficiently, reducing cache for long-running agents.\nGet this paper in your agent:\nhf papers read 2610.28577 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 108.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "LangChain core switches tool streaming to delta slices",
+      "summary": "LangChain Core 1.7.0 updates the behavior of streamed tool arguments, swapping cumulative block-delta snapshots for incremental tool-call-delta slices. Consuming ChatModelStream.tool_calls now yields only the newest token slice of an argument payload as it arrives rather than the full accumulated string emitted up to that tick. Convenience accessors like .tool_calls.get() remain unchanged, but any custom runtime event parser that inspects mid-stream tool calls without chunk accumulation will break unless pinned below 1.7. It aligns LangChain closer to modern token-streaming conventions, even if it requires updating partial JSON parsers downstream.",
+      "why_it_matters": "Directly impacts how custom agent harnesses stream, parse, and validate intermediate tool call invocations mid-generation.",
+      "reason": "LangChain's core update changes tool-call streaming to emit incremental deltas rather than snapshot blocks, directly affecting how agent runtimes stream and parse intermediate tool invocations.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.7.0",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-core==1.7.0",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.7.0",
+        "discussion_url": null,
+        "published": "2026-10-22T17:48:17Z",
+        "summary": "Changes since langchain-core==1.6.13\n\nrelease(core): 1.7.0 ( #41418 )\n\nfeat(core): emit tool-call-delta for streamed tool-call args ( #41257 )\n\nNotes\n\nTool-call args now stream as tool-call-delta slices instead of block-delta snapshots of the args so far. If you read raw stream events and their block-delta args mid-stream, read tool-call-delta instead. .tool_calls.get() and .output are unchanged. To keep snapshots, pin langchain-core<1.7 .\n\nSince 1.6.13, iterating ChatModelStream.tool_calls yields each call's new args slice, not a snapshot of the args so far.",
+        "content": "Repository navigation\nChanges since langchain-core==1.6.13\nrelease(core): 1.7.0 (#41418)\nfeat(core): emit tool-call-delta for streamed tool-call args (#41257)\nNotes\n- Tool-call args now stream as tool-call-delta slices instead of block-delta snapshots of the args so far. If you read raw stream events and their block-delta args mid-stream, read tool-call-delta instead. .tool_calls.get() and .output are unchanged. To keep snapshots, pin langchain-core<1.7.\n- Since 1.6.13, iterating ChatModelStream.tool_calls yields each call's new args slice, not a snapshot of the args so far.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "github.com/langchain-ai/langchain/releases/tag/langchain%3D%3D1.4.7",
+          "source": "LangChain releases",
+          "tags": [
+            "release",
+            "agents"
+          ],
+          "title": "langchain==1.4.7",
+          "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain%3D%3D1.4.7",
+          "discussion_url": null,
+          "published": "2026-10-21T21:39:18Z",
+          "summary": "Changes since langchain==1.4.6\n\nchore(langchain): update lockfile ( #41402 )\n\nrelease(langchain): 1.4.7 ( #41401 )\n\nchore(deps): bump certifi from 2025.11.12 to 2026.10.19 in /libs/langchain_v1 ( #41370 )\n\nfeat(core,langchain,standard-tests): read tool-call-delta in stream consumers ( #41246 )\n\nchore(deps): bump aiohttp from 3.14.4 to 3.14.5 in /libs/langchain_v1 ( #41360 )\n\nchore(deps): bump aiohttp from 3.14.3 to 3.14.4 in /libs/langchain_v1 ( #41330 )\n\nchore(deps): bump mcp from 2.1.1 to 2.2.0 in /libs/langchain_v1 ( #41270 )\n\nfeat(core): accept address inside LangChainTracer ( #41006 )",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.6.13",
+          "source": "LangChain releases",
+          "tags": [
+            "release",
+            "agents"
+          ],
+          "title": "langchain-core==1.6.13",
+          "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.6.13",
+          "discussion_url": null,
+          "published": "2026-10-21T20:43:50Z",
+          "summary": "Changes since langchain-core==1.6.12\n\nrelease(core): 1.6.13 ( #41397 )\n\nchore(deps): bump certifi from 2025.11.12 to 2026.10.19 in /libs/core ( #41373 )\n\nfeat(core,langchain,standard-tests): read tool-call-delta in stream consumers ( #41246 )",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Breaking agent action loops via self-supervised DPO",
+      "summary": "DeLoop tackles the familiar failure mode where an agent repeatedly fires identical tool calls and receives identical observations, making zero forward progress. The authors show this behavior worsens dramatically under context summarization—jumping from 29.0% to 57.3% of tasks on CodeGym for Qwen3-8B—because models frequently overlook their own compressed history. DeLoop solves this without task rewards or LLM judges by mining the agent's unassisted rollouts: the looping call is treated as the negative action and the eventual loop-breaking action as the positive pair for DPO. Training cut loop rates down to 6.1% and reduced total steps by two-thirds, while raising Qwen3-32B task success from 37.7% to 44.8%.",
+      "why_it_matters": "Provides a practical, judge-free method to fine-tune models out of repetitive tool-calling loops exacerbated by context window compression.",
+      "reason": "DeLoop investigates why frontier LLM agents repeatedly issue identical tool calls without gathering new information, offering a self-supervised method to break repetitive action loops.",
+      "item": {
+        "key": "arxiv:2610.19376",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "DeLoop: Repeated Actions as Self-Supervision for Long-Horizon Agents",
+        "url": "https://huggingface.co/papers/2610.19376",
+        "discussion_url": null,
+        "published": "2026-10-22T00:00:00Z",
+        "summary": "Language-model agents that run long tasks often redo work they have already done: they re-issue a tool call they made earlier and get back exactly the same observation, a step that adds no new information. We identify this failure as a loop. Loops appear natively in Qwen, Llama, and Gemini agents and become far more common once the agent's history is compressed to fit its context window. To reduce these loops, we propose DeLoop, a self-supervised training method. DeLoop builds on a simple observation: the agent's own rollout can provide the supervision needed to learn from its loops. We use a looping action as a negative example and the first later non-looping action in the same rollout as a positive example. DeLoop learns from these pairs through direct preference optimization and does not require task rewards, gold answers, or LLM judges. On CodeGym under compression, DeLoop reduces the share of Qwen3-8B tasks containing loops from 57.3% to 6.1%. It also uses about one third as many steps per task, with similar task success. On Qwen3-32B, DeLoop reduces loops and steps while raising task success from 37.7% to 44.8%.",
+        "content": "DeLoop: Repeated Actions as Self-Supervision for Long-Horizon Agents\nAbstract\nDeLoop is a self-supervised preference optimization method that reduces repetitive tool-use loops in language-model agents by learning from their own rollouts, improving efficiency and success under context compression.\nLanguage-model agents that run long tasks often redo work they have already done: they re-issue a tool call they made earlier and get back exactly the same observation, a step that adds no new information. We identify this failure as a loop. Loops appear natively in Qwen, Llama, and Gemini agents and become far more common once the agent's history is compressed to fit its context window. To reduce these loops, we propose DeLoop, a self-supervised training method. DeLoop builds on a simple observation: the agent's own rollout can provide the supervision needed to learn from its loops. We use a looping action as a negative example and the first later non-looping action in the same rollout as a positive example. DeLoop learns from these pairs through direct preference optimization and does not require task rewards, gold answers, or LLM judges. On CodeGym under compression, DeLoop reduces the share of Qwen3-8B tasks containing loops from 57.3% to 6.1%. It also uses about one third as many steps per task, with similar task success. On Qwen3-32B, DeLoop reduces loops and steps while raising task success from 37.7% to 44.8%.\nCommunity\nTL DR: LLM agents often re-issue a tool call they already made and get the same observation back. We call this a loop. DeLoop turns each loop into a free training pair from the agent's own rollout: the repeated call is the rejected action, and the agent's first later loop-breaking action is the chosen one. We train on these pairs with DPO. No task reward, gold answer, or LLM judge needed.\nWhy it matters: loops get much worse when the history is compressed. On CodeGym, Qwen3-8B loops in 29.0% of runs with the full history and in 57.3% under summarization. Summaries that explicitly track past actions don't fix it, because the agent often ignores a record it already has.\nResults\n- Qwen3-8B on CodeGym: loop rate 57.3% → 6.1% (9.4×), steps per task 15.0 → 4.7, tokens −47%, with similar task success\n- Qwen3-14B / 32B: task success +7.2 / +7.1 points (45.1 → 52.3, 37.7 → 44.8)\n- With cross-domain pairs (DeLoop-Mix): Qwen3-8B success 25.1 → 30.3. Loops also drop under 7 memory policies, in ALFWorld, Open-AgentRL, AppWorld, ScienceWorld, and BrowseComp-Plus (22.4% → 1.2%)\n🔗 Project page (with an interactive example of a loop forming): https://cskyl.github.io/deloop/\n📄 arXiv: https://arxiv.org/abs/2610.19376\n💻 Code and data: coming soon at https://github.com/cskyl/deloop\nGet this paper in your agent:\nhf papers read 2610.19376 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 18.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Representation-space world models catch GUI agent hijacks",
+      "summary": "Detecting attacks on computer-use agents is tricky because showing a login screen is legitimate after clicking 'Sign in', but malicious after clicking 'View order'. Rather than generating images or text that require a secondary VLM evaluator, the LGWM architecture predicts the representation vector of the expected next screen directly from action inputs. Trained on 1.85 million GUI transitions, verification reduces to an embedding distance check that runs in 17 milliseconds and achieves 0.987 AUC on the RSWT-BENCH hijack diagnostic. The vector residual also separates harmful screen mismatches from benign layout quirks at 0.953 AUC, where standard prompted VLMs perform near chance.",
+      "why_it_matters": "Delivers a sub-20ms state-transition verifier to detect UI hijacking and tool redirection without incurring multi-second VLM inference latencies.",
+      "reason": "This work explores state-transition verification for computer-use agents, showing why static screen inspection fails to catch security violations and how world models can act as trajectory verifiers.",
+      "item": {
+        "key": "arxiv:2610.11942",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Right Screen, Wrong Transition: World Models as Verifiers for GUI Agents",
+        "url": "https://huggingface.co/papers/2610.11942",
+        "discussion_url": null,
+        "published": "2026-10-22T00:00:00Z",
+        "summary": "A login screen that appears after a tap on Sign in is expected; the same screen after a tap on View order is an attack. For GUI agents, safety is therefore a property of the transition rather than of the screen, and a monitor that inspects only screens can be defeated by reusing a legitimate one. Judging a transition requires an expectation of what should have followed the action. Existing GUI world models provide one, but they output it as text, code, or images, so checking it against the observed screen requires a second model to judge the two. We argue that a world model meant for verification should instead predict in the space in which observations are encoded, and present LGWM, a decoder-free, action-conditioned world model that predicts the representation of the next screen directly, trained without semantic annotation on 1.85M real GUI transitions. Verification reduces to a vector comparison, and the same signal reveals whether a mismatch is harmful. We evaluate on RSWT-BENCH, a diagnostic where each credential screen appears under both a legitimate and a hijacked transition, so detectors that see only the screen are at chance by construction. The training-free score…",
+        "content": "Right Screen, Wrong Transition: World Models as Verifiers for GUI Agents\nAbstract\nA decoder-free, action-conditioned world model predicts next-screen representations to verify GUI transitions and detect hijacked screens with high accuracy and low latency.\nA login screen that appears after a tap on Sign in is expected; the same screen after a tap on View order is an attack. For GUI agents, safety is therefore a property of the transition rather than of the screen, and a monitor that inspects only screens can be defeated by reusing a legitimate one. Judging a transition requires an expectation of what should have followed the action. Existing GUI world models provide one, but they output it as text, code, or images, so checking it against the observed screen requires a second model to judge the two. We argue that a world model meant for verification should instead predict in the space in which observations are encoded, and present LGWM, a decoder-free, action-conditioned world model that predicts the representation of the next screen directly, trained without semantic annotation on 1.85M real GUI transitions. Verification reduces to a vector comparison, and the same signal reveals whether a mismatch is harmful. We evaluate on RSWT-BENCH, a diagnostic where each credential screen appears under both a legitimate and a hijacked transition, so detectors that see only the screen are at chance by construction. The training-free score reaches 0.987 AUC at 17 ms per decision, on par with the strongest closed-source VLMs and about ten AUC points above generative GUI world models at over three orders of magnitude lower latency. The residual direction reaches 0.953 AUC at separating harmful from benign violations, where prompted VLMs are near chance. Further analyses show that the prediction is a usable future state rather than an anomaly score. World models have mostly served as simulators or planners; our results point to a third role, verification, for which predicting in representation space is the natural design.\nGet this paper in your agent:\nhf papers read 2610.11942 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 1\nDatasets citing this paper 1\njiamingzz/lgwm-data\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 68.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Omnara open-sources a managed agent runtime architecture",
+      "summary": "Omnara has released an Apache 2.0 alternative to managed agent infrastructures like Claude Managed Agents and OpenAI's Agents API. The architecture centers on an event log in Postgres that captures every step, allowing stateless worker processes to handle active generation turns and recover cleanly after crashes. Sandboxed execution on external laptops or VMs is handled by an outbound-only omnarad daemon, avoiding the need to expose inbound network ports to orchestrate tool environments. It offers an accessible reference design for teams wanting durable execution logs, human approval hooks, and MCP support without relying on hosted proprietary harnesses.",
+      "why_it_matters": "Offers a modular, self-hostable harness architecture featuring durable execution loops and outbound-only sandboxing.",
+      "reason": "Omnara is a self-hostable agent harness providing an open-source alternative to managed agent services with durable execution loops, sandboxing, and granular permissions.",
+      "item": {
+        "key": "github.com/omnara-ai/omnara",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: Omnara – Open-source alternative to Claude Managed Agents",
+        "url": "https://github.com/omnara-ai/omnara",
+        "discussion_url": "https://news.ycombinator.com/item?id=50183892",
+        "published": "2026-10-21T16:44:53Z",
+        "summary": "Hey all, Kartik from Omnara ( https://omnara.com ) here. We're building an open-source API for running durable agents. You create an agent with an API call, and Omnara runs the agent loop, gives the agent sandboxes to run commands in, and handles secrets, permissions, and RBAC. Each agent's state is stored in Postgres, so agents survive restarts and cost nothing while idle. You can message them and stream their events over the API.\nYou may remember us from our early days, when we made a remote-control phone app for Claude Code and Codex. Since the harness ran on a laptop back then, we had to build a relay to reach it, it stopped when the laptop closed, and moving it to a cloud sandbox meant syncing code and agent state between machines. We didn't think remote-controlling a local agent was end-game for how people would run agents, so we built a new product where the agent runs in the cloud, any client can talk to it through an API, and it can still use your laptop as one of its machines.\nAnthropic and OpenAI are building hosted versions of this, like Claude Managed Agents and the OpenAI Agents API. Omnara is an open-source version you can run on your own servers and use your own…",
+        "content": "A self-hostable alternative to Claude Managed Agents and OpenAI's Agents API.\nWebsite · Quickstart · Docs · API · Changelog · Discord\nOmnara is an open-source managed agent platform. Use the API to run AI agents on any model and any machine, with tools, secrets, permissions, and streaming built in. Self-host it for free under Apache 2.0, or use Omnara Cloud.\nSign in at app.omnara.com. Your first project comes\nwith a model provider (omnara-openrouter) and a pool of managed sandboxes\n(default-pool), so this config runs as is. Save it as agent.yaml:\nversion: v1\ninstruction: |\n  You are an engineering assistant. Use your machine to run commands.\nmodel:\n  provider_config: omnara-openrouter\n  name: anthropic/claude-fable-5.1\nmachine_sources:\n  - machine_pool_name: default-pool\nLaunch it with the CLI (Node.js 22 or newer). If you're not logged in, the first command opens your browser to sign in.\nnpx omnara agents launch --file agent.yaml \\\n  --name \"Machine assistant\" \\\n  --message \"Report this machine's operating system and free disk space.\"\nChat with the agent in your terminal with npx omnara agents chat <agent-id>,\nor open it in the dashboard to watch its tool calls and reply.\nLaunch it from your code with the TypeScript SDK\nCreate an API key in the dashboard and export it as OMNARA_TOKEN, install the\nSDK with npm install @omnara/sdk, and use the org and project IDs that\nnpx omnara config prints:\nimport { readFile } from 'node:fs/promises'\nimport { bearerToken, createOmnaraClient, openAgentEventStream, sdk } from '@omnara/sdk'\nconst client = createOmnaraClient({ auth: bearerToken(process.env.OMNARA_TOKEN!) })\nconst path = { orgID: 'org_...', projectID: 'proj_...' }\nconst config = await sdk.createAgentConfig({\n  client,\n  path,\n  body: { source: await readFile('agent.yaml', 'utf8'), source_format: 'yaml' },\n})\nconst launched = await sdk.createAgent({\n  client,\n  path,\n  body: { config: config.data.id, message: \"Report this machine's free disk space.\" },\n})\nconst agentID = launched.data.agent.id\nfor await (const event of openAgentEventStream({ client, path: { ...path, agentID } })) {\n  console.log(event)\n}\nThe quickstart shows the same flow with the REST API.\nTo have your coding agent do the setup, give it this prompt:\nHelp me set up Omnara by following https://www.omnara.com/SKILL.md\nRequires Docker with Compose.\ngit clone https://github.com/omnara-ai/omnara.git\ncd omnara\ndocker compose -f compose.yaml --profile app up -d\nOpen http://localhost:8000 and sign up. Local\ndevelopment prints the verification link in docker compose logs api, so no\nemail provider is needed. To build from source instead of using published\nimages, run docker compose --profile app up -d --build.\nA new instance has no models or machines yet. In the console, add a model provider and a model, connect this computer under Machines, and share both with your project. Sandboxes also work once your instance has a public URL.\nPoint the CLI at your instance and log in:\nnpx omnara config --api-url http://localhost:8000/api/v1 --issuer-url http://localhost:8000\nnpx omnara login\nIn agent.yaml, use your provider and model names, and replace the\nmachine_pool_name entry with machine_name: <your machine>. Then launch it\nwith the same command as above.\nThe local defaults are intentionally insecure. For a real deployment, follow the self-hosting guide and the configuration reference.\nYour product talks to Omnara, and Omnara runs each agent with the model, tools, and machines in its config.\nflowchart TB\n    subgraph yours[\"Your side\"]\n        users([\"Your users\"]) --> app[\"Your app<br/>REST API · TypeScript SDK\"]\n        team[\"Your team<br/>CLI · dashboard<br/>Slack · Discord · GitHub\"]\n    end\n    subgraph omnara[\"Omnara\"]\n        api[\"API<br/>launch · input<br/>event stream · approvals\"] <--> pg[(\"Postgres<br/>each agent's event log\")] <--> worker[\"Workers<br/>run the agent loop\"]\n    end\n    subgraph plug[\" \"]\n        models[\"Models<br/>OpenAI · Anthropic<br/>OpenRouter · self-hosted\"]\n        tools[\"Tools<br/>built-in · skills<br/>MCP · custom\"]\n        machines[\"Machines<br/>sandboxes or your own<br/>laptop, VM, container\"]\n    end\n    app --> api\n    team --> api\n    worker --> models\n    worker --> tools\n    worker --> machines\n    classDef side fill:none,stroke:#8b949e,stroke-width:1px\n    classDef core fill:#506FCF,stroke:#3D5BB5,stroke-width:1px,color:#ffffff\n    classDef store fill:#3D5BB5,stroke:#2E4794,stroke-width:1px,color:#ffffff\n    classDef plugin fill:none,stroke:#85A0E6,stroke-width:1.5px\n    class users,app,team side\n    class api,worker core\n    class pg store\n    class models,tools,machines plugin\n    style yours fill:none,stroke:#8b949e,stroke-dasharray:4 3\n    style omnara fill:#506FCF14,stroke:#506FCF,stroke-width:1.5px\n    style plug fill:none,stroke:#85A0E6,stroke-dasharray:4 3\n    linkStyle default stroke:#8b949e,stroke-width:1.5px\n    - API. Your app, the CLI, and the dashboard all use the same REST API to launch agents, send messages, and answer approvals. Events stream back as they happen.\n- Postgres. Every step of every agent is saved here. That record is the agent's state, so any worker can pick an agent back up after a crash or restart.\n- Workers. Stateless processes that build the model context, call the model, and run tools. An agent only uses a worker while it's taking a turn, so one worker can serve many agents. Add workers to handle more turns at once.\n- Machines. Each machine runs the omnarad daemon, which connects out to\nOmnara, so agents can run commands there without any inbound ports.\nOmnara also uses Redis, blob storage for attachments and tool outputs, and a memory filesystem. The architecture docs cover the details.\n- Any model. Bring your own keys for OpenAI, Anthropic, OpenRouter, Amazon Bedrock, LiteLLM, Ollama, or any compatible endpoint, including models you host yourself.\n- Tools. Built-in tools for shell commands, files, web search and fetch, and asking a person a question, plus MCP…",
+        "score": 107.0,
+        "comments": 32,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Hardware-enforced guardrails for autonomous agents",
+      "summary": "NVIDIA outlined Sentry, a security framework under its OpenShell architecture that moves agent governance out of the host OS and directly into hardware trust domains. Running on BlueField-4 DPUs positioned as the sole network path between host Vera CPUs and model endpoints, Sentry enforces Layer-4 through Layer-7 policies without relying on host software integrity. Network traffic is managed via DOCA Flow firewalls and an Envoy-based proxy using Open Policy Agent, while a DOCA Argus module conducts agentless live memory introspection of host sandboxes. It represents an infrastructure-heavy answer to rogue agents, ensuring compromised containers cannot tamper with their own traffic inspection or policy rules.",
+      "why_it_matters": "Demonstrates the extreme, zero-trust hardware measures entering enterprise infrastructure to contain autonomous tool-calling swarms.",
+      "reason": "NVIDIA details runtime isolation boundaries and governance frameworks designed to keep autonomous multi-tool agent swarms from jumping permissions or violating sandbox boundaries.",
+      "item": {
+        "key": "developer.nvidia.com/blog/inside-nvidia-sentry-secure-ai-agents-at-runtime",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "Inside NVIDIA Sentry: Secure AI Agents at Runtime",
+        "url": "https://developer.nvidia.com/blog/inside-nvidia-sentry-secure-ai-agents-at-runtime/",
+        "discussion_url": null,
+        "published": "2026-10-21T09:52:16Z",
+        "summary": "An AI agent can complete its assignment and still cross a security boundary. Recent incidents show that agents can circumvent security controls while using...",
+        "content": "An AI agent can complete its assignment and still cross a security boundary. Recent incidents show that agents can circumvent security controls while using tools, credentials, and services to pursue their assigned goals. Monitoring and enforcement need to operate outside the agent’s reach so that it can’t alter or disable them.\nNVIDIA Sentry is a security software framework that monitors AI agents and enforces policies governing their access to models, tools, and data. Part of the NVIDIA OpenShell reference architecture announced at GTC Berlin, it’s built on NVIDIA DOCA, runs on NVIDIA BlueField-4 DPUs, and provides host-isolated runtime protection for AI agents. NVIDIA Sentry validates that an agent operates according to its designed intent and within its defined operational boundaries.\nTrusted even when host resources can’t be trusted, it controls the agent’s only path to the model, providing tamper-evident traceability of agent activity while enforcing granular security controls on agent access in silicon. In addition to inspecting agent communications, NVIDIA Sentry uses out-of-band observability to establish real-time situational awareness, continuously evaluating agents’ runtime security and behavior to validate their security and integrity.\nThis post explains how NVIDIA Sentry evaluates agent requests, detects threats, and enforces security policies independently of host software.\nAn independent security layer for agent runtime protection\nAn earlier agentic AI security post described how NVIDIA BlueField runs security services in a hardware trust domain independent from the host.\nNVIDIA Sentry builds on that foundation to continuously monitor AI agent behavior and enforce access policies independently of host software, establishing a strict security boundary in a separate hardware trust domain outside the agent’s reach to keep agents operating within their designed intent.\nSoftware runtime boundaries remain essential. NVIDIA OpenShell is a secure runtime for autonomous agents that governs what an agent can do. OpenShell separates policy enforcement from the agent workload, so a compromised agent can’t change its own restrictions. NVIDIA Sentry adds an independent hardware safeguard out of band, running on BlueField-4, beyond the agent’s reach and knowledge.\nIn the OpenShell reference architecture, agents execute on NVIDIA Vera CPUs, while BlueField-4 sits on the node’s only path to the model. NVIDIA Sentry inspects agent-to-model communications and enforces access policies without relying on the agent to report its own behavior. Memory introspection adds context about the agent’s execution environment, such as a container or microVM, to help detect external threats and agent misbehavior.\nGoverning agent communications\nDOCA Tower is NVIDIA Sentry’s AI security gateway. Built on Envoy, the open source edge and service proxy, it operates as a transparent proxy for agent traffic, placing a bidirectional inspection layer between an agent and the external environment.\nAgent network traffic reaches BlueField-4 through a direct network I/O path that bypasses host OS/hypervisor packet processing. All of the agent’s network communications are governed by NVIDIA Sentry as BlueField-4 sits on the only path to the model and to the outside world.\nAn agent’s network access boundary is controlled using DOCA Flow and DOCA Tower, which work in concert to restrict agent access to approved resources. DOCA Flow is used to implement a layer-4 firewall for each agent, accelerated in silicon on BlueField-4. The firewall blocks connections to unauthorized destinations and forwards permitted traffic to DOCA Tower for layer-7 (application layer) inspection, authorization, and additional security checks.\nDOCA Tower acts as a transparent proxy, performing Transport Layer Security (TLS) termination using built-in, in-silicon TLS acceleration. For connections configured for inspection, it decrypts the agent traffic permitted by the layer-4 firewall to inspect and control agent communications.\nNVIDIA Sentry uses the Open Policy Agent (OPA), an open source policy engine, to evaluate access requests against defined policies. OPA uses Rego, a declarative domain-specific language designed to evaluate complex hierarchical data structures. OPA runs locally in memory and can evaluate requests in under a millisecond, depending on policy complexity and configuration.\nDOCA Tower is compatible with OpenShell policies, using OPA to extend network access policies and runtime controls into BlueField-4 and to the infrastructure.\nEnforcing agent access policies with runtime context\nAn agent’s network communications provide only part of the information needed to assess its security and integrity. Visibility into the agent’s execution environment adds context for evaluating access requests that go beyond a traditional resource access policy.\nDOCA Argus provides real-time visibility into an agent’s execution environment and operational state, giving NVIDIA Sentry additional context about agent access requests.\nIt uses live memory introspection to analyze selected regions of volatile host memory and obtain independent evidence of the system’s operational state.\nDOCA Argus runs independently of the host, analyzing host memory on BlueField-4 without host-resident agents. This agentless design provides independent runtime visibility while preserving host compute resources. By operating outside the host in its own isolated trust domain, DOCA Argus remains beyond the reach of host software even if the host is compromised.\nDOCA Argus maps the execution environment in real time—for example, containers to their respective pods and sandboxes to microVMs—and identifies the running processes and their properties within each environment. It also maps relationships between processes and threads, file access, network connections, loaded libraries, CPUs, GPUs, memory, and other system resources. DOCA Argus tracks containers, processes, and…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "developer.nvidia.com/blog/how-nvidia-openshell-reference-architecture-secures-and-governs-ai-agent-workloads-at-scale",
+          "source": "NVIDIA Developer",
+          "tags": [
+            "infra"
+          ],
+          "title": "How NVIDIA OpenShell Reference Architecture Secures and Governs AI Agent Workloads at Scale",
+          "url": "https://developer.nvidia.com/blog/how-nvidia-openshell-reference-architecture-secures-and-governs-ai-agent-workloads-at-scale/",
+          "discussion_url": null,
+          "published": "2026-10-21T09:50:14Z",
+          "summary": "Autonomous agents can work for hours on complex tasks, accessing files, tools, the internet, and spawning other agents to collaborate with. Executing complex...",
+          "content": "Autonomous agents can work for hours on complex tasks, accessing files, tools, the internet, and spawning other agents to collaborate with. Executing complex...\nAutonomous agents can work for hours on complex tasks, accessing files, tools, the internet, and spawning other agents to collaborate with. Executing complex tasks over long time horizons leads to compounding risk: the agents may download code, build new tools, request additional privileges, and touch more of the underlying infrastructure. The agents’ action paths are determined as they work…\n\nSource",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "github.com/NVIDIA/OpenShell",
+          "source": "Hacker News front page",
+          "tags": [
+            "community"
+          ],
+          "title": "Nvidia OpenShell",
+          "url": "https://github.com/NVIDIA/OpenShell",
+          "discussion_url": "https://news.ycombinator.com/item?id=50198675",
+          "published": "2026-10-22T17:44:06Z",
+          "summary": "Comments",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "1Password for Agents introduces an approval-gated mechanism allowing AI agents to authenticate to web services without ever seeing or storing cleartext credentials.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1016399/1password-ai-agent-password-sign-in",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "1Password lets AI agents use your passwords without seeing them",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1016399/1password-ai-agent-password-sign-in",
+        "discussion_url": null,
+        "published": "2026-10-22T13:00:00Z",
+        "summary": "1Password is introducing a new feature that allows AI agents to sign into your accounts without actually seeing or handling your passwords. The aptly named 1Password for Agents doesn't give bots free reign to access all of your connected accounts - you'll still need to grant approval for sign-in requests - but should make it […]",
+        "content": "1Password is introducing a new feature that allows AI agents to sign into your accounts without actually seeing or handling your passwords. The aptly named 1Password for Agents doesn't give bots free reign to access all of your connected accounts - you'll still need to grant approval for sign-in requests - but should make it less cumbersome to use Agents for tasks that require them to log into various services.\n\n\"Agents are starting to do real work on our behalf. The old model where you hand over a credential and hope for the best doesn't work,\" 1Password chief product officer Aashish Tripathi said in a press statement. \"An agent should be a …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Alter launched multi-user access control and permission scoping designed for shared agents that execute user-authenticated actions in platforms like Slack.",
+      "item": {
+        "key": "alterauth.com/",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Launch HN: Alter (YC S25) – Access control for multi-user agents",
+        "url": "https://alterauth.com/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50176908",
+        "published": "2026-10-21T06:42:12Z",
+        "summary": "Hi HN! We’re Srikar and Kevan, founders of Alter – https://alterauth.com/ . We’re building access control for agents that can take actions on behalf of multiple users.\nIf you’ve built an internal agent people use through Slack, you may have experienced this scenario: everyone signs in with their own account, but the agent connects to the CRM or billing system with one shared API key, so the agent can do anything that the key can do. User-level authentication in Slack does nothing to control what the agent can do in an external system like the CRM or billing system.\nHere’s what Alter does:\n-It acts as a proxy and manages downstream credentials for every API request that an agent takes;\n-It takes identity into account for every action the agent does. Automatically take into account the end user identity of the person that the agent is taking actions on behalf of.\n-It enforces fine grained runtime policies and records compliance grade audit logs.\nHere’s a demo video: https://www.youtube.com/watch?v=9ZqPU14ipGE\nWe started this because we saw first hand how hard it is to build agents in regulated industries. To unlock the true benefits of agents we need to allow agents to take actions…",
+        "content": "",
+        "score": 66.0,
+        "comments": 38,
+        "also_in": []
+      }
+    },
+    {
+      "line": "The PACE paper details periodic, channel-aligned 4-bit quantization for recurrent states in linear-attention architectures, improving serving concurrency on accelerators.",
+      "item": {
+        "key": "arxiv:2610.29545",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "PACE: Periodic and Channel-Aligned Encoding of Four-Bit Recurrent States",
+        "url": "https://huggingface.co/papers/2610.29545",
+        "discussion_url": null,
+        "published": "2026-10-22T00:00:00Z",
+        "summary": "Linear-attention language models keep their context in a recurrent state of fixed size, where an inference system stores one copy of this state for every sequence it decodes at the same time. Storing the state at lower precision therefore lets more sequences share an accelerator. Existing state quantizers round the state after every generated token and report that four bits lose accuracy unless the bit width is raised or the model is fine-tuned.\\par We introduce PACE, a post-hoc four-bit state quantizer. PACE rounds the state only once every few generated tokens, as chunked kernels already do once per chunk during prefill, and keeps the tokens generated in between in a small buffer. Rounding less often reduces the error that accumulates in the state. Additionally, we find that the large entries of the gated-delta state gather in columns, because some channels of the update written at each token remain large across many tokens. PACE therefore shares each quantization scale within one column. It also keeps the heads that retain rounding error longest at eight bits. On four hybrid models from 4B to 35B parameters, PACE with mixed four- and eight-bit heads is competitive with…",
+        "content": "",
+        "score": 16.0,
+        "comments": 5,
+        "also_in": []
+      }
+    },
+    {
+      "line": "OpenAI announced a new Decisions API promising fast and low-cost model choices, though published technical architecture details remain sparse.",
+      "item": {
+        "key": "openai.com/index/decisions-api",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Build more responsive apps with the Decisions API",
+        "url": "https://openai.com/index/decisions-api",
+        "discussion_url": null,
+        "published": "2026-10-22T19:00:00Z",
+        "summary": "Fast, focused, low-cost decisions for any application.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A Lobsters technical post walks through constructing Turing-complete malware execution pipelines hidden inside PyTorch's autograd backward pass.",
+      "item": {
+        "key": "elonlit.com/scrivings/how-to-run-turing-complete-malware-in-pytorchs-backward-pass",
+        "source": "Lobsters (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "How to Run Turing-Complete Malware in PyTorch's Backward Pass",
+        "url": "https://elonlit.com/scrivings/how-to-run-turing-complete-malware-in-pytorchs-backward-pass/",
+        "discussion_url": "https://lobste.rs/s/urfgc9/how_run_turing_complete_malware_pytorch_s",
+        "published": "2026-10-21T21:06:35Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Socratic Skill Learning introduces an interleaved teaching and practice framework to help agents synthesize more transferable and robust skills across distinct task sessions.",
+      "item": {
+        "key": "arxiv:2610.17860",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Socratic Skill Learning: Interleaving Teaching and Practice for Transferable Agent Skills",
+        "url": "https://huggingface.co/papers/2610.17860",
+        "discussion_url": null,
+        "published": "2026-10-22T00:00:00Z",
+        "summary": "Agent Skills improve LLM agents by making task knowledge reusable across sessions. Learning transferable Skills requires evidence about a procedure and its conditions of use, which a successful task attempt can leave untested. We introduce Socratic Skill Learning (SSL), which interleaves expert teaching with Student practice. An Educator guides investigation while the Student remains the sole environment operator and Skill author, able to question, test, and adapt advice. To test reuse beyond the learning task, we construct SkillTransferBench, with 35 task families and 408 executable cases, pairing public variation specifications with held-out evaluation in fresh solver sessions. On the main 22-family, 155-case cohort, Fixed-Window SSL reaches 0.801 utility, versus 0.723 without a Skill, 0.761 for adapted Trace2Skill (trajectory distillation), and 0.751 for adapted SKILL-KD (contrastive distillation). Across three model pairs on shared families, interleaved guidance outperforms expert authoring and post-hoc teaching. Process analysis links guidance to Student writing and package revision; a case study shows the Student testing and refining a proposed procedure for later reuse. As…",
+        "content": "",
+        "score": 32.0,
+        "comments": 1,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your tool calls return valid JSON and your KV caches remain uncorrupted.",
+  "slow_day_note": "",
+  "headlines": [],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 14,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 27,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 42,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 888,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1315,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 281,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 187,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 92,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 6,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-19T19:49:56.983962Z",
+    "candidates": 155,
+    "triaged": 80,
+    "enriched": 7,
+    "headline_candidates": 163,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.7-flash (key 2)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 785.7,
+    "usage": {
+      "calls": 6,
+      "input_tokens": 29965,
+      "output_tokens": 18445,
+      "cost_usd": null
+    }
+  }
+}
