@@ -1,0 +1,598 @@
+{
+  "date": "2026-10-25",
+  "generated_at": "2026-10-25T19:19:11.518096Z",
+  "title": "Wafer-Scale 3T Serving, Evaluator Agents, and Runtime Harnesses",
+  "intro": "Today's selection focuses on the engineering separating proof-of-concept models from reliable production deployments. We look at automated benchmark synthesis, offline VLM perception evals, multi-wafer pipeline serving for 3T models, and compiler-level scheduling optimizations. Happy building.",
+  "stories": [
+    {
+      "headline": "Can agents write their own benchmarks? Not reliably yet",
+      "summary": "EvalResearchBench tests whether autonomous researcher agents can design compact, cost-effective evaluation suites and graders to power recursive self-improvement loops. Evaluating 9 agent researchers across 13 candidate models against 14 target benchmarks, the best synthesized evaluators managed only 75% pairwise agreement with target rankings, trailing well behind the 91% target-agreement ceiling. The agents demonstrated clear failure modes during automated eval synthesis, including draining the evaluation budget early, truncating candidate responses, and generating tasks where single questions dominated domain scores. A human-curated sample of public tasks still outperformed the agents, and the cheapest evaluator to run surprisingly achieved the highest pairwise concordance.",
+      "why_it_matters": "If you are exploring automated eval loops or self-improving agent architectures, this demonstrates why fully synthetic graders still drift and require human sanity baselines to prevent metric collapse.",
+      "reason": "Investigates whether autonomous agents can design their own compact benchmark suites and feedback mechanisms to drive recursive self-improvement without relying on expensive human evaluations.",
+      "item": {
+        "key": "arxiv:2610.04184",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "EvalResearchBench: Can AI Agents Build Their Own Feedback for Recursive Self-Improvement?",
+        "url": "https://huggingface.co/papers/2610.04184",
+        "discussion_url": null,
+        "published": "2026-10-23T00:00:00Z",
+        "summary": "Recursive self-improvement (RSI) relies on evaluation feedback to assess progress and guide further research, yet repeatedly running complex benchmarks is costly and slows iteration. Human experts reduce this cost by selecting benchmark subsets or designing compact suites. We ask whether AI agents can automate this design process and introduce EvalResearchBench (ERB), a benchmark for autonomous evaluation research. Given target materials, development references, candidate APIs, and fixed time and API budgets, an agent called the researcher selects or synthesizes tasks, implements graders, and revises them in pilot tests before freezing an executable evaluator for coding, co-work, and reasoning. We study 9 researchers and 13 candidate models and compare each frozen evaluator with 14 target benchmarks on score concordance and pairwise agreement. The best evaluators order about 75\\% of candidate pairs as the targets do, below the 91\\% ceiling set by disagreements among the targets. No researcher leads on every metric, and the best evaluator on development targets is not the best on sealed targets hidden from the researcher. A human-designed sample of public tasks remains a strong…",
+        "content": "EvalResearchBench: Can AI Agents Build Their Own Feedback for Recursive Self-Improvement?\nAbstract\nAI agents can automate benchmark design to reduce evaluation costs, but their generated evaluators still fall short of target agreement and suffer from budget exhaustion and score dominance issues.\nRecursive self-improvement (RSI) relies on evaluation feedback to assess progress and guide further research, yet repeatedly running complex benchmarks is costly and slows iteration. Human experts reduce this cost by selecting benchmark subsets or designing compact suites. We ask whether AI agents can automate this design process and introduce EvalResearchBench (ERB), a benchmark for autonomous evaluation research. Given target materials, development references, candidate APIs, and fixed time and API budgets, an agent called the researcher selects or synthesizes tasks, implements graders, and revises them in pilot tests before freezing an executable evaluator for coding, co-work, and reasoning. We study 9 researchers and 13 candidate models and compare each frozen evaluator with 14 target benchmarks on score concordance and pairwise agreement. The best evaluators order about 75\\% of candidate pairs as the targets do, below the 91\\% ceiling set by disagreements among the targets. No researcher leads on every metric, and the best evaluator on development targets is not the best on sealed targets hidden from the researcher. A human-designed sample of public tasks remains a strong baseline, and the evaluator with the lowest recorded execution cost attains the highest pairwise agreement. Agents repair tasks and graders through pilot feedback, yet their evaluators can still truncate answers, exhaust the evaluation budget, or let a few questions dominate a domain score.\nCommunity\nCan AI Agent design their own evaluations?\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2610.04184 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 21.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AgentVQA evaluates interactive perception without online environments",
+      "summary": "AgentVQA introduces an offline visual question answering benchmark to measure how well vision-language models handle agentic tasks across web navigation, robotics, games, spatial planning, and egocentric video. The dataset collects 1,000 human-verified tasks from 23 sources, designed specifically so that static offline scoring reliably mirrors model rankings obtained in live interactive simulators. Testing 22 modern VLMs revealed a steep cliff, with the strongest model reaching only 58.5% accuracy. Crucially, error analysis showed that models rarely failed from downstream logical reasoning or misinterpreting the task, but instead broke down on visual grounding, 3D spatial inference, and tracking dynamic state changes over time.",
+      "why_it_matters": "Offers a reproducible, cheap offline proxy for vision-agent performance that pinpoints perceptual tracking—not reasoning—as the core bottleneck in agentic vision models.",
+      "reason": "Introduces a benchmark specifically targeted at measuring vision-language models on interactive decision-making and tool-grounded perception in agentic environments.",
+      "item": {
+        "key": "arxiv:2610.31494",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "AgentVQA: A Unified Benchmark for Agentic Visual Understanding",
+        "url": "https://huggingface.co/papers/2610.31494",
+        "discussion_url": null,
+        "published": "2026-10-23T00:00:00Z",
+        "summary": "Vision-language models (VLMs) can perform a broad range of tasks across diverse settings, yet their performance in agentic contexts remains poorly understood. Although online evaluations in simulators and real-world environments are essential for measuring interactive agent performance, they are costly and challenging to scale. Complementary offline VQA benchmarks can enable faster and more reliable comparisons across agentic domains, yet existing benchmarks remain limited and fragmented. To address this gap, we introduce AgentVQA, an offline benchmark for evaluating VLMs on realistic agentic scenarios across five agent domains: Web Agents, Robotics, Egocentric Videos, Games, and Spatial Planning. We build AgentVQA by manually selecting 1000 challenging, real-world agent examples from 23 source datasets and adapting them for reliable offline evaluation. The resulting benchmark preserves realistic scenarios from interactive environments across diverse domains, and its model rankings track those from corresponding online evaluations. Across the 22 evaluated models, the best achieves only 58.5% accuracy. Our cross-domain analysis shows that errors are driven primarily by failures to…",
+        "content": "Abstract\nAgentVQA is an offline benchmark assessing vision-language models on realistic agentic tasks across web, robotics, video, games, and spatial planning, revealing that visual grounding and state tracking errors are the primary failure modes.\nVision-language models (VLMs) can perform a broad range of tasks across diverse settings, yet their performance in agentic contexts remains poorly understood. Although online evaluations in simulators and real-world environments are essential for measuring interactive agent performance, they are costly and challenging to scale. Complementary offline VQA benchmarks can enable faster and more reliable comparisons across agentic domains, yet existing benchmarks remain limited and fragmented. To address this gap, we introduce AgentVQA, an offline benchmark for evaluating VLMs on realistic agentic scenarios across five agent domains: Web Agents, Robotics, Egocentric Videos, Games, and Spatial Planning. We build AgentVQA by manually selecting 1000 challenging, real-world agent examples from 23 source datasets and adapting them for reliable offline evaluation. The resulting benchmark preserves realistic scenarios from interactive environments across diverse domains, and its model rankings track those from corresponding online evaluations. Across the 22 evaluated models, the best achieves only 58.5% accuracy. Our cross-domain analysis shows that errors are driven primarily by failures to ground and maintain accurate representations of the current and evolving visual state, including localizing relevant UI elements, interpreting motion, tracking state changes over time, and inferring 3D spatial relationships, rather than by task misinterpretation or downstream logical reasoning.\nCommunity\nAgentVQA is an offline benchmark for evaluating visual understanding in realistic agentic scenarios, without the cost of running agents in interactive environments.\nIt brings together 1,000 human-verified examples from 23 datasets across five domains: web agents, robotics, egocentric videos, games, and spatial planning.\nOur evaluation of 22 VLMs reveals substantial limitations in visual grounding, motion understanding, state tracking, and spatial reasoning. Importantly, model rankings on AgentVQA also align with corresponding online evaluations, supporting its use as a scalable alternative for assessing agentic visual understanding.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2610.31494 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 1\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 17.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Cerebras details pipelined 3T parameter serving on 59 wafers",
+      "summary": "Cerebras published its serving architecture for deploying multi-trillion parameter hybrid models, using the ~3T parameter Kimi K3 to illustrate how weights stay stationary across wafer-scale SRAM. With 4-bit weights and an 8-bit KV cache, Kimi K3 requires 59 WSE-3T wafers: 24 dense layers get one wafer each to leave SRAM headroom for active KV cache, while 69 linear-attention layers are packed two per wafer because their fixed-size recurrent states avoid per-token KV growth. Models are mapped into a deep pipeline where individual activations traverse wafers via RDMA over Ethernet at roughly 2 microseconds per hop. Concurrency is sustained by streaming micro-batched requests continuously through stages rather than waiting on monolithic GPU-style batch steps.",
+      "why_it_matters": "Provides an architectural blueprint for serving frontier-scale models at thousands of tokens per second by pairing linear attention with pinned on-chip SRAM.",
+      "reason": "Explores the serving architecture and throughput characteristics of deploying trillion-parameter AI models across wafer-scale cluster hardware.",
+      "item": {
+        "key": "cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Cerebras Deploys Trillion-Parameter AI Models",
+        "url": "https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras",
+        "discussion_url": "https://news.ycombinator.com/item?id=50227356",
+        "published": "2026-10-25T01:33:49Z",
+        "summary": "Comments",
+        "content": "One of the most frequently asked questions we get is how we deploy large models on Cerebras wafer-scale chips. A single Cerebras WSE-3T wafer has 44 GB of on-chip memory, and trillion-parameter frontier models need terabytes for their weights alone.\nIn this post, we’ll explain how we split a large frontier model across multiple WSE-3T wafers, to run multi-trillion parameter models at 1000-2000+ tokens per second.\nWe’ll use the open source model Kimi K3, with ~3 trillion parameters, as an illustrative example.\nBy the end, you'll understand:\n- How we fit the full model into on-chip memory\n- How we map the model across multiple chips\n- How we handle a high # of concurrent requests\nBreaking it down with Kimi K3\nKimi K3 is an open source, 3T parameter model with 69 linear-attention layers and 24 dense layers.\nIt scores an impressive 88.3% on Terminal-Bench 2.1 (vs. GPT-5.6 Sol's 88.8%) and 91.2% on BrowseComp (vs. GPT-5.6 Sol's 90.4%). These results demonstrate frontier-level coding and agentic capabilities, even outperforming leading proprietary models on some benchmarks. Read more about Kimi K3 here.\nFor this illustrative example, we use:\n- A 256k assumed average request size\n- 4-bit weight quantization (like the Hugging Face implementation)\n- An 8-bit KV cache\n#1: Size of Each layer\nTo calculate the total number of Cerebras WSE-3T wafers we need to support Kimi K3, let’s first calculate the size of each model layer.\nKimi K3 has 3 trillion parameters. If all 3T parameters are stored at 4 bits each, the raw parameter payload is:\nDividing that payload by 93 layers then gives:\n#2: Number of Wafers\nNow that we know each layer needs about 16 GB, we can figure out how many layers fit on each 44 GB wafer. The answer depends on the layer type:\n- Dense layers need additional room for a KV cache, because each dense (full-attention) layer stores the keys and values for every token in every active request. So, we place one dense layer per wafer and leave the remaining SRAM for its KV cache.\n- Linear-attention layers do not require additional room for a KV cache. Instead of storing keys and values for every token, a linear-attention layer keeps a small, fixed-size state per request, regardless of context length. That leaves room for two linear layers per wafer (2 × 16 GB = 32 GB).\nTherefore, with Kimi K3’s 69 linear layers and 24 dense layers, we get:\nThis gives us a total wafer count of 35 + 24 = 59 wafers.\n#3: Connecting the wafers together\nCerebras executes models in a pipeline. After the Cerebras compiler maps the model layers across regions of wafers, the runtime maps the path for tokens to flow between wafers. For ultrafast latency, only activations need to be passed between the wafers, and this can be done via RDMA over Ethernet. This is roughly 2 microseconds per hop.\nIt’s important to emphasize that because each Cerebras wafer has 44 GB of on-chip SRAM and each layer is only 16 GB, we are typically able to fit entire layers of the model directly on the chip.\nThis means that in most cases, the model weights never have to move, and layers don’t need to be split across wafers. Only activations cross from one wafer to the next.\n#4: How we serve 1 request\nNow that we have our wafers connected together and the model laid out, we can think of each wafer as one stage in an assembly line: the model’s weights for each stage stay in place, and the request’s intermediate results move through the layer stages.\nFor example, Wafer 1 runs model layers 1–2 and sends its activations to wafer 2. Wafer 2 runs layers 3–4 and passes its results to Wafer 3, and so on until the last wafer produces the next token.\n#5: How we serve many requests\nThis raises a common misconception. If a token has to travel through each wafer in order, doesn’t each wafer sit idle while it waits for its turn? In effect, wouldn't the system be running at a batch size of one?\nNo! If we only sent one request down the line at a time and waited for it to complete before starting the next request, this would be an inefficient use of the pipeline. Instead, we keep the entire pipeline full with different requests. Because the model is split into pipeline stages already, each stage can work on a different request at the same time.\nWhile stage 3 processes a token for request A, stage 2 processes one for request B, and stage 1 one for request C. In our example, each stage is a layer. In production, Cerebras uses much finer-grained stages, and many more of them.\nEach stage can also process a micro-batch, a small group of requests, rather than a single request. So the number of requests in flight is roughly the number of stages times the micro-batch size.\nTo understand the tradeoff, smaller micro-batches make each request even faster, while larger micro-batches increase total throughput.\n#6: How many requests can we serve?\nThe amount of on-chip memory allocated to KV cache determines the maximum number of concurrent requests. Every request in flight needs its own KV cache on each dense-layer wafer, so the size of on-chip memory sets the ceiling on concurrent requests. As explained above, we only need to calculate KV cache requirements for dense layers.\nFor each 44 GB wafer that already has one dense layer, we can calculate the remaining space for the KV cache with:\nTotal wafer storage - size of one dense layer. In this case:\nCalculating the # of Concurrent Requests\nTo find the number of concurrent requests supported for any particular model mapping, we first calculate how much cache a single 256k request takes up:\nTo then calculate the total number of concurrent requests this configuration would support, we divide:\nThe total number of concurrent requests represents the number of simultaneous requests moving through the pipeline at any point in time. Unlike a GPU batch, those requests don’t wait for one another to finish, they stream through the pipeline continuously.\nOf course, neither concurrency nor batch size tells you exactly how efficiently an…",
+        "score": 322.0,
+        "comments": 113,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "Production reliability comes from the harness, not the checkpoint",
+      "summary": "An analysis on enterprise serving infrastructure argues that system differentiation is shifting away from raw foundation model capabilities toward the surrounding runtime harness. The core bottleneck in production transitions from accuracy to workload-driven constraints like memory pressure, request concurrency, and latency budgets. Because the KV cache expands dynamically while weights remain static, adding raw compute without intelligent scheduling, quantization, or speculative decoding simply yields a more expensive, underutilized system. Building a modular harness designed around strict service-level objectives allows organizations to hot-swap evolving base models as configuration adjustments rather than complete architectural rewrites.",
+      "why_it_matters": "Matches the hard reality of agent engineering: robust tool calling and prompt execution depend far more on context scheduling and harness memory management than on switching model providers.",
+      "reason": "Focuses on the engineering of agent runtime harnesses and serving infrastructure, arguing that wrapper architecture rather than raw foundation model choice defines production reliability.",
+      "item": {
+        "key": "technologyreview.com/2026/10/22/1146109/designing-an-ai-serving-harness-built-to-last",
+        "source": "MIT Technology Review (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Designing an AI serving harness built to last",
+        "url": "https://www.technologyreview.com/2026/10/22/1146109/designing-an-ai-serving-harness-built-to-last/",
+        "discussion_url": null,
+        "published": "2026-10-22T21:17:29Z",
+        "summary": "The next competitive advantage in enterprise AI has less to do with which model you choose than with what you build around it. That’s an important shift. For the past several years, much of the AI conversation has centered on model capability: bigger models, better reasoning, larger context windows, higher benchmark scores. Those advances have…",
+        "content": "The next competitive advantage in enterprise AI has less to do with which model you choose than with what you build around it.\n\nThat’s an important shift. For the past several years, much of the AI conversation has centered on model capability: bigger models, better reasoning, larger context windows, higher benchmark scores. Those advances have been extraordinary. But as AI moves from experimentation to production, the question facing enterprise leaders has changed—it’s no longer, “what can the model do?”—it’s now, “Can we deliver that intelligence reliably, economically, and at scale?”\n\nIncreasingly, the answer depends on the serving harness—the engineering system surrounding the model, including the architecture, memory management , scheduling, and optimization decisions that determine how efficiently model intelligence becomes a production capability.\n\nFor technical executives, that changes where AI investment should go—and what they should demand from the architecture supporting it.\n\nStart with the workload, not the model\n\nThere is no universally “best” model or AI architecture. There is only the right solution for the business problem.\n\nA customer-facing assistant optimized for fast responses has fundamentally different requirements from a document-processing pipeline that can run overnight. An internal knowledge application and a high-volume customer service platform may use the same foundation model but require very different serving architectures.\n\nThe workload defines the constraints. The constraints should determine the architecture.\n\nThat sounds simple, but it runs counter to the way many organizations have approached early AI deployments. During a proof of concept, model accuracy naturally dominates the discussion. Production introduces constraints that are much easier to ignore when only a handful of users are involved: latency, concurrency, memory pressure, GPU utilization, infrastructure cost, and unpredictable traffic.\n\nA model that produces marginally better answers is not necessarily the better production choice if it doubles inference costs or cannot meet the application’s latency requirements. Not every workload needs a Ferrari. Sometimes the smarter engineering decision is the model that delivers exactly the performance the business needs without paying for capability it doesn’t.\n\nThe objective should be to deploy the right intelligence at the right cost for the workload. That makes serving architecture more than an engineering concern. It becomes an investment decision: where to spend on compute, where to optimize, and where additional model capability simply isn’t worth the cost.\n\nEngineer the system, not the model\n\nOnce AI reaches production, seemingly isolated engineering decisions begin affecting one another. Serving architecture influences memory utilization. Memory management affects concurrency. Concurrency shapes batching and scheduling, and scheduling affects GPU utilization and latency.\n\nOnly then can techniques such as quantization, speculative decoding, or optimized attention mechanisms deliver their full value. This interdependence matters because organizations can spend considerably more on infrastructure without solving the constraint limiting performance.\n\nGPU memory is a good example. During inference, the model’s weights remain fixed, but the key-value (KV) cache grows with active requests and context length. As concurrency increases, a system can run short of usable GPU memory even when compute capacity is still available. Adding more compute without understanding that bottleneck may simply make an inefficient system more expensive.\n\nThe lesson for technology leaders is broader than memory management: Measure before you optimize . Identify the dominant constraint. Address it. Measure the result. Then determine if another bottleneck emerged. Repeat.\n\nDon’t think of optimization techniques as Pokémon cards: The goal isn’t to collect them all. The goal is to apply the technique that removes the highest-impact constraint while preserving the application’s business requirements.\n\nFor technology leaders, that demands a different governance question. Instead of asking which AI capabilities the organization can deploy, ask which constraints stand between a proven capability and sustainable business value.\n\nBuild for change, not today’s benchmark\n\nPerhaps the most important reason to invest in the serving harness is that today’s leading model will probably not be tomorrow’s. Models will improve. Hardware will evolve. New optimization techniques will emerge. The architecture surrounding them should make those changes easier to absorb, not force the enterprise to rebuild its AI platform every time technology advances.\n\nThat makes adaptability an increasingly important outcome of AI strategy.\n\nOrganizations that build serving systems around workload requirements, clear service-level objectives, and measurable production economics gain the ability to evaluate new models and infrastructure against what the business actually needs. A model change can become an evaluation and configuration decision rather than an architectural reset.\n\nEXL researchers have explored these production challenges in greater depth in the EXL Engineering the Harness series. It examines how serving architecture, memory management, scheduling, and inference optimization work together to make enterprise AI more efficient, scalable, and economically sustainable.\n\nIncreasingly, enterprises have access to many of the same models. Sustainable differentiation comes from how effectively an organization turns that intelligence into business outcomes.\n\nThe model provides the intelligence. The harness determines whether the enterprise can deliver outcomes reliably, economically, and at scale.\n\nThis content was produced by EXL. It was not written by MIT Technology Review’s editorial staff.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "TensorRT 11.1 exposes multi-route compiler tuning",
+      "summary": "NVIDIA's second technical dive into TensorRT 11.1 details the Global Performance Tuner, an automated mechanism for exploring alternative compilation routes instead of relying on default pass heuristics. By exposing over 200 compiler knobs—ranging from fusion policies to code generation paths—the tuner expresses candidate builds as searchable routes and evaluates their real-world latency on target hardware. The build runner systematically discards configurations that fail numerical accuracy checks or fail to compile, selecting the fastest valid engine. Empirical testing across ten sample workloads showed speedups between 1.14x and 1.63x over default build routes simply by finding optimal scheduling strategies for specific tensor shapes.",
+      "why_it_matters": "Demonstrates practical performance headroom available in local inference engines by empirically searching compiler optimization paths rather than accepting stock build flags.",
+      "reason": "Details TensorRT 11.1's Global Performance Tuner for automating multi-route compilation and accuracy-aware kernel selection to maximize LLM serving performance.",
+      "item": {
+        "key": "developer.nvidia.com/blog/scaling-nvidia-tensorrt-performance-optimization-beyond-a-single-build-route-with-the-global-performance-tuner-part-2",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "Scaling NVIDIA TensorRT Performance Optimization Beyond a Single Build Route with the Global Performance Tuner, Part 2",
+        "url": "https://developer.nvidia.com/blog/scaling-nvidia-tensorrt-performance-optimization-beyond-a-single-build-route-with-the-global-performance-tuner-part-2/",
+        "discussion_url": null,
+        "published": "2026-10-23T17:27:52Z",
+        "summary": "The Global Performance Tuner is a feature for automatic performance tuning released in NVIDIA TensorRT 11.1. It provides automatic, accuracy-aware and...",
+        "content": "The Global Performance Tuner is a feature for automatic performance tuning released in NVIDIA TensorRT 11.1. It provides automatic, accuracy-aware and end-to-end performance tuning within TensorRT by customizing different optimizations for different models. For more details, see Part 1 of this series, which introduces the challenges associated with scheduling (a critical stage in deep learning compiler optimization), the motivation for developing the Global Performance Tuner feature in TensorRT, and the mathematical theories established to formalize the problem.\nThis post, Part 2, uses the notation from Part 1 to describe the algorithm and architectural design of the Global Performance Tuner feature. It also provides best practices for using it.\nDesigning the Global Performance Tuner feature in TensorRT\nThe central design idea of the Global Performance Tuner is to represent alternative scheduling strategies as explicit and searchable build routes. A compiler knob (also called a compiler flag or compiler option) is a configuration setting that changes some aspect of the compilation pipeline, such as a heuristic, fusion decision, or code generation path.\nEach tunable knob exposes a finite set of allowed values and has a default value. A build route is a concrete combination of knob values. When no build route is specified, TensorRT uses the default build route, in which every knob retains its default value.\nConsider a hypothetical compiler consisting of three passes, \\(f_1\\), \\(f_2\\), and \\(f_3\\). Suppose a binary knob \\(p\\) controls the fusion strategy used by \\(f_2\\): when \\(p=1\\), the pass applies horizontal fusion; when \\(p=0\\), it applies vertical fusion:\n\\(f_2(s) = \\begin{cases} f’_2(s), & \\text{if } p = 1 \\\\ f”_2(s), & \\text{if } p = 0 \\end{cases}\\)\nThe two possible values of \\(p\\) define two build routes and therefore produce a candidate solution set of size two for the input model \\(m\\):\n\\(B(m) = \\{f_3(f’_2(f_1(m))),\\, f_3(f”_2(f_1(m)))\\}\\)\nNeither fusion strategy is universally better. Horizontal fusion may produce the faster engine for one model, while vertical fusion may be more effective for another. The result may also change across tensor shapes and target GPUs, even when the model itself remains unchanged. Selecting the better route therefore requires building both candidate engines and comparing their end-to-end performance.\nEven this two-route example captures the essential idea of tuning: the compiler exposes meaningful scheduling alternatives, and measured behavior determines which complete solution performs best for the deployment case at hand.\nIn the mathematical framework introduced earlier, a build route is a composition of compiler passes. In the implementation, a combination of knob assignments provides a compact specification of that route. Changing one or more knob values changes how the model travels through the tunable parts of the compilation pipeline. Within this abstraction, a knob combination can be treated as identifying a build route.\nMore precisely, the knob combination is a build-route specification, not a complete description of the resulting engine. TensorRT still performs the remaining stages of engine construction, including tactic selection, and may reconcile individual knob values with constraints imposed by the network. The route specifies the requested choices within the tunable configuration space. It does not replace the rest of the TensorRT builder.\nTensorRT exposes a compact API surface around two fundamental capabilities:\n- Apply and inspect one build route: A setter applies a fixed route to the builder configuration, while the corresponding getter returns the currently specified route.\n- Discover the tunable configuration space: A separate getter describes the available knobs, their allowed values, their defaults, and their purposes.\nThe corresponding C++ APIs are:\nbool IBuilderConfig::setBuildRoute(char const* buildRoute);\nchar const* IBuilderConfig::getBuildRoute() const;\nchar const* IBuilderConfig::getAllBuildRoutes() const;\nYou can use these APIs to implement custom tuners. A sample C++ implementation is also provided in trtexec.\nAt a high level, trtexec organizes tuning as follows:\n- When a user specifies an input model and a regex-like tunable build route expression, trtexec will expand the expression into a list of concrete build routes according to the searching algorithm.\n- There will be a loop to traverse all fixed build routes. In each iteration, the model will be built with that single build route, then accuracy and performance will be measured during each iteration.\n- All build routes that crash during building or fail accuracy during inference are excluded from best-engine selection. The engine with the best measured end-to-end performance is selected.\nTensorRT 11.1 provides more than 200 knobs for tuning. For more details, refer to the Global Performance Tuner documentation. The same implementation in Python will be released in Torch-TensorRT 2.15.\nThe practical value of exploring multiple build routes becomes visible in end-to-end measurements. Figure 1 compares the default TensorRT build route, normalized to 1.0x for each workload, with the best eligible route found during tuning. Across these ten evaluated workloads, tuning delivered performance improvements ranging from 1.14x to 1.63x.\nThe variation across workloads is central to the result. Different models expose different optimization opportunities, so a single default scheduling strategy cannot be expected to realize every model’s best performance. The Global Performance Tuner explores alternative build routes, rejects candidates that do not satisfy the accuracy requirement, and selects the fastest eligible engine measured in the target environment.\nCase study: Performance-accuracy entanglement\nThe Global Performance Tuner feature applies accuracy-aware tuning, so the performance-accuracy entanglement problem can theoretically be solved perfectly. Consider the…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "developer.nvidia.com/blog/scaling-nvidia-tensorrt-performance-optimization-beyond-a-single-build-route-with-the-global-performance-tuner-part-1",
+          "source": "NVIDIA Developer",
+          "tags": [
+            "infra"
+          ],
+          "title": "Scaling NVIDIA TensorRT Performance Optimization Beyond a Single Build Route with the Global Performance Tuner, Part 1",
+          "url": "https://developer.nvidia.com/blog/scaling-nvidia-tensorrt-performance-optimization-beyond-a-single-build-route-with-the-global-performance-tuner-part-1/",
+          "discussion_url": null,
+          "published": "2026-10-23T17:27:35Z",
+          "summary": "Deploying a trained neural network involves more than translating each operator into a GPU kernel. It is a compilation problem with many legitimate answers. For...",
+          "content": "Deploying a trained neural network involves more than translating each operator into a GPU kernel. It is a compilation problem with many legitimate answers. For...\nDeploying a trained neural network involves more than translating each operator into a GPU kernel. It is a compilation problem with many legitimate answers. For example, when NVIDIA TensorRT builds an engine, it makes interdependent decisions about graph-IR transformations, fusion, implementation selection, memory placement, and quantization. This process is called scheduling.\n\nSource",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Deep Fusion Memory injects chunks without runtime RAG",
+      "summary": "Deep Fusion Memory proposes a parametric chunk-level alternative to retrieval-augmented generation by integrating predicted external knowledge directly into hidden states without inference-time lookups. A causal memory predictor learns from retrieved corpus chunk embeddings to predict relevant knowledge representations on the fly, which are then fused into token hidden layers via gated cross-attention while the base LLM remains frozen. By shifting supervision to chunk embeddings rather than token-level targets, the approach requires 32 times fewer retrieval queries and 2,048 times fewer retrieved items during offline training construction. On benchmark QA, the technique improved Mistral-7B-v0.3 by 12.71% and Qwen3-8B-Base by 11.19% while dodging external vector search latency.",
+      "why_it_matters": "Bypasses the inference latency and KV cache penalties of large prompt-stuffed RAG contexts by parameterizing knowledge fusion mid-network.",
+      "reason": "Proposes a chunk-level parametric memory framework for LLMs that provides dynamic external knowledge access without the latency overhead of runtime RAG.",
+      "item": {
+        "key": "arxiv:2610.25100",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Deep Fusion Memory: A Chunk-Level Parametric Memory for Large Language Models",
+        "url": "https://huggingface.co/papers/2610.25100",
+        "discussion_url": null,
+        "published": "2026-10-23T00:00:00Z",
+        "summary": "Large language models need effective ways to acquire and use external knowledge beyond what they retain from pretraining. Continued pretraining risks catastrophic forgetting, while retrieval at inference time can add substantial overhead. External parametric memory avoids online retrieval, but constructing its training data requires extensive offline search, and output-level interpolation provides only shallow fusion. We introduce Deep Fusion Memory (DFM), a parametric memory architecture that reduces this construction workload and incorporates learned memory into intermediate hidden states. A causal memory predictor learns to generate memory from the preceding context, using retrieved chunk embeddings from the corpus as supervision. The predicted memory is shared across tokens within each chunk and fused into their hidden states through gated cross-attention. Memory prediction and fusion are trained end to end with the backbone frozen, and inference requires no explicit retrieval. Compared with existing parametric memory approaches, which often construct token-level memory targets, DFM requires 32times fewer retrieval queries and 2048times fewer retrieved items to construct its…",
+        "content": "Deep Fusion Memory: A Chunk-Level Parametric Memory for Large Language Models\nAbstract\nDeep Fusion Memory integrates predicted parametric memory into intermediate hidden states via gated cross-attention, reducing retrieval overhead and improving knowledge-intensive tasks without online retrieval.\nLarge language models need effective ways to acquire and use external knowledge beyond what they retain from pretraining. Continued pretraining risks catastrophic forgetting, while retrieval at inference time can add substantial overhead. External parametric memory avoids online retrieval, but constructing its training data requires extensive offline search, and output-level interpolation provides only shallow fusion. We introduce Deep Fusion Memory (DFM), a parametric memory architecture that reduces this construction workload and incorporates learned memory into intermediate hidden states. A causal memory predictor learns to generate memory from the preceding context, using retrieved chunk embeddings from the corpus as supervision. The predicted memory is shared across tokens within each chunk and fused into their hidden states through gated cross-attention. Memory prediction and fusion are trained end to end with the backbone frozen, and inference requires no explicit retrieval. Compared with existing parametric memory approaches, which often construct token-level memory targets, DFM requires 32times fewer retrieval queries and 2048times fewer retrieved items to construct its training data. Across six QA tasks, DFM performs better over the strongest baseline by 12.71% on Mistral-7B-v0.3 and 11.19% on Qwen3-8B-Base. Beyond QA, domain adaptation yields average gains of 6.51 and 4.38 points over Qwen3-4B-Base and Qwen3-8B-Base, respectively.\nCommunity\nWe introduce Deep Fusion Memory (DFM), a chunk-level parametric memory architecture that enables LLMs to incorporate external knowledge without retrieval at inference time.\nDFM introduces two key ideas:\n- Efficient memory construction: A causal memory predictor learns from retrieved chunk embeddings, reducing retrieval queries by 32× and retrieved items by 2048× during training data construction.\n- Deep memory fusion: Predicted memory is integrated into intermediate hidden states through gated cross-attention, while keeping the LLM backbone frozen.\nExperiments demonstrate consistent improvements across knowledge-intensive QA and domain adaptation tasks.\nWe hope this work offers a scalable and efficient direction for equipping LLMs with external parametric memory. Feedback and discussions are welcome!\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- Mixture-of-Memories: Low-Overhead Language Modeling with Modular Knowledge Injection (2026)\n- Beyond the Final Embedding: Retrieving Memories from Token-Level Evidence (2026)\n- RPMem: Learning Long-Term Recurrent Parametric Memory Across Sessions for LLM Agents (2026)\n- LSTMem: Hierarchical Long Short-Term Online Memory for Large Language Models (2026)\n- PREM: Prefix-Steered Recurrent Memory for Long-Video Understanding (2026)\n- Cache2LoRA: Understanding and Improving Context Internalization (2026)\n- Memorilla: Latent Semantic Memory for LLMs (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2610.25100 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 49.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "llama.cpp release b11886 refactors Qwen model conversion by merging tensors directly during conversion and migrating to generator functions.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b11886",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b11886",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11886",
+        "discussion_url": null,
+        "published": "2026-10-25T18:20:39Z",
+        "summary": "qwen: merge tensors on convert ( #31028 )\n\nqwen: merge tensors on convert\n\nconvert: use generator functions\n\nqwen4exp: remove conts and pre-scale\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/59667111\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows arm64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows x64 (Vulkan)\n\nWindows arm64 (Vulkan)\n\nWindows x64 (OpenVINO)\n\nWindows x64 (SYCL)\n\nWindows…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Next-Concept Modeling introduces a coarse-to-fine generation strategy designed to enable parallel text decoding.",
+      "item": {
+        "key": "arxiv:2610.14162",
+        "source": "Lobsters (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Next-Concept Modeling: Fast, Parallel Coarse-to-Fine Text Generation",
+        "url": "https://arxiv.org/abs/2610.14162",
+        "discussion_url": "https://lobste.rs/s/d1snfg/next_concept_modeling_fast_parallel",
+        "published": "2026-10-23T17:25:34Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "New research shows diffusion language models exhibit time- and task-dependent quantization sensitivity, favoring variable precision across denoising steps.",
+      "item": {
+        "key": "arxiv:2610.31198",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Different Tasks, Different Timesteps: Temporal Task-Aware Quantization for Diffusion Language Models",
+        "url": "https://huggingface.co/papers/2610.31198",
+        "discussion_url": null,
+        "published": "2026-10-23T00:00:00Z",
+        "summary": "Diffusion Language Models (DLMs) introduce unique quantization challenges due to their iterative denoising process. In this work, we reveal that quantization sensitivity is both taskand time-dependent, with different downstream tasks exhibiting distinct precision requirements across denoising steps. We further show that these patterns can be predicted without groundtruth labels or task-specific evaluation metrics. Building on these findings, we introduce T 2Quant, a task and time-aware mixedprecision quantization framework that uses a label-free sensitivity signal to optimally allocate activation precision across denoising steps under a fixed bit-width budget. Extensive experiments across three DLMs and six benchmarks demonstrate that T 2Quant consistently improves the average accuracy of existing quantization methods, achieving gains of up to 6.7 percentage points under the same budget.",
+        "content": "",
+        "score": 23.0,
+        "comments": 2,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new paper reframes sequence compression as test-time regression to outperform conventional pooling and learned projection bottlenecks.",
+      "item": {
+        "key": "arxiv:2610.31574",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Rethinking Sequence Compression with Test-time Regression",
+        "url": "https://huggingface.co/papers/2610.31574",
+        "discussion_url": null,
+        "published": "2026-10-23T00:00:00Z",
+        "summary": "Sequence compression is a fundamental operation and a critical information bottleneck in efficient language and multimodal models, and yet prevailing approaches based on pooling or learned projections remain underperforming. We revisit sequence compression through the lens of test-time regression: input tokens define a regression problem whose fitted coefficients form the compressed representation. Importantly, the regression problem is learned end-to-end via backpropagation, while its coefficients are computed efficiently in closed form during the forward pass. This leads to TTR-Compressor, a general alternative to conventional pooling and projection-based compression. We evaluate TTR-Compressor as the compressor for block-wise sparse attention and the visual token merger for multimodal large language models. On block-wise sparse attention, TTR-Compressor improves RULER performance over attention-based compressors by a large margin. For visual token merging, it consistently outperforms the standard MLP merger and matches its performance with 55.6% fewer visual tokens. These results establish test-time regression as an effective primitive for sequence compression in efficient…",
+        "content": "",
+        "score": 19.0,
+        "comments": 3,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Hugging Face released a hardware compatibility tool to check which open models are supported for execution on AWS Trainium chips.",
+      "item": {
+        "key": "huggingface.co/blog/torch-neuronx-model-support",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "Does Your Model Run on AWS Trainium? Look It Up",
+        "url": "https://huggingface.co/blog/torch-neuronx-model-support",
+        "discussion_url": null,
+        "published": "2026-10-23T00:00:00Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Keep your KV caches bounded and your harnesses modular.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Infrastructure scaling",
+      "headline": "OpenAI Scales Habitat Storage for 1B ChatGPT Users",
+      "blurb": "OpenAI scaled its Habitat storage system with global caching and Azure Cosmos DB to deliver 12x faster reads for over a billion users.",
+      "item": {
+        "key": "openai.com/index/scaling-storage-one-billion-users-part-two",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Rapidly scaling online storage to serve over 1 billion ChatGPT users (Part II)",
+        "url": "https://openai.com/index/scaling-storage-one-billion-users-part-two",
+        "discussion_url": null,
+        "published": "2026-10-23T17:00:00Z",
+        "summary": "Learn how OpenAI scaled Habitat with reliable multi-tenancy, global caching, and Azure Cosmos DB to deliver 12× faster reads for ChatGPT.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Agentic foundation",
+      "headline": "IQuest-Q1 Introduces 320B MoE Model for CLI Agents",
+      "blurb": "The 320B sparse Mixture-of-Experts model activates 15B parameters to advance foundation capabilities for agentic command-line systems.",
+      "item": {
+        "key": "arxiv:2610.30949",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "IQuest-Q1: Advancing Foundation Capabilities for Agentic CLI Systems",
+        "url": "https://huggingface.co/papers/2610.30949",
+        "discussion_url": null,
+        "published": "2026-10-23T00:00:00Z",
+        "summary": "We present IQuest-Q1, a sparse Mixture-of-Experts (MoE) agentic foundation model with 320B total parameters (15B activated). IQuest-Q1 is developed through a three-stage process: (1) stable and efficient pre-training, combining Stable SplitNorm, Muon, and muP with a two-stage curriculum whose second stage increases the coding-data mixture, preserving a wide stability margin between safe and optimal learning rates; (2) fine-grained mid-training, expanding the data mixture across domains and formats and progressively extending the context; and (3) multi-scaffold with multi-version post-training, combining SFT, domain-specialized RL, and MOPD across various scaffolds to integrate complementary training signals and strengthen agentic coding capabilities. Furthermore, model merging combines different experts and checkpoints from different stages while mitigating conflicts among their parameter updates. The resulting IQuest-Q1 demonstrates capabilities in both coding and general tasks. We release IQuest-Q1 as an open-source model to support community research and development.",
+        "content": "",
+        "score": 97.0,
+        "comments": 2,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "Reddit Community r/opensource Bans All AI Projects",
+      "blurb": "New submission rules on r/opensource ban any projects that use AI, are made by AI, or are intended for AI.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1018217/reddit-opensource-ai-ban",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "r/opensource just banned AI, non-English speakers, and more",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1018217/reddit-opensource-ai-ban",
+        "discussion_url": null,
+        "published": "2026-10-25T13:25:32Z",
+        "summary": "The mods at r/opensource posted new submission rules that, among other things, banned projects that use AI. The post made Saturday evening opens by saying, \"If your project uses AI, is made by AI, or is intended for AI, it's not welcome on r/opensource. AI, as it exists today, is incongruent to this Open Source […]",
+        "content": "The mods at r/opensource posted new submission rules that, among other things, banned projects that use AI. The post made Saturday evening opens by saying, \"If your project uses AI, is made by AI, or is intended for AI, it's not welcome on r/opensource. AI, as it exists today, is incongruent to this Open Source community.\"\n\nThe new rules have set off a firestorm in the comments, and even spurred the creation of a rival sub r/trueopensource . Moderator Wolvereness has waded into the comments to explain that there's nuance and room for selective enforcement, such as \"software that incidentally has accessibility features that use AI,\" including …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 19,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 49,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 890,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1318,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 282,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 189,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 92,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-22T19:07:48.246376Z",
+    "candidates": 99,
+    "triaged": 99,
+    "enriched": 5,
+    "headline_candidates": 110,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.7-flash (key 1)"
+    ],
+    "seconds": 683.3,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 25754,
+      "output_tokens": 10064,
+      "cost_usd": 0.057056
+    }
+  }
+}
