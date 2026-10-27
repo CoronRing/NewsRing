@@ -1,0 +1,669 @@
+{
+  "date": "2026-10-27",
+  "generated_at": "2026-10-27T20:31:12.281898Z",
+  "title": "Ollama Updates, SGLang Leaks, and Agentic Automation Bias",
+  "intro": "Today's edition highlights local agent model releases, critical inference engine memory vulnerabilities, and novel orchestration techniques. We also look at new benchmarks for evolving toolsets and Anthropic's findings on expert deference to agent decisions.",
+  "stories": [
+    {
+      "headline": "Ollama v0.40.12 adds Liquid AI's LFM3 tri-hybrid family",
+      "summary": "Ollama's latest pre-release introduces native support for Liquid AI's LFM3 architecture, featuring a 1.7B text model with a 256K context window targeted at local agent execution and tool calling. The update also includes 2B decision models (`d1`) built on LFM3, alongside support for DFlash2 draft models using speculative decoding on MLX. Additional improvements include faster prompt processing for Gemma 4 on Apple silicon and a bug fix for tool-only assistant turns in Kimi CLI.",
+      "why_it_matters": "Local 256K-context models designed specifically for tool calling and decision-making expand options for offline agent frameworks.",
+      "reason": "Liquid AI's new LFM3 model family features a tri-hybrid architecture with a 256K context window optimized specifically for local agents, tool calling, and structured output, now supported natively in Ollama.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.12-rc1",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.12",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.12-rc1",
+        "discussion_url": null,
+        "published": "2026-10-27T17:16:47Z",
+        "summary": "Liquid AI LFM3\n\nLFM3 is Liquid AI's new family of small models built for local agents, tool calling, and structured output, on Liquid's new tri-hybrid architecture. The family includes:\n\nlfm3 : a 1.7B text model with a 256K-token context window\n\nlfm3-vl : adds image understanding\n\nlfm3-audio : speech recognition, translation, and text-to-speech in 18 languages\n\nlfm3-omni : text, images, and audio in one model\n\nollama run lfm3\n\nd1 decision models\n\nLiquid AI's d1 models now come in a 2B size, built on LFM3. d1 makes decisions about text and images, and d1-omni adds audio.\n\nollama run d1:2b \" I was charged twice for order 4417. \" --ask \" Is this a billing issue? \"\n\nNote: lfm3 and d1 2b are supported on Apple hardware in rc1. Support for Linux/Windows coming soon.\n\nWhat's Changed\n\nFaster prompt processing on Apple silicon for Gemma 4, Flint and Laguna models\n\nSpeculative decoding now supports DFlash2 draft models on MLX\n\nGemma 4 keeps more detail in small images\n\nollama launch now works with OpenCode v2\n\nFixed tool-only assistant turns from Kimi CLI\n\nUpdated MLX and llama.cpp\n\nFull Changelog : v0.40.11...v0.40.12",
+        "content": "Repository navigation\nv0.40.12\nPre-release\n      Pre-release\n    \nLiquid AI LFM3\nLFM3 is Liquid AI's new family of small models built for local agents, tool calling, and structured output, on Liquid's new tri-hybrid architecture. The family includes:\n- lfm3: a 1.7B text model with a 256K-token context window\n- lfm3-vl: adds image understanding\n- lfm3-audio: speech recognition, translation, and text-to-speech in 18 languages\n- lfm3-omni: text, images, and audio in one model\nollama run lfm3\nd1 decision models\nLiquid AI's d1 models now come in a 2B size, built on LFM3. d1 makes decisions about text and images, and d1-omni adds audio.\nollama run d1:2b \"I was charged twice for order 4417.\" --ask \"Is this a billing issue?\"\nNote: lfm3 and d1 2b are supported on Apple hardware in rc1. Support for Linux/Windows coming soon.\nWhat's Changed\n- Faster prompt processing on Apple silicon for Gemma 4, Flint and Laguna models\n- Speculative decoding now supports DFlash2 draft models on MLX\n- Gemma 4 keeps more detail in small images\n- ollama launch now works with OpenCode v2\n- Fixed tool-only assistant turns from Kimi CLI\n- Updated MLX and llama.cpp\nFull Changelog: v0.40.11...v0.40.12",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "huggingface.co/blog/LiquidAI/lfm3",
+          "source": "Hugging Face Blog",
+          "tags": [
+            "lab",
+            "open-source"
+          ],
+          "title": "Build specialized multimodal models with LFM3",
+          "url": "https://huggingface.co/blog/LiquidAI/lfm3",
+          "discussion_url": null,
+          "published": "2026-10-27T17:16:52Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "liquid.ai/blog/lfm3",
+          "source": "Hacker News (AI)",
+          "tags": [
+            "community"
+          ],
+          "title": "Introducing LFM3: Every Modality for Specialized Intelligence",
+          "url": "https://www.liquid.ai/blog/lfm3",
+          "discussion_url": "https://news.ycombinator.com/item?id=50262229",
+          "published": "2026-10-27T17:04:50Z",
+          "summary": "Comments",
+          "content": "",
+          "score": 66.0,
+          "comments": 24,
+          "also_in": [
+            "Hacker News front page"
+          ]
+        }
+      ]
+    },
+    {
+      "headline": "SGLang over-length prefill bug exposed cross-tenant KV cache in Workers AI",
+      "summary": "Cloudflare disclosed a cross-request KV cache isolation vulnerability in Workers AI's GLM-5.3 deployment that exposed data across 155 user responses to prompts exceeding 681,280 tokens. The issue resulted from an engine misconfiguration paired with a bug in SGLang's disaggregated prefill/decode mode. When a prompt exceeded GPU pool capacity, the prefill node rejected the request but still passed a un-updated transfer signal to the decode node, causing it to generate text using stale, un-zeroed cache pages from prior customer sessions.",
+      "why_it_matters": "Un-zeroed KV cache pages in disaggregated serving engines present a severe security and privacy risk for multi-tenant agent infrastructures.",
+      "reason": "An investigation revealed a serious cross-request KV cache isolation vulnerability in GLM-5.3 on Workers AI, causing multi-tenant data exposure during parallel inference serving.",
+      "item": {
+        "key": "blog.cloudflare.com/kv-cache-exposure-remediation",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Cross-request KV cache exposure in the GLM-5.3 Workers AI model (155 responses)",
+        "url": "https://blog.cloudflare.com/kv-cache-exposure-remediation/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50252159",
+        "published": "2026-10-26T22:41:48Z",
+        "summary": "",
+        "content": "Cross-request KV cache exposure in the GLM-5.3 Workers AI model, and our remediation with SGLang\nOn September 8, 2026, we were alerted by a security researcher, Gadi Evron from Knostic, to a tenant isolation issue affecting the GLM-5.3 Workers AI model (@cf/zai-org/glm-5.3) starting on August 27, 2026. We have remediated the issue, and we restored the model on September 9. We have confirmed that no other model hosted on Workers AI was affected.\nBetween August 27 and September 9, a small number of customers using the GLM 5.3 Workers AI model received responses that contained data from other customers' requests made to the same model shortly before theirs. In total, 155 responses were affected, all to prompts longer than 681,280 tokens.\nAfter excluding our own testing and the researcher's, the requests we identified are consistent in timing and volume with ordinary long-context use, not with someone repeatedly exploiting the bug. We found no evidence of deliberate exploitation.\nToday we are publishing this report alongside a post from SGLang, the open-source inference engine that we use, as a coordinated disclosure. This post describes the bug that caused this issue, our response timeline, and the subsequent hardening we have conducted on our production SGLang deployments. We also detail our continued efforts with the upstream maintainers of SGLang to address this and similar bugs.\nWhat happened\nGLM is a text generation model from Z.ai that is built for agentic coding workflows; it is one of the many models available through Workers AI. Gadi Evron submitted a report on September 8 through our HackerOne program stating that very long prompts sent to @cf/zai-org/glm-5.3 on Workers AI sometimes returned text that belonged to other users' sessions. Cloudflare reproduced the issue the next morning and took the model offline within 40 minutes of declaring an incident. We then deployed a corrected configuration and a patched inference engine, and restored service the same day.  \nThis specific report of cross-request KV cache exposure was the result of two overlapping issues. The first was a misconfiguration of the open-source inference engine, SGLang, used by Cloudflare. We deployed GLM 5.3 with a 1,048,576-token context window, but the KV cache pool on our prefill GPUs only had room for 681,280 tokens. We were aware of this mismatch before launch. We expected the engine to return an error for any prompt it could not process, and our long-context tests returned successful responses, so we did not believe this to be an issue.\nThe second was a bug in how SGLang handled the resulting over-length requests in disaggregated prefill/decode mode. A prompt that did not fit the pool was internally marked as rejected and replaced with a one-token placeholder, but instead of aborting the request and returning a client error, prefill generated the KV cache for the placeholder prompt and transferred it to the decode node. The decode node received a \"transfer complete\" message and assumed that prefill overwrote the KV cache from previous requests with the full prompt for this request, when in fact it left the majority of the previous state intact. The decode node subsequently generated a response while attending over stale cache pages that still held data from earlier requests. As a result, responses to prompts longer than 681,280 tokens could contain data from other users' GLM 5.3 sessions.\nImmediate remediation\nAfter disabling the model, we took the following actions to correct this vulnerability before restoring public access to it:\nTo fix our configuration, we made the pool hold the full context. We adjusted our GLM 5.3 configuration to match our GLM 5.2 configuration, which freed enough GPU memory that the prefill KV pool now holds about 2.04 million tokens, roughly twice the 1,048,576-token context length. A prompt that fits the context window now always fits the pool, so the rejection path is never reached for a valid request. This alone prevents the bug from being exercised.\nTo fix the engine, we also made the rejection path safe. Relying on pool size alone is fragile: any change to quantization, tensor parallelism, CUDA graph sizes, or a future model version changes the pool size in a way that's easy to miss. Furthermore, there may be other situations in which the prefill scheduler can reject a request and trigger the same bug. To prevent this, we also patched the engine so that a request carrying a pending rejection is retired at the disaggregation admission queue, with its original error, before any bootstrap, allocation, or KV transfer happens. We proposed this upstream as #38704, which also had the decode node verify that the number of tokens transferred matches the number it reserved. The fix was already on SGLang main in #36988, merged September 6 for a related failure path but not yet released. The maintainers also merged #38935, which rejects these requests earlier, following our approach.\nWe validated both changes against the researcher's reproduction script and our own canary-marker tests before restoring the model.\nBackground: how we serve GLM 5.3\nWorkers AI runs GLM 5.3 with SGLang in a disaggregated configuration: a pool of prefill GPUs processes the prompt and produces the model's KV cache for it, then hands that cache over remote direct memory access (RDMA), via Mooncake, to a pool of decode GPUs that generate the response. We have written about this architecture before in our posts on high-performance LLMs and smaller, faster, safer models.\nThe KV cache in GPU memory is a shared pool of fixed-size pages. Each request is assigned pages when it is admitted and releases them when it finishes. Pages are not currently zeroed between requests; the next request that gets a page simply overwrites it. This approach is common among inference engines and is necessary to achieve the best performance, but it means that the inference engine is responsible for tracking ownership of these memory…",
+        "score": 176.0,
+        "comments": 71,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "DynaFlow enables agents to synthesize executable multi-agent workflows",
+      "summary": "DynaFlow replaces static collaboration graphs by integrating free-form program synthesis directly into a main agent's action space. The main agent dynamically generates executable coordination code to run fixed sub-agents sequentially or in parallel, passing structured outputs and running verification steps as reasoning unfolds. Trained via SFT on distilled trajectories with filtered execution traces, a Qwen3.5-27B backbone achieved 88.08% accuracy across six reasoning benchmarks, beating static baseline graphs by nearly 11 percentage points.",
+      "why_it_matters": "Synthesizing coordination code at runtime allows multi-agent systems to adapt to complex tasks without retraining underlying executor models.",
+      "reason": "DynaFlow integrates executable workflow synthesis directly into an agent's action space, enabling adaptive multi-agent orchestration without static collaboration graphs.",
+      "item": {
+        "key": "arxiv:2610.34467",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "DynaFlow: Learning Free-Form Multi-Agent Orchestration",
+        "url": "https://huggingface.co/papers/2610.34467",
+        "discussion_url": null,
+        "published": "2026-10-27T00:00:00Z",
+        "summary": "Multi-agent systems often rely on predefined collaboration structures, limiting their ability to adapt to diverse task requirements. We introduce DynaFlow, a framework that integrates free-form executable workflow synthesis into the action space of the main agent. The agent decides when collaboration is needed and generates task-specific programs that coordinate sub-agents through sequential or parallel execution, structured information exchange, and verification. Execution results and traces inform subsequent actions, enabling the agent to adapt collaboration as reasoning progresses. We train only the main agent through supervised fine-tuning on distilled trajectories, followed by refinement on examples filtered for unsupported premises, biased verification, and information-flow defects. All sub-agents remain fixed, separating orchestration learning from executor capability improvement. Across six benchmarks spanning mathematical reasoning, scientific question answering, and multi-hop retrieval, DynaFlow achieves 88.08% overall accuracy in Forced mode, outperforming the strongest evaluated baseline by 10.90 percentage points with the same Qwen3.5-27B backbone. Workflow analysis…",
+        "content": "Abstract\nDynaFlow enables adaptive multi-agent collaboration by letting a main agent synthesize executable workflows that coordinate sub-agents through structured execution and verification.\nMulti-agent systems often rely on predefined collaboration structures, limiting their ability to adapt to diverse task requirements. We introduce DynaFlow, a framework that integrates free-form executable workflow synthesis into the action space of the main agent. The agent decides when collaboration is needed and generates task-specific programs that coordinate sub-agents through sequential or parallel execution, structured information exchange, and verification. Execution results and traces inform subsequent actions, enabling the agent to adapt collaboration as reasoning progresses. We train only the main agent through supervised fine-tuning on distilled trajectories, followed by refinement on examples filtered for unsupported premises, biased verification, and information-flow defects. All sub-agents remain fixed, separating orchestration learning from executor capability improvement. Across six benchmarks spanning mathematical reasoning, scientific question answering, and multi-hop retrieval, DynaFlow achieves 88.08% overall accuracy in Forced mode, outperforming the strongest evaluated baseline by 10.90 percentage points with the same Qwen3.5-27B backbone. Workflow analysis finds more explicit use, verification, and refinement of upstream outputs after training, highlighting cross-stage information flow as a key dimension of multi-agent orchestration.\nCommunity\nGitHub: https://github.com/amiya-special/Dynaflow\nArxiv: https://arxiv.org/abs/2610.34467\nProject Page: https://amiya-special.github.io/DynaFlow-website\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper",
+        "score": 183.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Δτ-Bench evaluates LLM agents against evolving tool ecosystems",
+      "summary": "A new benchmark, Δτ-Bench, measures how well agents handle dynamic tool environments where APIs disappear, documentation changes, and better alternatives emerge across six successive ecosystem states. Across 1,588 multi-turn tasks in 42 domains, the top-performing model and harness achieved a task success rate of only 42.3%, illustrating how existing skill-learning methods break when tool definitions shift. To counter this, the authors introduce Steward, an ecosystem manager that performs incremental skill updates and dynamic provisioning to maintain task performance amid breaking service changes.",
+      "why_it_matters": "Real-world agents must operate against shifting third-party APIs where static prompt instructions quickly become obsolete.",
+      "reason": "Δτ-Bench evaluates LLM agents against dynamic, continuously evolving tool ecosystems where underlying service APIs and tool capabilities change over time.",
+      "item": {
+        "key": "arxiv:2610.34238",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Δτ-Bench: Pushing Agents Toward a Moving Capability",
+        "url": "https://huggingface.co/papers/2610.34238",
+        "discussion_url": null,
+        "published": "2026-10-27T00:00:00Z",
+        "summary": "In this paper, we introduce Δτ-Bench, an executable agent benchmark that models the structural evolution of large tool ecosystems. In Δτ-Bench, independently evolving services continually reshape how tasks can be accomplished: familiar tools may disappear or be replaced, while more efficient alternatives emerge amid overlapping functionality and noisy documentation. Against this moving capability frontier, we evaluate whether agents can proactively discover efficient tool-use paths and promptly revise their accumulated procedural knowledge, bringing together demands that existing benchmarks fail to examine. Δτ-Bench comprises 1,588 validated multi-turn tasks across 42 domains and six successive ecosystem states generated through capability-preserving transformations. Our evaluation shows that even the strongest evaluated model or harness achieves only 42.3% task success, while initial gains from existing skill-learning methods can not consistently translate into better adaptation as the ecosystem evolves. These findings motivate Steward, an ecosystem manager that jointly manages tools and procedural knowledge through incremental skill maintenance and dynamic provisioning during…",
+        "content": "Abstract\nΔτ-Bench evaluates agent adaptability to evolving tool ecosystems, and Steward improves sustained success through incremental skill maintenance and dynamic provisioning.\nIn this paper, we introduce Δτ-Bench, an executable agent benchmark that models the structural evolution of large tool ecosystems. In Δτ-Bench, independently evolving services continually reshape how tasks can be accomplished: familiar tools may disappear or be replaced, while more efficient alternatives emerge amid overlapping functionality and noisy documentation. Against this moving capability frontier, we evaluate whether agents can proactively discover efficient tool-use paths and promptly revise their accumulated procedural knowledge, bringing together demands that existing benchmarks fail to examine. Δτ-Bench comprises 1,588 validated multi-turn tasks across 42 domains and six successive ecosystem states generated through capability-preserving transformations. Our evaluation shows that even the strongest evaluated model or harness achieves only 42.3% task success, while initial gains from existing skill-learning methods can not consistently translate into better adaptation as the ecosystem evolves. These findings motivate Steward, an ecosystem manager that jointly manages tools and procedural knowledge through incremental skill maintenance and dynamic provisioning during task execution. Experiments show that Steward sustains higher task success across ecosystem changes with lower skill-maintenance overhead, while improving both recovery from disrupted workflows and adoption of more efficient alternatives.\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 21.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Adapting harness self-evolution skills to executor model capabilities",
+      "summary": "Research into harness self-evolution shows that guidance engineered for frontier models like GPT-5.6-luna can degrade weaker executors like Gemma-4-E4B by 8.8 points, with 86% of weak-model failures stemming from inability to execute instructions already stated in the skill. To solve this, the authors introduced a meta-skill diagnosis framework that uses an external rewriter to adapt skill instructions to match executor execution limits. Across seven model scales, incorporating skill adaptation into a self-evolution loop consistently boosted benchmark performance by 2.0 to 5.1 points over unadapted self-evolution.",
+      "why_it_matters": "Self-evolving agent harnesses must tailor procedural skills to the specific execution limits of the underlying LLM.",
+      "reason": "This paper examines agent harness self-evolution, showing how skill adaptation fixes failure modes where model execution limits prevent agents from acting on harness guidance.",
+      "item": {
+        "key": "arxiv:2610.33024",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Evolving to Match Capabilities: Improving Harness Self-Evolution via Skill Adaptation",
+        "url": "https://huggingface.co/papers/2610.33024",
+        "discussion_url": null,
+        "published": "2026-10-27T00:00:00Z",
+        "summary": "Harness self-evolution offers a practical route for LLM agents to improve from execution experience without updating model parameters. Its effectiveness depends on whether models can successfully act on the guidance provided by their harnesses. However, we find that harness benefits are not uniform across model capabilities: skills that improve stronger models can provide little benefit or even degrade performance for weaker ones. Across seven models and three benchmarks, we identify 103 task-skill pairs where skills improve GPT-5.6-luna by 31.1 points but degrade Gemma-4-E4B by 8.8 points. In 86% of failed weak-model runs, the violated requirement is already stated in the skill. This motivates skill adaptation: reformulating existing skills to match the executor's capabilities and make their guidance easier to execute. To achieve this, we diagnose failures in tool execution, context management, instruction following, and verification, and distill these diagnoses into a fixed meta-skill that guides adaptation during harness self-evolution. Guided by the meta-skill, a capable external rewriter, Kimi-K3, adapts skills without execution evidence, improving the three weak executors by…",
+        "content": "Evolving to Match Capabilities: Improving Harness Self-Evolution via Skill Adaptation\nAbstract\nHarness self-evolution improves LLM agents via skill adaptation guided by a meta-skill that reformulates guidance to match executor capabilities, boosting weak models without parameter updates.\nHarness self-evolution offers a practical route for LLM agents to improve from execution experience without updating model parameters. Its effectiveness depends on whether models can successfully act on the guidance provided by their harnesses. However, we find that harness benefits are not uniform across model capabilities: skills that improve stronger models can provide little benefit or even degrade performance for weaker ones. Across seven models and three benchmarks, we identify 103 task-skill pairs where skills improve GPT-5.6-luna by 31.1 points but degrade Gemma-4-E4B by 8.8 points. In 86% of failed weak-model runs, the violated requirement is already stated in the skill. This motivates skill adaptation: reformulating existing skills to match the executor's capabilities and make their guidance easier to execute. To achieve this, we diagnose failures in tool execution, context management, instruction following, and verification, and distill these diagnoses into a fixed meta-skill that guides adaptation during harness self-evolution. Guided by the meta-skill, a capable external rewriter, Kimi-K3, adapts skills without execution evidence, improving the three weak executors by 5.1-14.1 points over the original skills. We then incorporate this adaptation into a five-round self-evolution loop, where each model revises its own skill from execution trajectories and verifier feedback. Across seven executors, from Gemma-4-E4B to Kimi-K2.5, the meta-skill consistently improves final scores by 2.0-5.1 points over the same loop without the meta-skill. Our findings provide practical design guidance for developing more effective harness self-evolution methods.\nGet this paper in your agent:\nhf papers read 2610.33024 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 12.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "miniTE aligns cross-engine FP4 execution for stable low-bit agent RL",
+      "summary": "A study on native NVFP4 (W4A4) reinforcement learning reveals that subtle numerical mismatches between separate training and rollout sampling engines destabilize training even when model weights and precision match. The proposed framework, miniTE, fixes this execution gap by introducing cross-engine numerical alignment alongside optimized native NVFP4 GEMM kernels, dropping log-probability differences down to ~1e-8. Tested on Qwen3-30B-A3B on NVIDIA B300 hardware, miniTE matched BF16 evaluation performance while delivering 1.39x higher learner update throughput.",
+      "why_it_matters": "Native 4-bit RL offers significant speedups for training agentic models once cross-engine numerical drift is eliminated.",
+      "reason": "This research diagnoses and resolves the execution gap between training and sampling engines when running reinforcement learning with native NVFP4 quantization.",
+      "item": {
+        "key": "arxiv:2610.23928",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "miniTE: Diagnosing and Bridging the Execution Gap in Native NVFP4 Reinforcement Learning",
+        "url": "https://huggingface.co/papers/2610.23928",
+        "discussion_url": null,
+        "published": "2026-10-27T00:00:00Z",
+        "summary": "Native NVFP4 promises to accelerate reinforcement learning (RL) for large language models (LLMs), but achieving stable learning across separate training and sampling engines remains challenging. We show that matching model weights and numerical formats is insufficient to ensure consistent policy evaluation, highlighting the importance of cross-engine numerical execution. We introduce miniTE, a lightweight framework that combines execution diagnostics, cross-engine numerical alignment, and efficient native W4A4 (4-bit weights and activations) GEMM computation for LLM RL. It improves numerical execution consistency without modifying the RL objective, while reducing implementation overhead to realize the benefits of native low-bit computation. Long-horizon RL experiments on Qwen3-30B-A3B demonstrate stable training and benchmark performance close to BF16, outperforming naive Transformer Engine (TE) NVFP4 in evaluation quality. On single NVIDIA B300 GPU node, the optimized learner reaches 33,540 tokens/s, yielding 1.39x and 1.47x the throughput of BF16 and TE NVFP4, respectively, for complete learner updates. We released the framework, kernels, diagnostics, and training configurations…",
+        "content": "miniTE: Diagnosing and Bridging the Execution Gap in Native NVFP4 Reinforcement Learning\nAbstract\nMiniTE enables stable low-bit reinforcement learning for large language models by aligning cross-engine numerical execution and accelerating native 4-bit computation.\nNative NVFP4 promises to accelerate reinforcement learning (RL) for large language models (LLMs), but achieving stable learning across separate training and sampling engines remains challenging. We show that matching model weights and numerical formats is insufficient to ensure consistent policy evaluation, highlighting the importance of cross-engine numerical execution. We introduce miniTE, a lightweight framework that combines execution diagnostics, cross-engine numerical alignment, and efficient native W4A4 (4-bit weights and activations) GEMM computation for LLM RL. It improves numerical execution consistency without modifying the RL objective, while reducing implementation overhead to realize the benefits of native low-bit computation. Long-horizon RL experiments on Qwen3-30B-A3B demonstrate stable training and benchmark performance close to BF16, outperforming naive Transformer Engine (TE) NVFP4 in evaluation quality. On single NVIDIA B300 GPU node, the optimized learner reaches 33,540 tokens/s, yielding 1.39x and 1.47x the throughput of BF16 and TE NVFP4, respectively, for complete learner updates. We released the framework, kernels, diagnostics, and training configurations to make native low-bit RL easier.\nCommunity\n🚀 Can we really train LLMs with native FP4 reinforcement learning — without sacrificing stability?\nExcited to share miniTE, our open-source framework for stable and efficient native NVFP4 (W4A4) RL!\nOne surprising finding: Same weights + same precision ≠ same policy. Even when both the learner and rollout engine use NVFP4, subtle differences in numerical execution can introduce significant training–inference mismatch and eventually destabilize RL.\nWith miniTE, we tackle this challenge from both numerical and systems perspectives:\n🔬 Diagnose & align: Identify cross-engine execution differences and bring training–inference log-probability gaps down to ~1e-8 in our strict-alignment setting.\n⚡ Make FP4 actually fast: Optimize native NVFP4 kernels, scaling, and grouped GEMMs, achieving up to 1.39× BF16 learner throughput on 8×B300 GPUs.\n📈 Keep learning stable: Demonstrate long-horizon RL on Qwen3-30B-A3B with downstream performance close to BF16.\nBeyond the results, we're releasing the framework, kernels, diagnostics, and training recipes to make native low-bit RL easier to reproduce and extend.\nFP4 is not just about using fewer bits — it's about making every bit work. 🔥\n📄 Paper: https://arxiv.org/abs/2610.23928\n💻 Details: https://infix.io/research/miniTE\nWe'd love to hear your thoughts, feedback, and ideas for pushing low-precision RL further!\nGet this paper in your agent:\nhf papers read 2610.23928 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 13.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Experts heavily defer to hidden agent preferences in ambiguous tasks",
+      "summary": "An Anthropic study of 50 professional analysts using Claude Code revealed that human experts defer heavily to AI recommendations when making ambiguous choices. Analysts agreed with their agent's secret, prompt-injected lean 86% of the time and abandoned their own pre-stated preferences 60% of the time when the agent disagreed. Furthermore, 77% of participants recycled the agent's arguments verbatim in their post-task explanations, but only 15% credited the AI as the source of those arguments.",
+      "why_it_matters": "Human-in-the-loop oversight and agent evaluation methodologies are highly vulnerable to subtle, unstated model biases.",
+      "reason": "Anthropic tested 50 professional analysts using Claude Code to measure how hands-on agent automation biases expert judgment and decision-making on ambiguous tasks.",
+      "item": {
+        "key": "anthropic.com/research/agents-judgment-calls",
+        "source": "Anthropic Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "How AI agents shape experts’ judgment calls",
+        "url": "https://www.anthropic.com/research/agents-judgment-calls",
+        "discussion_url": null,
+        "published": "2026-10-27T00:00:00Z",
+        "summary": "As AI does more of the hands-on work, the hope is that experts still make the judgment calls, meaning the decisions with more than one defensible answer. We tested this with 50 professional analysts who did a statistical analysis with Claude Code. On each key decision, we randomly assigned which of two defensible options the agent would favor. Analysts mostly went with the agent’s side, and few named the agent as a reason afterward.",
+        "content": "Amaç Herdağdelen, Hailey Joren, Alex Tamkin\nWhen experts hand their work to an AI agent, the usual assumption is that they still make the decisions that matter. The agent writes the code, runs the numbers, and offers advice, but the expert decides what to measure, how to interpret ambiguous evidence, and what the next steps should be. Often there is more than one reasonable answer to these questions, and the decision will come down to the experience and values of whoever makes the call.\nWe wanted to look at whether experts really do make those important decisions, or whether in practice they defer to their AI agents. In a study we report in a new paper, we asked 50 professional analysts to do a realistic statistical analysis with Claude Code. They all had experience in causal inference—that is, working out from data whether one thing causes another. Their task was to advise a farming cooperative on whether an advisory service it was running was effective and should be expanded.\nAlong the way, the analysts had to make four choices between two reasonable options, such as whether to measure productivity as crop yield per hectare or as yield per unit of operating cost, and then make a final decision. To see whether they were making these calls themselves, we set up each analyst’s agent to favor one option on each decision, which the analysts weren’t told about. Which way the agents would “lean” would be decided by coin flip. The agent was told to make the best honest case for its lean, to change its mind if the evidence demanded it, and never to mislead.\nAcross the four analytical choices, analysts went with their agent’s lean 86% of the time. If the agent’s input made no difference, we’d expect about 50%. When analysts had already expressed their own preference before the agent weighed in, they switched away from it 60% of the time if the agent disagreed, compared to 6% if it agreed.\nAfterward, when asked to explain their choices, 77% of analysts used the agents’ own arguments—sometimes word for word—but only 15% credited the agent as the source of those arguments. Analysts who followed the agents’ recommendations closely were about as confident in their final recommendation as the rest, and roughly as likely to call it the product of their own judgment.\nWe don’t know how much this tells us about the real world. Real agents will sometimes lean one way or another—with no lean assigned, Claude Opus 4.8 made the same five choices in 112 out of 123 runs—but in this case we strengthened their preferences on purpose to measure their effect. When agents aren’t given clear preferences and instructions to voice them, the effect might be smaller.\nThis isn’t a simple cautionary tale against working with AI. Analysts who used the agent finished the task faster and made far fewer serious errors than those who chose to work without it, although the latter group was small and less experienced, so we are wary of reading too much into it. But as AI takes over more of the hands-on work, decisions like these are increasingly where human judgment and values will affect the result. If experts defer to agents without realizing it, the agents’ preferences—which could be arbitrary or misaligned—could shape important decisions about policy proposals or research directions without anyone having chosen those preferences. This is particularly important for research into keeping AI safe. Researchers have begun using agents to run and analyze experiments and a human reviewer is only an independent check if their judgment is their own.\nStudy design\nWe recruited 61 analysts for a randomized controlled trial. All came from a pre-screened pool of professionals who had passed a causal-inference knowledge check, used the programming languages Python or R regularly, and had hands-on experience with observational causal analysis, which means studying cause and effect using real-world data rather than a controlled experiment.\nThe task was set at a fictional organization, the Greenfields Farming Cooperative, which runs an (equally fictitious) voluntary, paid advisory program to help its member farms improve their crop yields. About 40% of members have enrolled. The co-op’s board must decide whether to subsidize and expand the program, or discontinue it. The board will expand the program only if it improves farms’ productivity by a set margin, roughly 3–4%, but it doesn’t say exactly how productivity should be measured.\nWe deliberately left four analytical decisions open, each with two reasonable options:\n- Outcome: measure productivity as crop yield per hectare, or as yield per unit of operating cost?\n- Comparison method: look at how enrolled farms’ yields changed after joining compared with how other farms’ yields changed over the same period (a “difference-in-differences” design), or compare yields directly while adjusting statistically for differences between the farms?\n- Which farms the assessment covers: measure the effect only in the enrolled farms, or across the cooperative’s entire membership?\n- Weighting: count every farm equally, or give larger producers more weight?\nThese four choices led into a final recommendation: whether to roll out the program to everyone, or to discontinue it. Analysts and agents could also propose a one-year extension.\nEach of the analytical decisions could move the estimated productivity gain by several percentage points, which is important when the board’s threshold is 3–4%.\nFor each of the five decisions presented to each analyst, the agent’s lean was set by a coin flip. We gave the agent its leans in hidden instructions (a system prompt) that told it to hold each lean as its own view, to raise it when the decision came up, and to make the strongest case for it that the data allowed. The same instructions told it to change its mind if the evidence turned decisively against it, and never to misrepresent results, hide data, or make an argument the numbers didn’t support.\nOut of 61…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Trajectory2Gym: Decision-Grounded Compositional Interaction Synthesis for Tool-Use Agents",
+      "summary": "Successful tool-use trajectories are not necessarily useful supervision. Even successful interactions may underrepresent multi-step dependencies or contain actions that are unjustified by the information visible to the agent at decision time. We identify two coupled requirements for effective trajectory supervision: compositional coverage, so that important observation-action dependencies are represented, and decision grounding, so that each supervised action is supported by the learner-visible…",
+      "why_it_matters": "",
+      "reason": "Trajectory2Gym synthesizes verifiable interaction environments to fix credit assignment and observation-justification issues in training tool-use agents.",
+      "item": {
+        "key": "arxiv:2610.33568",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Trajectory2Gym: Decision-Grounded Compositional Interaction Synthesis for Tool-Use Agents",
+        "url": "https://huggingface.co/papers/2610.33568",
+        "discussion_url": null,
+        "published": "2026-10-27T00:00:00Z",
+        "summary": "Successful tool-use trajectories are not necessarily useful supervision. Even successful interactions may underrepresent multi-step dependencies or contain actions that are unjustified by the information visible to the agent at decision time. We identify two coupled requirements for effective trajectory supervision: compositional coverage, so that important observation-action dependencies are represented, and decision grounding, so that each supervised action is supported by the learner-visible interaction history. We introduce Trajectory2Gym, which constructs executable interactions around under-supported compositional structures and derives supervision only from grounded decisions in their realized executions. Structural-support selection allocates the resulting experience, while parent-normalized supervised fine-tuning preserves the semantic interaction as the unit of training weight. This reframes trajectory generation as the deliberate construction of learnable interaction experience, rather than the collection of successful trajectories. Across five Qwen3 scales, Trajectory2Gym improves Tau1, Tau2, and BFCL at every tested scale, increasing the equal-weight three-benchmark…",
+        "content": "Trajectory2Gym: Decision-Grounded Compositional Interaction Synthesis for Tool-Use Agents\nAbstract\nTrajectory2Gym improves tool-use training by constructing interactions with compositional coverage and decision grounding rather than collecting successful trajectories.\nSuccessful tool-use trajectories are not necessarily useful supervision. Even successful interactions may underrepresent multi-step dependencies or contain actions that are unjustified by the information visible to the agent at decision time. We identify two coupled requirements for effective trajectory supervision: compositional coverage, so that important observation-action dependencies are represented, and decision grounding, so that each supervised action is supported by the learner-visible interaction history. We introduce Trajectory2Gym, which constructs executable interactions around under-supported compositional structures and derives supervision only from grounded decisions in their realized executions. Structural-support selection allocates the resulting experience, while parent-normalized supervised fine-tuning preserves the semantic interaction as the unit of training weight. This reframes trajectory generation as the deliberate construction of learnable interaction experience, rather than the collection of successful trajectories. Across five Qwen3 scales, Trajectory2Gym improves Tau1, Tau2, and BFCL at every tested scale, increasing the equal-weight three-benchmark mean by 16.9-29.8 percentage points. The gains are strongest in stateful and multi-turn interaction, where later decisions depend on earlier observations and feedback. Our results suggest that scaling tool-use agents depends not only on collecting more successful trajectories, but on constructing interactions whose dependencies are represented and whose decisions are learnable from the agent's visible history.\nCommunity\nTrajectory2Gym is a framework for scaling tool-use agents through compositional coverage and decision-grounded supervision. It constructs executable interactions that capture multi-step dependencies and trains agents on decisions supported by their visible interaction history.\nAcross five Qwen3 model scales, Trajectory2Gym consistently improves performance on τ-bench, τ²-bench, and BFCL, achieving +16.9 to +29.8 percentage points in the average benchmark score.\nReally appreciate that all five checkpoints and the 34,772-interaction candidate pool are released alongside the code. The matched ablations in Table 3 surprised me most: parent normalization alone adds 8.04 points to the Qwen3-8B mean, with Tau2 going from 52.50 under rendered-row averaging to 74.17, the largest of the four component gains. It's also nice to see Table 4 reported so openly, where support depth 2 (72.28 mean) beats depths 3 and 4. Do you know how skewed the number of rendered examples per parent is in the corpus, and whether the Tau2 drop under row averaging comes mainly from a small set of very long interactions dominating the loss?\nGet this paper in your agent:\nhf papers read 2610.33568 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper",
+        "score": 330.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "llama.cpp decoupled k-pool sparse selection from kq_mask shape to fix cache selection indexing for Qwen4exp and GLM5-next.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b11936",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b11936",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11936",
+        "discussion_url": null,
+        "published": "2026-10-27T20:15:10Z",
+        "summary": "llama : build the k-pool sparse selection independently of the kq_mask shape ( #31243 )\n\nllama : build the k-pool sparse selection independently of the kq_mask shape\n\nqwen4exp (QSA) and glm5-next pick cache cells by index and no longer read the kq_mask values, but they still shaped the selection like the dense kq_mask. Build the selection as [n_kv, n_tokens] over the cache cells instead, and split it into the streams of the K view right before the attention.\n\nThis lets the dense mask change its layout (e.g. per-sequence row lists) without touching the sparse layers.\n\nimprove comment\n\nCo-authored-by: Georgi Gerganov ggerganov@gmail.com\n\nllama : drop the unused build_fused_top_k_mask args, review nits\n\nCo-authored-by: Georgi Gerganov ggerganov@gmail.com\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/60550938\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Triton 3.9.0 released with updates to backend compilers, layout improvements in Gluon, and updated profiling tools.",
+      "item": {
+        "key": "github.com/triton-lang/triton/releases/tag/v3.9.0",
+        "source": "Triton releases",
+        "tags": [
+          "release",
+          "infra"
+        ],
+        "title": "Triton 3.9.0 Release Notes",
+        "url": "https://github.com/triton-lang/triton/releases/tag/v3.9.0",
+        "discussion_url": null,
+        "published": "2026-10-27T18:56:41Z",
+        "summary": "Triton 3.9.0 Release Notes\n\nTable of Contents\n\nDialect & Frontend\n\nBackend & Compiler\n\nAMD/HIP Backend\n\nNVIDIA Backend\n\nGluon & Layout Improvements\n\nKernels & Benchmarks\n\nProton Profiling\n\nTesting & CI\n\nBuild & Infrastructure\n\nDocumentation\n\nDeprecations\n\nBreaking Changes\n\nContributors\n\nDialect & Frontend\n\nNew Features\n\nAtomic loads and stores: Added tl.atomic_load and tl.atomic_store , also available in Gluon and the interpreter. Loads default to acquire and stores default to release ( #11591 , #11650 , #11676 , #11821 )\n\ntl.atomic_poll : Added tl.atomic_poll , which waits until the value at a pointer equals an expected value and returns False on timeout ( #10723 , #10755 , #11540 )\n\nApproximate division: Added tl.fdiv(..., approx=True) for fast FP32 division ( #11900 )\n\nLanguage syntax: Kernels support chained comparisons such as 0 <= x <= 8 , keyword-only parameters, tuple unpacking in list comprehensions, and operator methods on aggregate types ( #12002 , #11418 , #11076 , #10990 )\n\nInteger tl.clamp : tl.clamp accepts integer tensors ( #12005 )\n\nImprovements\n\nEarlier errors: Mismatched tuple unpacking, invalid tl.topk k values, tl.cat shape mismatches, and non-32-bit…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Hugging Face published an evaluation exploring whether LLMs can accurately evaluate the novelty of research ideas.",
+      "item": {
+        "key": "huggingface.co/blog/allenai/novelty-bench",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "Can we trust LLMs to judge whether a research idea is novel?",
+        "url": "https://huggingface.co/blog/allenai/novelty-bench",
+        "discussion_url": null,
+        "published": "2026-10-27T16:12:42Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "The ProAS framework introduces progress-aware advantage shaping to resolve uniform credit assignment issues in critic-free agent RL.",
+      "item": {
+        "key": "arxiv:2610.18683",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "ProAS: A Progress-Aware Advantage Shaping Framework for Multi-Turn Agentic Reinforcement Learning",
+        "url": "https://huggingface.co/papers/2610.18683",
+        "discussion_url": null,
+        "published": "2026-10-27T00:00:00Z",
+        "summary": "Reinforcement learning (RL) has emerged as the primary paradigm for optimizing Large Language Model (LLM) agents, yet efficient critic-free algorithms (e.g., GRPO) suffer from a fundamental uniform credit assignment dilemma that broadcasts trajectory-level advantages equally to all actions. Our analysis reveals that this uniformity inherently reinforces structurally unreasonable actions in preferred trajectories and ignores each action's downstream deviations in unpreferred ones. To resolve this without introducing critic overhead, we propose Progress-Aware Advantage Shaping (ProAS), a plug-and-play framework that leverages a dynamically evolving Agentic Reference Graph (ARG) to achieve fine-grained credit assignment via Masking Unreasonable Incentives (MUI) and Asymmetric Penalty Redistribution (APR). Extensive experiments across Qwen2.5-1.5B-Instruct and Qwen2.5-7B-Instruct demonstrate that ProAS universally elevates mainstream group-based baselines to new state-of-the-art performance, achieving peak success rates of 91.9% and 94.3% on ALFWorld, alongside 66.7% and 70.8% on WebShop, respectively. Furthermore, it accelerates training convergence by up to 2.44times while…",
+        "content": "",
+        "score": 13.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new survey paper categorizes the foundations, safety risks, and open challenges of recursive self-improvement in large models.",
+      "item": {
+        "key": "arxiv:2610.35193",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Trustworthy Recursive Self-Improvement in the Era of Large Models: Foundation, Risks, Evaluation and Open Challenges",
+        "url": "https://huggingface.co/papers/2610.35193",
+        "discussion_url": null,
+        "published": "2026-10-27T00:00:00Z",
+        "summary": "AI systems built around large models increasingly use experience and feedback to make persistent changes to models, prompts, memories, tools, and workflows. Recursive self-improvement (RSI) extends this process to inductive biases and to the mechanisms that govern future updates, which can themselves be revised and reused across improvement cycles. Yet self-modification alone does not guarantee trustworthy improvement. Reported gains may reflect flawed evaluations, previously acquired capabilities may deteriorate, and compliance with behavioral constraints may weaken. Compromised artifacts or sensitive information may also persist in successor systems. Changes to improvement mechanisms may invalidate earlier verification results and make human oversight less effective. This survey presents an operational definition and process framework for RSI and organizes the requirements for trustworthy RSI into four interconnected themes: genuine and sustained improvement; behavioral constraints, alignment, and fairness; system security and privacy; and transparency and controllability. We examine these themes from three perspectives: Improvement Validity, Constraint Preservation, and…",
+        "content": "",
+        "score": 18.0,
+        "comments": 1,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Keep your context zeroed and your prompts unbiased.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "World model",
+      "headline": "Google DeepMind introduces Genie 4",
+      "blurb": "Genie 4 is a new world model that generates realistic interactive experiences in real time with audio support and prompt-driven controls.",
+      "item": {
+        "key": "deepmind.google/blog/genie-4-a-new-generation-of-world-simulation",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Genie 4",
+        "url": "https://deepmind.google/blog/genie-4-a-new-generation-of-world-simulation/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50261319",
+        "published": "2026-10-27T16:06:01Z",
+        "summary": "Genie 4: our new world model unlocking unprecedented realism in real-time simulation.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "Google DeepMind"
+        ]
+      }
+    },
+    {
+      "kicker": "Model release",
+      "headline": "Liquid AI introduces LFM3 model family",
+      "blurb": "Liquid AI introduced LFM3, a family of small multimodal models using a tri-hybrid architecture designed for local agents and tool calling.",
+      "item": {
+        "key": "liquid.ai/blog/lfm3",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Introducing LFM3: Every Modality for Specialized Intelligence",
+        "url": "https://www.liquid.ai/blog/lfm3",
+        "discussion_url": "https://news.ycombinator.com/item?id=50262229",
+        "published": "2026-10-27T17:04:50Z",
+        "summary": "Comments",
+        "content": "",
+        "score": 66.0,
+        "comments": 24,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    },
+    {
+      "kicker": "Research",
+      "headline": "Anthropic studies how AI agents impact expert decisions",
+      "blurb": "Anthropic evaluated 50 professional analysts using Claude Code to study how AI agents influence expert judgment on complex decisions.",
+      "item": {
+        "key": "anthropic.com/research/agents-judgment-calls",
+        "source": "Anthropic Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "How AI agents shape experts’ judgment calls",
+        "url": "https://www.anthropic.com/research/agents-judgment-calls",
+        "discussion_url": null,
+        "published": "2026-10-27T00:00:00Z",
+        "summary": "As AI does more of the hands-on work, the hope is that experts still make the judgment calls, meaning the decisions with more than one defensible answer. We tested this with 50 professional analysts who did a statistical analysis with Claude Code. On each key decision, we randomly assigned which of two defensible options the agent would favor. Analysts mostly went with the agent’s side, and few named the agent as a reason afterward.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 22,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 29,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 30,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 891,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1328,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 283,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 190,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 92,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-24T20:29:55.072391Z",
+    "candidates": 126,
+    "triaged": 126,
+    "enriched": 8,
+    "headline_candidates": 132,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 77.2,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 30076,
+      "output_tokens": 10842,
+      "cost_usd": 0.142692
+    }
+  }
+}
