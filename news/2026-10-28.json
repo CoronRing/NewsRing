@@ -1,0 +1,647 @@
+{
+  "date": "2026-10-28",
+  "generated_at": "2026-10-28T21:02:33.583513Z",
+  "title": "Agent Memory Taxes, MoE Channel Skipping, and Dayjob Realities",
+  "intro": "Today's highlights dig into the hidden costs of complex agent memory stacks versus plain retrieval, why calibrating MoE channels offline was a waste of time, and how brittle evaluation setups secretly favor incumbent models. Google also introduced Gemini 4 Carbon, while AWS formalized the plumbing required to run agent fleets in multi-tenant environments.",
+  "stories": [
+    {
+      "headline": "Gemini 4 Carbon targets autonomous cyberdefense and long-horizon tasks",
+      "summary": "Google DeepMind announced Gemini 4 Carbon, taking the top spot on Artificial Analysis's Intelligence Index v5.0 with a score of 59. The release leans heavily into offensive and defensive cybersecurity benchmarks, posting 88.2% on SEC-bench Pro, 54.8% on ExploitGym, and 71.0% on CWE-bench. DeepMind claims the model runs multi-day debugging workflows internally and has eliminated successful cheat attempts on Terminal-Bench 4.0. Access is rolling out gradually to cyber defenders and Fairwind Program partners first, matching Argon's pricing at $2 per million input tokens and $10 per million output tokens, with 95% discounts on cached inputs.",
+      "why_it_matters": "If you are orchestrating long-horizon coding or security agents, Carbon's 80% reduction in high-severity alignment alerts and lower overreach rates promise fewer runaway execution loops.",
+      "reason": "Google DeepMind has unveiled its next frontier model, Gemini 4 Carbon.",
+      "item": {
+        "key": "deepmind.google/blog/gemini-4-carbon-our-next-frontier-model",
+        "source": "Google DeepMind",
+        "tags": [
+          "lab"
+        ],
+        "title": "Gemini 4 Carbon: Our next frontier model",
+        "url": "https://deepmind.google/blog/gemini-4-carbon-our-next-frontier-model/",
+        "discussion_url": null,
+        "published": "2026-10-28T17:00:58Z",
+        "summary": "",
+        "content": "Gemini 4 Carbon: our next frontier model\nToday, we’re announcing the next frontier model: Gemini 4 Carbon, our strongest model with state-of-the-art cybersecurity and long horizon capabilities.\nCarbon ranks #1 on the recently updated v5.0 of Artificial Analysis Intelligence Index at 59. It shows significant gains across coding and agentic tasks as well as across key capabilities critical for cybersecurity defense, landing a firm lead in SEC-bench Pro (88.2%) for finding vulnerabilities, ExploitGym (54.8%) for exploitation, and CWE-bench (71.0%) for patching. On internal benchmarks, Carbon drives a strong uplift in generating secure code, and in live coding environments with our own teams it shows reduced misalignment and fabrication rates.\nBuilding on Gemini 4 Argon, which was launched two weeks ago, Carbon illustrates the pace at which we’re pushing the frontier forward. Our researchers and models are working hand in hand to advance capabilities faster, while strengthening our safeguards in tandem.\nWe're taking a deliberate approach to rollout and are actively engaged in the U.S. government’s voluntary process for pre-release model testing. Starting this week, we will make Carbon available to a subset of cyber defenders and will gradually phase access to additional trusted partners through our Fairwind Program. We’re continuing to gather feedback and iterate on guardrails before making Carbon available to developers, businesses, and consumers via our product surfaces as soon as possible.\nGemini 4 Carbon will launch at the same introductory price 1 as Argon at $2 per million input tokens and $10 per million output tokens, with cached input tokens priced at 95% off input token price.\nImproving coding and reasoning for challenging, long-horizon tasks\nDesigned to take on much harder, long-horizon engineering problems, Carbon is built for sustained agentic workflows. Internally, our teams have seen Carbon run for days to persist through dead ends to tackle complex, multi-step engineering tasks like root-causing and patching subtle bugs across large codebases and low-level systems.\nBuilding on user feedback, we focused on improving model performance across a variety of domains, including coding, agentic, and scientific tasks, as well as full-stack web development and multimodal understanding. With improved quality of output and artifacts in web development, Carbon jumps +89 elo points to land at #4 (1768) on WebDev Arena.\nState-of-the-art cybersecurity performance to help build secure systems\nGemini 4 Carbon delivers a significant leap in cybersecurity capabilities. It achieves state-of-the-art performance across the cybersecurity defense lifecycle — vulnerability detection, validation, and remediation.\nOur teams are already seeing strong gains in cyberdefense. On internal benchmarks, Carbon achieves more than 2x uplift in success rate for generating secure code over Argon. As another example, the Chrome team has reported that Carbon performed more than 10X better than another lab's large frontier model when generating high quality patches. Wiz, our leading Cloud security platform, also observes Carbon leading on benchmarks for web penetration testing, a core capability for Wiz's Scan for Good initiative.\nCarbon excels across key external benchmarks (evaluated without guardrails):\n- Finding real vulnerabilities: Core to cybersecurity defense is finding real vulnerabilities. Carbon achieves a state-of-the-art 88.2% on SEC-bench Pro, autonomously uncovering complex flaws buried in real-world software.\n- Validating risk through exploitation: To prioritize which vulnerabilities to remediate first or remediate at all, cyber defenders increasingly rely on models to check which vulnerabilities are exploitable. Carbon sets a new state-of-the-art on the popular exploitation benchmark ExploitGym (54.8%).\n- Patching at the root cause: Ultimately after identifying the vulnerabilities, fixing the root cause is a critical step in the cybersecurity defense lifecycle. Carbon reaches 71.0% on Collinear’s CWE-bench, turning validated findings directly into working code fixes.\nAdvancing frontier model safety & security\nGemini 4 Carbon builds on the same multi-layered safety and security stack of Argon — combining model training, real-time misuse defenses, prompt-injection resilience, and chain-of-thought monitoring. In particular, we made significant strides in model alignment with Argon, and reported its propensities to behave in an aligned way in our Safety and Security report. With Carbon, we challenged ourselves to go a step further on alignment, and trained the model to respond to complex or high-pressure tasks in the right way.\n- Reducing shortcuts and loophole exploitation: With Carbon, we further mitigated shortcut attempts in training while ensuring high-quality coding performance. Carbon reduced successful cheating on Terminal-Bench 4.0 to 0.0%, with attempts to cheat dropping to 0.4% — all while improving overall accuracy. In live coding environments with our internal teams, we observed that high-severity misalignment alerts dropped by almost 80%.\n- Greater transparency and honesty: In our internal testing, Carbon cuts unsupported claims by approximately 2x over Argon. It puts methodological caveats directly into the deliverable or withholds blocked actions with a clear list of what remains required, rather than fabricating or hedging around missing evidence.\n- Improved collaboration with the user in the face of ambiguity: Rather than guessing or forcing a path forward, Carbon retrieves the relevant sources and surfaces discrepancies to the user before acting — as a result, users should observe a much better collaborative experience with Carbon.\n- Following through without overstepping: Carbon simultaneously reduced overreach by 26% and under-service by 29% resulting in much more reliable execution of multi-step plans end-to-end while respecting project constraints and staying strictly within…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon",
+          "source": "Hacker News (AI)",
+          "tags": [
+            "community"
+          ],
+          "title": "Gemini 4 Carbon",
+          "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon/",
+          "discussion_url": "https://news.ycombinator.com/item?id=50276792",
+          "published": "2026-10-28T17:01:23Z",
+          "summary": "Faceted iridescent crystal surrounded by floating white number 4s.",
+          "content": "Gemini 4 Carbon is our strongest model with state-of-the-art cybersecurity and long horizon capabilities.",
+          "score": 596.0,
+          "comments": 502,
+          "also_in": [
+            "Hacker News front page",
+            "Google Gemini Blog"
+          ]
+        }
+      ]
+    },
+    {
+      "headline": "Dedicated agent memory architectures often fail to beat naive RAG",
+      "summary": "A new empirical study introduces the concept of \"memory tax\" to explain why structured agent memory frameworks frequently trail direct retrieval over raw history. Evaluating frameworks like MemOS and HippoRAG2 against a compact baseline (BM25 with Qwen3-Embedding and Reranker), naive two-round RAG beat both on LongMemEval-s using Qwen3.6-27B. The shortfall stems from construction losses during distillation, where systems like OpenViking lost up to 38% of ground-truth facts during extraction. Even when memory architectures saved inference tokens, cost amortization curves on GPT-5.6 Luna showed that query savings failed to outpace build costs until dozens of runs had passed—still at lower overall accuracy.",
+      "why_it_matters": "It is concrete validation that complex memory schemas and pre-summarization pipelines often degrade accuracy compared to simple, uncompressed context retrieval with solid rerankers.",
+      "reason": "This study analyzes the net utility of dedicated agent memory architectures, demonstrating where structured memory systems surprisingly underperform direct retrieval from raw context history.",
+      "item": {
+        "key": "arxiv:2610.34073",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Memory Tax: Dissecting the Net Value of Agent Memory",
+        "url": "https://huggingface.co/papers/2610.34073",
+        "discussion_url": null,
+        "published": "2026-10-28T00:00:00Z",
+        "summary": "Memory is increasingly used in long-horizon agents, yet the net value of building memory over direct retrieval from raw history remains largely unclear. Through a large-scale evaluation across multiple benchmarks and model backbones, we find many dedicated memory systems underperform naive RAG in many cases, indicating a negative net value. Taking RAG as a reference, we dissect the net value of memory into the gains and losses over direct retrieval, termed memory benefit and memory tax. These gains and losses arise because memory process changes how the raw information is organized and accessed. We view such changes as the double-edged deviations from the raw history. They are originally designed and introduced to benefit the task, for example by reorganizing facts or distilling preferences, but some may also remove or obscure evidence, giving rise to memory tax. Since memory benefit reflects the expected gains of its design, we then focus more on the overlooked memory tax, study how it arises from the system and evaluation side, and generalize the concept to more application scenarios of memory. We hope the notion of memory tax can provide a new lens and shift more attention from…",
+        "content": "Abstract\nLarge-scale evaluation reveals that dedicated memory systems often underperform naive retrieval-augmented generation, introducing a framework of memory benefit and memory tax to assess net value.\nMemory is increasingly used in long-horizon agents, yet the net value of building memory over direct retrieval from raw history remains largely unclear. Through a large-scale evaluation across multiple benchmarks and model backbones, we find many dedicated memory systems underperform naive RAG in many cases, indicating a negative net value. Taking RAG as a reference, we dissect the net value of memory into the gains and losses over direct retrieval, termed memory benefit and memory tax. These gains and losses arise because memory process changes how the raw information is organized and accessed. We view such changes as the double-edged deviations from the raw history. They are originally designed and introduced to benefit the task, for example by reorganizing facts or distilling preferences, but some may also remove or obscure evidence, giving rise to memory tax. Since memory benefit reflects the expected gains of its design, we then focus more on the overlooked memory tax, study how it arises from the system and evaluation side, and generalize the concept to more application scenarios of memory. We hope the notion of memory tax can provide a new lens and shift more attention from standalone performance to the net value of memory, informing more reliable memory designs and evaluations. We will open-source the code and results to the community. Project Page: https://hexuan21.github.io/MemoryTax/\nCommunity\nMany agent memory systems can’t even beat a naive RAG? We conducted a comprehensive evaluation and find many underperform the naive RAG, even at higher cost. To better understand this, we introduce “Memory Tax”, see more in our paper.\nReally useful framing, and I appreciate how carefully the RAG baseline is specified (BM25 + Qwen3-Embedding-0.6B, reranked by Qwen3-Reranker-0.6B), since that whole stack fits easily on a home GPU. Table 1 makes the point clearly: with Qwen3.6-27B on LongMemEval-s, two-round RAG reaches 81.4 versus 76.6 for MemOS and 78.2 for HippoRAG2, and the fact tracing in Table 2 shows how different construction losses can be, from 98.4% no-loss for MemoryOS to 38.0% of sampled facts with no memory unit at all for OpenViking. The recovery path in Section 6.1, retrieving from the raw history alongside memory and reranking jointly, feels like the most practical takeaway for people building agents today. How much extra token cost and latency does that hybrid path add compared with plain one-round RAG, and does it close most of the gap to the Gold Context scores?\nTable 18 suggests a workload threshold. With GPT-5.6 Luna, LightMem pays 5.22M build tokens across 100 histories (about 52.2k per history), then 0.09M QA tokens versus 0.27M for one-round RAG (about 0.9k versus 2.7k per query). Linearly extrapolating those rates, LLM-token cost crosses near 29 queries per history. Accuracy still trails RAG, 77% versus 82%, so that cost crossover does not erase memory tax. Could you show amortization curves alongside accuracy for the other systems?\nGet this paper in your agent:\nhf papers read 2610.34073 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 7\nhexuan21/MemoryTax-Res-GPT-5-6-luna\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 99.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Multiscale Policy Optimization shifts agent RL credit to the turn level",
+      "summary": "Reinforcement learning for long-horizon LLM agents frequently stumbles because token-level credit assignment penalizes an entire assistant generation when only a single tool parameter fails. Researchers propose Multiscale Policy Optimization (MPO), pairing Multiscale Advantage Estimation with turn-level importance sampling after observing that critic values remain largely stable within a turn and shift primarily across turn boundaries. Tested across search and tool-use benchmarks on 4B and 30B-A3B models, MPO delivered consistent policy gains over standard RL baselines. The near-constant within-turn critic value also doubles as a lightweight per-turn anomaly metric for runtime agent harnesses.",
+      "why_it_matters": "Aligning advantage estimation with distinct tool execution steps directly addresses the noisy credit assignment that plagues RL recipes for tool-calling agents.",
+      "reason": "The paper tackles training long-horizon LLM agents by aligning value estimation with multi-token turns rather than isolated token steps.",
+      "item": {
+        "key": "arxiv:2610.35013",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Multiscale Policy Optimization for Long-Horizon LLM Agents",
+        "url": "https://huggingface.co/papers/2610.35013",
+        "discussion_url": null,
+        "published": "2026-10-28T00:00:00Z",
+        "summary": "Long-horizon LLM agents interact with their environments through complete assistant turns while generating each action token by token. We observe that critic values vary primarily across turns, motivating optimization anchored at turns with finer credit allocation among tokens. We propose Multiscale Policy Optimization (MPO), combining Multiscale Advantage Estimation (MAE) and turn-level importance sampling to align credit assignment and policy updates at the turn scale. Extensive experiments across search, tool-use, and automation tasks with 4B and 30B-A3B models demonstrate consistent gains over strong RL baselines.",
+        "content": "Abstract\nMultiscale Policy Optimization improves long-horizon agent training by aligning credit assignment and policy updates at the turn scale.\nLong-horizon LLM agents interact with their environments through complete assistant turns while generating each action token by token. We observe that critic values vary primarily across turns, motivating optimization anchored at turns with finer credit allocation among tokens. We propose Multiscale Policy Optimization (MPO), combining Multiscale Advantage Estimation (MAE) and turn-level importance sampling to align credit assignment and policy updates at the turn scale. Extensive experiments across search, tool-use, and automation tasks with 4B and 30B-A3B models demonstrate consistent gains over strong RL baselines.\nCommunity\nExcited to share Multiscale Policy Optimization (MPO), a reinforcement learning framework designed for long-horizon LLM agents!\nWe observe that critic values vary primarily across assistant turns, motivating turn-level optimization with fine-grained token credit assignment. MPO combines Multiscale Advantage Estimation (MAE) with turn-level importance sampling to better align credit assignment and policy updates.\nExperiments on search, tool-use, and automation tasks with 4B and 30B-A3B models demonstrate consistent improvements over strong RL baselines.\nMost of my bad rollouts are one rotten turn — a tool call with a malformed argument — while the rest of that turn is the model narrating correctly around it. Token-level credit smears that blame across every token in the step, so the policy gets punished for the parts it got right. What I'd want measured before trusting the gains: turn-level ratios when turn lengths are wildly unequal. A 40-token function call and a 6000-token file read in the same trajectory have completely different variance, and long-horizon agents live entirely in that regime. If clipping needs retuning per task to keep the long-turn ratio from exploding, that's a deployment cost, not a detail.\nThe more useful finding for me is the near-constant critic value within a turn — it means the critic is already a runtime signal, not just a gradient source. I'd take that value exposed at inference as a cheap per-turn anomaly score to trigger a retry or a human check over another RL recipe I can't afford to run. Does it stay calibrated as the policy drifts, or does it need the same on-policy refresh the training loop gives it?\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 1\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 316.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Frontier models struggle with unstated context on DAYJOB: Tax",
+      "summary": "Surge AI published DAYJOB: Tax, an evaluation benchmark spanning 50 complex professional tax assignments that provide realistic workspaces containing up to 123 unstandardized files, including PDFs, spreadsheets, and handwritten receipts. Requiring a stringent 95% rubric threshold to pass, Claude Sonnet 5.5 topped the leaderboard with only a 10.8% pass rate, followed by Claude Fable 5.1 at 9.6% and Opus 5.5 at 9.2%. The tasks expose critical failure modes in agentic judgment: models frequently answer explicit client questions correctly while completely missing unmentioned, high-stakes deadlines or confidently acting on unverified legal assumptions buried in customer records.",
+      "why_it_matters": "The sub-11% pass rates highlight how poorly current frontier models navigate loose domain evidence when tasks require unprompted professional skepticism rather than direct instruction-following.",
+      "reason": "A realistic practitioner benchmark evaluating autonomous agents on 50 complex professional tax tasks, shedding light on failure modes in multi-step domain work.",
+      "item": {
+        "key": "surgehq.ai/blog/dayjob-tax",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Dayjob: Tax – evaluating AI agents on 50 professional tax assignments",
+        "url": "https://surgehq.ai/blog/dayjob-tax",
+        "discussion_url": "https://news.ycombinator.com/item?id=50275626",
+        "published": "2026-10-28T15:46:30Z",
+        "summary": "Comments",
+        "content": "Anna was planning to sell her condo. She had moved out in August 2024 and wanted to know whether closing in October 2026 or January 2027 would be better for taxes.\nAn AI agent reviewed both options and correctly concluded that either date would satisfy the residence requirement for a tax break worth up to $250,000 in excluded gains.\nBut it left out an important deadline.\nUnder the usual rules, homeowners must have lived in a property for at least two of the five years before selling it to qualify for the exclusion. Because Anna moved out in August 2024, she would stop satisfying that requirement around the end of August 2027. If her sale was delayed beyond August 2027, she could lose eligibility.\nAcross five attempts, Astra never identified the deadline. Opus identified it in all five attempts.\nThe agent evaluated the proposed dates correctly, but its advice left Anna unaware of a deadline that could affect a major financial decision. A tax adviser should recognize consequential issues even when the client doesn't know to ask about them.\nThis is the kind of professional judgment we're testing with DAYJOB: Tax, the latest addition to Surge AI's DAYJOB benchmark family.\nIntroducing DAYJOB: Tax\nDAYJOB evaluates AI agents on professional tax assignments requiring specialized expertise, complex materials, and decisions that aren't fully specified in the initial instructions. Our earlier releases covered Healthcare and Finance. DAYJOB: Tax extends that work into tax preparation, compliance, and advisory services.\nThe benchmark contains 50 environments across eight areas of tax practice. Agents receive client requests and supporting records, then produce tax returns, workpapers, technical reviews, or client advice.\nThese assignments test professional judgment alongside tax knowledge, calculations, retrieval, and instruction following. Agents must decide what deserves investigation, resolve conflicting evidence, recognize when information is insufficient, and carry those decisions into their final work.\nResults: Leaderboard and Pareto Frontiers\nClaude Sonnet 5.5 leads with a 10.8% pass rate on the DAYJOB: Tax leaderboard, followed by Claude Fable 5.1 at 9.6% and Claude Opus 5.5 at 9.2%.\nWe report pass@1 at a 95% rubric threshold. An attempt passes when it satisfies at least 95% of the task's criteria, which assess calculations, supporting evidence, consequential issues, and the completed deliverable.\nPerformance versus cost\nWe also compared model performance against average cost per trial.\nClaude Sonnet 5.5 and Opus 5.5 occupy the high-performance end of the measured Pareto frontier.\nThe breadth of professional tax work\nDAYJOB: Tax covers eight areas, each requiring different rules, records, and expertise:\n- Individual and family tax\n- Small-business tax\n- Partnerships\n- Property and investments\n- Estates, gifts, and trusts\n- International tax\n- Corporate transactions\n- Tax review and disputes\nSome assignments require complete filing packages with supporting workpapers. Others ask agents to investigate transactions, review previous filings, or prepare advice about decisions clients haven't yet made.\nWhat's inside the assignments?\nThe benchmark contains 1,789 workspace files, with a median of 30 per assignment and as many as 123. These include 1,487 PDFs, 117 Excel workbooks, 38 Word documents, and additional emails, images, CSVs, JSON records, and text files.\nThe workspaces include filed and draft tax returns, K-1s, W-2s, IRS notices, general ledgers, payroll records, contracts, and correspondence. They also contain the less standardized evidence that tax professionals routinely work with.\nOne assignment includes a photograph of a handwritten receipt for merchandise purchased for resale. The agent must read the item descriptions and amounts, reconcile them with spending records, and determine how the purchases affect inventory and cost of goods sold.\nAnother assignment involves an industrial silo-services company whose client assumes it operates only in Alabama. But its field dispatch log shows crews working across five states. The job locations, crew sizes, and days on site provide evidence relevant to the company's multistate tax obligations.\nOther environments are similarly varied. One involves a cross-border household whose Polish employment and property records must be reconciled with cryptocurrency exchange exports, wallet histories, and historical purchase lots.\nCreated and reviewed by tax experts\nDAYJOB tasks begin with real-world professional workflows. Tax experts turn these situations into realistic assignments, developing the supporting records, expected outcomes, and grading criteria. Each task undergoes a three-layer expert review for correctness, completeness, and solvability.\nTax experts bring experience across corporate taxation, partnerships, individual returns, trusts, and multistate compliance. Their backgrounds include:\n- Corporate and private-equity taxation: A tax attorney with over 10 years of experience at PwC, Deloitte, and Exxon, covering tax planning, compliance, audits, and controversy.\n- Partnership and corporate taxation: A Baker Tilly Tax Director with experience at PwC, Moss Adams, and Windes, specializing in complex partnership allocations, consolidated corporate returns, REITs, and high-net-worth clients.\n- Real estate and individual taxation: A tax professional with experience at Deloitte and EY, specializing in real-estate partnerships, individual taxation, and trusts.\nA retirement plan built on an unverified assumption\nA separating couple asked an AI agent how to divide their Roth IRA and 401(k). Opus 5.5 told them they weren't legally married and recommended keeping their accounts separate, with a cash payment to even out the balances.\nIt opened one response:\nYou aren't legally married, so neither account can be split without triggering taxes and penalties.\nBut the couple's own records raised doubts about that conclusion. Although they now lived in…",
+        "score": 140.0,
+        "comments": 79,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "How circular VLM labels poisoned an evaluation pipeline",
+      "summary": "A case study from Property Finder and AWS illustrates the hazards of evaluating new models against datasets generated by legacy production systems. The team found that 96.8% of their image-quality ground-truth labels were unchecked outputs from an incumbent vision model, embedding its character-level OCR bugs and rigid single-label room constraints directly into the grading key. Replacing the dataset with 356 expert-annotated listings and switching to multi-label scoring allowed alternative models to finally be measured accurately. Following an evolutionary prompt optimization cycle spanning 28 iterations, they deployed an Amazon Bedrock alternative that surpassed baseline accuracy while cutting inference costs by 86%.",
+      "why_it_matters": "Treating existing model outputs as evaluation ground truth is a common trap that invisibly penalizes better candidate models simply because they disagree with an incumbent's mistakes.",
+      "reason": "A practical case study detailing how inherited evaluation labels caused circular model-bias in agent evaluation pipelines and how evolutionary prompt optimization corrected it.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/fix-evaluation-bias-to-unlock-better-models-on-amazon-bedrock",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Fix evaluation bias to unlock better models on Amazon Bedrock",
+        "url": "https://aws.amazon.com/blogs/machine-learning/fix-evaluation-bias-to-unlock-better-models-on-amazon-bedrock/",
+        "discussion_url": null,
+        "published": "2026-10-27T16:53:02Z",
+        "summary": "Property Finder found that 96.8% of their vision-AI evaluation labels were inherited from the incumbent model, hiding its true accuracy. See how they built unbiased ground truth, applied evolutionary prompt optimization, and selected a more accurate, cost-effective model on Amazon Bedrock, cutting cost by 86% across 11 image-quality attributes.",
+        "content": "This post was co-authored with Khaled Thabit, Meriem Boughrara, and Mohamed Desouky from Property Finder.\n\nThe engineering team at Property Finder , a digital real estate application, discovered that 96.8 percent of their evaluation labels had been inherited directly from a single model’s predictions rather than verified by human experts. Their ground truth was systematically skewed toward the incumbent model, making every alternative appear to underperform. The labels also had errors, but the bias was what blocked objective model comparison. They uncovered this when migrating their vision AI workload to a more cost-effective option on Amazon Bedrock .\n\nProperty Finder processes tens of thousands of property images every day across the Middle East and North Africa (MENA). Their system evaluates 11 quality attributes per image. These cover watermark detection, room classification, furnishing status, photo quality, and construction indicators. That’s thousands of new property listings with an average of 15 images each. All need quality assessment before going live.\n\nProperty Finder needed a more cost-effective option. But measured against those labels, any alternative was at a disadvantage.\n\nThe hardest part was not finding a better model. It was discovering that their evaluation methodology itself was the blocker.\n\nIn this post, we share how Property Finder identified evaluation bias, built unbiased ground truth, and applied evolutionary prompt optimization to select the right model on Amazon Bedrock, achieving higher accuracy at 86 percent lower cost. We walk through the methodology and iteration examples, with lessons you can apply to your own workloads.\n\nThe following figure illustrates the prompt optimization loop that Property Finder and the AWS Generative AI Innovation Center team used to iteratively improve classification accuracy on Amazon Bedrock.\n\nFigure 1: Prompt optimization loop architecture\n\nThe diagram shows the iterative prompt optimization cycle. A property image is processed by Amazon Bedrock, which outputs the predicted attributes in JSON format. During optimization, these predictions are scored with Micro F1 against the 256-image expert-annotated development set. Error analysis then inspects failed images and identifies visual patterns, which inform the next prompt version. The loop ran from v0 to v27. AI assistants helped refine the prompts, and later versions used automated optimization.\n\nYour evaluation might be lying\n\nMany teams encounter this scenario. You want to compare vision models, so you build an evaluation dataset. The most common way to get labels is to run your current model and treat its outputs as ground truth. The model has been running in production and nobody complained, so the labels must be good enough.\n\nBut this creates a circular evaluation where any alternative gets judged by how closely it matches the incumbent’s behavior, not by actual correctness.\n\nProperty Finder’s evaluation dataset had exactly this problem. Of their labeled samples, 96.8 percent came directly from the predictions of the existing vision language model (VLM) rather than independent human verification. Any alternative model was structurally disadvantaged before a single image was even processed.\n\nHidden errors confirmed the severity. Watermark text extraction had character-level mistakes marked as correct, including hallucinated brand names and missing characters. Photo classification forced single labels onto images containing multiple room types.\n\nIn the remaining 3.2 percent of human-labeled samples, annotators had introduced categories outside the original specification, like Office appearing where no such label existed in the prompt. A model comparison loses validity when the answer key was written by the model you are trying to replace.\n\nBuilding ground truth you can trust\n\nTo break the cycle, you need human experts with real domain knowledge doing fresh annotations independently. No reference to previous model outputs. No access to what the incumbent predicted.\n\nDataset scope\n\nProperty Finder’s team hand-annotated 356 UAE images and a separate set of Egypt images. The team selected these from unlabeled production listings across representative industry segments. This post reports results on the UAE images. The Egypt images served as a cross-regional check on 230 images and are not reported here. The first 256 UAE images to be annotated formed the development set for tuning. The evaluation set for the final model comparison uses all 356, adding 100 images annotated after the development runs. A set of 356 images is roughly sufficient to detect moderate differences between models. Rare classes within individual attributes have fewer examples, so smaller differences on those attributes might not be detectable.\n\nExpert annotation\n\nA strategy and analytics expert annotated all images. They brought specialized knowledge of real estate listing quality standards. The AWS Generative AI Innovation Center team conducted systematic quality reviews through dedicated clarification sessions. Those reviews settled ambiguous cases and kept the labeling consistent across the dataset.\n\nMulti-label transition\n\nReal estate images frequently show multiple rooms through doorways or display overlapping quality characteristics. The switch from single-label to multi-label classification alleviated a major source of artificial ambiguity.\n\nA hallway photo showing a bedroom through a doorway is genuinely both. After you allow multiple labels, you measure what the model gets right rather than penalizing it for reasonable secondary predictions.\n\nA hybrid approach could complement this methodology: models from different families surface candidate labels and disagreements, and human experts adjudicate every case, so no model output is used directly as a label. This would reduce the annotation burden for future dataset expansion.\n\nMetrics selection\n\nMicro F1 served as the primary metric because it weights each prediction equally, which matches the business goal of overall label correctness. Macro F1 was reported alongside it because Micro F1 is dominated by frequent classes and can hide weak performance on rare attributes. Per-label precision and recall helped identify specific failure modes. Per-sample intersection over union (IoU) measured how closely each image’s predicted labels overlapped the expert’s labels. The nine single-label attributes, such as rotation or watermark detection, have one right answer per image. The AWS team also scored them with exact-match accuracy, the share of images where the answer matches the expert label.\n\nPrompt optimization as reinforcement learning\n\nWith unbiased evaluation in place, you can start improving. You cannot improve what you cannot measure correctly.\n\nThe optimization follows a loop analogous to reinforcement learning. Think of each prompt version as an agent, the Micro F1 score as the reward signal, and error analysis as the gradient for improvement. The idea resembles GEPA (Genetic-Pareto reflective prompt evolution) , where you mutate prompt components, evaluate fitness, select survivors, and iterate. In this engagement, the AWS team refined most versions from error analysis, with AI assistants reviewing failed images and proposing changes.\n\nMIPROv2 , an automated prompt optimization framework from the DSPy library, complemented this manual process for the photo classification task in v27.\n\nWhere it started\n\nThe first prompt (v0) used generic classification instructions, simplified here for illustration:\n\n“Classify this image into one of the following categories: Living Room, Kitchen, Bedroom, Bathroom…”\n\nProprietary model A, Property Finder’s production baseline, scored a Micro F1 of 0.55 on the 256-image development set. It used v22, a prompt tuned for its model family. Scores before v21 used the earlier single-label setup and aren’t directly comparable.\n\nIteration by iteration\n\nThe AWS team tested early…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS details enterprise harness patterns for Bedrock AgentCore",
+      "summary": "AWS published an architectural reference blueprint for scaling agent deployments across federated enterprise teams using Amazon Bedrock AgentCore. The architecture treats the \"Workstream cell\" as the core unit of deployment, decoupling application development from centralized platform governance. Crucially, inference requests are channeled through policy-enforcing gateways while tool calls are funneled through an authenticated Model Context Protocol (MCP) gateway with least-privilege scoping. The blueprint also establishes automated CI/CD gating that enforces model and tool authorization boundaries, tests identity isolation, and validates rollback before allowing agents to reach production.",
+      "why_it_matters": "It offers a structured reference design for standardizing MCP tool gateway authorization, tenant sandboxing, and CI/CD evaluation gates in enterprise agent platforms.",
+      "reason": "AWS publishes a reference blueprint for agent harness engineering, featuring decoupled tool gateways, isolated workstream cells, and CI/CD eval loops.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/building-an-agentic-ai-platform-on-amazon-bedrock-agentcore",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Building an Agentic AI Platform on Amazon Bedrock AgentCore",
+        "url": "https://aws.amazon.com/blogs/machine-learning/building-an-agentic-ai-platform-on-amazon-bedrock-agentcore/",
+        "discussion_url": null,
+        "published": "2026-10-28T18:28:26Z",
+        "summary": "Stand up a governed, multi-account Agentic AI Platform on Amazon Bedrock AgentCore. This post walks through the architecture and an open-source reference blueprint: the operating model, control plane, per-Workstream cells, separate inference and tool gateways, and a CI/CD evaluation pipeline that gates each agent before production.",
+        "content": "If you’ve tried to get an agent into production, the model and tool use are not the blocker. The main bottleneck is everything around them: how many teams can build within a secure environment, which team owns each model and tool, how AgentOps and error handling stay inside a pre-defined boundary, and how platform, Workstream, and finance teams see cost and health across accounts. For a Platform team that wants to support many agentic use cases, that’s a platform product to design and operate. In this post, we refer to the team that manages the platform as the Platform team, and to the teams that build on it as Workstream teams. Workstream teams are the domain or product teams that build and own agents on the platform.\n\nEach Workstream team needs a paved road with approved models and tools, short-lived workload identity, isolated runtime and memory, automated evaluation, rollback, telemetry, and cost attribution. These controls need to remain consistent as Workstream teams customize prompts, tools, data access, and application behavior. When every team assembles them, controls drift, shared services become a bottleneck, and ownership is difficult to audit.\n\nIn this post, we walk through the architecture and reference implementation of an enterprise Agentic AI Platform on Amazon Bedrock and Amazon Bedrock AgentCore. We cover the multi-account operating model, the Platform control plane, a repeatable per-Workstream deployment pattern, separate inference and tool gateways, and an evaluation pipeline that gates each agent before promotion to production. By the end, you should be able to deploy a governed Workstream from the companion blueprint, validate its security and lifecycle contracts, and use it as the foundation for your own agentic AI platform in the organization.\n\nAmazon Bedrock AgentCore provides modular services for building, deploying, and operating agents at scale, including runtime, gateway, identity, memory, policy, registry, and evaluations. The Enterprise Agentic AI Platform Blueprint , built on AgentCore, adds the surrounding enterprise contracts as deployable infrastructure as code: ownership, account boundaries, software delivery, observability, cost governance, and retirement.\n\nArchitectural principles\n\nBefore diving into the solution details, it helps to understand the organizational needs that drive the platform architecture. The common challenges we have heard from customers who establish an agent platform fall into these five categories:\n\nGoverned model access: Every untrusted inference request must pass through an approved inference gateway. The gateway applies the organization’s guardrails (for example, Amazon Bedrock Guardrails or a third-party provider), restricts which models and inference AWS Regions each Workstream can use, and enforces per-Workstream rate limits, token quotas, and budgets so that no single team can exhaust shared capacity. It also carries workload identity and emits attribution data.\n\nGoverned tool access: Agents must discover and invoke only approved tools through an authenticated Model Context Protocol (MCP) gateway, with exact targets, least-privilege execution roles, policy decisions, and an auditable owner.\n\nDelegated delivery: Workstream teams (for example, product teams) need to ship and roll back independently inside pre-approved boundaries, without waiting for the platform team to deploy each application or granting developers a direct infrastructure write path.\n\nFleet operations and cost: Several personas need visibility across accounts without gaining write access to team workloads. Agent operations engineers need logs, metrics, traces, and quotas. Workstream owners need cost per agent against their budgets. FinOps and finance teams need chargeback by team or business unit through AWS Cost Explorer and the AWS Cost and Usage Report (CUR) . Security and governance leads need evidence of which workload called which model and tool.\n\nBounded evidence and lifecycle: Every agent release needs proof at each boundary it touches:\n\nModel access: An approved model call succeeds, and a call to an unapproved model or Region is denied.\n\nTool access: A subscribed tool call succeeds, and a call to a tool outside the agent’s subscription is denied with the expected error.\n\nIdentity: A request from another workstream’s account or identity is rejected.\n\nRelease: The previous agent runtime version can be restored.\n\nRetirement: Teardown removes the agent’s runtime, memory, tool gateway, and tool grants in dependency order, and confirms nothing is left behind.\n\nThe blueprint addresses these needs through four connected planes: developer experience, platform control, Workstream execution, and assurance and operations. The unit of scale is the Workstream cell, not a manually configured agent or one shared workload account. The blueprint README documents the responsibilities of each plane in detail. And you will read the main planes: Agentic AI Platform control plane and Repeatable Workstream cell in the later paragraphs.\n\nOperating models and platform components\n\nEnterprises usually adopt one of three operating models for agentic AI:\n\nCentralized: A single artificial intelligence and machine learning (AI/ML) team builds and runs every agent. Governance is consistent, but that team quickly becomes a bottleneck as the number of use cases grows.\n\nDecentralized: Each business unit builds and operates its own agents. Teams can move quickly, but without shared standards, controls tend to drift, effort gets duplicated, and cost visibility suffers.\n\nFederated: A central Platform team provides shared, governed services while domain teams retain ownership of their agents, tools, and data. This model balances team autonomy with consistent guardrails and is where most enterprises land.\n\nFor assistance choosing, see the AWS Prescriptive Guidance page on Governance Models .\n\nFollowing patterns we have observed in customer engagements, the blueprint implements the federated model. The Platform team is the hub, typically a Platform product manager, architect, platform engineers, agent operations engineers, and a security and governance lead. Workstream teams are the spokes, made up of agent developers, a domain tech lead, and AI/ML engineers. An executive sponsor and the CISO sit above both.\n\nIn this blueprint, the Platform team owns the definition of each component: templates, versions, policies, and admission. Each Workstream account runs its own instance of the per-team components (Runtime, Memory, Tool Gateway), so a failure or rollback stays inside one team’s boundary.\n\nSolution overview\n\nThis solution delivers a governed, multi-account Agentic AI Platform that platform teams operate, and workstream teams such as internal product and engineering teams consume through versioned, self-service interfaces.\n\nAt enterprise scale, the developer experience plane is a catalog of organization-approved, versioned agent templates. The blueprint ships reference templates for Strands , LangGraph , and CrewAI , but you can use your choice of framework when the template preserves the same inference gateway, tool gateway, identity, policy, evaluation, and delivery contracts. Application teams own prompts, agent logic, tools, and evaluation cases. The Platform team owns the common controls and release requirements.\n\nOut of the four planes, two carry most of the architecture:\n\nAgentic AI Platform control plane: The Platform account publishes versioned templates and interfaces, operates AWS Agent Registry governance records and shared Inference Gateways, admits models and Guardrails, orchestrates reviewed releases, and aggregates fleet signals. Teams consume these capabilities through code, descriptors, and pipelines rather than administrator sessions or deployment tickets.\n\nRepeatable Workstream cell: Each product or domain receives an isolated boundary with a team-owned source repository, a Workload pipeline, and three Amazon Bedrock AgentCore…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Prox skips MoE offline calibration using top-k channel selection",
+      "summary": "Interactive decoding for Mixture-of-Experts architectures is heavily memory-bandwidth bound at low batch sizes, usually prompting systems to prune intermediate expert channels using offline calibrated thresholds. A new paper presents Prox, showing that offline threshold calibration neither guarantees a target read budget nor prevents failure modes like repetition loops on Gemma 4. Instead, switching to an uncalibrated top-k channel selector matched or outperformed calibrated thresholding in 40 of 43 benchmark evaluations. Paired with a weight-derived reader using ternary sketches and low-rank recovery maps, their custom Triton kernels retained 98.1% accuracy while reading only 17.8% of routed weights, yielding 1.6x to 1.9x speedups over optimized vLLM at batch size one.",
+      "why_it_matters": "This provides a calibration-free path to significantly accelerate MoE decoding on memory-bound inference engines without retraining or maintaining offline calibration sets.",
+      "reason": "A novel MoE decoding acceleration technique that selects active expert channels on the fly without needing offline calibration data.",
+      "item": {
+        "key": "arxiv:2610.37386",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Channel Selection for Mixture-of-Experts Decoding Needs No Calibration Data",
+        "url": "https://huggingface.co/papers/2610.37386",
+        "discussion_url": null,
+        "published": "2026-10-28T00:00:00Z",
+        "summary": "Mixture-of-Experts (MoE) models are bottlenecked by loading routed-expert weights from memory during interactive decoding at small batch sizes. Because most intermediate channels in a routed expert contribute little to any single token, channel selectors predict which channels matter and read only their weights, typically keeping channels above a threshold calibrated on offline data. We show that channel selection needs no calibration data. First, a calibrated threshold does not fix how much a selector reads, because the number of channels passing it varies across inputs; Prox with thresholds calibrated for an 18% read budget actually reads only 12.9% on average across our benchmarks. Second, top-k keeps each token's k highest-scoring channels and needs no calibration data. At the calibrated budget, a selector's top-k version matches or beats its threshold version on the same score in 40 of 43 comparisons at 13% and 18% budgets, including all 23 on generation tasks. The top-k versions also avoid the repetition-loop collapse that calibrated thresholds cause on Gemma 4. Calibrating a threshold thus provides neither of the two things selectors use it for: a known read budget and a…",
+        "content": "Channel Selection for Mixture-of-Experts Decoding Needs No Calibration Data\nAbstract\nProx replaces calibrated thresholds with top-k channel selection and a weight-derived reader to accelerate Mixture-of-Experts inference while preserving accuracy.\nMixture-of-Experts (MoE) models are bottlenecked by loading routed-expert weights from memory during interactive decoding at small batch sizes. Because most intermediate channels in a routed expert contribute little to any single token, channel selectors predict which channels matter and read only their weights, typically keeping channels above a threshold calibrated on offline data. We show that channel selection needs no calibration data. First, a calibrated threshold does not fix how much a selector reads, because the number of channels passing it varies across inputs; Prox with thresholds calibrated for an 18% read budget actually reads only 12.9% on average across our benchmarks. Second, top-k keeps each token's k highest-scoring channels and needs no calibration data. At the calibrated budget, a selector's top-k version matches or beats its threshold version on the same score in 40 of 43 comparisons at 13% and 18% budgets, including all 23 on generation tasks. The top-k versions also avoid the repetition-loop collapse that calibrated thresholds cause on Gemma 4. Calibrating a threshold thus provides neither of the two things selectors use it for: a known read budget and a consistent accuracy gain at that budget. We furthermore introduce a reader built entirely from the model's weights, which screens channels with a ternary sketch and recovers the skipped ones with a low-rank map. Across three post-trained MoE models, our reader retains 98.1% of full-model accuracy at 17.8% of routed-expert reads, with Triton kernels running MoE blocks 1.60 to 1.90x faster than optimized vLLM at batch one and up to 2.69x at larger batches on the same three models.\nCommunity\nActivation pruning is a really big issue with slow-memory GPUs such as DGX Spark!\nHere is the GitHub: 😀\nThank you! Yes, I think the next regime of sparsity would come from activation sparsity, especially when serving from hardware with heavy memory-bandwidth bottlenecks.\nGet this paper in your agent:\nhf papers read 2610.37386 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 18.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "llama.cpp release b11969 accelerates IQ4 quantization generation by pre-computing halfway points.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b11969",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b11969",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11969",
+        "discussion_url": null,
+        "published": "2026-10-28T19:12:03Z",
+        "summary": "Speed up IQ4 quant creation with pre-computed halfway points ( #31201 )\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/60965905\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows arm64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows x64 (Vulkan)\n\nWindows arm64 (Vulkan)\n\nWindows x64 (OpenVINO)\n\nWindows x64 (SYCL)\n\nWindows x64 (ROCm…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "PyTorch 2.15 is out with a completely rewritten default NCCL backend that includes a built-in flight recorder for distributed debugging.",
+      "item": {
+        "key": "pytorch.org/blog/pytorch-2-15-release-blog",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "PyTorch 2.15 Release Blog",
+        "url": "https://pytorch.org/blog/pytorch-2-15-release-blog/",
+        "discussion_url": null,
+        "published": "2026-10-28T17:44:20Z",
+        "summary": "We are excited to announce the release of PyTorch® 2.15 (release notes)! The PyTorch 2.15 release features the following changes: Rewritten NCCL backend becomes the default, with a flight recorder...\n\nThe post PyTorch 2.15 Release Blog appeared first on PyTorch .",
+        "content": "We are excited to announce the release of PyTorch® 2.15 ( release notes )!\n\nThe PyTorch 2.15 release features the following changes:\n\nRewritten NCCL backend becomes the default, with a flight recorder that dumps on hangs and TORCH_DIST_USE_NCCL2=0 or nccl-legacy as rollback paths\n\nOne-sided transports for torch.distributed, with a NIXL backend and CUDA-graph-capturable transfers\n\nFSDP2 and pipelining gain finer memory and communication control, with fp32 for precision-sensitive parameters, CUDA-graph-captured gradient accumulation, and gradient reduction overlapped with compute\n\nFaster 4-bit (NVFP4) LLM decoding on NVIDIA Blackwell GPUs through fewer, better-overlapped kernel launches in NVGEMM\n\nApple Silicon gains FP8 and faster decode, with float8_e4m3fn and _scaled_mm , a new grouped_mm with a decode fast path (1.32–1.34x tokens/s on MoE decode), and public torch.mps.Stream APIs\n\nBroader platform support with FlyDSL kernels on AMD gfx950, Tensor Data Mover support for gfx1250 (MI450), ROCm 10.0 wheels, simpler SYCL kernel authoring and multi-GPU profiling on Intel GPUs, CUDA 13.2 as the default wheel with CUDA 13.4 alongside it, and torch.compile on Python 3.15\n\nThis release is composed of 3,117 commits from 583 contributors since PyTorch 2.14. We want to sincerely thank our dedicated community for your contributions. As always, we encourage you to try these out and report any issues as we improve 2.15. More information about how to get started with the PyTorch 2-series can be found at our Getting Started page.\n\nBring any questions you may have about PyTorch 2.15 to our Q&A webinar on Thursday, November 5, 2026, at 11 AM PT. Tristan Rice, Natalia Gimelshein, Huy Do, and Jane Xu (all Meta) will share an overview of the 2.15 release and answer community questions about PyTorch and the new capabilities in this release. Chris Gottbrath (Gottbrath Tech) will moderate. Register today.\n\nThroughout the 2.x series, PyTorch has been evolving from a research-first framework into a unified, hardware-agnostic platform for production training and inference at scale. PyTorch 2.13 landed FlexAttention on Apple Silicon, gave Inductor a CuTeDSL code path, and introduced torchcomms for large-cluster training. PyTorch 2.14 matured that path into NVGEMM, previewed the rewritten NCCL backend, and brought native linear algebra to Apple Silicon.\n\nPyTorch 2.15 builds on that work. The rewritten NCCL backend now backs every nccl process group, NVGEMM is tuned for low-precision decode, Apple Silicon adds FP8 and decode-specific kernels, AMD support extends to new compiler DSLs and (preview support) for next Instinct generation, and Intel GPUs gain a simpler kernel programming model and deeper profiling.\n\nDistributed Training\n\nThe Rewritten NCCL Backend Becomes the Default\n\nWhen a model trains across many GPUs, those GPUs constantly exchange data through a communication backend, and on NVIDIA hardware that backend is NCCL. In PyTorch 2.15, every job that uses nccl runs on our rewritten backend by default.\n\nPyTorch 2.14 previewed our rewritten NCCL backend, ported from torchcomms, as the opt-in nccl2 backend. In 2.15 it is the default for every nccl process group, with TORCH_DIST_USE_NCCL2=0 and the nccl-legacy backend name as rollback paths. Communicators are now created eagerly with the process group, and reconfiguration can opt into a shrink/grow fast path (NCCL 2.29 or newer) so surviving ranks skip a full bootstrap. Reconfigure for fault tolerance is also enabled on ROCm with RCCL 2.30.7.\n\nTo make the backend debuggable in production, a backend-agnostic flight recorder writes a post-mortem to disk when a collective hangs, and watchdog health is published to the debug server so a timeout on any rank triggers flight-recorder dumps from every rank. At cluster scale, a single stalled GPU can halt an entire training run, and finding the cause has often meant reproducing the failure by hand. The flight recorder captures what each rank was doing at the moment of the hang.\n\nAPI Unstable\n\n(PRs #192281 , #192895 , #199240 , #198865 and #198339 by Tristan Rice, Meta; #194774 by Chinmay Kuchinad, AMD; #192233 and #199092 by Tushar Jain, Meta; #192075 by Atharva Kshirsagar, Red Hat)\n\nOne-Sided Transports with a NIXL Backend\n\ntorch.distributed gains a Python transport API for one-sided data movement, with NIXL as the first backend. Transports connect to a peer through a store, without needing a process group or collectives, and Transport.read_stream/write_stream enqueue transfers on a CUDA stream so they can be captured with torch.cuda.graph .\n\nAPI Unstable\n\n(PRs #195643 , #197032 , #198889 and #198918 by Tristan Rice, Meta)\n\nFSDP2 and Pipeline Parallelism: Memory and Communication Control\n\nFSDP2 now gives finer control over precision and capture. Precision-sensitive parameters, such as MoE router gates and norm weights, can stay in fp32 while the rest of the model trains in bf16, still with one all-gather per  fully_shard ( MixedPrecisionPolicy(param_dtype_override_fn=...) ). A full gradient-accumulation step can now be captured in a single CUDA graph. Gradient precision can also be set per parameter. Gradients accumulate directly in .grad and follow each parameter’s grad_dtype , which changes the default behavior when reduce_dtype=None (see Deprecations and Backwards-Incompatible Changes).\n\nPipeline parallelism now allocates receive buffers just before each receive instead of for every microbatch up front, and releases forward outputs once their sends complete. Schedules accept a max_outstanding_sends budget, and FSDP unshards are staggered across each rank’s startup bubble instead of all being issued at the start of a step. Each unique edge between pipeline-parallel ranks, as determined by the schedule, now gets a dedicated P2P communicator. FSDP reduce grads can now be overlapped with subsequent compute. These improvements make PyTorch pipelining cudagraphable, deterministic, with an optimized memory profile, and expose performance tuning knobs for minimizing exposed communication.\n\nAPI Unstable\n\n(PRs #196640 , #196724 , #196727 , #196641 and #196963 by Chien-Chin Huang, Meta; #196626 by Anshul Sinha, Meta; #198417 by Andrew Or, Apache Spark PMC); #194114 by Animesh Jain, Meta; #196463 , #196464 and #196706 by Sanket Purandare, Meta)\n\nPerformance Improvements\n\nFaster MPS Kernels for Decode and Linear Algebra\n\nBuilding on the 2.14 migration, more MPS operators move from MPSGraph to native Metal kernels. A single-row softmax over a 128,256-entry vocabulary drops by 8x, upsample backward is up to 21.7x faster, and reductions now share one set of kernels, making norm full reductions more than 100x faster.\n\nFor decode, F.linear now uses the existing gemv kernels (1.23x geometric-mean speedup, up to 5x on small projections), and the new MPS grouped_mm has a gemv path that gives 1.32–1.34x higher MoE decode throughput on an M3 Ultra. Several linear algebra solvers were also rewritten: QR of a 512 x 512 matrix falls from about 7 seconds to 1.5 ms, and triangular solves are now blocked.\n\n(PRs #196071 , #199687 , #198611 , #198495 , #194933 , #198721 , #198725 , #198732 , #195944 and #196900 by Irakli Salia, Hugging Face; #196922 , #196241 and #195369 by Nikita Shulga, Thinking Machines Lab; #193153 by Sunghyun Choi, Tech University of Korea ; #188473 by Shrivas Shankar, University of Wisconsin-Madison)\n\nCore Features\n\nCUDA 13.2 by Default and CUDA 13.4 Wheels\n\nThe default PyTorch wheel moves to CUDA 13.2 (13.2.2 toolkit), with CUDA 13.4 GA wheels shipping alongside it for Linux x86_64, Linux aarch64 and Windows. The CUDA 13.4 wheels add experimental support for NVIDIA Rubin GPUs.\n\n(PRs #198913 and #196014 by Andrey Talman, Meta; #194996 and #198843 by Ashish Karale, NVIDIA; #196560 , #199269 and #196351 by Ting Lu, NVIDIA; #192653 by Wei Wang, NVIDIA; #186245 by Lakshay Garg, NVIDIA)\n\nROCm 10.0 and TheRock Wheels\n\nPyTorch 2.15 adds ROCm 10.0 wheels alongside the ROCm 7.14 wheels…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "The SPOT paper introduces commit-order prediction to make speculative decoding lossless and significantly faster for diffusion language models.",
+      "item": {
+        "key": "arxiv:2610.22543",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "On the SPOT: Enhancing Speculative Decoding for Diffusion Language Models via Commit-Order Prediction",
+        "url": "https://huggingface.co/papers/2610.22543",
+        "discussion_url": null,
+        "published": "2026-10-28T00:00:00Z",
+        "summary": "Diffusion language models (DLMs) promise parallel text generation, but in practice face an unresolved speed-quality trade-off. Exact decoding fills in only one masked position per model pass, while faster multi-token decoding schemes are lossy. Speculative decoding is the standard lossless acceleration for autoregressive models. However, it does not transfer directly to DLMs, which must choose both what to generate and where. We show that this order is the missing piece: the model's own predictions from the previous pass already give the right token at over 90% of positions, but not which position comes next. We introduce Speculating Positions Order Trajectory (SPOT), a 0.62M-parameter model that reads only the target's output distributions, predicts this order and proposes a tree of candidate continuations, which the target verifies in a single pass by state equality. Coupled-noise match, which shares Gumbel noise between drafter and target, keeps this verification exact at any temperature. This approach also inspired us to introduce SPOT-Sets for dynamic threshold decoding, where a pass commits several positions: SPOT-Sets drafts whole commit sets together with their tokens. Our…",
+        "content": "",
+        "score": 22.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "HABIT-Bench benchmarks the ability of long-term agents to induce implicit user behavioral habits from weak, longitudinal conversational cues.",
+      "item": {
+        "key": "arxiv:2610.24520",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "HABIT-Bench: Evaluating Habit Induction from Longitudinal Weak Evidence in Agent Memory",
+        "url": "https://huggingface.co/papers/2610.24520",
+        "discussion_url": null,
+        "published": "2026-10-28T00:00:00Z",
+        "summary": "In long-term interactions with large language model (LLM) agents, users reveal habits through their choices and actions. These habits capture implicit user information that agents must infer across conversations. However, individual observations may provide only partial evidence about a habit or when it applies. Retaining past interactions alone does not ensure that agents can infer habits and apply them appropriately. We introduce HABIT-Bench to evaluate how well agent memory systems infer habits from weak evidence and apply them to later requests. We construct synthetic user histories from task-oriented dialogue data and controlled habit graphs. The histories span hundreds of sessions across food, finance, software, and travel. Four-choice tasks assess agents' ability to infer user habits and apply them appropriately. They include temporary exceptions, changes in habits, and suggestions that users have not accepted. Sampled tasks undergo independent human review. We evaluate eight memory methods with Qwen3-235B-A22B and GLM-5.3-Flash. The best-performing memory method achieves 33.61\\% macro accuracy across the four domains. Performance remains limited even when annotated…",
+        "content": "",
+        "score": 78.0,
+        "comments": 5,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new community discussion surfaced around The Agent SDK on Hacker News, though technical specifics remain sparse.",
+      "item": {
+        "key": "cursor.com/blog/agent-sdk",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "The Agent SDK",
+        "url": "https://cursor.com/blog/agent-sdk",
+        "discussion_url": "https://news.ycombinator.com/item?id=50273731",
+        "published": "2026-10-28T14:02:20Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Ollama v0.40.13 bumps its internal llama.cpp engine to b11963 and rolls out GGUF fixes for LFM3 alongside speech features in llama-server.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.13-rc0",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.13",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.13-rc0",
+        "discussion_url": null,
+        "published": "2026-10-28T19:55:04Z",
+        "summary": "What's Changed\n\nllm: LFM3 GGUF fixes and llama-server speech by @dhiltgen in #19344\n\nllama.cpp: version bump b11963 by @dhiltgen in #19360\n\nFull Changelog : v0.40.12...v0.40.13-rc0",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your evaluators be human and your context windows free of memory tax.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "Google DeepMind unveils Gemini 4 Carbon",
+      "blurb": "Google DeepMind has announced Gemini 4 Carbon as its next-generation frontier model.",
+      "item": {
+        "key": "deepmind.google/blog/gemini-4-carbon-our-next-frontier-model",
+        "source": "Google DeepMind",
+        "tags": [
+          "lab"
+        ],
+        "title": "Gemini 4 Carbon: Our next frontier model",
+        "url": "https://deepmind.google/blog/gemini-4-carbon-our-next-frontier-model/",
+        "discussion_url": null,
+        "published": "2026-10-28T17:00:58Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Framework release",
+      "headline": "PyTorch 2.15 makes rewritten NCCL backend default",
+      "blurb": "PyTorch 2.15 arrives with a rewritten NCCL backend enabled by default alongside a new flight recorder for tracking distributed jobs.",
+      "item": {
+        "key": "pytorch.org/blog/pytorch-2-15-release-blog",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "PyTorch 2.15 Release Blog",
+        "url": "https://pytorch.org/blog/pytorch-2-15-release-blog/",
+        "discussion_url": null,
+        "published": "2026-10-28T17:44:20Z",
+        "summary": "We are excited to announce the release of PyTorch® 2.15 (release notes)! The PyTorch 2.15 release features the following changes: Rewritten NCCL backend becomes the default, with a flight recorder...\n\nThe post PyTorch 2.15 Release Blog appeared first on PyTorch .",
+        "content": "We are excited to announce the release of PyTorch® 2.15 ( release notes )!\n\nThe PyTorch 2.15 release features the following changes:\n\nRewritten NCCL backend becomes the default, with a flight recorder that dumps on hangs and TORCH_DIST_USE_NCCL2=0 or nccl-legacy as rollback paths\n\nOne-sided transports for torch.distributed, with a NIXL backend and CUDA-graph-capturable transfers\n\nFSDP2 and pipelining gain finer memory and communication control, with fp32 for precision-sensitive parameters, CUDA-graph-captured gradient accumulation, and gradient reduction overlapped with compute\n\nFaster 4-bit (NVFP4) LLM decoding on NVIDIA Blackwell GPUs through fewer, better-overlapped kernel launches in NVGEMM\n\nApple Silicon gains FP8 and faster decode, with float8_e4m3fn and _scaled_mm , a new grouped_mm with a decode fast path (1.32–1.34x tokens/s on MoE decode), and public torch.mps.Stream APIs\n\nBroader platform support with FlyDSL kernels on AMD gfx950, Tensor Data Mover support for gfx1250 (MI450), ROCm 10.0 wheels, simpler SYCL kernel authoring and multi-GPU profiling on Intel GPUs, CUDA 13.2 as the default wheel with CUDA 13.4 alongside it, and torch.compile on Python 3.15\n\nThis release is composed of 3,117 commits from 583 contributors since PyTorch 2.14. We want to sincerely thank our dedicated community for your contributions. As always, we encourage you to try these out and report any issues as we improve 2.15. More information about how to get started with the PyTorch 2-series can be found at our Getting Started page.\n\nBring any questions you may have about PyTorch 2.15 to our Q&A webinar on Thursday, November 5, 2026, at 11 AM PT. Tristan Rice, Natalia Gimelshein, Huy Do, and Jane Xu (all Meta) will share an overview of the 2.15 release and answer community questions about PyTorch and the new capabilities in this release. Chris Gottbrath (Gottbrath Tech) will moderate. Register today.\n\nThroughout the 2.x series, PyTorch has been evolving from a research-first framework into a unified, hardware-agnostic platform for production training and inference at scale. PyTorch 2.13 landed FlexAttention on Apple Silicon, gave Inductor a CuTeDSL code path, and introduced torchcomms for large-cluster training. PyTorch 2.14 matured that path into NVGEMM, previewed the rewritten NCCL backend, and brought native linear algebra to Apple Silicon.\n\nPyTorch 2.15 builds on that work. The rewritten NCCL backend now backs every nccl process group, NVGEMM is tuned for low-precision decode, Apple Silicon adds FP8 and decode-specific kernels, AMD support extends to new compiler DSLs and (preview support) for next Instinct generation, and Intel GPUs gain a simpler kernel programming model and deeper profiling.\n\nDistributed Training\n\nThe Rewritten NCCL Backend Becomes the Default\n\nWhen a model trains across many GPUs, those GPUs constantly exchange data through a communication backend, and on NVIDIA hardware that backend is NCCL. In PyTorch 2.15, every job that uses nccl runs on our rewritten backend by default.\n\nPyTorch 2.14 previewed our rewritten NCCL backend, ported from torchcomms, as the opt-in nccl2 backend. In 2.15 it is the default for every nccl process group, with TORCH_DIST_USE_NCCL2=0 and the nccl-legacy backend name as rollback paths. Communicators are now created eagerly with the process group, and reconfiguration can opt into a shrink/grow fast path (NCCL 2.29 or newer) so surviving ranks skip a full bootstrap. Reconfigure for fault tolerance is also enabled on ROCm with RCCL 2.30.7.\n\nTo make the backend debuggable in production, a backend-agnostic flight recorder writes a post-mortem to disk when a collective hangs, and watchdog health is published to the debug server so a timeout on any rank triggers flight-recorder dumps from every rank. At cluster scale, a single stalled GPU can halt an entire training run, and finding the cause has often meant reproducing the failure by hand. The flight recorder captures what each rank was doing at the moment of the hang.\n\nAPI Unstable\n\n(PRs #192281 , #192895 , #199240 , #198865 and #198339 by Tristan Rice, Meta; #194774 by Chinmay Kuchinad, AMD; #192233 and #199092 by Tushar Jain, Meta; #192075 by Atharva Kshirsagar, Red Hat)\n\nOne-Sided Transports with a NIXL Backend\n\ntorch.distributed gains a Python transport API for one-sided data movement, with NIXL as the first backend. Transports connect to a peer through a store, without needing a process group or collectives, and Transport.read_stream/write_stream enqueue transfers on a CUDA stream so they can be captured with torch.cuda.graph .\n\nAPI Unstable\n\n(PRs #195643 , #197032 , #198889 and #198918 by Tristan Rice, Meta)\n\nFSDP2 and Pipeline Parallelism: Memory and Communication Control\n\nFSDP2 now gives finer control over precision and capture. Precision-sensitive parameters, such as MoE router gates and norm weights, can stay in fp32 while the rest of the model trains in bf16, still with one all-gather per  fully_shard ( MixedPrecisionPolicy(param_dtype_override_fn=...) ). A full gradient-accumulation step can now be captured in a single CUDA graph. Gradient precision can also be set per parameter. Gradients accumulate directly in .grad and follow each parameter’s grad_dtype , which changes the default behavior when reduce_dtype=None (see Deprecations and Backwards-Incompatible Changes).\n\nPipeline parallelism now allocates receive buffers just before each receive instead of for every microbatch up front, and releases forward outputs once their sends complete. Schedules accept a max_outstanding_sends budget, and FSDP unshards are staggered across each rank’s startup bubble instead of all being issued at the start of a step. Each unique edge between pipeline-parallel ranks, as determined by the schedule, now gets a dedicated P2P communicator. FSDP reduce grads can now be overlapped with subsequent compute. These improvements make PyTorch pipelining cudagraphable, deterministic, with an optimized memory profile, and expose performance tuning knobs for minimizing exposed communication.\n\nAPI Unstable\n\n(PRs #196640 , #196724 , #196727 , #196641 and #196963 by Chien-Chin Huang, Meta; #196626 by Anshul Sinha, Meta; #198417 by Andrew Or, Apache Spark PMC); #194114 by Animesh Jain, Meta; #196463 , #196464 and #196706 by Sanket Purandare, Meta)\n\nPerformance Improvements\n\nFaster MPS Kernels for Decode and Linear Algebra\n\nBuilding on the 2.14 migration, more MPS operators move from MPSGraph to native Metal kernels. A single-row softmax over a 128,256-entry vocabulary drops by 8x, upsample backward is up to 21.7x faster, and reductions now share one set of kernels, making norm full reductions more than 100x faster.\n\nFor decode, F.linear now uses the existing gemv kernels (1.23x geometric-mean speedup, up to 5x on small projections), and the new MPS grouped_mm has a gemv path that gives 1.32–1.34x higher MoE decode throughput on an M3 Ultra. Several linear algebra solvers were also rewritten: QR of a 512 x 512 matrix falls from about 7 seconds to 1.5 ms, and triangular solves are now blocked.\n\n(PRs #196071 , #199687 , #198611 , #198495 , #194933 , #198721 , #198725 , #198732 , #195944 and #196900 by Irakli Salia, Hugging Face; #196922 , #196241 and #195369 by Nikita Shulga, Thinking Machines Lab; #193153 by Sunghyun Choi, Tech University of Korea ; #188473 by Shrivas Shankar, University of Wisconsin-Madison)\n\nCore Features\n\nCUDA 13.2 by Default and CUDA 13.4 Wheels\n\nThe default PyTorch wheel moves to CUDA 13.2 (13.2.2 toolkit), with CUDA 13.4 GA wheels shipping alongside it for Linux x86_64, Linux aarch64 and Windows. The CUDA 13.4 wheels add experimental support for NVIDIA Rubin GPUs.\n\n(PRs #198913 and #196014 by Andrey Talman, Meta; #194996 and #198843 by Ashish Karale, NVIDIA; #196560 , #199269 and #196351 by Ting Lu, NVIDIA; #192653 by Wei Wang, NVIDIA; #186245 by Lakshay Garg, NVIDIA)\n\nROCm 10.0 and TheRock Wheels\n\nPyTorch 2.15 adds ROCm 10.0 wheels alongside the ROCm 7.14 wheels…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Speech AI",
+      "headline": "Nvidia releases Nemotron 3.5 Transcribe for 40 languages",
+      "blurb": "Nvidia has launched Nemotron 3.5 Transcribe, an open automatic speech recognition model covering 40 languages.",
+      "item": {
+        "key": "huggingface.co/blog/nvidia/nemotron-transcribe-granary",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Nvidia Nemotron 3.5 Transcribe: open ASR for 40 languages",
+        "url": "https://huggingface.co/blog/nvidia/nemotron-transcribe-granary",
+        "discussion_url": "https://news.ycombinator.com/item?id=50275128",
+        "published": "2026-10-28T15:17:53Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "Hugging Face Blog"
+        ]
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 22,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 35,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 891,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1334,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 286,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 191,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 92,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 5,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-25T20:51:32.806357Z",
+    "candidates": 147,
+    "triaged": 147,
+    "enriched": 5,
+    "headline_candidates": 153,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.7-flash (key 1)"
+    ],
+    "seconds": 660.8,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 34524,
+      "output_tokens": 7842,
+      "cost_usd": 0.055301
+    }
+  }
+}

@@ -1,91 +1,86 @@
-# Ollama Updates, SGLang Leaks, and Agentic Automation Bias
+# Agent Memory Taxes, MoE Channel Skipping, and Dayjob Realities
 
-*2026-10-27 · 8 stories*
+*2026-10-28 · 7 stories*
 
-![Top AI stories for 2026-10-27](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-10-28](https://coronring.github.io/NewsRing/today.png)
 
-Today's edition highlights local agent model releases, critical inference engine memory vulnerabilities, and novel orchestration techniques. We also look at new benchmarks for evolving toolsets and Anthropic's findings on expert deference to agent decisions.
+Today's highlights dig into the hidden costs of complex agent memory stacks versus plain retrieval, why calibrating MoE channels offline was a waste of time, and how brittle evaluation setups secretly favor incumbent models. Google also introduced Gemini 4 Carbon, while AWS formalized the plumbing required to run agent fleets in multi-tenant environments.
 
 ## Across AI today
 
-- **Google DeepMind introduces Genie 4** Genie 4 is a new world model that generates realistic interactive experiences in real time with audio support and prompt-driven controls. ([deepmind.google](https://deepmind.google/blog/genie-4-a-new-generation-of-world-simulation/))
-- **Liquid AI introduces LFM3 model family** Liquid AI introduced LFM3, a family of small multimodal models using a tri-hybrid architecture designed for local agents and tool calling. ([liquid.ai](https://www.liquid.ai/blog/lfm3))
-- **Anthropic studies how AI agents impact expert decisions** Anthropic evaluated 50 professional analysts using Claude Code to study how AI agents influence expert judgment on complex decisions. ([anthropic.com](https://www.anthropic.com/research/agents-judgment-calls))
+- **Google DeepMind unveils Gemini 4 Carbon** Google DeepMind has announced Gemini 4 Carbon as its next-generation frontier model. ([deepmind.google](https://deepmind.google/blog/gemini-4-carbon-our-next-frontier-model/))
+- **PyTorch 2.15 makes rewritten NCCL backend default** PyTorch 2.15 arrives with a rewritten NCCL backend enabled by default alongside a new flight recorder for tracking distributed jobs. ([pytorch.org](https://pytorch.org/blog/pytorch-2-15-release-blog/))
+- **Nvidia releases Nemotron 3.5 Transcribe for 40 languages** Nvidia has launched Nemotron 3.5 Transcribe, an open automatic speech recognition model covering 40 languages. ([huggingface.co](https://huggingface.co/blog/nvidia/nemotron-transcribe-granary))
 
-## 1. Ollama v0.40.12 adds Liquid AI's LFM3 tri-hybrid family
+## 1. Gemini 4 Carbon targets autonomous cyberdefense and long-horizon tasks
 
-Ollama's latest pre-release introduces native support for Liquid AI's LFM3 architecture, featuring a 1.7B text model with a 256K context window targeted at local agent execution and tool calling. The update also includes 2B decision models (`d1`) built on LFM3, alongside support for DFlash2 draft models using speculative decoding on MLX. Additional improvements include faster prompt processing for Gemma 4 on Apple silicon and a bug fix for tool-only assistant turns in Kimi CLI.
+Google DeepMind announced Gemini 4 Carbon, taking the top spot on Artificial Analysis's Intelligence Index v5.0 with a score of 59. The release leans heavily into offensive and defensive cybersecurity benchmarks, posting 88.2% on SEC-bench Pro, 54.8% on ExploitGym, and 71.0% on CWE-bench. DeepMind claims the model runs multi-day debugging workflows internally and has eliminated successful cheat attempts on Terminal-Bench 4.0. Access is rolling out gradually to cyber defenders and Fairwind Program partners first, matching Argon's pricing at $2 per million input tokens and $10 per million output tokens, with 95% discounts on cached inputs.
 
-**Why it matters:** Local 256K-context models designed specifically for tool calling and decision-making expand options for offline agent frameworks.
+**Why it matters:** If you are orchestrating long-horizon coding or security agents, Carbon's 80% reduction in high-severity alignment alerts and lower overreach rates promise fewer runaway execution loops.
 
-[github.com](https://github.com/ollama/ollama/releases/tag/v0.40.12-rc1) · [huggingface.co](https://huggingface.co/blog/LiquidAI/lfm3) · [liquid.ai](https://www.liquid.ai/blog/lfm3) · via Ollama releases
+[deepmind.google](https://deepmind.google/blog/gemini-4-carbon-our-next-frontier-model/) · [blog.google](https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon/) · via Google DeepMind
 
-## 2. SGLang over-length prefill bug exposed cross-tenant KV cache in Workers AI
+## 2. Dedicated agent memory architectures often fail to beat naive RAG
 
-Cloudflare disclosed a cross-request KV cache isolation vulnerability in Workers AI's GLM-5.3 deployment that exposed data across 155 user responses to prompts exceeding 681,280 tokens. The issue resulted from an engine misconfiguration paired with a bug in SGLang's disaggregated prefill/decode mode. When a prompt exceeded GPU pool capacity, the prefill node rejected the request but still passed a un-updated transfer signal to the decode node, causing it to generate text using stale, un-zeroed cache pages from prior customer sessions.
+A new empirical study introduces the concept of "memory tax" to explain why structured agent memory frameworks frequently trail direct retrieval over raw history. Evaluating frameworks like MemOS and HippoRAG2 against a compact baseline (BM25 with Qwen3-Embedding and Reranker), naive two-round RAG beat both on LongMemEval-s using Qwen3.6-27B. The shortfall stems from construction losses during distillation, where systems like OpenViking lost up to 38% of ground-truth facts during extraction. Even when memory architectures saved inference tokens, cost amortization curves on GPT-5.6 Luna showed that query savings failed to outpace build costs until dozens of runs had passed—still at lower overall accuracy.
 
-**Why it matters:** Un-zeroed KV cache pages in disaggregated serving engines present a severe security and privacy risk for multi-tenant agent infrastructures.
+**Why it matters:** It is concrete validation that complex memory schemas and pre-summarization pipelines often degrade accuracy compared to simple, uncompressed context retrieval with solid rerankers.
 
-[blog.cloudflare.com](https://blog.cloudflare.com/kv-cache-exposure-remediation/) · [discussion](https://news.ycombinator.com/item?id=50252159) · via Hacker News (AI)
+[huggingface.co](https://huggingface.co/papers/2610.34073) · via HF Daily Papers
 
-## 3. DynaFlow enables agents to synthesize executable multi-agent workflows
+## 3. Multiscale Policy Optimization shifts agent RL credit to the turn level
 
-DynaFlow replaces static collaboration graphs by integrating free-form program synthesis directly into a main agent's action space. The main agent dynamically generates executable coordination code to run fixed sub-agents sequentially or in parallel, passing structured outputs and running verification steps as reasoning unfolds. Trained via SFT on distilled trajectories with filtered execution traces, a Qwen3.5-27B backbone achieved 88.08% accuracy across six reasoning benchmarks, beating static baseline graphs by nearly 11 percentage points.
+Reinforcement learning for long-horizon LLM agents frequently stumbles because token-level credit assignment penalizes an entire assistant generation when only a single tool parameter fails. Researchers propose Multiscale Policy Optimization (MPO), pairing Multiscale Advantage Estimation with turn-level importance sampling after observing that critic values remain largely stable within a turn and shift primarily across turn boundaries. Tested across search and tool-use benchmarks on 4B and 30B-A3B models, MPO delivered consistent policy gains over standard RL baselines. The near-constant within-turn critic value also doubles as a lightweight per-turn anomaly metric for runtime agent harnesses.
 
-**Why it matters:** Synthesizing coordination code at runtime allows multi-agent systems to adapt to complex tasks without retraining underlying executor models.
+**Why it matters:** Aligning advantage estimation with distinct tool execution steps directly addresses the noisy credit assignment that plagues RL recipes for tool-calling agents.
 
-[huggingface.co](https://huggingface.co/papers/2610.34467) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2610.35013) · via HF Daily Papers
 
-## 4. Δτ-Bench evaluates LLM agents against evolving tool ecosystems
+## 4. Frontier models struggle with unstated context on DAYJOB: Tax
 
-A new benchmark, Δτ-Bench, measures how well agents handle dynamic tool environments where APIs disappear, documentation changes, and better alternatives emerge across six successive ecosystem states. Across 1,588 multi-turn tasks in 42 domains, the top-performing model and harness achieved a task success rate of only 42.3%, illustrating how existing skill-learning methods break when tool definitions shift. To counter this, the authors introduce Steward, an ecosystem manager that performs incremental skill updates and dynamic provisioning to maintain task performance amid breaking service changes.
+Surge AI published DAYJOB: Tax, an evaluation benchmark spanning 50 complex professional tax assignments that provide realistic workspaces containing up to 123 unstandardized files, including PDFs, spreadsheets, and handwritten receipts. Requiring a stringent 95% rubric threshold to pass, Claude Sonnet 5.5 topped the leaderboard with only a 10.8% pass rate, followed by Claude Fable 5.1 at 9.6% and Opus 5.5 at 9.2%. The tasks expose critical failure modes in agentic judgment: models frequently answer explicit client questions correctly while completely missing unmentioned, high-stakes deadlines or confidently acting on unverified legal assumptions buried in customer records.
 
-**Why it matters:** Real-world agents must operate against shifting third-party APIs where static prompt instructions quickly become obsolete.
+**Why it matters:** The sub-11% pass rates highlight how poorly current frontier models navigate loose domain evidence when tasks require unprompted professional skepticism rather than direct instruction-following.
 
-[huggingface.co](https://huggingface.co/papers/2610.34238) · via HF Daily Papers
+[surgehq.ai](https://surgehq.ai/blog/dayjob-tax) · [discussion](https://news.ycombinator.com/item?id=50275626) · via Hacker News (AI)
 
-## 5. Adapting harness self-evolution skills to executor model capabilities
+## 5. How circular VLM labels poisoned an evaluation pipeline
 
-Research into harness self-evolution shows that guidance engineered for frontier models like GPT-5.6-luna can degrade weaker executors like Gemma-4-E4B by 8.8 points, with 86% of weak-model failures stemming from inability to execute instructions already stated in the skill. To solve this, the authors introduced a meta-skill diagnosis framework that uses an external rewriter to adapt skill instructions to match executor execution limits. Across seven model scales, incorporating skill adaptation into a self-evolution loop consistently boosted benchmark performance by 2.0 to 5.1 points over unadapted self-evolution.
+A case study from Property Finder and AWS illustrates the hazards of evaluating new models against datasets generated by legacy production systems. The team found that 96.8% of their image-quality ground-truth labels were unchecked outputs from an incumbent vision model, embedding its character-level OCR bugs and rigid single-label room constraints directly into the grading key. Replacing the dataset with 356 expert-annotated listings and switching to multi-label scoring allowed alternative models to finally be measured accurately. Following an evolutionary prompt optimization cycle spanning 28 iterations, they deployed an Amazon Bedrock alternative that surpassed baseline accuracy while cutting inference costs by 86%.
 
-**Why it matters:** Self-evolving agent harnesses must tailor procedural skills to the specific execution limits of the underlying LLM.
+**Why it matters:** Treating existing model outputs as evaluation ground truth is a common trap that invisibly penalizes better candidate models simply because they disagree with an incumbent's mistakes.
 
-[huggingface.co](https://huggingface.co/papers/2610.33024) · via HF Daily Papers
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/fix-evaluation-bias-to-unlock-better-models-on-amazon-bedrock/) · via AWS Machine Learning
 
-## 6. miniTE aligns cross-engine FP4 execution for stable low-bit agent RL
+## 6. AWS details enterprise harness patterns for Bedrock AgentCore
 
-A study on native NVFP4 (W4A4) reinforcement learning reveals that subtle numerical mismatches between separate training and rollout sampling engines destabilize training even when model weights and precision match. The proposed framework, miniTE, fixes this execution gap by introducing cross-engine numerical alignment alongside optimized native NVFP4 GEMM kernels, dropping log-probability differences down to ~1e-8. Tested on Qwen3-30B-A3B on NVIDIA B300 hardware, miniTE matched BF16 evaluation performance while delivering 1.39x higher learner update throughput.
+AWS published an architectural reference blueprint for scaling agent deployments across federated enterprise teams using Amazon Bedrock AgentCore. The architecture treats the "Workstream cell" as the core unit of deployment, decoupling application development from centralized platform governance. Crucially, inference requests are channeled through policy-enforcing gateways while tool calls are funneled through an authenticated Model Context Protocol (MCP) gateway with least-privilege scoping. The blueprint also establishes automated CI/CD gating that enforces model and tool authorization boundaries, tests identity isolation, and validates rollback before allowing agents to reach production.
 
-**Why it matters:** Native 4-bit RL offers significant speedups for training agentic models once cross-engine numerical drift is eliminated.
+**Why it matters:** It offers a structured reference design for standardizing MCP tool gateway authorization, tenant sandboxing, and CI/CD evaluation gates in enterprise agent platforms.
 
-[huggingface.co](https://huggingface.co/papers/2610.23928) · via HF Daily Papers
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/building-an-agentic-ai-platform-on-amazon-bedrock-agentcore/) · via AWS Machine Learning
 
-## 7. Experts heavily defer to hidden agent preferences in ambiguous tasks
+## 7. Prox skips MoE offline calibration using top-k channel selection
 
-An Anthropic study of 50 professional analysts using Claude Code revealed that human experts defer heavily to AI recommendations when making ambiguous choices. Analysts agreed with their agent's secret, prompt-injected lean 86% of the time and abandoned their own pre-stated preferences 60% of the time when the agent disagreed. Furthermore, 77% of participants recycled the agent's arguments verbatim in their post-task explanations, but only 15% credited the AI as the source of those arguments.
+Interactive decoding for Mixture-of-Experts architectures is heavily memory-bandwidth bound at low batch sizes, usually prompting systems to prune intermediate expert channels using offline calibrated thresholds. A new paper presents Prox, showing that offline threshold calibration neither guarantees a target read budget nor prevents failure modes like repetition loops on Gemma 4. Instead, switching to an uncalibrated top-k channel selector matched or outperformed calibrated thresholding in 40 of 43 benchmark evaluations. Paired with a weight-derived reader using ternary sketches and low-rank recovery maps, their custom Triton kernels retained 98.1% accuracy while reading only 17.8% of routed weights, yielding 1.6x to 1.9x speedups over optimized vLLM at batch size one.
 
-**Why it matters:** Human-in-the-loop oversight and agent evaluation methodologies are highly vulnerable to subtle, unstated model biases.
+**Why it matters:** This provides a calibration-free path to significantly accelerate MoE decoding on memory-bound inference engines without retraining or maintaining offline calibration sets.
 
-[anthropic.com](https://www.anthropic.com/research/agents-judgment-calls) · via Anthropic Research
-
-## 8. Trajectory2Gym: Decision-Grounded Compositional Interaction Synthesis for Tool-Use Agents
-
-Successful tool-use trajectories are not necessarily useful supervision. Even successful interactions may underrepresent multi-step dependencies or contain actions that are unjustified by the information visible to the agent at decision time. We identify two coupled requirements for effective trajectory supervision: compositional coverage, so that important observation-action dependencies are represented, and decision grounding, so that each supervised action is supported by the learner-visible…
-
-[huggingface.co](https://huggingface.co/papers/2610.33568) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2610.37386) · via HF Daily Papers
 
 ## Quick hits
 
-- llama.cpp decoupled k-pool sparse selection from kq_mask shape to fix cache selection indexing for Qwen4exp and GLM5-next. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b11936))
-- Triton 3.9.0 released with updates to backend compilers, layout improvements in Gluon, and updated profiling tools. ([github.com](https://github.com/triton-lang/triton/releases/tag/v3.9.0))
-- Hugging Face published an evaluation exploring whether LLMs can accurately evaluate the novelty of research ideas. ([huggingface.co](https://huggingface.co/blog/allenai/novelty-bench))
-- The ProAS framework introduces progress-aware advantage shaping to resolve uniform credit assignment issues in critic-free agent RL. ([huggingface.co](https://huggingface.co/papers/2610.18683))
-- A new survey paper categorizes the foundations, safety risks, and open challenges of recursive self-improvement in large models. ([huggingface.co](https://huggingface.co/papers/2610.35193))
+- llama.cpp release b11969 accelerates IQ4 quantization generation by pre-computing halfway points. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b11969))
+- PyTorch 2.15 is out with a completely rewritten default NCCL backend that includes a built-in flight recorder for distributed debugging. ([pytorch.org](https://pytorch.org/blog/pytorch-2-15-release-blog/))
+- The SPOT paper introduces commit-order prediction to make speculative decoding lossless and significantly faster for diffusion language models. ([huggingface.co](https://huggingface.co/papers/2610.22543))
+- HABIT-Bench benchmarks the ability of long-term agents to induce implicit user behavioral habits from weak, longitudinal conversational cues. ([huggingface.co](https://huggingface.co/papers/2610.24520))
+- A new community discussion surfaced around The Agent SDK on Hacker News, though technical specifics remain sparse. ([cursor.com](https://cursor.com/blog/agent-sdk))
+- Ollama v0.40.13 bumps its internal llama.cpp engine to b11963 and rolls out GGUF fixes for LFM3 alongside speech features in llama-server. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.13-rc0))
 
-Keep your context zeroed and your prompts unbiased.
+May your evaluators be human and your context windows free of memory tax.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 126 candidates, 126 reviewed, gemini/gemini-3.8-flash, 77s, 3 model calls, $0.1427.</sub>
+<sub>35 of 35 sources read. 147 candidates, 147 reviewed, gemini/gemini-3.8-flash, 661s, 3 model calls, $0.0553.</sub>
