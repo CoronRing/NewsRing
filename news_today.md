@@ -1,94 +1,86 @@
-# Supply-Chain Backdoors, Agent Sandboxing, and Synthetic Enterprise Evals
+# Clean MTP Gradients, Sandboxed Preview Escapes, and Lean Agent Runtimes
 
-*2026-10-30 · 8 stories*
+*2026-10-31 · 7 stories*
 
-![Top AI stories for 2026-10-30](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-10-31](https://coronring.github.io/NewsRing/today.png)
 
-Today's digest is headlined by an active supply-chain compromise targeting developers using Claude Code in Cursor, followed by NVIDIA's architectural blueprint for sandboxing open agent harnesses. We also look at Microsoft's synthetic tenant pipeline for privacy-safe Copilot evaluation, though a stubborn bot-protection wall kept several daily benchmark papers out of reach.
+Today's selection covers fundamental fixes to multi-token prediction and practical agent systems design. Between an account takeover hidden in ChatGPT's iframe architecture and a new C++ harness designed to survive the Linux OOM killer, there is plenty of meat-and-potatoes engineering to unpack. We also look at stateful CRDTs for coding assistants and why your banking evals are probably being duped.
 
 ## Across AI today
 
-- **Google runs Gemma 4 on satellite TPUs in orbit** Google successfully booted satellite TPUs in orbit to generate and transmit an AI response from its Gemma 4 model back to Earth. ([theverge.com](https://www.theverge.com/tech/1023528/google-project-suncatcher-ai-satellite-transmission))
-- **OpenAI adopts shared robots.txt signal for training opt-outs** OpenAI will honor a shared robots.txt signal allowing website operators to communicate training preferences to participating AI providers. ([openai.com](https://openai.com/index/helping-websites-express-ai-training-preferences))
-- **Intrinsic Distribution Matching sharpens few-step generation** A new method improves prompt accuracy and fine detail in one-step and few-step text-to-image models using distribution matching distillation. ([huggingface.co](https://huggingface.co/papers/2610.39633))
+- **Anthropic Cursor Extension Backdoored for 12 Hours** Attackers breached Anthropic's verified Cursor account to distribute a backdoored extension for nearly 12 hours. ([arstechnica.com](https://arstechnica.com/security/2026/10/anthropic-vs-code-extension-on-cursor-backdoored-for-nearly-12-hours/))
+- **NES Emulator Baked Directly into Qwen3.5 Weights** Nesformer embeds a working NES 6502 CPU emulator inside Qwen3.5-4B, allowing the language model to execute ROMs like Super Mario Bros. ([simonwillison.net](https://simonwillison.net/2026/Oct/30/nesformer/))
+- **Ollama Expands Liquid AI LFM3 Support to Linux and Windows** Ollama v0.40.13 adds Linux and Windows support for Liquid AI's LFM3 models, including text-to-speech in lfm3-audio and lfm3-omni. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.13))
 
-## 1. Backdoor discovered in Claude Code extension on Cursor Marketplace
+## 1. Removing the noisy residual in multi-token prediction
 
-Security firm Phorion identified a persistent SSH backdoor injected into the official `Claude Code for VS Code` extension bundle (version 2.1.313) hosted on the Cursor Marketplace. The injected IIFE prepended to `extension.js` runs immediately upon module load, writing an attacker Ed25519 public key labeled `svc-telemetry` to `~/.ssh/authorized_keys` before extension activation occurs. While the script attempts to start background SSH daemons across macOS, Linux, and Windows, execution failed on default macOS and Windows configurations due to flawed privilege checks and hardcoded shell paths. Cursor and related registries have pulled the release, but the incident demonstrates how easily unvetted IDE extensions can bypass agent tool sandboxing and compromise developer environments.
+Standard Multi-Token Prediction (MTP) pre-training has a quiet flaw: roughly 80% of the MTP gradient reaching the trunk is a noisy residual that actively interferes with next-token learning. The authors show that the cross-entropy gradient cleanly decomposes into a helpful KL self-distillation term and this low-SNR residual. Their proposed fix, Soft-MTP, recovers the exact KL divergence gradient via straight-through routing on the shared linear head without needing vocabulary-sized matrices or custom kernels. Tested up to 1.2B parameters, the one-line change yields lower perplexity, improved speculative decoding acceptance lengths, and stronger reasoning after fine-tuning with zero parameter or compute overhead.
 
-**Why it matters:** Because developer extensions inherit the full privileges of the user and editor, backdoors in agent tooling provide immediate, unconstrained access to source code and local infrastructure.
+**Why it matters:** Isolating the clean self-distillation signal directly improves draft acceptance rates for speculative decoding without bloating pre-training memory budgets or breaking fused cross-entropy kernels.
 
-[phorion.io](https://phorion.io/blog/offical-claude-code-vsx-compromise/) · [discussion](https://news.ycombinator.com/item?id=50300683) · via Hacker News front page
+[huggingface.co](https://huggingface.co/papers/2610.38331) · via HF Daily Papers
 
-## 2. Benchmark difficulty formalization hits a verification barrier
+## 2. How ChatGPT's sandbox was chained into an account takeover
 
-This paper sets out to formalize benchmark evaluations through a measure-theoretic framework over task difficulty distributions. Unfortunately, technical details are unavailable because the source page presented an automated anti-bot verification screen instead of the paper text. Without raw access to the mathematical formulation or empirical results, the specific failure modes identified remain unverified.
+Security researchers documented a zero-interaction account takeover vulnerability in ChatGPT exploitable through ordinary shared chat links. While HTML previews were isolated inside separate-origin iframes, the chat rendering pipeline loaded a math graphing library called MathLive that listened for unrestricted `postMessage` calls on the parent window. By sending a payload to update the on-screen keyboard layout, the researchers caused MathLive to insert an unsandboxed `srcdoc` iframe directly into `chatgpt.com`. They then bypassed CSP using a JSONP callback reflection on an allowed YouTube endpoint, achieving arbitrary script execution that could enumerate and exfiltrate private conversations through authenticated APIs before OpenAI patched the issue.
 
-**Why it matters:** A formal mathematical framework for model difficulty distributions could fix major flaws in how LLM judges and benchmarks measure frontier agents, once readable.
+**Why it matters:** Sandboxing agent-rendered UI in restricted frames is useless if parent-page rendering libraries register unvalidated event listeners that can be coerced into injecting DOM nodes.
 
-[huggingface.co](https://huggingface.co/papers/2610.29927) · via HF Daily Papers
+[parameter.ai](https://www.parameter.ai/labs/we-found-a-gap-at-openai) · [discussion](https://news.ycombinator.com/item?id=50314699) · via Hacker News (AI)
 
-## 3. NVIDIA NemoClaw packages open harnesses with OpenShell governance
+## 3. Zed turns to copy-on-write B+ trees for agent version control
 
-NVIDIA introduced NemoClaw, an open blueprint stack that integrates existing agent harnesses—including Hermes Agent, LangChain Deep Agents, and OpenClaw—with Nemotron models and runtime governance. Rather than inventing another orchestration framework, the stack layers pre-tuned harness configurations alongside `OpenShell`, an execution sandbox that isolates credentials (such as MCP keys) and enforces filesystem and network policies. NVIDIA notes that tuning LangChain Deep Agents specifically for Nemotron 3 Ultra brought performance near frontier baselines at roughly one-tenth the inference cost of closed models. For production agent builders, separating orchestration logic from a dedicated policy-enforcing runtime like OpenShell is becoming table stakes.
+Zed Industries published the architecture of DeltaDB, a fine-grained version control system built to retain the conversational context behind code edits. DeltaDB stores CRDTs in local SQLite databases organized into a directed acyclic graph where each node is a minimal delta consisting simply of a parent version and an offset. Because version vectors bloat when dealing with ephemeral agents, the engine navigates DAG ancestry directly, caching state snapshots using copy-on-write B+ trees adapted from Zed's SumTree. This allows clients to scrub through thread histories and reify intermediate worktrees instantly while keeping deltas remarkably compact over the wire.
 
-**Why it matters:** It establishes a concrete pattern for wrapping third-party harnesses and MCP connections in strict, policy-driven security perimeters without rewriting agent logic.
+**Why it matters:** Tracking the granular DAG of agent tool calls and human edits replaces opaque, squash-merged commits with structured, causally linked attribution graphs.
 
-[developer.nvidia.com](https://developer.nvidia.com/blog/build-specialized-agents-on-a-stack-you-control-with-nvidia-nemoclaw/) · via NVIDIA Developer
+[delta.dev](https://delta.dev/blog/fine-grained-version-control-for-agents) · [discussion](https://lobste.rs/s/cctbcu/building_fine_grained_version_control) · via Lobsters (AI)
 
-## 4. PersonaCUABench benchmarks computer-use agents against varied user personas
+## 4. Bedrock AgentCore introduces authenticated session endpoints
 
-PersonaCUABench proposes an evaluation suite for computer-use agents handling underspecified instructions and unstated approval gates across varied user personas. However, the publication page was blocked by an automated bot verification check, leaving the specific task suites and evaluation methodologies inaccessible in the source text. Details remain sparse until the paper text can be properly ingested.
+Amazon Bedrock AgentCore added Session endpoints, allowing developers to interact with web servers spun up inside an agent's microVM without pushing code to external hosting environments. The runtime grants each microVM session an authenticated URL that forwards HTTP/1.1, HTTP/2, and WebSocket traffic directly to a designated port range (8000–12000) selected via host name prefixes. A local client SDK signs requests with SigV4 or bearer tokens on behalf of the browser, enabling hot-reloading development servers like Vite to push live UI updates over WebSockets as the agent modifies files. The endpoint lifecycle is strictly tied to the agent session, shutting down as soon as the session terminates.
 
-**Why it matters:** Benchmarking how desktop agents handle ambiguous human intent and missing permission boundaries is essential for deploying reliable computer-use agents.
+**Why it matters:** Providing secure, ephemeral HTTP and WebSocket proxies directly into agent microVMs eliminates out-of-band deploy steps during interactive coding workflows.
 
-[huggingface.co](https://huggingface.co/papers/2610.22990) · via HF Daily Papers
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/preview-web-apps-live-as-your-coding-agent-builds-them-with-amazon-bedrock-agentcore-runtime/) · via AWS Machine Learning
 
-## 5. WebAnything aims to turn live websites into reproducible agent sandboxes
+## 5. Outcome-only evals let banking agents cheat procedure
 
-WebAnything attempts to tackle agent web navigation by converting arbitrary live websites into reproducible, resettable sandbox environments for training and evaluation. Specifics regarding its capture-and-replay engine and environment resets could not be confirmed because the host site returned a JavaScript robot challenge. Practical details on sandbox fidelity and state isolation are consequently unavailable.
+TauIndianBankBench introduces an evaluation suite of 1,000 simulated Indian retail banking tasks that explicitly grades intermediate procedure alongside final state. Standard agent benchmarks typically verify only end-state database records, ignoring mandatory intermediate steps like fetching a deposit closure quote before issuing an account closure. The study found that across every tested model, 6.5% to 12.0% of conversational sessions were marked as successful by traditional outcome scoring despite the agent skipping required steps or making unrequested modifications. Evaluating procedural trace compliance alongside outcomes exposes how brittle standard tool callers remain when navigating compliance runbooks.
 
-**Why it matters:** Standardized capture-and-replay systems for live web targets are critical for evaluating browser agents without risking side effects on real web services.
+**Why it matters:** Evaluating agents solely on end-state mutation misses significant regulatory and procedural failure modes where models take dangerous shortcuts.
 
-[huggingface.co](https://huggingface.co/papers/2610.37786) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2610.30161) · via HF Daily Papers
 
-## 6. Microsoft evaluates Copilot on fully synthetic enterprise tenants
+## 6. Glance turns the generation backbone into its own reranker
 
-Microsoft Research detailed its Industry Evaluation Data Generation Platform, designed to benchmark Microsoft Copilot across realistic enterprise workflows without touching private customer data. The platform generates dynamic, time-evolving synthetic enterprise environments ('tenants') grounded in public data from the U.S. Department of Labor's O*NET database, online job postings, and SEC filings. By simulating cross-functional communication histories, reporting hierarchies, and project timelines across industries like pharmaceuticals and capital markets, Microsoft can evaluate time-dependent queries like project updates against structured baselines. It offers a viable template for agent developers needing complex, temporally grounded organizational data to test retrieval and summarization without privacy liabilities.
+Glance proposes replacing separate cross-encoder rerankers by having the primary generator model rerank its own candidate passages using shared context prefill. By attaching a lightweight decision adapter and pointer head to a 9B Gated DeltaNet backbone, the model scores candidate passages via short probes extending from the cached context with only ~0.1 GiB of additional parameter overhead. After a 39-minute fine-tuning run on a B200, Glance outperformed `bge-reranker-v2-m3` on SciFact and NFCorpus, effectively scaling up to 200 candidates across 43k tokens. Because the activated adapter variant leaves generation bit-identical to the base model, answers can stream straight from the pre-existing passage cache.
 
-**Why it matters:** Evaluating enterprise agents against dynamic, multi-turn organizational histories requires high-fidelity synthetic environments that avoid data privacy exposure.
+**Why it matters:** Eliminating dedicated cross-encoders saves GPU residency and removes redundant KV cache prefill passes in multi-stage agentic RAG pipelines.
 
-[microsoft.com](https://www.microsoft.com/en-us/research/blog/from-synthetic-enterprise-data-evaluations-to-real-microsoft-copilot-ai-confidence/) · via Microsoft Research
+[huggingface.co](https://huggingface.co/papers/2610.40454) · via HF Daily Papers
 
-## 7. Co-Design Bench evaluates multimodal coding agents on UI revisions
+## 7. A C++ coding harness built to resist memory bloat
 
-Co-Design Bench introduces an evaluation benchmark tailored for multimodal coding agents tasked with converting visual feedback and UI mockups into functional code revisions. Further technical analysis is precluded because the source text was obscured behind an anti-bot verification screen. Specific metrics, reference-free evaluation details, and baseline scores are not present in the available material.
+Frustrated with resource-heavy web-based frameworks, Chris Wellons built Prospero, a lean coding agent harness written in C++ with a Dear ImGui docking interface. Prospero eschews electron stacks, using passive UI rendering that idles when waiting on build tools and operating headless agent engines across macOS, Linux, and Windows. Architected around a strict 'never wait forever' rule, every network call, mailbox, and tool command enforces hard deadlines, allowing agents to fail gracefully past unresponsive prompts rather than hanging indefinitely. Its minimal memory profile is explicitly designed to keep the harness from being targeted by the Linux OOM killer during intensive local loops like agent-driven fuzzing runs.
 
-**Why it matters:** Evaluating how coding agents interpret visual UI feedback directly addresses the gap between raw code completion and end-to-end software development.
+**Why it matters:** Trimming harness overhead down to native binaries and enforcing aggressive timeouts solves the silent hang and out-of-memory crash loops common in unattended coding agents.
 
-[huggingface.co](https://huggingface.co/papers/2610.35138) · via HF Daily Papers
-
-## 8. WorkFactory automates trajectory generation from professional intents
-
-WorkFactory addresses agent training bottlenecks by translating ambiguous, high-level professional intents into executable, verifiable demonstration workflows. Technical specifics on the translation pipeline and trajectory verification are unavailable because the source material was restricted by an anti-bot challenge. Concrete architectural details cannot be verified until the paper text is made available.
-
-**Why it matters:** Automating the synthesis of verifiable, multi-step execution traces from vague user prompts helps resolve the massive data bottleneck in training workflow agents.
-
-[huggingface.co](https://huggingface.co/papers/2610.37161) · via HF Daily Papers
+[nullprogram.com](https://nullprogram.com/blog/2026/10/31/) · [discussion](https://news.ycombinator.com/item?id=50315226) · via Hacker News front page
 
 ## Quick hits
 
-- Epsilon implemented a managed UI testing platform using Amazon Nova Act and Bedrock's AgentCore Browser Tool to run plain-English tests inside AWS-managed browsers. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/building-intent-driven-ui-testing-with-amazon-nova-act/))
-- AWS published reference architectures for deploying NVIDIA's 120B-parameter Nemotron 3.5 Super VL MoE model on Amazon EKS and SageMaker HyperPod. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/accelerate-agentic-ai-with-nvidia-nemotron-models-on-amazon-eks-and-sagemaker-hyperpod-eks/))
-- A new project demonstrates automated deduction of a FlashAttention kernel implementation expressed in roughly 25 lines of SQL. ([github.com](https://github.com/xqlsystems/xarray-sql/blob/6debe2495dcb4e8fac20ab97df5b89baae2a31a6/benchmarks/ml/01_attention.py))
-- Artificial Analysis released edition v5 of its Intelligence Index benchmarking model capabilities and serving economics. ([artificialanalysis.ai](https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v5))
-- Qwenputer demonstrates a functional, deterministic RISC-V CPU implemented entirely within Qwen3.5. ([divagr.com](https://divagr.com/blog/qwenputer))
-- LangChain Core 1.7.2 rolled out, introducing notification metadata helpers and patching an in-place mutation bug inside merge_content. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.7.2))
+- llama.cpp b12023 caps shared decision prefixes at the first output position to ensure decision embeddings remain available when queries share option tokens. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12023))
+- An AI startup reported breaching Anthropic's perimeter, claiming access to internal Slack messages and employee records. ([indiatoday.in](https://www.indiatoday.in/technology/news/story/ai-startup-hacks-anthropic-in-12-hours-gains-access-to-employee-details-and-internal-messages-3025452-2026-10-26))
+- Security researchers spotted malware using LLM inferences to autonomously triage and rank compromised target environments by value. ([blog.talosintelligence.com](https://blog.talosintelligence.com/appraisal-by-ai-model-driven-victim-prioritization-in-the-volta-infostealer/))
+- Engineers documented running autonomous agent swarms across Minecraft and Mindustry to benchmark open-ended spatial orchestration. ([labs.ycombinator.com](https://labs.ycombinator.com/projects/games/index.html))
+- Simantic launched out of Y Combinator to provide a hardware-free firmware simulation runtime for software agents. ([news.ycombinator.com](https://news.ycombinator.com/item?id=50291116))
+- OpenAI's GPT-5.6 Sol model has been demonstrated completing a run of Factorio on peaceful mode. ([ryanmadden.net](https://ryanmadden.net/gpt-56-beats-factorio/))
 
-Until tomorrow, check your authorized_keys and keep your agent tokens scoped.
+Until tomorrow, keep your harnesses lean and your iframes tightly gated.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 141 candidates, 141 reviewed, gemini/gemini-3.8-flash, 523s, 3 model calls, $0.0683.</sub>
+<sub>35 of 35 sources read. 128 candidates, 128 reviewed, gemini/gemini-3.8-flash, 312s, 3 model calls, $0.0650.</sub>

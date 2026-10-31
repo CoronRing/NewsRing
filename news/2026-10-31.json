@@ -1,0 +1,625 @@
+{
+  "date": "2026-10-31",
+  "generated_at": "2026-10-31T19:51:53.458654Z",
+  "title": "Clean MTP Gradients, Sandboxed Preview Escapes, and Lean Agent Runtimes",
+  "intro": "Today's selection covers fundamental fixes to multi-token prediction and practical agent systems design. Between an account takeover hidden in ChatGPT's iframe architecture and a new C++ harness designed to survive the Linux OOM killer, there is plenty of meat-and-potatoes engineering to unpack. We also look at stateful CRDTs for coding assistants and why your banking evals are probably being duped.",
+  "stories": [
+    {
+      "headline": "Removing the noisy residual in multi-token prediction",
+      "summary": "Standard Multi-Token Prediction (MTP) pre-training has a quiet flaw: roughly 80% of the MTP gradient reaching the trunk is a noisy residual that actively interferes with next-token learning. The authors show that the cross-entropy gradient cleanly decomposes into a helpful KL self-distillation term and this low-SNR residual. Their proposed fix, Soft-MTP, recovers the exact KL divergence gradient via straight-through routing on the shared linear head without needing vocabulary-sized matrices or custom kernels. Tested up to 1.2B parameters, the one-line change yields lower perplexity, improved speculative decoding acceptance lengths, and stronger reasoning after fine-tuning with zero parameter or compute overhead.",
+      "why_it_matters": "Isolating the clean self-distillation signal directly improves draft acceptance rates for speculative decoding without bloating pre-training memory budgets or breaking fused cross-entropy kernels.",
+      "reason": "It identifies and fixes a flaw in standard multi-token prediction pre-training gradients, which directly impacts inference speed via speculative decoding and downstream task performance.",
+      "item": {
+        "key": "arxiv:2610.38331",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Multi-Token Prediction Done Right",
+        "url": "https://huggingface.co/papers/2610.38331",
+        "discussion_url": null,
+        "published": "2026-10-30T00:00:00Z",
+        "summary": "Multi-Token Prediction (MTP) is now a common ingredient in language-model pre-training, as it improves downstream performance and enables faster inference through speculative decoding. We identify a flaw in standard MTP training, in which a residual component of the MTP gradient interferes with both next-token and multi-token learning, increasingly so with scale. Specifically, the MTP cross-entropy gradient can be decomposed exactly into a KL self-distillation term that pulls each MTP head toward the model's own next-token prediction (NTP) distribution and improves speculative decoding, and a residual that has a low signal-to-noise ratio and buries the useful KL signal. We introduce the KL gradient-recovery trick: when two distributions share a linear output head, the gradient of their KL divergence can be recovered exactly by combining their cross-entropy gradients through straight-through gradient routing. Unlike minimizing the KL directly, this trick requires no vocabulary-sized logit matrices and is compatible with standard fused cross-entropy kernels. This enables Soft Multi-Token Prediction (Soft-MTP), a one-line code change to MTP that removes the noisy residual and…",
+        "content": "Abstract\nSoft-MTP removes a noisy gradient residual from multi-token prediction via a straight-through KL recovery trick, improving perplexity, speculative decoding, and reasoning without added cost.\nMulti-Token Prediction (MTP) is now a common ingredient in language-model pre-training, as it improves downstream performance and enables faster inference through speculative decoding. We identify a flaw in standard MTP training, in which a residual component of the MTP gradient interferes with both next-token and multi-token learning, increasingly so with scale. Specifically, the MTP cross-entropy gradient can be decomposed exactly into a KL self-distillation term that pulls each MTP head toward the model's own next-token prediction (NTP) distribution and improves speculative decoding, and a residual that has a low signal-to-noise ratio and buries the useful KL signal. We introduce the KL gradient-recovery trick: when two distributions share a linear output head, the gradient of their KL divergence can be recovered exactly by combining their cross-entropy gradients through straight-through gradient routing. Unlike minimizing the KL directly, this trick requires no vocabulary-sized logit matrices and is compatible with standard fused cross-entropy kernels. This enables Soft Multi-Token Prediction (Soft-MTP), a one-line code change to MTP that removes the noisy residual and backpropagates only the KL self-distillation signal by reusing the existing NTP and MTP cross-entropy computations. Soft-MTP supports both DeepSeek- and Meta-style MTP, adds no parameters, and incurs no measurable overhead. From 167M to 1.2B parameters, Soft-MTP improves over standard MTP with lower NTP perplexity, faster speculative decoding and higher zero-shot accuracy at every scale, lower MTP perplexity from 689M onward, and stronger math and code reasoning after fine-tuning at 1.2B. Soft-MTP also matches, if not exceeds, direct KL divergence minimization on most metrics. Soft-MTP is, in effect, a free lunch for MTP optimization. Our code can be found at https://github.com/JaydenTeoh/Soft-MTP.\nCommunity\nWe show the standard multi-token prediction (MTP) gradient hides a KL self-distillation gradient signal behind a noisy residual, and introduce the KL gradient–recovery trick to extract it. This is a free lunch that improves MTP across a range of tasks.\nReally elegant result: splitting the MTP cross-entropy gradient into a KL self-distillation term plus a residual, then recovering only the KL part through straight-through routing on the shared head, as a one-line change that still works with fused cross-entropy kernels. The SNR analysis stood out to me, with the residual carrying about 80% of the MTP gradient reaching the trunk at roughly 4x lower SNR, and the gap widening from 4.1x at 167M to 4.6x at 1.2B. Given that trend, do you expect the gains to keep growing beyond 1.2B, or does the KL signal eventually saturate once the MTP heads track the NTP distribution closely? Curious too whether the 1.8-2.2% longer acceptance length holds up with more than K = 3 draft heads.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2610.38331 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 12\nJaydenTeoh/hard-mtp-167m-model\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 11.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "How ChatGPT's sandbox was chained into an account takeover",
+      "summary": "Security researchers documented a zero-interaction account takeover vulnerability in ChatGPT exploitable through ordinary shared chat links. While HTML previews were isolated inside separate-origin iframes, the chat rendering pipeline loaded a math graphing library called MathLive that listened for unrestricted `postMessage` calls on the parent window. By sending a payload to update the on-screen keyboard layout, the researchers caused MathLive to insert an unsandboxed `srcdoc` iframe directly into `chatgpt.com`. They then bypassed CSP using a JSONP callback reflection on an allowed YouTube endpoint, achieving arbitrary script execution that could enumerate and exfiltrate private conversations through authenticated APIs before OpenAI patched the issue.",
+      "why_it_matters": "Sandboxing agent-rendered UI in restricted frames is useless if parent-page rendering libraries register unvalidated event listeners that can be coerced into injecting DOM nodes.",
+      "reason": "A high-profile technical postmortem detailing an account takeover vulnerability on ChatGPT that offers practical lessons for securing production LLM architectures.",
+      "item": {
+        "key": "parameter.ai/labs/we-found-a-gap-at-openai",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Do the math: How we took over ChatGPT accounts",
+        "url": "https://www.parameter.ai/labs/we-found-a-gap-at-openai",
+        "discussion_url": "https://news.ycombinator.com/item?id=50314699",
+        "published": "2026-10-31T10:30:11Z",
+        "summary": "Comments",
+        "content": "Do the Math: How We Took Over ChatGPT Accounts\nBy bypassing ChatGPT's sandbox and content security policy, our research team was able to take over anyone's account simply by sending them a link.\nIn October 2026, we found a way to turn an ordinary public ChatGPT share into attacker-controlled JavaScript running inside the signed-in session of whoever opened it.\nAn attacker could create a malicious conversation, publish it using ChatGPT's normal sharing feature, and send the link to another user. When the victim opened the share, the payload executed as chatgpt.com with access to the victim's authenticated web session.\nWe confirmed that this code could enumerate the victim's conversation list, retrieve content from a private conversation that had never been shared with the attacker, and send data from that conversation to an external server. The payload was not limited to modifying the page or displaying an alert—it could directly call ChatGPT's authenticated APIs as the victim, essentially allowing us to take over the victim's ChatGPT account.\nThe victim did not need to install an App, join a Project, paste code, or open developer tools. Opening the shared link was the only required action.\nOpenAI fixed the issue on October 26 and classified the report as P1.\nThe chain started with two features that looked harmless on their own: a graph and an HTML Preview.\nTechnical walkthrough\nIt started with a graph and a Preview\nThe question that started this research was simple: if Preview code was boxed into a different website, what could it still talk to?\nChatGPT can turn an HTML code block into a small working webpage using its Preview feature. Since that page may contain arbitrary code, ChatGPT sensibly runs it inside a restricted frame on a different web address. The Preview can run JavaScript, but the browser treats it as a different website, so it cannot directly inspect the signed-in ChatGPT page around it.\nAt first, this isolation appeared to work exactly as intended. Code inside the Preview could not read parent.document, which is the main ChatGPT page. That should have been the end of it.\nThe conversation also contained a normal interactive graph. Behind the scenes, the graph loaded a math library called MathLive. Loading it did more than draw the graph: it also installed a listener in the main ChatGPT page for messages related to MathLive's on-screen keyboard.\nBrowsers call the relevant API postMessage. It is a legitimate way for two frames to exchange information even when the browser prevents them from reading each other's pages. You can think of it as a mail slot: the restricted Preview cannot walk into the main page, but it can still drop a message through the slot.\nThat is safe only if the receiver checks who sent the message.\nMathLive did not make that check for the setting we were interested in. Its listener accepted a message that changed the virtual keyboard layout, and that layout was allowed to contain HTML. The graph had installed the receiver; the Preview gave us an untrusted sender. Two unrelated features had accidentally created a path across the sandbox.\nThe message that should not have worked\nThe Preview sent two messages. The first replaced a virtual keyboard layout with our HTML. The second told MathLive to show the keyboard, causing it to render the new layout:\nMathLive recognized the public message type, but its top-level controller used an origin policy of none, which meant it accepted messages from any web address. It also did not require the update-setting message to come from a previously approved window. Anyone who could reach the listener and knew the message format could replace the layout.\nWhen the keyboard opened, MathLive joined the supplied layout into an HTML string and assigned it to innerHTML in the real ChatGPT page. A helper named createHTML initially looked like it might sanitize the value. It did not; it marked the string as trusted and passed our HTML through unchanged.\nThis was exciting, but we still did not have JavaScript execution. Script tags inserted through innerHTML do not automatically run.\nThe next step was an iframe using srcdoc, a browser feature that lets an embedded frame carry its HTML directly in an attribute:\nMathLive inserted this frame into the main ChatGPT document without a sandbox attribute. That gave us two useful properties. First, srcdoc created a fresh document where an external script could execute. Second, because the main ChatGPT page created the frame, the browser gave it the https://chatgpt.com web identity. Code inside the new frame could therefore access the parent page.\nBypassing CSP with YouTube JSONP\nChatGPT's Content Security Policy, or CSP, stopped us again. CSP controls which scripts a page may load, and the policy correctly blocked inline JavaScript. It did, however, allow scripts from YouTube.\nYouTube's oEmbed endpoint supported a JSONP-style callback parameter. JSONP responses are JavaScript rather than ordinary JSON. The endpoint tried to reject an invalid callback, but it placed the callback into the response before returning its validation error:\nThe response began like this:\nEnding our callback with ;void made the object appended by YouTube harmless. Since YouTube was already allowed by ChatGPT's CSP, the browser loaded this response as a script and ran our callback inside the new frame.\nWe now had arbitrary JavaScript running as chatgpt.com. The original Preview was still isolated on its separate web address; we had crossed the boundary by convincing a trusted component in the main page to create a new, unsandboxed document for us.\nTurning a lab bug into one public link\nSo far, this was a useful sandbox escape, but the first working version was not a convincing real-world attack. It used a researcher-controlled ChatGPT App as the sender. A victim would have needed to connect or invoke that App first.\nWe next tried delivering the payload through a native HTML attachment. ChatGPT opened the attachment…",
+        "score": 270.0,
+        "comments": 123,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "Zed turns to copy-on-write B+ trees for agent version control",
+      "summary": "Zed Industries published the architecture of DeltaDB, a fine-grained version control system built to retain the conversational context behind code edits. DeltaDB stores CRDTs in local SQLite databases organized into a directed acyclic graph where each node is a minimal delta consisting simply of a parent version and an offset. Because version vectors bloat when dealing with ephemeral agents, the engine navigates DAG ancestry directly, caching state snapshots using copy-on-write B+ trees adapted from Zed's SumTree. This allows clients to scrub through thread histories and reify intermediate worktrees instantly while keeping deltas remarkably compact over the wire.",
+      "why_it_matters": "Tracking the granular DAG of agent tool calls and human edits replaces opaque, squash-merged commits with structured, causally linked attribution graphs.",
+      "reason": "It provides a concrete systems design for managing fine-grained state and persistence in agent runtimes using Rust and Durable Objects.",
+      "item": {
+        "key": "delta.dev/blog/fine-grained-version-control-for-agents",
+        "source": "Lobsters (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Building fine-grained version control for agents with Rust and Durable Objects",
+        "url": "https://delta.dev/blog/fine-grained-version-control-for-agents",
+        "discussion_url": "https://lobste.rs/s/cctbcu/building_fine_grained_version_control",
+        "published": "2026-10-30T16:50:44Z",
+        "summary": "Comments",
+        "content": "Back in 2021, Nathan, Max and I founded Zed Industries with two goals: build a very fast code editor, and fundamentally change how teams collaborate on software. Millions of people now use Zed, and I’m proud of what we built.\nFor the past year, we’ve been working on the second goal.\nI believe that writing software is the process of continuously clarifying a problem, in your head or with your teammates, until the code becomes inevitable. Clear thinking leads to clear code; messy thinking leads to messy code. Agents haven’t changed that. We’re just producing code way faster, and more and more of the clarifying happens in conversations with agents. In the best case, the context behind that code is trapped inside the agent harness of the week. In the worst case, it’s lost forever in Slack or compressed into a commit message that the agent wrote and that you didn’t read.\nDeltaDB is our answer. It’s a version control system for agent context. You can point at a piece of code, recover the reasoning behind it, and ask the agent or human who wrote it why it looks the way it does.\nIn this post, we’ll dive into how we built a system that streams every change from humans and agents in real time, merges their edits into one monotonically growing causal graph, and keeps every edit linked to the conversation that produced it.\nAs always at Zed Industries, we started with an empty repo.\nArchitecture\nDeltaDB is a collection of CRDTs, all stored locally in SQLite and linked together in a directed acyclic graph (DAG). Every node in the graph is called a delta, and it’s the smallest unit of change that can be represented. Combined, this lets us model the essential state of an agent thread: its conversation, its files, and everything around them.\nUsing CRDTs lets clients make progress on their own and stay resilient to network failures or partitions. We eventually synchronize all the state to a server, but we don’t need clients to be constantly connected: changes are applied locally right away and synchronized when possible. This makes it straightforward to implement the entire spectrum of collaboration, from handing off a thread asynchronously to collaborating in real time with your teammates.\nThe DAG enables representing every possible intermediate state in the system. This has a few nice properties. For example, we can easily scrub back and forth through the history of a thread and its worktree. It also lets us express the entire state of the system with a very compact version: the deltas at the tips of the graph (also called a frontier). Its size grows with how many branches are open at the same time, not with how many writers there have ever been. Our design closely resembles the work pioneered by Gentle and Kleppmann in the Eg-walker paper.\nThe primary downside of using a DAG is that we need to navigate the graph to detect whether a delta already includes the impact of some other delta. If we used a version vector, we could answer that by comparing counters. Even though that would be cheaper than walking the parent links, a version vector assumes that actors are few and long-lived. In a thread, however, people and agents come and go all the time, and once an actor makes some changes, the vector can’t drop the counter. So the vector can only ever grow, even after the actor has left. Dotted version vectors have similar issues, as illustrated in the animation below.\nAncestor queries are a fine tradeoff for us because we need to store every version anyway. They’re also fast in practice, because we store a delta’s ancestry separately from its payload. The ancestry data is tiny and stored in causal order, so these queries can leverage a lot of locality.\nMaking each delta a node in the DAG also lets us decouple its network representation from how the CRDT expresses its impact internally. For example, this is how we define text edits:\nstruct EditTextDelta {\n    parent: Version,\n    offset: usize,\n    text: String,\n}\nNote how parent and offset are sufficient to uniquely identify a position in a buffer, even in the presence of concurrent edits. Most of the time, the buffer is already at parent, so the edit applies directly. When it isn’t (e.g., if a concurrent edit happened in the meantime), the client reifies the version at parent, reconstructing the buffer as it was at that point. It then translates the offset into an internal representation (fragment IDs in our case, similar to how we do it in Zed) and locates that fragment ID in the buffer at the version we’re applying the edit to.\nThis makes deltas very cheap on the wire and it also lets us change the internal fragment representation and page out unused fragments.\nThe mighty B+ tree\nWe store all of our data in SQLite. This data can roughly be partitioned into two categories: relational and versioned.\nRelational data is pretty straightforward. For example, on the client we store all the threads that you’ve created or opened. This goes in a traditional table and there’s nothing special about it.\nVersioned data is where it gets interesting. The whole system hinges on the ability to quickly reify any version. As we saw above, applying a concurrent delta depends on it, and we also don’t want to wait a long time when scrubbing through history or mounting the worktree of an old version of the thread on the file system.\nTo make that fast, we cache a snapshot of the whole state for recently used nodes in the DAG (plus a few more important versions that we pin). Then, starting from the version we want, we walk back through the DAG to the closest ancestor that has a cached snapshot and apply every delta in between.\nStoring a full copy of the CRDTs for every cached version would be prohibitively expensive. Instead, we express the whole state as copy-on-write B+ trees. This means we can reuse most of the nodes from a previous snapshot and only pay for the paths that the replayed deltas touch.\nOur B+ tree is a variation of Zed’s SumTree. The SumTree in Zed is an…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Bedrock AgentCore introduces authenticated session endpoints",
+      "summary": "Amazon Bedrock AgentCore added Session endpoints, allowing developers to interact with web servers spun up inside an agent's microVM without pushing code to external hosting environments. The runtime grants each microVM session an authenticated URL that forwards HTTP/1.1, HTTP/2, and WebSocket traffic directly to a designated port range (8000–12000) selected via host name prefixes. A local client SDK signs requests with SigV4 or bearer tokens on behalf of the browser, enabling hot-reloading development servers like Vite to push live UI updates over WebSockets as the agent modifies files. The endpoint lifecycle is strictly tied to the agent session, shutting down as soon as the session terminates.",
+      "why_it_matters": "Providing secure, ephemeral HTTP and WebSocket proxies directly into agent microVMs eliminates out-of-band deploy steps during interactive coding workflows.",
+      "reason": "It details an agent harness runtime design that supplies authenticated session endpoints and live HTTP/WebSocket environments to preview coding agent output in real time.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/preview-web-apps-live-as-your-coding-agent-builds-them-with-amazon-bedrock-agentcore-runtime",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Preview web apps live as your coding agent builds them with Amazon Bedrock AgentCore runtime",
+        "url": "https://aws.amazon.com/blogs/machine-learning/preview-web-apps-live-as-your-coding-agent-builds-them-with-amazon-bedrock-agentcore-runtime/",
+        "discussion_url": null,
+        "published": "2026-10-30T21:40:03Z",
+        "summary": "Amazon Bedrock AgentCore Session endpoints give each runtime session an authenticated URL that forwards any HTTP method, path, and WebSocket connection to the ports you allow. In this post, you deploy a coding agent that keeps a Vite website running in its session, then watch the live site update in your browser as the agent edits files.",
+        "content": "Coding agents now build working web apps: a dashboard, a product page, a prototype that a product team wants to try. The fastest way to review that work is to open the app, use it, ask for a change, and check the result. That loop works well when the app keeps running where the agent edits it, so each change shows up in the browser within seconds. When the app must be copied out and deployed somewhere else first, every change waits for a deployment, and the review slows down to that pace.\n\nAmazon Bedrock AgentCore is a platform to build, connect, and optimize agents at scale, with your choice of agent framework and foundation model (FM). AgentCore runtime , a capability of Amazon Bedrock AgentCore, runs each agent session in its own isolated microVM. With Session endpoints , you can open an app running in that session from your own browser. Session Endpoints give each session an authenticated URL that forwards each request’s HTTP method, path, query string, and body, and WebSocket connections, to the ports you allow. You can watch the page update as the agent saves each file.\n\nIn this post, you deploy a coding agent that keeps a Vite website running in its session, then open one local page with a chat on the left and the live website on the right. You ask the agent to switch the site to a dark color theme, follow its steps as they stream in, and watch the website change without a refresh. Finally, you look at what happens internally: a second port in the same session, and the requests the Session endpoint refuses.\n\nThe complete sample, including the notebook this post follows, is in the 14-remote-access folder of the agentcore-samples GitHub repo .\n\nHow Session endpoints work\n\nEach session gets its own Session endpoint, and six details shape how you use it.\n\nYou choose which ports it reaches.  You set allowedPorts when you call CreateAgentRuntime : 1–5 entries, each a single port or a range within 8000–12000, excluding the reserved platform ports . Allowing a port doesn’t start a server, so your application must listen on it, bound to 0.0.0.0 .\n\nThe URL arrives with the session. The InvokeAgentRuntime response carries it in the X-Amzn-Bedrock-AgentCore-Runtime-Session-Endpoint-Url header, which SDKs that model it expose as sessionEndpointUrl .\n\nEvery request is authenticated. For a runtime that uses AWS Identity and Access Management (IAM) , each HTTP request, HTTP/2 stream, and WebSocket handshake carries a Signature Version 4 (SigV4) signature. The caller also needs bedrock-agentcore:InvokeAgentRuntimeProxy on the runtime and its runtime endpoint. For a runtime with an inbound JSON Web Token (JWT) authorizer , each request carries a bearer token instead. Knowing the URL doesn’t grant access.\n\nThe host name selects the port. Your client connects on port 443 regardless of the target port, and a prefix on the host name chooses the port inside the session:\n\nhttps://8090--<session-endpoint-id>.runtime.bedrock-agentcore.<region>.on.aws/index.html\nhttps://8081--<session-endpoint-id>.runtime.bedrock-agentcore.<region>.on.aws/status\n\nIt carries the protocols your server speaks. HTTP/1.1 and HTTP/2 requests, including server-sent events and gRPC, and WebSocket connections all pass through. This walkthrough uses HTTP/1.1 and WebSocket.\n\nIt’s scoped to one session. The URL needs credentials on every request and lasts only as long as the session, so use it to build, test, and review what your agent produces. To serve an app to your users, deploy it to a hosting service such as AWS Amplify Hosting .\n\nA browser can’t add a SigV4 signature or a bearer token to the requests a page makes on its own, so the Session endpoint client in the bedrock-agentcore SDK can open a local endpoint on your machine. Your browser opens http://localhost:8088 , and the local endpoint adds your credentials to each request and WebSocket handshake before forwarding it.\n\nA Session endpoint is different from a runtime endpoint , which AgentCore runtime already provides. Use a runtime endpoint, such as DEFAULT , to reach your agent, which controls which version of it callers will reach. InvokeAgentRuntime calls resolve through it, so you can keep development and production on different versions and promote or roll back without changing callers. Use a Session endpoint to see what your agent runs in its session, such as a web preview. It’s an authenticated URL that reaches only the ports you allow, works with whichever version the session runs, and stops working when the session ends. For complete documentation, refer to Connect to runtime sessions through a session endpoint .\n\nSolution overview\n\nThe sample has four parts. A coding agent runs in the session on port 8080 and edits the website’s files with four tools: list, read, write, and edit. The agent starts a Vite development server on port 8090, which serves the website and pushes each saved change to the browser over its hot-reload WebSocket. On your machine, PreviewApp serves the preview page, sends your prompts to InvokeAgentRuntime , and opens a local endpoint for the website. As Figure 1 shows, the preview page loads the website from the Vite development server on port 8090 through the local endpoint and the Session endpoint, and sends your prompts through InvokeAgentRuntime to the agent on port 8080. The numbers show the order of the steps for one request.\n\nFigure 1: Solution architecture\n\nBefore step 1, PreviewApp has already called InvokeAgentRuntime once to start the session, which starts the agent and the Vite development server. PreviewApp read the Session endpoint URL from that response and opened a local endpoint for port 8090. The numbered steps in Figure 1 then follow one request for a change:\n\nThe site pane of the preview page loads the website from the local endpoint on localhost:8088 . The local endpoint adds your credentials to each request and the WebSocket handshake, and forwards them to the Session endpoint. The Session endpoint checks the signature and the port against allowedPorts , then forwards them to the Vite development server on port 8090. The page keeps the Vite hot-reload WebSocket open.\n\nYou send a prompt from the chat pane. PreviewApp sends it to InvokeAgentRuntime as a standard AWS API call signed with your AWS credentials, and the runtime delivers it to the agent on port 8080. The agent’s steps stream back to the chat pane as it works.\n\nThe agent calls Claude Haiku 5.5 in Amazon Bedrock to decide what to change.\n\nThe agent reads the site’s files and saves the ones it changes. The Vite development server serves those files and watches them for changes.\n\nWhen a file is saved, Vite pushes the change over the WebSocket opened in step 1, back through the Session endpoint and the local endpoint, and the site pane updates without a refresh.\n\nFrom the notebook, PreviewApp reads the agent’s /status route on port 8081 through the same Session endpoint. Only the port changes.\n\nPort 8080 isn’t in allowedPorts , because InvokeAgentRuntime reaches the agent without going through the Session endpoint.\n\nPrerequisites\n\nTo follow the walkthrough, you need:\n\nAn AWS account in an AWS Region where AgentCore runtime Session endpoints are available, with credentials configured.\n\nPermissions to create an AWS Identity and Access Management (IAM) role, upload to Amazon Simple Storage Service (Amazon S3) , and create a runtime, plus bedrock-agentcore:InvokeAgentRuntime and bedrock-agentcore:InvokeAgentRuntimeProxy on that runtime and its DEFAULT runtime endpoint. For details, refer to IAM permissions for AgentCore runtime .\n\nPython 3.10 or later, with bedrock-agentcore 1.25.2 or later and boto3 1.43.122 or later.\n\nGit , to clone the sample repo, and a Jupyter environment, such as JupyterLab or Visual Studio Code with the Jupyter extension, to run the notebook.\n\nAccess to Claude Haiku 5.5 in Amazon Bedrock. For model availability by Region, refer to Regional availability by models .\n\nNode.js 22 or later with npm , which the…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Outcome-only evals let banking agents cheat procedure",
+      "summary": "TauIndianBankBench introduces an evaluation suite of 1,000 simulated Indian retail banking tasks that explicitly grades intermediate procedure alongside final state. Standard agent benchmarks typically verify only end-state database records, ignoring mandatory intermediate steps like fetching a deposit closure quote before issuing an account closure. The study found that across every tested model, 6.5% to 12.0% of conversational sessions were marked as successful by traditional outcome scoring despite the agent skipping required steps or making unrequested modifications. Evaluating procedural trace compliance alongside outcomes exposes how brittle standard tool callers remain when navigating compliance runbooks.",
+      "why_it_matters": "Evaluating agents solely on end-state mutation misses significant regulatory and procedural failure modes where models take dangerous shortcuts.",
+      "reason": "A dedicated evaluation benchmark measuring the failure modes of tool-calling conversational agents when forced to adhere to strict multi-step procedural rules.",
+      "item": {
+        "key": "arxiv:2610.30161",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "TauIndianBankBench: Procedure-Aware, Action-Oriented Evaluation of Tool-Using Conversational Agents",
+        "url": "https://huggingface.co/papers/2610.30161",
+        "discussion_url": null,
+        "published": "2026-10-29T00:00:00Z",
+        "summary": "Many Indian banks serve customers through FAQ pages and scripted chatbots. Assistants based on language models could respond faster and carry out requests such as blocking a card, but only if they give correct information and follow the bank's rules. These rules prescribe a procedure, a set of required steps, such as obtaining a closure quote before closing a deposit. Adapting models to this domain requires measuring how well they follow the procedure, before and after training. Benchmarks usually judge only the records left at the end of a conversation. Many required steps, however, leave the records unchanged, so an assistant that skips them can still be judged successful. We present TauIndianBankBench, an action-oriented benchmark of 1,000 Indian retail-banking tasks where an assistant helps a simulated customer. Besides the final records, it checks that the assistant took every required step and made no unrequested change. For every model, 6.5-12.0% of sessions are judged successful when only the final records are checked, although the assistant skipped a required step or made an unrequested change. Scoring both procedure and outcome shows more accurately how well language…",
+        "content": "TauIndianBankBench: Procedure-Aware, Action-Oriented Evaluation of Tool-Using Conversational Agents\nAbstract\nTauIndianBankBench evaluates language model assistants on Indian retail banking by verifying both procedural compliance and final outcomes across 1,000 simulated tasks.\nMany Indian banks serve customers through FAQ pages and scripted chatbots. Assistants based on language models could respond faster and carry out requests such as blocking a card, but only if they give correct information and follow the bank's rules. These rules prescribe a procedure, a set of required steps, such as obtaining a closure quote before closing a deposit. Adapting models to this domain requires measuring how well they follow the procedure, before and after training. Benchmarks usually judge only the records left at the end of a conversation. Many required steps, however, leave the records unchanged, so an assistant that skips them can still be judged successful. We present TauIndianBankBench, an action-oriented benchmark of 1,000 Indian retail-banking tasks where an assistant helps a simulated customer. Besides the final records, it checks that the assistant took every required step and made no unrequested change. For every model, 6.5-12.0% of sessions are judged successful when only the final records are checked, although the assistant skipped a required step or made an unrequested change. Scoring both procedure and outcome shows more accurately how well language models perform in Indian retail banking.\nCommunity\nHi everyone, author here! 👋 Thanks for checking out TauIndianBankBench.\nTL;DR: Most agent benchmarks only check the final database state. But many required banking steps, like getting a closure quote before closing a deposit, don't change any records, so an agent can skip them and still be marked successful. TauIndianBankBench has 1,000 Indian retail-banking tasks with a simulated customer. It scores the outcome, and it also checks that the agent completed every required step and made no unrequested changes. With outcome-only scoring, 6.5–12.0% of sessions across all models were counted as successes even though the agent broke the procedure.\n📄 Paper: https://arxiv.org/abs/2610.30161\n📂 Dataset: https://huggingface.co/datasets/NPCI/tau-indian-banking\n💻 Code: https://github.com/npci/TauIndianBankBench\nContributions are welcome, whether that's new tasks, procedure fixes or additional banking flows. Feel free to open a PR on the dataset repo. You're also welcome to evaluate your own models and share the results.\nIf you find this work useful, please upvote the paper and ❤️ like the dataset. It helps more people discover it!\nHappy to answer any questions! 🙏\nHalf the procedural bugs I've fixed weren't the model ignoring steps. It was the steps being written for a human who'd been trained on them. Nobody writes a runbook for a reader you have to explicitly tell not to skip verification. So a benchmark that scores step-following on a clean runbook is measuring the easy half. Hand the agent the version a bank actually gives a new hire, the one where \"confirm identity\" is quietly doing three jobs and section 4 contradicts section 2, then I'll trust the number. On the sanitised version it's a reading comprehension test, and mine pass those fine right up until the runbook changes on a Tuesday and nobody tells them.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- IndicBankBench: Evaluating Safety and Reliability of Language Model Assistants in Indian Retail Banking (2026)\n- FiMI Banking: A Sovereign Model for Indian Retail Banking (2026)\n- Small agents should know what their tools do (2026)\n- Concordat: Typed Sessions for LLM Agents (2026)\n- Compiling Expert Procedures into Verified Programs: When a Small Model Is Enough (2026)\n- Evaluating LLMs as Agentic Workflow Executors in Real-World Customer Support Skills (2026)\n- ProductWebBench: Evaluating Website Continuity Beyond Task Completion (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 1\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 11.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Glance turns the generation backbone into its own reranker",
+      "summary": "Glance proposes replacing separate cross-encoder rerankers by having the primary generator model rerank its own candidate passages using shared context prefill. By attaching a lightweight decision adapter and pointer head to a 9B Gated DeltaNet backbone, the model scores candidate passages via short probes extending from the cached context with only ~0.1 GiB of additional parameter overhead. After a 39-minute fine-tuning run on a B200, Glance outperformed `bge-reranker-v2-m3` on SciFact and NFCorpus, effectively scaling up to 200 candidates across 43k tokens. Because the activated adapter variant leaves generation bit-identical to the base model, answers can stream straight from the pre-existing passage cache.",
+      "why_it_matters": "Eliminating dedicated cross-encoders saves GPU residency and removes redundant KV cache prefill passes in multi-stage agentic RAG pipelines.",
+      "reason": "It proposes an architecture that enables a generator to act as its own reranker via a lightweight pointer head, reducing residency and latency in agentic RAG pipelines.",
+      "item": {
+        "key": "arxiv:2610.40454",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Glance: The Generator Is Its Own Reranker",
+        "url": "https://huggingface.co/papers/2610.40454",
+        "discussion_url": null,
+        "published": "2026-10-30T00:00:00Z",
+        "summary": "Retrieval-augmented generation commonly serves separate models for reranking and answering, duplicating model residency and passage processing. We introduce Glance, which equips the generator with a lightweight decision adapter and pointer head to score candidate passages from a shared prefill. Short relevance probes branch from the cached context, producing one score per passage without separately prefilling each query-passage pair. A single resident 9B backbone supports generation, general decisions and reranking, with approximately 0.1 GiB of additional memory per decision skill. After 39 minutes of MS MARCO fine-tuning, Glance achieves nDCG@10 of 0.741 on SciFact and 0.345 on NFCorpus, compared with 0.721 and 0.326 for bge-reranker-v2-m3. On 300 HotpotQA questions, its selected context improves answer F1 by 0.045 over cross-encoder-selected context under the same base generator (paired bootstrap 95% CI [0.014, 0.076]). In a scaling study, reranking quality keeps rising up to 200 candidates (43k tokens) scored from one shared prefill, where it exceeds the cross-encoder by 0.058 nDCG@10, and a probe-only activated adapter lets generation continue from the original passage cache…",
+        "content": "Abstract\nGlance integrates reranking and generation into a single backbone using lightweight adapters and pointer heads to score passages from shared context, reducing memory overhead while improving retrieval and answer quality.\nRetrieval-augmented generation commonly serves separate models for reranking and answering, duplicating model residency and passage processing. We introduce Glance, which equips the generator with a lightweight decision adapter and pointer head to score candidate passages from a shared prefill. Short relevance probes branch from the cached context, producing one score per passage without separately prefilling each query-passage pair. A single resident 9B backbone supports generation, general decisions and reranking, with approximately 0.1 GiB of additional memory per decision skill. After 39 minutes of MS MARCO fine-tuning, Glance achieves nDCG@10 of 0.741 on SciFact and 0.345 on NFCorpus, compared with 0.721 and 0.326 for bge-reranker-v2-m3. On 300 HotpotQA questions, its selected context improves answer F1 by 0.045 over cross-encoder-selected context under the same base generator (paired bootstrap 95% CI [0.014, 0.076]). In a scaling study, reranking quality keeps rising up to 200 candidates (43k tokens) scored from one shared prefill, where it exceeds the cross-encoder by 0.058 nDCG@10, and a probe-only activated adapter lets generation continue from the original passage cache. These initial results demonstrate generator-based reranking with one resident backbone; evaluation currently covers two retrieval datasets, one QA dataset and one backbone family.\nCommunity\nGlance: one model. Judge, rank, generate.\nRAG usually serves two models: a cross-encoder reranker that encodes every (query, passage) pair, then a generator that reads the winners again. We show the generator can be its own reranker. All k passages are prefilled once into a shared state, one short probe per passage continues from that cache, and a LoRA + pointer head scores every passage in the same pass. With the adapter off, the same weights chat as usual.\nOn a 9B hybrid (Gated DeltaNet) backbone:\n- 39 min of training on one B200: SciFact nDCG@10 0.741, NFCorpus 0.345 (bge-reranker-v2-m3: 0.721 / 0.326)\n- Scales to k=200 candidates: 0.717 vs 0.659 for BGE (SciFact subset)\n- HotpotQA answer F1 +0.045 over BGE-selected context, same generator (paired bootstrap CI excludes 0)\n- Activated variant: chat stays bit-identical to the base model, and the answer continues the reranking cache\nAdapters + code (Apache-2.0): https://huggingface.co/airun-ai/GlanceRAG-MiMo-9B-Reranker\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- Multimodal Reranking Is a System One Decision (2026)\n- System One models Are Not Better Rerankers (2026)\n- Can System-1-Style Decision Models Replace Dedicated Rerankers in RAG? A Systems Evaluation (2026)\n- UNREAL: Unifying Retrieval and Long-Context with a Single Model (2026)\n- Can a Cacheable Decision Model Follow Rules? (2026)\n- Joint or Per-Option? Compact Encoders for Closed-Set Decisions from 17 Million to 1 Billion Parameters (2026)\n- Retriever-Free Retrieval: Navigating Documents with Decision Models (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nModels citing this paper 3\nairun-ai/MiMo-V2.6-Distill-Qwen-9B-Decision\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 11.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "A C++ coding harness built to resist memory bloat",
+      "summary": "Frustrated with resource-heavy web-based frameworks, Chris Wellons built Prospero, a lean coding agent harness written in C++ with a Dear ImGui docking interface. Prospero eschews electron stacks, using passive UI rendering that idles when waiting on build tools and operating headless agent engines across macOS, Linux, and Windows. Architected around a strict 'never wait forever' rule, every network call, mailbox, and tool command enforces hard deadlines, allowing agents to fail gracefully past unresponsive prompts rather than hanging indefinitely. Its minimal memory profile is explicitly designed to keep the harness from being targeted by the Linux OOM killer during intensive local loops like agent-driven fuzzing runs.",
+      "why_it_matters": "Trimming harness overhead down to native binaries and enforcing aggressive timeouts solves the silent hang and out-of-memory crash loops common in unattended coding agents.",
+      "reason": "A new developer-focused execution harness built specifically to orchestrate context and tool execution for coding agents.",
+      "item": {
+        "key": "nullprogram.com/blog/2026/10/31",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Prospero: A new coding harness for a more civilized age",
+        "url": "https://nullprogram.com/blog/2026/10/31/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50315226",
+        "published": "2026-10-31T11:54:59Z",
+        "summary": "Comments",
+        "content": "nullprogram.com/blog/2026/10/31/\n  \nI’ve been fascinated with local LLMs for a couple of years now.\nThe better open weight models, including some that inference on regular,\nhigher-end consumer hardware at tolerable speeds, are now reliable enough\nto handle simpler programming tasks. This requires a coding harness, but\nso far this year I’ve been disappointed by all the harness offerings. For\ninexplicable reasons most are built with web stacks, and consume enormous\namounts of memory. At its core a coding harness is essentially curl glued\nto popen(). This should not require gigabytes of RAM. So I built my own:\nProspero. It’s written in my C++ style with a snappy Dear\nImGui docking interface. It uses around two orders of magnitude\nfewer resources than other harnesses without sacrificing features.\nDark mode aficionados are covered, too:\nNote that Prospero comes with no model providers built-in. You’re expected\nto supply that yourself, such as with llama.cpp, a workplace on-prem\nmodel, OpenRouter, Anthropic API, OpenAI API, etc. (You can’t use your\nClaude subscription.)\nFor those unfamiliar with coding harnesses: In a chat interface you and\nthe AI take turns writing messages to each other. A coding harness extends\nthis concept, allowing an AI to “talk” to tools offered by the harness.\nTools “reply” with their outputs. A tool might read or write a file, or\nrun a shell command. An AI will go from tool call to tool call on its own,\nlooping on the results. Such an AI is called an agent. Occasionally the\nAI will send you a message to inform you of progress or to ask a question,\nand the chat interface is still there.\nSome harnesses, including Prospero, allow agents to spawn subagents to\ndo their bidding, to work in parallel or keep their context clean. That\nis, to not fill their working memory with subtasks. Agents can message one\nanother and coordinate on tasks. Given SSH access to another machine, or\nover plain WSL, Prospero can deploy a headless copy of itself to other\nhosts so that agents can operate on those systems. The Professional\nEdition embeds engines for combinations of x86/x86-64 and ARM64 on\nmacOS, Windows, and Linux. The Windows x86 engine even works on Windows\nXP, and can play solitaire and minesweeper if you ask.\nThe last is because Prospero is one of the few harnesses with desktop\ncontrol capabilities. If your model supports vision — any any model worth\nusing does — then it can “see” your desktop and interact with it. It can\nclick, type, and drag to test and debug GUI applications live without a\nspecialized, per-app MCP assist.\nThis headless engine is why no TUI is necessary. The harness engine runs\non the headless system, and the UI runs on your desktop or laptop. With a\nlittle extra setup, the harness to run fully independently of the GUI, so\nthat it will continue without the GUI system attached — re-attachable\nlater.\nBecause Prospero is so lean, it may be the only harness that can drive a\nfuzz campaign, particularly on a headless system, without the\nLinux OOM killer targeting the memory-gobbling harness rather than the\nout-of-control fuzz target that triggered it. So many times I’ve checked\nback in on a fuzz campaign hours later, to find nothing was accomplished\nbecause the harness process is gone.\n(Why have an agent run a fuzz campaign? Because it can fix discovered bugs\non the fly and keep the campaign going! It’s a no brainer.)\nConfiguration\nThe configuration lives at ~/.config/prospero/prospero.ini. Easy to\nedit. No JSON, thank goodness. Check it into source control, copy-paste\nit. All the usual benefits. Alternatively, the Settings page can reach\nevery setting from the GUI, so you don’t have to edit the INI by hand. INI\nfiles can also include each other, not just naming file system paths but\nURLs:\ninclude = https://example.com/prospero.ini\nThe idea is to allow a live shared or managed configuration. Includes by\nURL are restricted in what they can set, with a hard rule against anything\nwhich might appear in shell command. Some trust is still required, as a\nconfiguration can extract an environment variable by using it as an API\nkey and supplying an endpoint it controls.\nProspero fetches a model list and other parameters like context size from\nthe endpoint, but you might want to tweak it. A typical configuration may\nlook like:\nmodel = falstaff/Qwen3.8-27B\n[endpoint falstaff]\nurl = http://falstaff.local/\nkey = env:FALSTAFF_API_KEY\n[model Qwen3.8-27B]\nedit_format = replace\ntemplate.reasoning_effort = medium\n[model Qwen3.8-27B-xhigh]\nlike = Qwen3.8-27B\ntemplate.reasoning_effort = xhigh\n[web]\nsearch = searxng\nurl = https://search.example.com/\nkey = env:EXAMPLE_API_KEY\nPassive rendering\nThe ImGui paradigm typically uses active rendering, redrawing on vsync\nlike a video game. This is appropriate in some contexts, like interfaces\nwithin video games. Less so for mostly-static text-oriented UIs, such as a\ncoding harness. Instead Prospero uses passive rendering with settle\nframes to finish animations before going idle. When there’s nothing to\ndo, Prospero does nothing. It won’t chew on the GPU while the agent is\nwaiting on a build.\nNever wait forever\nAn annoyance with most other harnesses is how easily they get stuck. I set\na long-running task, go to sleep, and in the morning find the harness hung\non a trivial issue two hours into the night, wasting the rest. Therefore\nProspero prime design principle: Never wait forever. Every operation\nhas a deadline. This decision influences everything. If you’re not there\nto grant a requested permission, the agent will get a denial by timeout\nand must do without. To assist, Prospero will raise a system toast when an\nagent requires your attention so that you’re less likely to miss it if\nyou’re attending.\nThe harness itself plows through intermittent errors, trying its best to\ndrive the agent to complete its task. All network requests have timeouts,\nand watchdogs prevent endless waiting. Agent mailboxes are\nbounded.\nShell commands that hit their…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "llama.cpp b12023 caps shared decision prefixes at the first output position to ensure decision embeddings remain available when queries share option tokens.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12023",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12023",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12023",
+        "discussion_url": null,
+        "published": "2026-10-31T19:22:28Z",
+        "summary": "server: cap shared decision prefixes at the first output ( #30710 )\n\nLimit the shared prefix to the first required output position of the parent and each child task.\n\nThis keeps decision output embeddings available in the final batch when questions share option tokens.\n\nFixes #30482\n\nSigned-off-by: aiqubits aiqubits@hotmail.com\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/62175271\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "An AI startup reported breaching Anthropic's perimeter, claiming access to internal Slack messages and employee records.",
+      "item": {
+        "key": "indiatoday.in/technology/news/story/ai-startup-hacks-anthropic-in-12-hours-gains-access-to-employee-details-and-internal-messages-3025452-2026-10-26",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "AI startup hacks Anthropic, gains access to employee details, internal messages",
+        "url": "https://www.indiatoday.in/technology/news/story/ai-startup-hacks-anthropic-in-12-hours-gains-access-to-employee-details-and-internal-messages-3025452-2026-10-26",
+        "discussion_url": "https://news.ycombinator.com/item?id=50315990",
+        "published": "2026-10-31T13:25:10Z",
+        "summary": "",
+        "content": "",
+        "score": 74.0,
+        "comments": 18,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Security researchers spotted malware using LLM inferences to autonomously triage and rank compromised target environments by value.",
+      "item": {
+        "key": "blog.talosintelligence.com/appraisal-by-ai-model-driven-victim-prioritization-in-the-volta-infostealer",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Malware uses LLMs to rank victims by how much they're worth",
+        "url": "https://blog.talosintelligence.com/appraisal-by-ai-model-driven-victim-prioritization-in-the-volta-infostealer/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50316531",
+        "published": "2026-10-31T14:29:03Z",
+        "summary": "Comments",
+        "content": "",
+        "score": 196.0,
+        "comments": 105,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    },
+    {
+      "line": "Engineers documented running autonomous agent swarms across Minecraft and Mindustry to benchmark open-ended spatial orchestration.",
+      "item": {
+        "key": "labs.ycombinator.com/projects/games/index.html",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "We ran AI agent swarms in Minecraft and Mindustry",
+        "url": "https://labs.ycombinator.com/projects/games/index.html",
+        "discussion_url": "https://news.ycombinator.com/item?id=50296486",
+        "published": "2026-10-29T21:40:28Z",
+        "summary": "",
+        "content": "",
+        "score": 411.0,
+        "comments": 167,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Simantic launched out of Y Combinator to provide a hardware-free firmware simulation runtime for software agents.",
+      "item": {
+        "key": "news.ycombinator.com/item?id=50291116",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Launch HN: Simantic (YC F26) – Firmware Simulation for AI Agents",
+        "url": "https://news.ycombinator.com/item?id=50291116",
+        "discussion_url": "https://news.ycombinator.com/item?id=50291116",
+        "published": "2026-10-29T15:56:32Z",
+        "summary": "Hi HN, we're Ahnaf and Seungmin from Simantic ( https://simantic.com ). We are building the simulation layer that lets engineers and AI agents test and validate firmware without hardware.\nBefore Simantic, we were ex-firmware engineers at companies like Neuralink and Tesla. We’ve worked on some of the coolest projects, like the Cybertruck and Roadster, back when they were still early prototypes.\nWe started working on firmware back when ChatGPT didn’t exist yet, but over the years, we saw how much of the engineering and development work has been automated as the frontier models improved to this point. In software, AI can run and test code inside your computer in a matter of seconds. But as firmware engineers, we didn’t have that luxury. An AI agent can write firmware in seconds, but in order to test it, we had to flash a physical board, then manually run tests using expensive and clunky tools with software made over a decade ago.\nTo speed up the validation loop, we built the simulation layer that lets AI agents test the firmware and make decisions based on evidence, instead of waiting for the engineer to run tests for them. We used to spend hours testing our firmware manually on…",
+        "content": "",
+        "score": 77.0,
+        "comments": 36,
+        "also_in": []
+      }
+    },
+    {
+      "line": "OpenAI's GPT-5.6 Sol model has been demonstrated completing a run of Factorio on peaceful mode.",
+      "item": {
+        "key": "ryanmadden.net/gpt-56-beats-factorio",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "GPT-5.6 Sol can beat Factorio on peaceful mode",
+        "url": "https://ryanmadden.net/gpt-56-beats-factorio/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50318871",
+        "published": "2026-10-31T18:50:34Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Until tomorrow, keep your harnesses lean and your iframes tightly gated.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Security incident",
+      "headline": "Anthropic Cursor Extension Backdoored for 12 Hours",
+      "blurb": "Attackers breached Anthropic's verified Cursor account to distribute a backdoored extension for nearly 12 hours.",
+      "item": {
+        "key": "arstechnica.com/security/2026/10/anthropic-vs-code-extension-on-cursor-backdoored-for-nearly-12-hours",
+        "source": "Ars Technica",
+        "tags": [
+          "press"
+        ],
+        "title": "Anthropic VS code extension on Cursor backdoored for nearly 12 hours",
+        "url": "https://arstechnica.com/security/2026/10/anthropic-vs-code-extension-on-cursor-backdoored-for-nearly-12-hours/",
+        "discussion_url": "https://arstechnica.com/security/2026/10/anthropic-vs-code-extension-on-cursor-backdoored-for-nearly-12-hours/#comments",
+        "published": "2026-10-30T21:09:54Z",
+        "summary": "It's still unknown how attackers got access to Anthropic's verified Cursor account.",
+        "content": "An official extension for Anthropic’s Claude model was backdoored and threatened as many as 5,000 developers' machines, multiple sources reported Friday. Anthropic so far has yet to warn customers of the incident.\n\nThe compromised package was a VS Code extension available in the marketplace of Cursor, a maker of AI-assisted developer tools, the company said Friday. The malicious version, 2.1.313, subsequently affected “at most 5,000 users,” presumably when they either downloaded it or their systems automatically fetched and installed it. Anthropic pushed version 2.1.314 several hours after the previous version became available on Cursor, according to independent researcher Kevin Beaumont. Both Beaumont and the CTO and co-founder of security firm Phorian said that version 2.1.313 was distributed through Anthropic’s official account on Cursor. So far, neither Cursor nor Anthropic has explained how the attackers gained control of the account.\n\nIn search of cloud credentials\n\n“It was a supply-chain compromise where the attacker gained access to the official distribution channel,” Phorian CTO and co-founder Luke Roberts told Ars. “The malicious version 2.1.313 was posted to the official Anthropic account, effectively superseding 2.1.312. Extensions auto-update in Cursor by default, but users can configure this in settings.” Phorian has more details here .\n\nRead full article\n\nComments",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Neural emulation",
+      "headline": "NES Emulator Baked Directly into Qwen3.5 Weights",
+      "blurb": "Nesformer embeds a working NES 6502 CPU emulator inside Qwen3.5-4B, allowing the language model to execute ROMs like Super Mario Bros.",
+      "item": {
+        "key": "simonwillison.net/2026/Oct/30/nesformer",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "dbreunig/nesformer",
+        "url": "https://simonwillison.net/2026/Oct/30/nesformer/",
+        "discussion_url": null,
+        "published": "2026-10-30T21:59:22Z",
+        "summary": "dbreunig/nesformer\n\nInspired by qwenputer by Divyansh Agrawal, Drew Breunig baked a working emulator for a Nintendo Entertainment System 6502 CPU into the weights of Qwen3.5-4B. You can now play NES ROMs such as Super Mario Bros (very slowly) running inside Qwen!\n\nIn a comment on Hacker News Drew reveals the Opus 5.5 prompts he used to build this system:\n\nRead this article and any relevant source code: https://divagr.com/blog/qwenputer. Then explore if you could emulate the chip and ram in a Nintendo Entertainment System (as people do today with FPGAs in MISTRs) using this technique. If so, what size model would you have to build and if you could use smaller faster ones, could you get it to be at the standard clockspeed.\n\nFollowed by:\n\nI think we should build it! Just for fun. It's okay if it's not fast. We want to be able to have the weights, and a cli to run them that we can point at a ROM.\n\nApparently Opus found and then used this collection of conformance tests for the NES CPU released 15 years ago by Christopher Pow.\n\nVia Hacker News\n\nTags: games , ai , generative-ai , llms , drew-breunig , qwen , conformance-suites",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Local inference",
+      "headline": "Ollama Expands Liquid AI LFM3 Support to Linux and Windows",
+      "blurb": "Ollama v0.40.13 adds Linux and Windows support for Liquid AI's LFM3 models, including text-to-speech in lfm3-audio and lfm3-omni.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.13",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.13",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.13",
+        "discussion_url": null,
+        "published": "2026-10-29T02:54:11Z",
+        "summary": "LFM3 on Linux and Windows\n\nLiquid AI's LFM3 models, including text-to-speech in lfm3-audio and lfm3-omni , now run on Linux and Windows as well as Apple silicon.\n\nFull Changelog : v0.40.12...v0.40.13",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 26,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 36,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 894,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1341,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 286,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 191,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 93,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-28T19:46:40.931970Z",
+    "candidates": 128,
+    "triaged": 128,
+    "enriched": 6,
+    "headline_candidates": 135,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 312.5,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 32403,
+      "output_tokens": 10866,
+      "cost_usd": 0.06505
+    }
+  }
+}
