@@ -1,86 +1,76 @@
-# Clean MTP Gradients, Sandboxed Preview Escapes, and Lean Agent Runtimes
+# Multi-Agent Coding Harnesses, Courtroom Injections, and Omni-Modal Attention
 
-*2026-10-31 · 7 stories*
+*2026-11-01 · 6 stories*
 
-![Top AI stories for 2026-10-31](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-01](https://coronring.github.io/NewsRing/today.png)
 
-Today's selection covers fundamental fixes to multi-token prediction and practical agent systems design. Between an account takeover hidden in ChatGPT's iframe architecture and a new C++ harness designed to survive the Linux OOM killer, there is plenty of meat-and-potatoes engineering to unpack. We also look at stateful CRDTs for coding assistants and why your banking evals are probably being duped.
+Today's digest highlights multi-agent orchestration outperforming proprietary frontier models on hard coding benchmarks, alongside real-world judicial sanctions for prompt injection in legal filings. We also review open-source serving releases, mechanistic interpretability of retrieval attention heads, and RL frameworks for mobile UI agents.
 
 ## Across AI today
 
-- **Anthropic Cursor Extension Backdoored for 12 Hours** Attackers breached Anthropic's verified Cursor account to distribute a backdoored extension for nearly 12 hours. ([arstechnica.com](https://arstechnica.com/security/2026/10/anthropic-vs-code-extension-on-cursor-backdoored-for-nearly-12-hours/))
-- **NES Emulator Baked Directly into Qwen3.5 Weights** Nesformer embeds a working NES 6502 CPU emulator inside Qwen3.5-4B, allowing the language model to execute ROMs like Super Mario Bros. ([simonwillison.net](https://simonwillison.net/2026/Oct/30/nesformer/))
-- **Ollama Expands Liquid AI LFM3 Support to Linux and Windows** Ollama v0.40.13 adds Linux and Windows support for Liquid AI's LFM3 models, including text-to-speech in lfm3-audio and lfm3-omni. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.13))
+- **Parameter Labs details account takeover flaw in ChatGPT** Researchers demonstrated an account takeover vulnerability within ChatGPT caused by an exploit in interactive HTML previews. ([parameter.ai](https://www.parameter.ai/labs/we-found-a-gap-at-openai))
+- **Minecraft experiment shows AI swarms struggle to scale** Researchers running AI agent swarms in Minecraft found that agents failed to build complex civilizations due to coordination failure. ([labs.ycombinator.com](https://labs.ycombinator.com/projects/games/index.html))
+- **JEPAs test and improve Platonic Representation Hypothesis** Researchers used Joint Embedding Predictive Architectures to test and improve how scaling models converge on shared representations. ([arxiv.org](https://arxiv.org/abs/2610.39302))
 
-## 1. Removing the noisy residual in multi-token prediction
+## 1. vLLM Tags Version 0.33.0
 
-Standard Multi-Token Prediction (MTP) pre-training has a quiet flaw: roughly 80% of the MTP gradient reaching the trunk is a noisy residual that actively interferes with next-token learning. The authors show that the cross-entropy gradient cleanly decomposes into a helpful KL self-distillation term and this low-SNR residual. Their proposed fix, Soft-MTP, recovers the exact KL divergence gradient via straight-through routing on the shared linear head without needing vocabulary-sized matrices or custom kernels. Tested up to 1.2B parameters, the one-line change yields lower perplexity, improved speculative decoding acceptance lengths, and stronger reasoning after fine-tuning with zero parameter or compute overhead.
+vLLM has officially tagged version 0.33.0, delivering stability updates and production bug fixes for open-source model serving. Recent release candidate commits include a ROCm patch that skips AITER tuned GEMM when M*N exceeds 2^31 on gfx950 hardware. While detailed release documentation is sparse in the tag log, the release represents ongoing maintenance for production serving infrastructure.
 
-**Why it matters:** Isolating the clean self-distillation signal directly improves draft acceptance rates for speculative decoding without bloating pre-training memory budgets or breaking fused cross-entropy kernels.
+**Why it matters:** Keeps your underlying open-weight model serving stack updated with critical bug fixes for high-throughput inference engines.
 
-[huggingface.co](https://huggingface.co/papers/2610.38331) · via HF Daily Papers
+[github.com](https://github.com/vllm-project/vllm/releases/tag/v0.33.0) · [github.com](https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc3) · [github.com](https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc2) · via vLLM releases
 
-## 2. How ChatGPT's sandbox was chained into an account takeover
+## 2. Five Qwen3.8-27B Models Beat Fable 5 via File-Based Multi-Agent Loop
 
-Security researchers documented a zero-interaction account takeover vulnerability in ChatGPT exploitable through ordinary shared chat links. While HTML previews were isolated inside separate-origin iframes, the chat rendering pipeline loaded a math graphing library called MathLive that listened for unrestricted `postMessage` calls on the parent window. By sending a payload to update the on-screen keyboard layout, the researchers caused MathLive to insert an unsandboxed `srcdoc` iframe directly into `chatgpt.com`. They then bypassed CSP using a JSONP callback reflection on an allowed YouTube endpoint, achieving arbitrary script execution that could enumerate and exfiltrate private conversations through authenticated APIs before OpenAI patched the issue.
+A team of five Qwen3.8-27B model instances—serving as planner, ideators, solver, manager, and repair worker—achieved a 98% pass rate on a ten-problem LiveCodeBench Hard sample, reproducing their harness parity claims and outperforming Fable 5. Built using the Memdoor workflow engine with eight YAML files, the agents operate without shared chat memory, starting from fresh contexts and communicating strictly by reading and writing files on disk. The test execution script determines success rather than an LLM judge, running at a median of 40 minutes and $0.39 per task on OpenRouter. The authors attribute the benchmark performance to strict context hygiene and file-based state ledgers.
 
-**Why it matters:** Sandboxing agent-rendered UI in restricted frames is useless if parent-page rendering libraries register unvalidated event listeners that can be coerced into injecting DOM nodes.
+**Why it matters:** Demonstrates how file-ledger multi-agent orchestration and context discipline allow mid-sized open-weights models to outperform proprietary frontier LLMs on hard coding benchmarks.
 
-[parameter.ai](https://www.parameter.ai/labs/we-found-a-gap-at-openai) · [discussion](https://news.ycombinator.com/item?id=50314699) · via Hacker News (AI)
+[github.com](https://github.com/guregodevo/memdoor/tree/main/examples/workflows/team-solve) · [discussion](https://news.ycombinator.com/item?id=50320995) · via Hacker News front page
 
-## 3. Zed turns to copy-on-write B+ trees for agent version control
+## 3. Omni-Modal LLMs Reuse a Tiny Subset of Dedicated Retrieval Attention Heads
 
-Zed Industries published the architecture of DeltaDB, a fine-grained version control system built to retain the conversational context behind code edits. DeltaDB stores CRDTs in local SQLite databases organized into a directed acyclic graph where each node is a minimal delta consisting simply of a parent version and an offset. Because version vectors bloat when dealing with ephemeral agents, the engine navigates DAG ancestry directly, caching state snapshots using copy-on-write B+ trees adapted from Zed's SumTree. This allows clients to scrub through thread histories and reify intermediate worktrees instantly while keeping deltas remarkably compact over the wire.
+A mechanistic interpretability study across 18 multimodal checkpoints reveals that evidence retrieval relies on a sparse set of attention heads largely preserved from base language or vision-language backbones. When evaluating paired audio-visual inputs where identical evidence is spoken or displayed as on-screen text, models recruit the exact same retrieval heads, which account for less than 2% of all attention heads. Ablating this shared subset virtually eliminates audio-visual retrieval while degrading spatial perception, visual math, and document understanding. Targeting these specific heads with a ranking optimization objective improved Qwen3-VL-8B's page Recall@1 on MMDocIR by 6.03 percentage points.
 
-**Why it matters:** Tracking the granular DAG of agent tool calls and human edits replaces opaque, squash-merged commits with structured, causally linked attribution graphs.
+**Why it matters:** Provides mechanistic insight into multimodal context retrieval, opening up targeted attention optimization to boost RAG performance without retraining whole models.
 
-[delta.dev](https://delta.dev/blog/fine-grained-version-control-for-agents) · [discussion](https://lobste.rs/s/cctbcu/building_fine_grained_version_control) · via Lobsters (AI)
+[huggingface.co](https://huggingface.co/papers/2610.32411) · via HF Daily Papers
 
-## 4. Bedrock AgentCore introduces authenticated session endpoints
+## 4. Brazilian Lawyers Fined $16,000 for White-Text Prompt Injection in Legal Filing
 
-Amazon Bedrock AgentCore added Session endpoints, allowing developers to interact with web servers spun up inside an agent's microVM without pushing code to external hosting environments. The runtime grants each microVM session an authenticated URL that forwards HTTP/1.1, HTTP/2, and WebSocket traffic directly to a designated port range (8000–12000) selected via host name prefixes. A local client SDK signs requests with SigV4 or bearer tokens on behalf of the browser, enabling hot-reloading development servers like Vite to push live UI updates over WebSockets as the agent modifies files. The endpoint lifecycle is strictly tied to the agent session, shutting down as soon as the session terminates.
+A Brazilian labor court sanctioned two law firms with a 10% claim fine (roughly $16,000) after discovering white text on a white background embedded inside a court petition. The hidden prompt instructed the court's automated AI processing tool, Galileu, to respond superficially and refrain from challenging the filing's documents. Galileu detected the hidden command, raised an automated alert, and blocked processing before the judge penalized counsel under civil procedural good-faith standards. The ruling represents one of the first formal judicial sanctions globally for deliberate prompt injection targeting legal AI tools.
 
-**Why it matters:** Providing secure, ephemeral HTTP and WebSocket proxies directly into agent microVMs eliminates out-of-band deploy steps during interactive coding workflows.
+**Why it matters:** Highlights real-world prompt injection failure modes and legal liabilities when deploying automated AI document ingestion without robust input sanitization and alerting mechanisms.
 
-[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/preview-web-apps-live-as-your-coding-agent-builds-them-with-amazon-bedrock-agentcore-runtime/) · via AWS Machine Learning
+[jetstream.security](https://jetstream.security/insights/brazilian-court-sanctions-prompt-injection-filing/) · [discussion](https://news.ycombinator.com/item?id=50322173) · via Hacker News front page
 
-## 5. Outcome-only evals let banking agents cheat procedure
+## 5. Online Dense RL Framework Trains 8B UI Navigation Agents on Live iOS Devices
 
-TauIndianBankBench introduces an evaluation suite of 1,000 simulated Indian retail banking tasks that explicitly grades intermediate procedure alongside final state. Standard agent benchmarks typically verify only end-state database records, ignoring mandatory intermediate steps like fetching a deposit closure quote before issuing an account closure. The study found that across every tested model, 6.5% to 12.0% of conversational sessions were marked as successful by traditional outcome scoring despite the agent skipping required steps or making unrequested modifications. Evaluating procedural trace compliance alongside outcomes exposes how brittle standard tool callers remain when navigating compliance runbooks.
+Researchers developed an online reinforcement learning framework that decouples mobile UI navigation into a Planning agent and a UI Grounding model trained directly on live iOS apps. To combat memorization and high inference costs, the system uses an LLM-as-a-Judge for step-level intermediate rewards combined with terminal completion signals, optimized via PPO and a neighbor-conditioned value estimator called GiGPPO. Operating across hundreds of concurrent virtual iOS instances, the resulting 8B RL agent achieved a nearly sevenfold improvement in out-of-distribution generalization on Android over SFT baselines. In evaluations on real iOS applications, the 8B model outperformed Gemini-3.5-Flash and tied Gemini-3.1-Pro.
 
-**Why it matters:** Evaluating agents solely on end-state mutation misses significant regulatory and procedural failure modes where models take dangerous shortcuts.
+**Why it matters:** Shows how online RL with dense step-level LLM-as-a-judge rewards can train compact, lower-cost agents that rival frontier LLMs on computer use tasks.
 
-[huggingface.co](https://huggingface.co/papers/2610.30161) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2610.39264) · via HF Daily Papers
 
-## 6. Glance turns the generation backbone into its own reranker
+## 6. llama.cpp Release b12032 Adjusts SYCL Dependencies
 
-Glance proposes replacing separate cross-encoder rerankers by having the primary generator model rerank its own candidate passages using shared context prefill. By attaching a lightweight decision adapter and pointer head to a 9B Gated DeltaNet backbone, the model scores candidate passages via short probes extending from the cached context with only ~0.1 GiB of additional parameter overhead. After a 39-minute fine-tuning run on a B200, Glance outperformed `bge-reranker-v2-m3` on SciFact and NFCorpus, effectively scaling up to 200 candidates across 43k tokens. Because the activated adapter variant leaves generation bit-identical to the base model, answers can stream straight from the pre-existing passage cache.
+The llama.cpp project released pre-release build b12032, introducing PkgConfig lookups for LevelZero includes and libraries within the SYCL backend build system. Recent release iterations also include work on low-bit IQ3 quantization support for OpenCL mobile GPUs. Details remain centered on low-level build infrastructure and hardware acceleration tweaks.
 
-**Why it matters:** Eliminating dedicated cross-encoders saves GPU residency and removes redundant KV cache prefill passes in multi-stage agentic RAG pipelines.
+**Why it matters:** Tracks continuous low-level build fixes and quantization refinements across local inference runtimes.
 
-[huggingface.co](https://huggingface.co/papers/2610.40454) · via HF Daily Papers
-
-## 7. A C++ coding harness built to resist memory bloat
-
-Frustrated with resource-heavy web-based frameworks, Chris Wellons built Prospero, a lean coding agent harness written in C++ with a Dear ImGui docking interface. Prospero eschews electron stacks, using passive UI rendering that idles when waiting on build tools and operating headless agent engines across macOS, Linux, and Windows. Architected around a strict 'never wait forever' rule, every network call, mailbox, and tool command enforces hard deadlines, allowing agents to fail gracefully past unresponsive prompts rather than hanging indefinitely. Its minimal memory profile is explicitly designed to keep the harness from being targeted by the Linux OOM killer during intensive local loops like agent-driven fuzzing runs.
-
-**Why it matters:** Trimming harness overhead down to native binaries and enforcing aggressive timeouts solves the silent hang and out-of-memory crash loops common in unattended coding agents.
-
-[nullprogram.com](https://nullprogram.com/blog/2026/10/31/) · [discussion](https://news.ycombinator.com/item?id=50315226) · via Hacker News front page
+[github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12032) · [github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12031) · via llama.cpp releases
 
 ## Quick hits
 
-- llama.cpp b12023 caps shared decision prefixes at the first output position to ensure decision embeddings remain available when queries share option tokens. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12023))
-- An AI startup reported breaching Anthropic's perimeter, claiming access to internal Slack messages and employee records. ([indiatoday.in](https://www.indiatoday.in/technology/news/story/ai-startup-hacks-anthropic-in-12-hours-gains-access-to-employee-details-and-internal-messages-3025452-2026-10-26))
-- Security researchers spotted malware using LLM inferences to autonomously triage and rank compromised target environments by value. ([blog.talosintelligence.com](https://blog.talosintelligence.com/appraisal-by-ai-model-driven-victim-prioritization-in-the-volta-infostealer/))
-- Engineers documented running autonomous agent swarms across Minecraft and Mindustry to benchmark open-ended spatial orchestration. ([labs.ycombinator.com](https://labs.ycombinator.com/projects/games/index.html))
-- Simantic launched out of Y Combinator to provide a hardware-free firmware simulation runtime for software agents. ([news.ycombinator.com](https://news.ycombinator.com/item?id=50291116))
-- OpenAI's GPT-5.6 Sol model has been demonstrated completing a run of Factorio on peaceful mode. ([ryanmadden.net](https://ryanmadden.net/gpt-56-beats-factorio/))
+- Certificate-Guided Visual Routing reduces decoding overhead in Diffusion VLMs by dynamically skipping redundant visual tokens during denoising steps. ([huggingface.co](https://huggingface.co/papers/2610.36671))
+- The A-RSI framework introduces an adaptive task refresh mechanism for zero-data multimodal self-improvement to evaluate when synthetic training experience loses utility. ([huggingface.co](https://huggingface.co/papers/2610.38568))
+- The Investor's Last Exam benchmark evaluates financial AI agents on equity research and forecasting using decision-time data without lookahead bias. ([huggingface.co](https://huggingface.co/papers/2610.38342))
+- datasette-llm 0.1a9 now automatically inherits default model settings from the core LLM tool to streamline setup for Datasette Agent. ([simonwillison.net](https://simonwillison.net/2026/Oct/31/datasette-llm/))
 
-Until tomorrow, keep your harnesses lean and your iframes tightly gated.
+Until tomorrow, keep your prompt boundaries clear and your context ledgers clean.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 128 candidates, 128 reviewed, gemini/gemini-3.8-flash, 312s, 3 model calls, $0.0650.</sub>
+<sub>35 of 35 sources read. 109 candidates, 109 reviewed, gemini/gemini-3.8-flash, 96s, 3 model calls, $0.1153.</sub>
