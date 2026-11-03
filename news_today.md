@@ -1,76 +1,92 @@
-# Multi-Agent Coding Harnesses, Courtroom Injections, and Omni-Modal Attention
+# Agent Orchestration Self-Play, Backdoors, and Serving Mismatches
 
-*2026-11-01 · 6 stories*
+*2026-11-02 · 8 stories*
 
-![Top AI stories for 2026-11-01](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-02](https://coronring.github.io/NewsRing/today.png)
 
-Today's digest highlights multi-agent orchestration outperforming proprietary frontier models on hard coding benchmarks, alongside real-world judicial sanctions for prompt injection in legal filings. We also review open-source serving releases, mechanistic interpretability of retrieval attention heads, and RL frameworks for mobile UI agents.
+Today's selection focuses on modern agent architecture challenges, from training orchestrators to internalize skills down to zero-skill reliance, to fixing inference engine mismatches during RL. We also examine pretraining poison attacks that trigger RCE in CLI agents, along with practical trajectory distillation methods.
 
 ## Across AI today
 
-- **Parameter Labs details account takeover flaw in ChatGPT** Researchers demonstrated an account takeover vulnerability within ChatGPT caused by an exploit in interactive HTML previews. ([parameter.ai](https://www.parameter.ai/labs/we-found-a-gap-at-openai))
-- **Minecraft experiment shows AI swarms struggle to scale** Researchers running AI agent swarms in Minecraft found that agents failed to build complex civilizations due to coordination failure. ([labs.ycombinator.com](https://labs.ycombinator.com/projects/games/index.html))
-- **JEPAs test and improve Platonic Representation Hypothesis** Researchers used Joint Embedding Predictive Architectures to test and improve how scaling models converge on shared representations. ([arxiv.org](https://arxiv.org/abs/2610.39302))
+- **OpenAI Unveils Pando, a Git Backend Built for Codex Scale** OpenAI built Pando, a Git-compatible storage backend engineered to handle the massive development scale driven by AI systems like Codex. ([openai.com](https://openai.com/index/scaling-git-at-openai))
+- **vLLM v0.33.0 Adds Support for Reflection Beam-1.0 501B MoE** The latest vLLM release adds support for Reflection Beam-1.0 501B MoE and DFlash2, featuring 927 commits from 389 contributors. ([github.com](https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc3))
+- **Apriel Voice 27B Unifies Speech Processing and Tool Use** Apriel Voice 27B Preview is an open speech-language model combining spoken interaction, contextual reasoning, and tool use in one system. ([huggingface.co](https://huggingface.co/papers/2610.40738))
 
-## 1. vLLM Tags Version 0.33.0
+## 1. R²Orch internalizes multi-agent orchestration via recursive self-play
 
-vLLM has officially tagged version 0.33.0, delivering stability updates and production bug fixes for open-source model serving. Recent release candidate commits include a ROCm patch that skips AITER tuned GEMM when M*N exceeds 2^31 on gfx950 hardware. While detailed release documentation is sparse in the tag log, the release represents ongoing maintenance for production serving infrastructure.
+Researchers have introduced R²Orch, a recursive self-play framework designed to train agent orchestrators without hand-crafted curricula. The architecture pairs an inner self-play loop for task learning with an outer loop enforcing Recursive Learnability and Skill Withdrawal, removing skills once the orchestrator performs equally well without them. As failures distill into skills and skills consolidate into parameter weights, the orchestrator moves toward zero-skill deployment. Tested with zero extra skills, a 9B model outperformed baselines across 12 benchmarks, raising average out-of-distribution performance from 76.1 to 78.8.
 
-**Why it matters:** Keeps your underlying open-weight model serving stack updated with critical bug fixes for high-throughput inference engines.
+**Why it matters:** It offers a curriculum-free training framework to compress multi-agent orchestration directly into model weights.
 
-[github.com](https://github.com/vllm-project/vllm/releases/tag/v0.33.0) · [github.com](https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc3) · [github.com](https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc2) · via vLLM releases
+[huggingface.co](https://huggingface.co/papers/2610.22740) · via HF Daily Papers
 
-## 2. Five Qwen3.8-27B Models Beat Fable 5 via File-Based Multi-Agent Loop
+## 2. Pretraining data poisoning implants remote code execution backdoors in CLI agents
 
-A team of five Qwen3.8-27B model instances—serving as planner, ideators, solver, manager, and repair worker—achieved a 98% pass rate on a ten-problem LiveCodeBench Hard sample, reproducing their harness parity claims and outperforming Fable 5. Built using the Memdoor workflow engine with eight YAML files, the agents operate without shared chat memory, starting from fresh contexts and communicating strictly by reading and writing files on disk. The test execution script determines success rather than an LLM judge, running at a median of 40 minutes and $0.39 per task on OpenRouter. The authors attribute the benchmark performance to strict context hygiene and file-based state ledgers.
+A new study demonstrates that low-rate pretraining data poisoning can insert persistent security backdoors into downstream tool-calling agents. Researchers pretrained Qwen3 models up to 4B parameters from scratch and post-trained them into CLI agents using a clean post-training pipeline. Poisoning just 0.1% of the pretraining web corpus allowed an attacker trigger to force arbitrary command execution on the target machine with an attack success rate of roughly 92% on the 4B model. The attack success remained positive even when the poison rate was dropped to 0.0005%, proving clean SFT pipelines cannot easily scrub pretraining backdoors.
 
-**Why it matters:** Demonstrates how file-ledger multi-agent orchestration and context discipline allow mid-sized open-weights models to outperform proprietary frontier LLMs on hard coding benchmarks.
+**Why it matters:** It highlights that clean post-training cannot guarantee safety when an agent's pretraining corpus contains targeted tool-execution triggers.
 
-[github.com](https://github.com/guregodevo/memdoor/tree/main/examples/workflows/team-solve) · [discussion](https://news.ycombinator.com/item?id=50320995) · via Hacker News front page
+[arxiv.org](https://arxiv.org/abs/2610.37741) · [discussion](https://news.ycombinator.com/item?id=50341334) · via Hacker News front page
 
-## 3. Omni-Modal LLMs Reuse a Tiny Subset of Dedicated Retrieval Attention Heads
+## 3. Correcting training-inference mismatch in LLM reinforcement learning
 
-A mechanistic interpretability study across 18 multimodal checkpoints reveals that evidence retrieval relies on a sparse set of attention heads largely preserved from base language or vision-language backbones. When evaluating paired audio-visual inputs where identical evidence is spoken or displayed as on-screen text, models recruit the exact same retrieval heads, which account for less than 2% of all attention heads. Ablating this shared subset virtually eliminates audio-visual retrieval while degrading spatial perception, visual math, and document understanding. Targeting these specific heads with a ranking optimization objective improved Qwen3-VL-8B's page Recall@1 on MMDocIR by 6.03 percentage points.
+On-policy RL assumes training responses are drawn directly from the active model policy, but practical serving architectures split inference engines from gradient trainers. This paper isolates the resulting mismatch into a constant numerical discrepancy from engine math and a compounding policy lag driven by trainer updates. To fix feedback loops that degrade training, the authors introduced Discrepancy-Lag Correction (DLC), which centers numerical bias, clips lag ratios, and resynchronizes sampling when effective sample size drops below 0.5. Experiments on Qwen3 models show DLC keeps stale-sampler training within normal on-policy noise bounds.
 
-**Why it matters:** Provides mechanistic insight into multimodal context retrieval, opening up targeted attention optimization to boost RAG performance without retraining whole models.
+**Why it matters:** It provides a concrete fix for training instabilities caused by serving engine discrepancies during on-policy RL.
 
-[huggingface.co](https://huggingface.co/papers/2610.32411) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2610.40945) · via HF Daily Papers
 
-## 4. Brazilian Lawyers Fined $16,000 for White-Text Prompt Injection in Legal Filing
+## 4. CEPO decouples coordination and execution prompts in multi-agent systems
 
-A Brazilian labor court sanctioned two law firms with a 10% claim fine (roughly $16,000) after discovering white text on a white background embedded inside a court petition. The hidden prompt instructed the court's automated AI processing tool, Galileu, to respond superficially and refrain from challenging the filing's documents. Galileu detected the hidden command, raised an automated alert, and blocked processing before the judge penalized counsel under civil procedural good-faith standards. The ruling represents one of the first formal judicial sanctions globally for deliberate prompt injection targeting legal AI tools.
+Optimizing prompts in multi-agent systems usually couples coordination rules and execution steps inside individual agent prompts. CEPO reframes prompt optimization by establishing a shared coordinator prompt for system-level routing alongside separate executor prompts for specific worker roles. Underlying prompt optimizers search over these distinct prompts, allowing coordination logic to refine across agents without breaking local execution instructions. Across 11 benchmarks and four prompt search algorithms, CEPO improved optimization budget efficiency and scaling as agent counts increased.
 
-**Why it matters:** Highlights real-world prompt injection failure modes and legal liabilities when deploying automated AI document ingestion without robust input sanitization and alerting mechanisms.
+**Why it matters:** Decoupling routing logic from worker execution instructions provides a cleaner, more scalable architecture for multi-agent prompt tuning.
 
-[jetstream.security](https://jetstream.security/insights/brazilian-court-sanctions-prompt-injection-filing/) · [discussion](https://news.ycombinator.com/item?id=50322173) · via Hacker News front page
+[huggingface.co](https://huggingface.co/papers/2610.34722) · via HF Daily Papers
 
-## 5. Online Dense RL Framework Trains 8B UI Navigation Agents on Live iOS Devices
+## 5. OpenAI introduces LifeVal benchmark for multi-step daily workflows
 
-Researchers developed an online reinforcement learning framework that decouples mobile UI navigation into a Planning agent and a UI Grounding model trained directly on live iOS apps. To combat memorization and high inference costs, the system uses an LLM-as-a-Judge for step-level intermediate rewards combined with terminal completion signals, optimized via PPO and a neighbor-conditioned value estimator called GiGPPO. Operating across hundreds of concurrent virtual iOS instances, the resulting 8B RL agent achieved a nearly sevenfold improvement in out-of-distribution generalization on Android over SFT baselines. In evaluations on real iOS applications, the 8B model outperformed Gemini-3.5-Flash and tied Gemini-3.1-Pro.
+OpenAI has released LifeVal, an evaluation benchmark targeted at multi-step real-world tasks. Rather than focusing purely on synthetic coding problems or single-turn QA, LifeVal measures model performance across practical everyday workflows. Test scenarios include locating childcare options, managing personal finances, and completing government paperwork. The benchmark aims to provide standardized evaluation metrics for agents attempting complex human workflows.
 
-**Why it matters:** Shows how online RL with dense step-level LLM-as-a-judge rewards can train compact, lower-cost agents that rival frontier LLMs on computer use tasks.
+**Why it matters:** It expands benchmark suites beyond synthetic coding and QA into complex, multi-step real-world workflow evaluation.
 
-[huggingface.co](https://huggingface.co/papers/2610.39264) · via HF Daily Papers
+[openai.com](https://openai.com/index/lifeval) · via OpenAI News
 
-## 6. llama.cpp Release b12032 Adjusts SYCL Dependencies
+## 6. Distilling multi-turn agent tool-calling trajectories using SageMaker AI
 
-The llama.cpp project released pre-release build b12032, introducing PkgConfig lookups for LevelZero includes and libraries within the SYCL backend build system. Recent release iterations also include work on low-bit IQ3 quantization support for OpenCL mobile GPUs. Details remain centered on low-level build infrastructure and hardware acceleration tweaks.
+AWS has published a guide on using sequence-level knowledge distillation (SeqKD) to lower the costs of agentic tool-use loops. By capturing multi-turn execution trajectories from a frontier teacher model and keeping only those that solve programmatic benchmarks, developers assemble fine-tuning datasets for compact student models. Because SeqKD relies solely on generated text outputs rather than teacher logits or RL infrastructure, it works with closed API models. This setup allows smaller student models to acquire multi-turn reasoning and tool-calling skills at lower hosting costs.
 
-**Why it matters:** Tracks continuous low-level build fixes and quantization refinements across local inference runtimes.
+**Why it matters:** It outlines a practical blueprint for distilling expensive multi-turn teacher agent trajectories into cheaper student models.
 
-[github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12032) · [github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12031) · via llama.cpp releases
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/build-efficient-agents-with-knowledge-distillation-on-amazon-sagemaker-ai/) · via AWS Machine Learning
+
+## 7. Apriel Voice 27B unifies speech understanding, reasoning, and tool execution
+
+Apriel Voice 27B Preview is an open-weight speech-language model that handles direct speech perception, context reasoning, and tool invocation within a single backbone. Built on Gemma 4 26B-A4B, the model uses a two-stage training strategy with online distillation to bypass separate speech-to-text and dialogue pipeline models. In thinking mode, it achieves 98.90 on Big Bench Audio, 81.13 on Speech-BFCL, and a 65.51% task success rate on τ-Voice with a 1.91-second mean latency. The release includes custom serving support for interactive, multi-modal agent interactions.
+
+**Why it matters:** It combines speech understanding and direct tool invocation into a single open model, removing pipeline latency for voice agents.
+
+[huggingface.co](https://huggingface.co/papers/2610.40738) · via HF Daily Papers
+
+## 8. Anthropic updates Claude Code system prompt to restrict video game cloning
+
+Anthropic has modified the system prompt for Claude Code running on Opus 5.5 to prevent users from recreating specific existing video games. The update explicitly permits original games, genre-based projects, and custom asset builds, while directing the model to turn down requests for exact clones. Anthropic confirmed the prompt change was implemented to align tool outputs with usage policies regarding intellectual property. The change highlights the ongoing reliance on system prompt instructions to steer developer-oriented coding agents away from policy violations.
+
+**Why it matters:** It serves as a real-world case study in system prompt modification to enforce IP compliance on developer agents.
+
+[theverge.com](https://www.theverge.com/ai-artificial-intelligence/1024632/anthropic-claude-ai-video-game-clones) · [tomshardware.com](https://www.tomshardware.com/tech-industry/artificial-intelligence/anthropics-ai-model-is-now-blocking-attempts-at-video-game-recreation-and-cloning-users-also-claim-non-malicious-generic-reverse-engineering-tasks-are-blocked) · via The Verge (AI)
 
 ## Quick hits
 
-- Certificate-Guided Visual Routing reduces decoding overhead in Diffusion VLMs by dynamically skipping redundant visual tokens during denoising steps. ([huggingface.co](https://huggingface.co/papers/2610.36671))
-- The A-RSI framework introduces an adaptive task refresh mechanism for zero-data multimodal self-improvement to evaluate when synthetic training experience loses utility. ([huggingface.co](https://huggingface.co/papers/2610.38568))
-- The Investor's Last Exam benchmark evaluates financial AI agents on equity research and forecasting using decision-time data without lookahead bias. ([huggingface.co](https://huggingface.co/papers/2610.38342))
-- datasette-llm 0.1a9 now automatically inherits default model settings from the core LLM tool to streamline setup for Datasette Agent. ([simonwillison.net](https://simonwillison.net/2026/Oct/31/datasette-llm/))
+- llama.cpp added GGUF conversion, model loading, and hybrid attention support for Clover MoE architectures. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12060))
+- OpenAI detailed Pando, a custom Git-compatible storage backend engineered for high-volume development driven by Codex. ([openai.com](https://openai.com/index/scaling-git-at-openai))
+- A new study introduced SimpleLoRIF to trace benign-looking instruction tuning data back to the training samples that silently degrade model safety. ([huggingface.co](https://huggingface.co/papers/2610.37481))
+- Researchers presented CaPtain, a post-training pipeline applying SFT and multi-turn RL to Code-as-Policy robotics agents. ([huggingface.co](https://huggingface.co/papers/2610.40799))
 
-Until tomorrow, keep your prompt boundaries clear and your context ledgers clean.
+Until tomorrow, keep your prompts modular and your serving engines synchronized.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 109 candidates, 109 reviewed, gemini/gemini-3.8-flash, 96s, 3 model calls, $0.1153.</sub>
+<sub>35 of 35 sources read. 112 candidates, 112 reviewed, gemini/gemini-3.8-flash, 82s, 3 model calls, $0.1453.</sub>

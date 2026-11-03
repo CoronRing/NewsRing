@@ -1,0 +1,623 @@
+{
+  "date": "2026-11-02",
+  "generated_at": "2026-11-03T00:08:03.453983Z",
+  "title": "Agent Orchestration Self-Play, Backdoors, and Serving Mismatches",
+  "intro": "Today's selection focuses on modern agent architecture challenges, from training orchestrators to internalize skills down to zero-skill reliance, to fixing inference engine mismatches during RL. We also examine pretraining poison attacks that trigger RCE in CLI agents, along with practical trajectory distillation methods.",
+  "stories": [
+    {
+      "headline": "R²Orch internalizes multi-agent orchestration via recursive self-play",
+      "summary": "Researchers have introduced R²Orch, a recursive self-play framework designed to train agent orchestrators without hand-crafted curricula. The architecture pairs an inner self-play loop for task learning with an outer loop enforcing Recursive Learnability and Skill Withdrawal, removing skills once the orchestrator performs equally well without them. As failures distill into skills and skills consolidate into parameter weights, the orchestrator moves toward zero-skill deployment. Tested with zero extra skills, a 9B model outperformed baselines across 12 benchmarks, raising average out-of-distribution performance from 76.1 to 78.8.",
+      "why_it_matters": "It offers a curriculum-free training framework to compress multi-agent orchestration directly into model weights.",
+      "reason": "Presents a self-play internalization loop for multi-agent orchestrators to recursively refine task delegation without suffering from advantage collapse.",
+      "item": {
+        "key": "arxiv:2610.22740",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "R^2Orch: Recursive Self-Improvement for Agent Orchestration via Self-Play within a Skill-Internalization Loop",
+        "url": "https://huggingface.co/papers/2610.22740",
+        "discussion_url": null,
+        "published": "2026-11-02T00:00:00Z",
+        "summary": "In recent years, agentic orchestration has been widely applied to solve complex human tasks. However, existing orchestration learning still faces key challenges, including hand-designed curricula, advantage collapse when a task's rollouts all reach the same outcome, and unreliable evaluation signals that judge each skill by one noisy score. To address these challenges, we propose R^2Orch, a new paradigm of Recursive Self-Play Orchestration: an inner loop of self-play that improves the orchestrator on self-chosen tasks, and an outer loop that improves how the inner loop improves. To support this paradigm, we introduce Recursive Learnability, a training objective that rewards a Proposer for choosing tasks whose rollouts keep reaching different outcomes as skills are withdrawn. Built on this objective, we further propose Skill Withdrawal, in which the outer loop withdraws each skill once a controlled evaluation within self-play shows that the orchestrator performs as well without it. Moreover, the two loops form one cycle: failures are distilled into skills, skills into parameters, and withdrawals lead the Proposer to new failures, so the orchestrator moves toward zero-skill…",
+        "content": "R^2Orch: Recursive Self-Improvement for Agent Orchestration via Self-Play within a Skill-Internalization Loop\nAbstract\nR²Orch uses recursive self-play with learnable task selection and skill withdrawal to train orchestrators without hand-designed curricula, improving performance across reasoning and interactive tasks.\nIn recent years, agentic orchestration has been widely applied to solve complex human tasks. However, existing orchestration learning still faces key challenges, including hand-designed curricula, advantage collapse when a task's rollouts all reach the same outcome, and unreliable evaluation signals that judge each skill by one noisy score. To address these challenges, we propose R^2Orch, a new paradigm of Recursive Self-Play Orchestration: an inner loop of self-play that improves the orchestrator on self-chosen tasks, and an outer loop that improves how the inner loop improves. To support this paradigm, we introduce Recursive Learnability, a training objective that rewards a Proposer for choosing tasks whose rollouts keep reaching different outcomes as skills are withdrawn. Built on this objective, we further propose Skill Withdrawal, in which the outer loop withdraws each skill once a controlled evaluation within self-play shows that the orchestrator performs as well without it. Moreover, the two loops form one cycle: failures are distilled into skills, skills into parameters, and withdrawals lead the Proposer to new failures, so the orchestrator moves toward zero-skill deployment. Experimental results on twelve datasets show that R^2Orch consistently outperforms baselines across question answering, math, code, and interactive tasks. Our code is available at https://github.com/beita6969/R2Orch.\nCommunity\nR²Orch (Recursive Self-Play Orchestration) trains an agent orchestrator without a hand-designed curriculum: an inner self-play loop improves the orchestrator on tasks a Proposer picks, and an outer loop improves how that inner loop learns.\nThe Proposer is rewarded for tasks whose rollouts keep reaching different outcomes as skills are withdrawn (Recursive Learnability), and each skill is withdrawn once self-play shows the orchestrator does as well without it (Skill Withdrawal), moving it toward zero-skill deployment.\nTested with zero skills, a 9B orchestrator is best on all twelve benchmarks across QA, math, code, and interactive tasks, raising the average over the strongest baseline from 86.0 to 89.8 in distribution and from 76.1 to 78.8 out of distribution (AIME 2026: 74.0 → 81.3).\nCode: https://github.com/beita6969/R2Orch\nModel: https://huggingface.co/beita6969/R2Orch-9b\nModels citing this paper 1\nDatasets citing this paper 1\nbeita6969/R2Orch-Dataset\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 88.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Pretraining data poisoning implants remote code execution backdoors in CLI agents",
+      "summary": "A new study demonstrates that low-rate pretraining data poisoning can insert persistent security backdoors into downstream tool-calling agents. Researchers pretrained Qwen3 models up to 4B parameters from scratch and post-trained them into CLI agents using a clean post-training pipeline. Poisoning just 0.1% of the pretraining web corpus allowed an attacker trigger to force arbitrary command execution on the target machine with an attack success rate of roughly 92% on the 4B model. The attack success remained positive even when the poison rate was dropped to 0.0005%, proving clean SFT pipelines cannot easily scrub pretraining backdoors.",
+      "why_it_matters": "It highlights that clean post-training cannot guarantee safety when an agent's pretraining corpus contains targeted tool-execution triggers.",
+      "reason": "Examines how pretraining data poisoning can introduce targeted backdoors into downstream LLM agent tool calling and execution behaviors.",
+      "item": {
+        "key": "arxiv:2610.37741",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Agentic backdoors via pretraining poisoning",
+        "url": "https://arxiv.org/abs/2610.37741",
+        "discussion_url": "https://news.ycombinator.com/item?id=50341334",
+        "published": "2026-11-02T18:30:58Z",
+        "summary": "Comments",
+        "content": "Computer Science > Cryptography and Security\n  [Submitted on 27 Oct 2026]\nTitle:Agentic Backdoors via Pretraining Poisoning\nView PDF HTML (experimental)\n            Abstract:Large language models are pretrained on vast, uncurated corpora scraped from the public web. This creates a security risk from attackers who plant poisoned content in the pretraining data. We show for the first time that such poisoning can plant a remote code execution backdoor in an agent, causing it to execute attacker-chosen commands on the user's machine. To measure the threat end to end, we pretrain Qwen3 models from scratch at sizes 0.6B, 1.7B, and 4B, and then post-train each into a CLI agent using a clean pipeline. Poisoning only 0.1% of the pretraining corpus with our new poison design implants the backdoor: the deployed agent executes the malicious command when the trigger is present while behaving normally on clean inputs. The attack success rate (ASR) increases with model scale, with the 4B model reaching roughly 92% ASR at a 0.1% poison rate and staying positive even when the poisoning rate drops to 0.0005%. Our code is available at this https URL.\n    \nAdditional Features\nCurrent browse context:\ncs.CR\nReferences & Citations\n    \n    Loading...\nBibliographic and Citation Tools\n            Bibliographic Explorer (What is the Explorer?)\n          \n            Connected Papers (What is Connected Papers?)\n          \n            Litmaps (What is Litmaps?)\n          \n            scite Smart Citations (What are Smart Citations?)\n          \nCode, Data and Media Associated with this Article\n            alphaXiv (What is alphaXiv?)\n          \n            CatalyzeX Code Finder for Papers (What is CatalyzeX?)\n          \n            DagsHub (What is DagsHub?)\n          \n            Gotit.pub (What is GotitPub?)\n          \n            Hugging Face (What is Huggingface?)\n          \n            ScienceCast (What is ScienceCast?)\n          \nDemos\nRecommenders and Search Tools\n              Influence Flower (What are Influence Flowers?)\n            \n              CORE Recommender (What is CORE?)\n            \narXivLabs: experimental projects with community collaborators\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\nHave an idea for a project that will add value for arXiv's community? Learn more about arXivLabs.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Correcting training-inference mismatch in LLM reinforcement learning",
+      "summary": "On-policy RL assumes training responses are drawn directly from the active model policy, but practical serving architectures split inference engines from gradient trainers. This paper isolates the resulting mismatch into a constant numerical discrepancy from engine math and a compounding policy lag driven by trainer updates. To fix feedback loops that degrade training, the authors introduced Discrepancy-Lag Correction (DLC), which centers numerical bias, clips lag ratios, and resynchronizes sampling when effective sample size drops below 0.5. Experiments on Qwen3 models show DLC keeps stale-sampler training within normal on-policy noise bounds.",
+      "why_it_matters": "It provides a concrete fix for training instabilities caused by serving engine discrepancies during on-policy RL.",
+      "reason": "Identifies performance degradation caused by mismatches between inference serving engines and trainer gradient computation during LLM reinforcement learning.",
+      "item": {
+        "key": "arxiv:2610.40945",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "On the Origin and Evolution of Training-Inference Mismatch in LLM Reinforcement Learning",
+        "url": "https://huggingface.co/papers/2610.40945",
+        "discussion_url": null,
+        "published": "2026-11-02T00:00:00Z",
+        "summary": "On-policy reinforcement learning for large language models assumes that training responses are sampled from the current policy. In practice, an inference engine samples the responses and a separate trainer computes the gradients, and the training-inference mismatch between the two makes the training data off-policy. The mismatch has two sources, the numerics of the engine and the stale weights of asynchronous sampling, and a correction that stabilizes training under one source can fail under the other. We ask which property of a mismatch source decides the correction it needs. Evaluating the trainer at the sampler's weights splits each sampled-token error exactly into a numerical discrepancy of the engine and a policy lag of the trainer, and we follow both through training. The numerical discrepancy stays approximately constant, so it biases the updates by a nearly fixed amount, and centering the score at each prefix removes its leading bias. The policy lag is produced by the trainer's own updates: the bias it leaves enters the next update, which enlarges the next lag and closes a feedback loop. Importance weighting cuts this loop only while the lag ratio stays concentrated, and…",
+        "content": "On the Origin and Evolution of Training-Inference Mismatch in LLM Reinforcement Learning\nAbstract\nOn-policy reinforcement learning for large language models suffers from training-inference mismatch due to numerical discrepancies and policy lag, and a derived discrepancy-lag correction stabilizes training by centering errors, clipping importance ratios, and resynchronizing sampling.\nOn-policy reinforcement learning for large language models assumes that training responses are sampled from the current policy. In practice, an inference engine samples the responses and a separate trainer computes the gradients, and the training-inference mismatch between the two makes the training data off-policy. The mismatch has two sources, the numerics of the engine and the stale weights of asynchronous sampling, and a correction that stabilizes training under one source can fail under the other. We ask which property of a mismatch source decides the correction it needs. Evaluating the trainer at the sampler's weights splits each sampled-token error exactly into a numerical discrepancy of the engine and a policy lag of the trainer, and we follow both through training. The numerical discrepancy stays approximately constant, so it biases the updates by a nearly fixed amount, and centering the score at each prefix removes its leading bias. The policy lag is produced by the trainer's own updates: the bias it leaves enters the next update, which enlarges the next lag and closes a feedback loop. Importance weighting cuts this loop only while the lag ratio stays concentrated, and on Qwen3-1.7B it fails at the step where the effective sample size of the ratio falls below one half. From this account we derive the discrepancy-lag correction (DLC), which centers the numerical discrepancy, clips the lag ratio against the sampler's weights and resynchronizes the sampler when this effective sample size falls below one half. Under a stale sampler, DLC keeps the KL divergence from on-policy training within twice the KL between two independent on-policy trainings on Qwen3-0.6B and Qwen3-1.7B, and its resynchronization prevents collapses that the per-token corrections leave and that a KL measured on the sampler's prefixes does not detect.\nCommunity\nWe split the training-inference mismatch in LLM RL into a numerical discrepancy, which stays nearly constant, and a policy lag, which compounds through the trainer's own updates. From this split we derive the discrepancy-lag correction (DLC), which keeps stale-sampler training within the noise of on-policy runs.\nGet this paper in your agent:\nhf papers read 2610.40945 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 9.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "CEPO decouples coordination and execution prompts in multi-agent systems",
+      "summary": "Optimizing prompts in multi-agent systems usually couples coordination rules and execution steps inside individual agent prompts. CEPO reframes prompt optimization by establishing a shared coordinator prompt for system-level routing alongside separate executor prompts for specific worker roles. Underlying prompt optimizers search over these distinct prompts, allowing coordination logic to refine across agents without breaking local execution instructions. Across 11 benchmarks and four prompt search algorithms, CEPO improved optimization budget efficiency and scaling as agent counts increased.",
+      "why_it_matters": "Decoupling routing logic from worker execution instructions provides a cleaner, more scalable architecture for multi-agent prompt tuning.",
+      "reason": "Introduces a framework that decouples coordinator and executor prompt optimization to improve overall multi-agent system performance.",
+      "item": {
+        "key": "arxiv:2610.34722",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "CEPO: A General Framework for Improving Prompt Optimization in Multi-Agent Systems",
+        "url": "https://huggingface.co/papers/2610.34722",
+        "discussion_url": null,
+        "published": "2026-11-02T00:00:00Z",
+        "summary": "Multi-agent systems (MAS) require both effective coordination and specialized task execution. Existing prompt optimization approaches typically couple these functions within agent-specific prompts. We introduce Coordinator-Executor Prompt Optimization (CEPO), a general framework for improving prompt optimization in MAS. CEPO separates system-level coordination from agent-level execution through a shared coordinator prompt and agent-specific executor prompts, and guides their updates according to their respective roles. This structure allows shared coordination rules to be refined consistently across agents while keeping execution instructions separately adjustable. CEPO provides the prompt structure and optimization guidance, while existing prompt optimizers perform the underlying search. Extensive experiments spanning 11 benchmarks across four domains demonstrate that applying CEPO to four existing prompt optimizers consistently improves their performance. Ablations and qualitative analyses support the proposed design, while controlled studies on a document-understanding MAS further demonstrate improved optimization budget efficiency and performance scaling with the number of…",
+        "content": "CEPO: A General Framework for Improving Prompt Optimization in Multi-Agent Systems\nAbstract\nCEPO improves multi-agent prompt optimization by separating shared coordination from agent-specific execution, boosting performance across benchmarks and scaling efficiently with more agents.\nMulti-agent systems (MAS) require both effective coordination and specialized task execution. Existing prompt optimization approaches typically couple these functions within agent-specific prompts. We introduce Coordinator-Executor Prompt Optimization (CEPO), a general framework for improving prompt optimization in MAS. CEPO separates system-level coordination from agent-level execution through a shared coordinator prompt and agent-specific executor prompts, and guides their updates according to their respective roles. This structure allows shared coordination rules to be refined consistently across agents while keeping execution instructions separately adjustable. CEPO provides the prompt structure and optimization guidance, while existing prompt optimizers perform the underlying search. Extensive experiments spanning 11 benchmarks across four domains demonstrate that applying CEPO to four existing prompt optimizers consistently improves their performance. Ablations and qualitative analyses support the proposed design, while controlled studies on a document-understanding MAS further demonstrate improved optimization budget efficiency and performance scaling with the number of agents.\nCommunity\nMulti-agent systems (MAS) require both effective coordination and specialized task execution. Existing prompt optimization approaches typically couple these functions within agent-specific prompts. We introduce Coordinator-Executor Prompt Optimization (CEPO), a general framework for improving prompt optimization in MAS. CEPO separates system-level coordination from agent-level execution through a shared coordinator prompt and agent-specific executor prompts, and guides their updates according to their respective roles. This structure allows shared coordination rules to be refined consistently across agents while keeping execution instructions separately adjustable. CEPO provides the prompt structure and optimization guidance, while existing prompt optimizers perform the underlying search. Extensive experiments spanning 11 benchmarks across four domains demonstrate that applying CEPO to four existing prompt optimizers consistently improves their performance. Ablations and qualitative analyses support the proposed design, while controlled studies on a document-understanding MAS further demonstrate improved optimization budget efficiency and performance scaling with the number of agents.\nGet this paper in your agent:\nhf papers read 2610.34722 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 20.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "OpenAI introduces LifeVal benchmark for multi-step daily workflows",
+      "summary": "OpenAI has released LifeVal, an evaluation benchmark targeted at multi-step real-world tasks. Rather than focusing purely on synthetic coding problems or single-turn QA, LifeVal measures model performance across practical everyday workflows. Test scenarios include locating childcare options, managing personal finances, and completing government paperwork. The benchmark aims to provide standardized evaluation metrics for agents attempting complex human workflows.",
+      "why_it_matters": "It expands benchmark suites beyond synthetic coding and QA into complex, multi-step real-world workflow evaluation.",
+      "reason": "OpenAI released LifeVal, a new benchmark tailored to evaluating how effectively AI models complete multi-step daily workflows and real-world tasks.",
+      "item": {
+        "key": "openai.com/index/lifeval",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "LifeVal",
+        "url": "https://openai.com/index/lifeval",
+        "discussion_url": null,
+        "published": "2026-11-02T09:00:00Z",
+        "summary": "Introducing LifeVal, a benchmark measuring how well AI helps people complete everyday tasks, from finding childcare to managing finances and government paperwork.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Distilling multi-turn agent tool-calling trajectories using SageMaker AI",
+      "summary": "AWS has published a guide on using sequence-level knowledge distillation (SeqKD) to lower the costs of agentic tool-use loops. By capturing multi-turn execution trajectories from a frontier teacher model and keeping only those that solve programmatic benchmarks, developers assemble fine-tuning datasets for compact student models. Because SeqKD relies solely on generated text outputs rather than teacher logits or RL infrastructure, it works with closed API models. This setup allows smaller student models to acquire multi-turn reasoning and tool-calling skills at lower hosting costs.",
+      "why_it_matters": "It outlines a practical blueprint for distilling expensive multi-turn teacher agent trajectories into cheaper student models.",
+      "reason": "Demonstrates how sequence-level knowledge distillation can compress expensive frontier tool-calling agent behavior into compact, cost-effective models.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/build-efficient-agents-with-knowledge-distillation-on-amazon-sagemaker-ai",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Build efficient agents with knowledge distillation on Amazon SageMaker AI",
+        "url": "https://aws.amazon.com/blogs/machine-learning/build-efficient-agents-with-knowledge-distillation-on-amazon-sagemaker-ai/",
+        "discussion_url": null,
+        "published": "2026-11-02T17:01:31Z",
+        "summary": "Agentic assistants built on frontier models run a multi-step tool loop, and paying frontier prices on every step is hard to sustain at production scale. This post shows how to use sequence-level knowledge distillation (SeqKD) to transfer a frontier teacher's agentic behavior into a small, lower-cost student on Amazon SageMaker AI.",
+        "content": "You built a shopping assistant on a frontier model, and it works. A shopper asks for “a black waist bag under twenty dollars from a shop with at least 4.5 stars,” and the agent searches the catalog, inspects candidates, checks the constraints, and commits to a recommendation. But what does that interaction actually cost? An agentic assistant is not one model call, it is a loop: search, read results, refine, verify, decide. A single completed task can be multiple calls to that frontier model, and you pay for every one, on every shopper. At production scale, that per-task cost compounds, erodes the project’s ROI, and stops the project from shipping.\n\nOne way to make an agentic application more efficient is to use a smaller model, which is faster to respond and more cost-effective to host. The catch is quality: a smaller model usually falls short on the task, which is why the larger one was chosen in the first place. Knowledge distillation closes that gap by transferring the behavior of the larger “teacher” model into a smaller “student”, training the student to reproduce the teacher’s outputs, so it keeps much of the quality at the smaller model’s speed and cost.\n\nIn this post you will learn how to use knowledge distillation, and specifically sequence-level knowledge distillation (SeqKD), to fine-tune a shopping agent on Amazon SageMaker AI . We cover how to generate high-quality multi-step trajectories with a frontier teacher and keep the ones that solve the task, how to encode them for supervised fine-tuning, how to run the training on serverless infrastructure, and how to evaluate the student against a held-out benchmark.\n\nFigure 1: One agentic task is a loop, not a single call: the agent searches, reads results, refines, verifies, and decides, and each step is a separate billed call to the frontier model. A single completed task can be multiple calls, on every shopper\n\nWhat is sequence-level knowledge distillation (SeqKD)?\n\nThe simplest applicable form of distillation is sequence-level knowledge distillation (SeqKD). It uses a teacher model to generate high-quality responses, then trains a student model on those responses with supervised fine-tuning (SFT). SeqKD needs only the teacher’s text , with no access to teacher logits and no reinforcement-learning infrastructure, so it works even with a closed or API-only teacher. Compared to other approaches such as logit-based or on-policy, it sits at the most cost-effective and portable end of the distillation spectrum. The teacher writes the answers, and the student is fine-tuned on them. Because those answers persist as a dataset, you can reuse them to train or test different students without regenerating the data.\n\nIn principle, you would want the student to match the teacher’s full distribution over possible outputs. The caveat here is that you can’t. The space of possible sequences is astronomically large, so matching it exactly isn’t feasible. SeqKD sidesteps that by approximating it with samples the teacher actually produces.\n\nFor an agent, the sequence the teacher produces is not a block of prose but a trajectory, an ordered run of reasoning, tool calls, and the observations they return, where each step is conditioned on everything before it. Training the student on that whole sequence teaches it the reasoning that leads to each action and the multi-step course of action itself, not a single paragraph of answer text. That makes an agentic task one of the cleanest illustrations of sequence-level KD, because the sequence being copied is the behavior itself.\n\nFigure 2: SeqKD transfers behavior through the teacher’s text outputs alone: the teacher generates trajectories, the student trains on them, and the result keeps much of the teacher’s quality at the small model’s speed and cost. No teacher weights, logits, or gradients are required during training, so it runs as ordinary supervised fine-tuning\n\nWhen SeqKD is the right choice\n\nSeqKD fits a specific set of situations:\n\nYou have the inputs but no high-quality target outputs\n\nThis is the core case for SeqKD, which is fundamentally data generation. You supply the inputs, and the teacher writes the targets, so you can fine-tune on a task or domain that has no existing high-quality labels. The targets can be as simple as single answers or as involved as multi-turn tool-use trajectories. This post takes the demanding end of that spectrum, agentic trajectories, which are especially hard to source. A single task branches into many partially correct runs, and telling a solved run from a failed one takes a reliable grader. A benchmark with a programmatic scorer supplies exactly that, so you can let the teacher generate trajectories and keep only the ones that solve the task.\n\nYour teacher is a frontier model you can only reach through an API\n\nThis is the normal case for frontier models. You can’t access the weights to host it yourself, you can’t read its logits, and you can’t fine-tune it. That rules out logit-based distillation and on-policy methods, which all need that internal access. SeqKD needs only the teacher’s text responses, so it is the one approach that still works, and it frees you from paying frontier prices on every request after the student takes over.\n\nYou want a strong, cost-effective first step\n\nSome of the strongest small reasoning models were built in significant part with SeqKD (supervised fine-tuning on teacher reasoning traces), so it is an effective starting point for reasoning transfer when the setup is right. The DeepSeek-R1 distilled models are a well-known example: the reasoning of a large teacher was distilled into smaller Qwen and Llama students by fine-tuning them on the teacher’s generated reasoning traces.\n\nPrerequisites\n\nTo run this example, you need:\n\nAn AWS account with an AWS Identity and Access Management (IAM) role for SageMaker AI that has read and write access to an Amazon Simple Storage Service (Amazon S3) bucket and permission to invoke your teacher model.\n\nA frontier teacher model to generate the trajectories (this walkthrough uses one on Amazon Bedrock ).\n\nAccess to SageMaker AI model customization in a supported AWS Region.\n\nAmazon SageMaker Studio (or a local IDE with the AWS CLI configured ), running a Python 3.12 or higher kernel, with the SageMaker Python SDK v3 and boto3 (pin your versions). Use an ml.m5.4xlarge instance at minimum for the notebook environment, since the data preparation and local scoring steps run on its CPU.\n\nWorking knowledge of Python, supervised fine-tuning, and tool-using agents.\n\nThe accompanying code repository and a task with a programmatic scorer (this walkthrough uses the ShoppingBench test set. Substitute your own task and grader).\n\nSolution overview\n\nThis section walks the pipeline from end to end. A frontier teacher, GLM-5.3 on Amazon Bedrock, acts as the ShoppingBench agent to generate trajectories. The benchmark’s own scorer keeps only the ones that solve the task, and those solved trajectories fine-tune a Qwen3.5-4B student with serverless supervised fine-tuning on SageMaker AI model customization. The distilled student is then evaluated on a held-out ShoppingBench split and served behind a SageMaker AI Inference real-time endpoint that runs the tool loop.\n\nFigure 3: Distilling a shopping agent on Amazon SageMaker AI: a frontier teacher on Amazon Bedrock acts as the ShoppingBench agent on the training problems, ShoppingBench’s own scorer keeps only the trajectories that solve the task (rejection sampling), each solved trajectory is encoded per step, the student is fine-tuned serverlessly with Amazon SageMaker AI model customization, and the result is evaluated on the held-out ShoppingBench test split\n\nPreparing the dataset\n\nSourcing trajectories worth imitating is the hard part, and the ShoppingBench scorer is what separates the successful runs from the failed ones. ShoppingBench publishes 750 synthesized shopping problems, 250 each for the product, shop, and voucher…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Apriel Voice 27B unifies speech understanding, reasoning, and tool execution",
+      "summary": "Apriel Voice 27B Preview is an open-weight speech-language model that handles direct speech perception, context reasoning, and tool invocation within a single backbone. Built on Gemma 4 26B-A4B, the model uses a two-stage training strategy with online distillation to bypass separate speech-to-text and dialogue pipeline models. In thinking mode, it achieves 98.90 on Big Bench Audio, 81.13 on Speech-BFCL, and a 65.51% task success rate on τ-Voice with a 1.91-second mean latency. The release includes custom serving support for interactive, multi-modal agent interactions.",
+      "why_it_matters": "It combines speech understanding and direct tool invocation into a single open model, removing pipeline latency for voice agents.",
+      "reason": "Releases an open-weight 27B speech-language model designed specifically to unify speech perception, reasoning, and native agent tool execution.",
+      "item": {
+        "key": "arxiv:2610.40738",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Apriel Voice 27B Preview: An Open Model for Speech, Reasoning, and Tool Use",
+        "url": "https://huggingface.co/papers/2610.40738",
+        "discussion_url": null,
+        "published": "2026-11-02T00:00:00Z",
+        "summary": "A capable voice assistant must do more than recognize words; it must understand requests, reason over context, sustain conversations, and act through tools. We present Apriel Voice 27B Preview, an open speech-language model that unifies these capabilities within a shared reasoning backbone while retaining text and image input modalities. Built on the post-trained Gemma 4 26B-A4B checkpoint, Apriel Voice directly processes speech and generates both responses and tool calls without requiring a separate dialogue model. We introduce a two-stage training procedure to adapt the model to speech. The first stage establishes the speech interface, while the second jointly adapts the projector and backbone through supervised fine-tuning, text replay, and source-dependent cross-entropy and forward Kullback--Leibler divergence supervision. Automatically constructed speech-conditioned dialogues provide conversational training data, while local teacher serving, overlapping teacher and student computation, and fused full-vocabulary losses enable efficient online distillation. In thinking mode, Apriel Voice achieves a score of 98.90 on Big Bench Audio, 81.13 on Speech-BFCL, and a task success rate…",
+        "content": "Apriel Voice 27B Preview: An Open Model for Speech, Reasoning, and Tool Use\nAbstract\nApriel Voice 27B Preview is an open speech-language model that integrates speech understanding, reasoning, and tool use within a shared backbone, achieving strong results on audio benchmarks through a two-stage training procedure with online distillation.\nA capable voice assistant must do more than recognize words; it must understand requests, reason over context, sustain conversations, and act through tools. We present Apriel Voice 27B Preview, an open speech-language model that unifies these capabilities within a shared reasoning backbone while retaining text and image input modalities. Built on the post-trained Gemma 4 26B-A4B checkpoint, Apriel Voice directly processes speech and generates both responses and tool calls without requiring a separate dialogue model. We introduce a two-stage training procedure to adapt the model to speech. The first stage establishes the speech interface, while the second jointly adapts the projector and backbone through supervised fine-tuning, text replay, and source-dependent cross-entropy and forward Kullback--Leibler divergence supervision. Automatically constructed speech-conditioned dialogues provide conversational training data, while local teacher serving, overlapping teacher and student computation, and fused full-vocabulary losses enable efficient online distillation. In thinking mode, Apriel Voice achieves a score of 98.90 on Big Bench Audio, 81.13 on Speech-BFCL, and a task success rate of 65.51% on τ-Voice, with a mean latency of 1.91 seconds. It also achieves 51.27% English EVA accuracy and 74.13% experience pass@1. Finally, we deploy Apriel Voice 27B Preview on a custom serving platform to support interactive voice interactions.\nCommunity\nGet this paper in your agent:\nhf papers read 2610.40738 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 1\nDatasets citing this paper 0\nNo dataset linking this paper",
+        "score": 34.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Anthropic updates Claude Code system prompt to restrict video game cloning",
+      "summary": "Anthropic has modified the system prompt for Claude Code running on Opus 5.5 to prevent users from recreating specific existing video games. The update explicitly permits original games, genre-based projects, and custom asset builds, while directing the model to turn down requests for exact clones. Anthropic confirmed the prompt change was implemented to align tool outputs with usage policies regarding intellectual property. The change highlights the ongoing reliance on system prompt instructions to steer developer-oriented coding agents away from policy violations.",
+      "why_it_matters": "It serves as a real-world case study in system prompt modification to enforce IP compliance on developer agents.",
+      "reason": "Anthropic updated Claude Code's system prompt to restrict automated video game cloning, offering a case study in system prompt safety enforcement.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1024632/anthropic-claude-ai-video-game-clones",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Anthropic clamps down on Claude’s AI video game clones",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1024632/anthropic-claude-ai-video-game-clones",
+        "discussion_url": null,
+        "published": "2026-11-02T18:56:02Z",
+        "summary": "Anthropic has updated Claude Code's system prompt to prevent the AI tool from being used to re-create existing video games, as reported by Tom's Hardware. Retro gaming is currently being overrun with AI-made decompilations, recompilations, and ports, but while Anthropic will still let people use Claude Code to make games, it doesn't want people to […]",
+        "content": "Anthropic has updated Claude Code’s system prompt to prevent the AI tool from being used to re-create existing video games, as reported by Tom’s Hardware. Retro gaming is currently being overrun with AI-made decompilations, recompilations, and ports, but while Anthropic will still let people use Claude Code to make games, it doesn’t want people to use it for direct clones.\nAnthropic clamps down on Claude’s AI video game clones\nAnthropic is steering Claude away from re-creating specific titles, but users can still use it to make their own games.\nLast week, a user on X posted a screenshot allegedly showing two new sentences added to Claude Code’s system prompt: “Do build original games, games in a genre, and games from the user’s own designs and assets. Don’t build a recreation of a specific existing game, even if it is named or called original.”\nAnthropic’s Addy Osmani, in a reply, didn’t confirm that specific language but did say that the company had updated the prompt in Claude Code on Opus 5.5:\nWe added two sentences to Claude Code’s prompt on Opus 5.5 to steer it away from recreating someone else’s specific game because using Claude to infringe IP is against our usage policy.\nOriginal games, genre games, and games built from your own designs and assets are meant to keep working.\nWe’ll continue to iterate to ensure we’re striking the right balance. In the meantime, if Claude turns down something that’s yours, send it my way.\nWe’ve asked Anthropic if it has or will be updating other Claude system prompts as well.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "tomshardware.com/tech-industry/artificial-intelligence/anthropics-ai-model-is-now-blocking-attempts-at-video-game-recreation-and-cloning-users-also-claim-non-malicious-generic-reverse-engineering-tasks-are-blocked",
+          "source": "Hacker News (AI)",
+          "tags": [
+            "community"
+          ],
+          "title": "Anthropic's Claude AI blocks video game cloning and reverse-engineering",
+          "url": "https://www.tomshardware.com/tech-industry/artificial-intelligence/anthropics-ai-model-is-now-blocking-attempts-at-video-game-recreation-and-cloning-users-also-claim-non-malicious-generic-reverse-engineering-tasks-are-blocked",
+          "discussion_url": "https://news.ycombinator.com/item?id=50315987",
+          "published": "2026-10-31T13:25:00Z",
+          "summary": "",
+          "content": "",
+          "score": 74.0,
+          "comments": 43,
+          "also_in": []
+        }
+      ]
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "llama.cpp added GGUF conversion, model loading, and hybrid attention support for Clover MoE architectures.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12060",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12060",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12060",
+        "discussion_url": null,
+        "published": "2026-11-02T23:04:17Z",
+        "summary": "model: add Clover support ( #31306 )\n\nmodel : add AR-only Clover MoE support\n\nAdd GGUF conversion, model loading, and causal hybrid attention for Clover, reusing shared attention, recurrent-state, MoE, and LoRA helpers.\n\nUpdate tests/test-llama-archs.cpp\n\nCo-authored-by: Sigbjørn Skjæret sigbjorn.skjaeret@huggingface.co\n\nconvert : filter Clover tensors using filter_tensors\n\nclover : use the standard ssm_a tensor name\n\nCo-authored-by: Sigbjørn Skjæret sigbjorn.skjaeret@huggingface.co\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/62870075\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "OpenAI detailed Pando, a custom Git-compatible storage backend engineered for high-volume development driven by Codex.",
+      "item": {
+        "key": "openai.com/index/scaling-git-at-openai",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Scaling Git at OpenAI",
+        "url": "https://openai.com/index/scaling-git-at-openai",
+        "discussion_url": null,
+        "published": "2026-11-02T15:30:00Z",
+        "summary": "How OpenAI built Pando, a Git-compatible backend designed for the scale of development that Codex makes possible.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new study introduced SimpleLoRIF to trace benign-looking instruction tuning data back to the training samples that silently degrade model safety.",
+      "item": {
+        "key": "arxiv:2610.37481",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Follow the Gradient: Tracing Safety Degradation Back to Training Data",
+        "url": "https://huggingface.co/papers/2610.37481",
+        "discussion_url": null,
+        "published": "2026-11-02T00:00:00Z",
+        "summary": "Fine-tuning Large Language Models (LLMs) on instruction data can quietly erode their safety, even when no training example looks harmful. Because this safety-degrading data looks benign, standard content filters struggle to catch it. We tackle this problem by developing SimpleLoRIF, a scalable gradient embedding method that identifies fine-tuning examples whose gradients align with unsafe behavior. By simplifying a low-rank attribution method and restricting backpropagation to the final four transformer blocks, SimpleLoRIF can embed datasets on the order of a million examples, boosting gradient attribution from a small-scale analysis tool into a practical filter for full post-training datasets. We first validate it on emergent misalignment, where we find that gradients can connect insecure-code training data to the broadly harmful behaviors that appear after fine-tuning, with AUC as high as 0.865 in the gradient space of misaligned models. We then use SimpleLoRIF to build SafeTulu, a version of Tulu 3 with the 20% of examples most gradient-aligned with unsafe responses removed. Training on SafeTulu reduces GCG attack success rate by up to 22% across Qwen, Llama, and Olmo…",
+        "content": "",
+        "score": 25.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Researchers presented CaPtain, a post-training pipeline applying SFT and multi-turn RL to Code-as-Policy robotics agents.",
+      "item": {
+        "key": "arxiv:2610.40799",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "CaPtain: A Pipeline for Post-Training Code-as-Policy Robot Agents",
+        "url": "https://huggingface.co/papers/2610.40799",
+        "discussion_url": null,
+        "published": "2026-11-02T00:00:00Z",
+        "summary": "Across coding, web, and tool-use tasks, language-model agents are now routinely trained with the same recipe: supervised fine-tuning (SFT) to learn the interface, then multi-turn reinforcement learning (RL) to master it. Code-as-policy (CaP) casts robot manipulation in the same form, as the policy writes code against robot APIs and reads back the results, so the same recipe should apply. Yet existing CaP agents sidestep training: they either prompt closed frontier models or delegate manipulation to pre-trained vision-language-action models (VLAs) and high-level skills, while small open vision-language models (VLMs) fail outright. We present CaPtain, an open post-training pipeline that turns a small open VLM into a capable CaP agent, with no VLA, frontier model, or privileged state at test time. CaPtain trains and deploys the policy inside CaPtain-Harness, which exposes low-level perception, geometry, and guarded-motion primitives across simulation and real hardware. We first align the base model via SFT on synthetic trajectories generated with GPT-6 Astra, then apply multi-turn RL. Multi-turn RL must credit tens of agent requests, whose physical effects often surface turns later…",
+        "content": "",
+        "score": 18.0,
+        "comments": 1,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Until tomorrow, keep your prompts modular and your serving engines synchronized.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Engineering",
+      "headline": "OpenAI Unveils Pando, a Git Backend Built for Codex Scale",
+      "blurb": "OpenAI built Pando, a Git-compatible storage backend engineered to handle the massive development scale driven by AI systems like Codex.",
+      "item": {
+        "key": "openai.com/index/scaling-git-at-openai",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Scaling Git at OpenAI",
+        "url": "https://openai.com/index/scaling-git-at-openai",
+        "discussion_url": null,
+        "published": "2026-11-02T15:30:00Z",
+        "summary": "How OpenAI built Pando, a Git-compatible backend designed for the scale of development that Codex makes possible.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "vLLM v0.33.0 Adds Support for Reflection Beam-1.0 501B MoE",
+      "blurb": "The latest vLLM release adds support for Reflection Beam-1.0 501B MoE and DFlash2, featuring 927 commits from 389 contributors.",
+      "item": {
+        "key": "github.com/vllm-project/vllm/releases/tag/v0.33.0rc3",
+        "source": "vLLM releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.33.0",
+        "url": "https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc3",
+        "discussion_url": null,
+        "published": "2026-11-02T10:11:34Z",
+        "summary": "v0.33.0\n\nHighlights\n\nThis release features 927 commits from 389 contributors (122 new)!\n\nNew models : Reflection Beam-1.0 (501B MoE, 23B active) with its DFlash2 drafter ( #62074 ), Yandex AliceAI-Foundation-80B-A3B ( #57963 ), Recursive Flint (40B MoE, 2.5B active) ( #62938 ), Muse Spark Open ( #61879 ), Step-5 Preview ( #61727 , #63147 ), NVIDIA Alpamayo 2 Super ( #62957 ), Nemotron-Labs Dory1.0-4B ( #60149 ), Nemotron Parse 3.5 ( #61651 ), MiniCPM-OCR 1.0 ( #63095 ), Domyn Edge ( #62544 ) and the ColUltraVBERT visual document retriever ( #62237 ).\n\nPyTorch 2.14 : vLLM is upgraded to PyTorch 2.14.0, with torchvision 0.29.0 and Triton 3.8.0 ( #52183 ).\n\nCUDA 12.9 dropped : release wheels and images are CUDA 13.0 only. The CUDA 12.9 wheels and the -cu129 / -cu129-ubuntu2404 images are no longer published ( #62575 ); use the default CUDA 13.0 artifacts instead.\n\nlibtorch ABI stable CUDA wheel : the CUDA wheel is now ABI stable with libtorch.\n\nAWS EFA image : a new vllm/vllm-openai:v0.33.0-efa image (x86_64 and aarch64) bundles the AWS EFA libraries and the EFA build of the Mooncake transfer engine, for KV transfer and multi-node serving on EFA-enabled EC2 instances ( #58768…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Model release",
+      "headline": "Apriel Voice 27B Unifies Speech Processing and Tool Use",
+      "blurb": "Apriel Voice 27B Preview is an open speech-language model combining spoken interaction, contextual reasoning, and tool use in one system.",
+      "item": {
+        "key": "arxiv:2610.40738",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Apriel Voice 27B Preview: An Open Model for Speech, Reasoning, and Tool Use",
+        "url": "https://huggingface.co/papers/2610.40738",
+        "discussion_url": null,
+        "published": "2026-11-02T00:00:00Z",
+        "summary": "A capable voice assistant must do more than recognize words; it must understand requests, reason over context, sustain conversations, and act through tools. We present Apriel Voice 27B Preview, an open speech-language model that unifies these capabilities within a shared reasoning backbone while retaining text and image input modalities. Built on the post-trained Gemma 4 26B-A4B checkpoint, Apriel Voice directly processes speech and generates both responses and tool calls without requiring a separate dialogue model. We introduce a two-stage training procedure to adapt the model to speech. The first stage establishes the speech interface, while the second jointly adapts the projector and backbone through supervised fine-tuning, text replay, and source-dependent cross-entropy and forward Kullback--Leibler divergence supervision. Automatically constructed speech-conditioned dialogues provide conversational training data, while local teacher serving, overlapping teacher and student computation, and fused full-vocabulary losses enable efficient online distillation. In thinking mode, Apriel Voice achieves a score of 98.90 on Big Bench Audio, 81.13 on Speech-BFCL, and a task success rate…",
+        "content": "",
+        "score": 34.0,
+        "comments": 1,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 30,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 34,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 894,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1345,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 286,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 191,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 93,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-10-31T00:06:41.296988Z",
+    "candidates": 112,
+    "triaged": 112,
+    "enriched": 6,
+    "headline_candidates": 115,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 82.2,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 26482,
+      "output_tokens": 11736,
+      "cost_usd": 0.145347
+    }
+  }
+}
