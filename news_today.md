@@ -1,92 +1,92 @@
-# Agent Orchestration Self-Play, Backdoors, and Serving Mismatches
+# Agent Harnessing, Multi-Node llama.cpp, and Software Consent Violations
 
-*2026-11-02 · 8 stories*
+*2026-11-03 · 9 stories*
 
-![Top AI stories for 2026-11-02](https://coronring.github.io/NewsRing/today.png)
+Today's lineup highlights the boundary between smart engineering and overreaching automation, starting with Postman stealth-installing agent plugins into local developer environments. On the technical side, we cover multi-node scaling in llama.cpp, cryptographic inference verification, and fresh benchmarks for multi-repo coding and long-context state tracking.
 
-Today's selection focuses on modern agent architecture challenges, from training orchestrators to internalize skills down to zero-skill reliance, to fixing inference engine mismatches during RL. We also examine pretraining poison attacks that trigger RCE in CLI agents, along with practical trajectory distillation methods.
+## 1. llama.cpp gains multi-node tensor parallelism via NCCL
 
-## Across AI today
+The llama.cpp CUDA backend has added NCCL support to enable multi-node tensor parallelism across distributed processes. The update introduces generic multi-process communicator interfaces for per-rank communicators and wires them into the RPC server when available. It also adjusts backend parameters, such as setting maxCTAs to 8 for DGX Spark setups. This allows running split inference workloads beyond a single machine's local GPU limits without abandoning the ggml ecosystem.
 
-- **OpenAI Unveils Pando, a Git Backend Built for Codex Scale** OpenAI built Pando, a Git-compatible storage backend engineered to handle the massive development scale driven by AI systems like Codex. ([openai.com](https://openai.com/index/scaling-git-at-openai))
-- **vLLM v0.33.0 Adds Support for Reflection Beam-1.0 501B MoE** The latest vLLM release adds support for Reflection Beam-1.0 501B MoE and DFlash2, featuring 927 commits from 389 contributors. ([github.com](https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc3))
-- **Apriel Voice 27B Unifies Speech Processing and Tool Use** Apriel Voice 27B Preview is an open speech-language model combining spoken interaction, contextual reasoning, and tool use in one system. ([huggingface.co](https://huggingface.co/papers/2610.40738))
+**Why it matters:** Multi-node tensor parallelism expands local inference capabilities, enabling self-hosted serving of larger open-weight models across cluster nodes.
 
-## 1. R²Orch internalizes multi-agent orchestration via recursive self-play
+[github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12079) · [github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12078) · via llama.cpp releases
 
-Researchers have introduced R²Orch, a recursive self-play framework designed to train agent orchestrators without hand-crafted curricula. The architecture pairs an inner self-play loop for task learning with an outer loop enforcing Recursive Learnability and Skill Withdrawal, removing skills once the orchestrator performs equally well without them. As failures distill into skills and skills consolidate into parameter weights, the orchestrator moves toward zero-skill deployment. Tested with zero extra skills, a 9B model outperformed baselines across 12 benchmarks, raising average out-of-distribution performance from 76.1 to 78.8.
+## 2. Postman auto-installs agent plugins and hooks into Codex and Claude
 
-**Why it matters:** It offers a curriculum-free training framework to compress multi-agent orchestration directly into model weights.
+Users discovered that launching the Postman desktop client silently executed a background script installing Postman plugins into local Codex and Claude Code environments. The installer modified global configuration files, added remote MCP endpoints, and attempted to self-approve its own instruction hooks in Codex. The injected hooks instructed agents to route general API engineering tasks through Postman skills before answering. While no data exfiltration was proven, the silent modification of unrelated agent workflows represents a substantial breach of boundary context and user consent.
 
-[huggingface.co](https://huggingface.co/papers/2610.22740) · via HF Daily Papers
+**Why it matters:** Unrequested agent plugin installations and automated hook manipulation introduce significant security and control risks to local agent harnesses.
 
-## 2. Pretraining data poisoning implants remote code execution backdoors in CLI agents
+[github.com](https://github.com/postmanlabs/postman-app-support/issues/14370) · [discussion](https://news.ycombinator.com/item?id=50354960) · via Hacker News (AI)
 
-A new study demonstrates that low-rate pretraining data poisoning can insert persistent security backdoors into downstream tool-calling agents. Researchers pretrained Qwen3 models up to 4B parameters from scratch and post-trained them into CLI agents using a clean post-training pipeline. Poisoning just 0.1% of the pretraining web corpus allowed an attacker trigger to force arbitrary command execution on the target machine with an attack success rate of roughly 92% on the 4B model. The attack success remained positive even when the poison rate was dropped to 0.0005%, proving clean SFT pipelines cannot easily scrub pretraining backdoors.
+## 3. Deconstructing claims of LLMs reading and editing raw model weights
 
-**Why it matters:** It highlights that clean post-training cannot guarantee safety when an agent's pretraining corpus contains targeted tool-execution triggers.
+A detailed technical breakdown dismantles viral assertions that Astra directly reads raw weight values in-context to self-improve model parameters like Qwen. The critique points out that while tiny network toy tasks examined raw floats, experiments on full-scale language models relied on executing generated Python code and inspecting up to 50 batches of practice outputs. The author notes that prompting a model to write code acting as an ML engineer is fundamentally different from a model natively interpreting matrix weights directly. Conflating tool-augmented execution with direct weight-space perception obscures how models actually solve optimization tasks.
 
-[arxiv.org](https://arxiv.org/abs/2610.37741) · [discussion](https://news.ycombinator.com/item?id=50341334) · via Hacker News front page
+**Why it matters:** Disentangling agent tool use from claimed innate model capabilities is essential for accurate evaluation and avoiding hype in model capabilities.
 
-## 3. Correcting training-inference mismatch in LLM reinforcement learning
+[honnibal.dev](https://honnibal.dev/blog/astra-read-write-misleading) · [discussion](https://news.ycombinator.com/item?id=50351111) · [simonwillison.net](https://simonwillison.net/2026/Nov/3/qwen-can-interpret-model-weights/) · [rikiyat.github.io](https://rikiyat.github.io/blog/weight-space-programming/) · via Hacker News front page
 
-On-policy RL assumes training responses are drawn directly from the active model policy, but practical serving architectures split inference engines from gradient trainers. This paper isolates the resulting mismatch into a constant numerical discrepancy from engine math and a compounding policy lag driven by trainer updates. To fix feedback loops that degrade training, the authors introduced Discrepancy-Lag Correction (DLC), which centers numerical bias, clips lag ratios, and resynchronizes sampling when effective sample size drops below 0.5. Experiments on Qwen3 models show DLC keeps stale-sampler training within normal on-policy noise bounds.
+## 4. CrossSWE benchmark highlights agent failures in multi-repository development
 
-**Why it matters:** It provides a concrete fix for training instabilities caused by serving engine discrepancies during on-policy RL.
+The new CrossSWE benchmark evaluates coding agents on joint development tasks that span multiple interdependent repositories rather than isolated single codebases. Comprising 171 instances across 16 technical domains and 13 programming languages, the benchmark ensures that partial modifications to a single repository are insufficient for resolution. Testing five leading LLMs revealed low performance, with GPT-6.1 Sol scoring only 58.48% Pass@1. The primary failure mode was cross-repository inconsistency, which accounted for 44.2% of all failures.
 
-[huggingface.co](https://huggingface.co/papers/2610.40945) · via HF Daily Papers
+**Why it matters:** As coding agents tackle complex enterprise workflows, multi-repo consistency benchmarks provide critical evaluation for long-horizon orchestration.
 
-## 4. CEPO decouples coordination and execution prompts in multi-agent systems
+[huggingface.co](https://huggingface.co/papers/2611.01484) · via HF Daily Papers
 
-Optimizing prompts in multi-agent systems usually couples coordination rules and execution steps inside individual agent prompts. CEPO reframes prompt optimization by establishing a shared coordinator prompt for system-level routing alongside separate executor prompts for specific worker roles. Underlying prompt optimizers search over these distinct prompts, allowing coordination logic to refine across agents without breaking local execution instructions. Across 11 benchmarks and four prompt search algorithms, CEPO improved optimization budget efficiency and scaling as agent counts increased.
+## 5. SWE-Trail uses off-context history to guide agent trajectory collection
 
-**Why it matters:** Decoupling routing logic from worker execution instructions provides a cleaner, more scalable architecture for multi-agent prompt tuning.
+Post-training coding agents on trajectory rollouts often causes train-test mismatches if historical advice is fed directly into the model's context during data collection. SWE-Trail solves this by keeping previous rollout history outside the agent's context, using it only at the framework level to identify execution checkpoints worth exploring further. The collector prompts the agent for candidate actions from normal context and executes them briefly to decide which rollout branch to continue. Training a 124B student model on SWE-Trail data improved resolution rates by 2.33 percentage points on SWE-bench Multilingual over independent sampling.
 
-[huggingface.co](https://huggingface.co/papers/2610.34722) · via HF Daily Papers
+**Why it matters:** Improving synthetic trajectory collection without introducing context leakage helps build higher-quality post-training data for coding agents.
 
-## 5. OpenAI introduces LifeVal benchmark for multi-step daily workflows
+[huggingface.co](https://huggingface.co/papers/2611.02074) · via HF Daily Papers
 
-OpenAI has released LifeVal, an evaluation benchmark targeted at multi-step real-world tasks. Rather than focusing purely on synthetic coding problems or single-turn QA, LifeVal measures model performance across practical everyday workflows. Test scenarios include locating childcare options, managing personal finances, and completing government paperwork. The benchmark aims to provide standardized evaluation metrics for agents attempting complex human workflows.
+## 6. ReTrace framework measures computer-use agent failure recovery
 
-**Why it matters:** It expands benchmark suites beyond synthetic coding and QA into complex, multi-step real-world workflow evaluation.
+Long-horizon computer-use agents frequently fail due to accumulating UI errors and lack mechanism-agnostic ways to reset state. The ReTrace evaluation framework introduces Transition-Consistent Recovery, testing whether agents can return an environment to a clean target state via goal-oriented action replay after controlled error injection. The benchmark demonstrates that current vision-language agents struggle to utilize their latent recovery capabilities autonomously. However, when recovery succeeds, it yields measurable end-to-end task completion gains across digital workflows.
 
-[openai.com](https://openai.com/index/lifeval) · via OpenAI News
+**Why it matters:** Evaluating autonomous recovery mechanics is crucial for building reliable, long-horizon computer-use agents that do not require manual intervention.
 
-## 6. Distilling multi-turn agent tool-calling trajectories using SageMaker AI
+[huggingface.co](https://huggingface.co/papers/2610.27954) · via HF Daily Papers
 
-AWS has published a guide on using sequence-level knowledge distillation (SeqKD) to lower the costs of agentic tool-use loops. By capturing multi-turn execution trajectories from a frontier teacher model and keeping only those that solve programmatic benchmarks, developers assemble fine-tuning datasets for compact student models. Because SeqKD relies solely on generated text outputs rather than teacher logits or RL infrastructure, it works with closed API models. This setup allows smaller student models to acquire multi-turn reasoning and tool-calling skills at lower hosting costs.
+## 7. StateBench benchmarks long-context tracking across architectural primitives
 
-**Why it matters:** It outlines a practical blueprint for distilling expensive multi-turn teacher agent trajectories into cheaper student models.
+StateBench introduces a four-level hierarchy to evaluate how language models track evolving entity states across long documents as context length increases. The benchmark ranges from trivial immutable variable lookups to general finite problems involving reference assignments and permutation chains. Evaluations reveal that while recurrent and hybrid architectures like Gated DeltaNet generalize farther than transformers when trained on these tasks, state-of-the-art models like Gemini 3.8 Flash, Claude Opus 5.5, and GPT-6 Sol still fail on complex state tracking as inputs grow.
 
-[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/build-efficient-agents-with-knowledge-distillation-on-amazon-sagemaker-ai/) · via AWS Machine Learning
+**Why it matters:** Long-context state tracking is a fundamental bottleneck for memory-intensive agents, exposing architectural limits in current frontier LLMs.
 
-## 7. Apriel Voice 27B unifies speech understanding, reasoning, and tool execution
+[huggingface.co](https://huggingface.co/blog/allenai/statebench) · via Hugging Face Blog
 
-Apriel Voice 27B Preview is an open-weight speech-language model that handles direct speech perception, context reasoning, and tool invocation within a single backbone. Built on Gemma 4 26B-A4B, the model uses a two-stage training strategy with online distillation to bypass separate speech-to-text and dialogue pipeline models. In thinking mode, it achieves 98.90 on Big Bench Audio, 81.13 on Speech-BFCL, and a 65.51% task success rate on τ-Voice with a 1.91-second mean latency. The release includes custom serving support for interactive, multi-modal agent interactions.
+## 8. Anthropic introduces FlashProve for zero-knowledge LLM inference verification
 
-**Why it matters:** It combines speech understanding and direct tool invocation into a single open model, removing pipeline latency for voice agents.
+Anthropic has released FlashProve, an open-source prototype utilizing zkSNARKs to generate cryptographic proofs of LLM inference without revealing model weights. Running on a single H100 GPU, the system achieves over 100 tokens per second proving speeds for a 4-bit quantized 400B MoE model, yielding ~19 MB proof files per 1,024-token request. To verify optimization safety, the project includes top-level auditable security statements formally verified in Lean along with a C++ verifier. This enables users and independent auditors to mathematically confirm that outputs originated from a specific model without hosting costs or weight access.
 
-[huggingface.co](https://huggingface.co/papers/2610.40738) · via HF Daily Papers
+**Why it matters:** Cryptographic proof of inference provides verifiable execution for agent API calls, helping mitigate routing spoofing and unauthorized model substitution.
 
-## 8. Anthropic updates Claude Code system prompt to restrict video game cloning
+[anthropic.com](https://www.anthropic.com/research/provable-inference) · via Anthropic Research
 
-Anthropic has modified the system prompt for Claude Code running on Opus 5.5 to prevent users from recreating specific existing video games. The update explicitly permits original games, genre-based projects, and custom asset builds, while directing the model to turn down requests for exact clones. Anthropic confirmed the prompt change was implemented to align tool outputs with usage policies regarding intellectual property. The change highlights the ongoing reliance on system prompt instructions to steer developer-oriented coding agents away from policy violations.
+## 9. Bedrock AgentCore Gateway native OBO token exchange preserves user identity
 
-**Why it matters:** It serves as a real-world case study in system prompt modification to enforce IP compliance on developer agents.
+AWS demonstrated how Bedrock AgentCore Gateway can execute Microsoft Entra ID on-behalf-of (OBO) token exchanges when agents make downstream API calls. By handling token exchange natively at the gateway level, incoming user JWTs are converted into target-scoped OAuth tokens before reaching services like ServiceNow. This ensures that tool calls pass through existing downstream authorization rules and audit logs with the end user's permissions intact rather than running under a generic application identity.
 
-[theverge.com](https://www.theverge.com/ai-artificial-intelligence/1024632/anthropic-claude-ai-video-game-clones) · [tomshardware.com](https://www.tomshardware.com/tech-industry/artificial-intelligence/anthropics-ai-model-is-now-blocking-attempts-at-video-game-recreation-and-cloning-users-also-claim-non-malicious-generic-reverse-engineering-tasks-are-blocked) · via The Verge (AI)
+**Why it matters:** Preserving end-user identity context across tool-calling gateways is essential for secure enterprise agent integration and access control.
+
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/servicenow-on-behalf-of-token-exchange-with-bedrock-agentcore-gateway/) · [aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/build-a-semantic-layer-for-agentic-ai-with-edb-postgres-ai-and-amazon-bedrock-agentcore/) · via AWS Machine Learning
 
 ## Quick hits
 
-- llama.cpp added GGUF conversion, model loading, and hybrid attention support for Clover MoE architectures. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12060))
-- OpenAI detailed Pando, a custom Git-compatible storage backend engineered for high-volume development driven by Codex. ([openai.com](https://openai.com/index/scaling-git-at-openai))
-- A new study introduced SimpleLoRIF to trace benign-looking instruction tuning data back to the training samples that silently degrade model safety. ([huggingface.co](https://huggingface.co/papers/2610.37481))
-- Researchers presented CaPtain, a post-training pipeline applying SFT and multi-turn RL to Code-as-Policy robotics agents. ([huggingface.co](https://huggingface.co/papers/2610.40799))
+- Ollama v0.40.14 updates the `launch claude` command to apply output token caps suitable for Claude Code and fixes compressed cloud web search response decoding. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.14))
+- The open-weight uni-robot-agent framework offers a unified harness to standardise research and training for zero-shot robot manipulation agents. ([huggingface.co](https://huggingface.co/papers/2611.01560))
+- Hugging Face announced CWE-bench v2, expanding coverage, benchmark quality, and transparency for agent security evaluations. ([huggingface.co](https://huggingface.co/blog/cwe-bench))
+- CoworkOS presents a scalable architecture for agent coworkers handling real-world automated software delivery and multi-step monitoring. ([huggingface.co](https://huggingface.co/papers/2611.03178))
 
-Until tomorrow, keep your prompts modular and your serving engines synchronized.
+Keep your context clean and your hooks explicitly approved until tomorrow.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 112 candidates, 112 reviewed, gemini/gemini-3.8-flash, 82s, 3 model calls, $0.1453.</sub>
+<sub>35 of 35 sources read. 146 candidates, 146 reviewed, gemini/gemini-3.8-flash, 663s, 3 model calls.</sub>
