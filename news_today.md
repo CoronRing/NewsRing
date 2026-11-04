@@ -1,92 +1,110 @@
-# Agent Harnessing, Multi-Node llama.cpp, and Software Consent Violations
+# Agent Harness Engineering, Hardware Speculations, and Open SOTA Models
 
-*2026-11-03 · 9 stories*
+*2026-11-04 · 10 stories*
 
-Today's lineup highlights the boundary between smart engineering and overreaching automation, starting with Postman stealth-installing agent plugins into local developer environments. On the technical side, we cover multi-node scaling in llama.cpp, cryptographic inference verification, and fresh benchmarks for multi-repo coding and long-context state tracking.
+![Top AI stories for 2026-11-04](https://coronring.github.io/NewsRing/today.png)
 
-## 1. llama.cpp gains multi-node tensor parallelism via NCCL
+Today's selection focuses heavily on agent reliability: from hardware-conscious open-weight models to systematic harness optimization and empirical sandbox guardrails. We also have practical context engineering frameworks from AWS and autonomous optimization loops tackling speculative decoding.
 
-The llama.cpp CUDA backend has added NCCL support to enable multi-node tensor parallelism across distributed processes. The update introduces generic multi-process communicator interfaces for per-rank communicators and wires them into the RPC server when available. It also adjusts backend parameters, such as setting maxCTAs to 8 for DGX Spark setups. This allows running split inference workloads beyond a single machine's local GPU limits without abandoning the ggml ecosystem.
+## Across AI today
 
-**Why it matters:** Multi-node tensor parallelism expands local inference capabilities, enabling self-hosted serving of larger open-weight models across cluster nodes.
+- **OpenAI pipeline patches 948 Linux kernel flaws** OpenAI built an autonomous pipeline that found, validated, and generated patches for 948 local privilege-escalation vulnerabilities in Linux. ([openai.com](https://openai.com/index/a-thousand-fewer-paths-to-root))
+- **Anthropic advances provable LLM inference** Anthropic shares progress on cryptographic zkSNARK proofs for large language model inference through a new system called FlashProve. ([anthropic.com](https://www.anthropic.com/research/provable-inference))
+- **Moonshot AI releases Kimi K3.1 Pro open weights** Model weights for Kimi K3.1 Pro, a multimodal image-and-text model, have been officially released. ([huggingface.co](https://huggingface.co/moonshotai/Kimi-K3.1-Pro))
 
-[github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12079) · [github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12078) · via llama.cpp releases
+## 1. Ricursive Intelligence drops Ripple-65B Preview for agentic coding
 
-## 2. Postman auto-installs agent plugins and hooks into Codex and Claude
+Ricursive Intelligence has released Ripple-65B Preview, an open-weight model pretrained on 12 trillion tokens with a 1M context window. Built for $32M—roughly one-tenth the cost of prior open-weight coding SOTA—the modernized dense Transformer employs gated attention, value residuals, and global NoPE across 80 layers. Post-training relied on synthetic data generation and a compute-efficient RL recipe requiring just 1.4M rollouts to hit an 80.52 score on TerminalBench 2.1. The architecture was co-designed for NVIDIA hardware, making it suitable for local execution on systems like DGX Spark.
 
-Users discovered that launching the Postman desktop client silently executed a background script installing Postman plugins into local Codex and Claude Code environments. The installer modified global configuration files, added remote MCP endpoints, and attempted to self-approve its own instruction hooks in Codex. The injected hooks instructed agents to route general API engineering tasks through Postman skills before answering. While no data exfiltration was proven, the silent modification of unrelated agent workflows represents a substantial breach of boundary context and user consent.
+**Why it matters:** It delivers top-tier agentic coding performance in a compact 65B dense envelope that runs locally, bypassing massive MoE scaling costs.
 
-**Why it matters:** Unrequested agent plugin installations and automated hook manipulation introduce significant security and control risks to local agent harnesses.
+[ricursive.com](https://www.ricursive.com/ripple) · [discussion](https://news.ycombinator.com/item?id=50369925) · via Hacker News front page
 
-[github.com](https://github.com/postmanlabs/postman-app-support/issues/14370) · [discussion](https://news.ycombinator.com/item?id=50354960) · via Hacker News (AI)
+## 2. Moonshot AI releases Kimi K3.1 Pro weights with vLLM and SGLang support
 
-## 3. Deconstructing claims of LLMs reading and editing raw model weights
+Moonshot AI released the open weights for Kimi K3.1 Pro, a 3T-class multimodal model supporting a 1M token context window. The architecture replaces the Gated MLA layers from Kimi K3 with Gated DeepSeek Sparse Attention (Gated DSA) to accelerate long-context inference. Serving support is available out of the box via vLLM and SGLang, alongside Docker containers and HuggingChat integration. Benchmarks reported in the release include evaluations on Terminal-Bench 4.0, DeepSWE v1.1, and PostTrainBench using the Claude Code harness.
 
-A detailed technical breakdown dismantles viral assertions that Astra directly reads raw weight values in-context to self-improve model parameters like Qwen. The critique points out that while tiny network toy tasks examined raw floats, experiments on full-scale language models relied on executing generated Python code and inspecting up to 50 batches of practice outputs. The author notes that prompting a model to write code acting as an ML engineer is fundamentally different from a model natively interpreting matrix weights directly. Conflating tool-augmented execution with direct weight-space perception obscures how models actually solve optimization tasks.
+**Why it matters:** Gives agent developers a frontier open-weight multimodal option with native long-context support and ready-to-run vLLM and SGLang deployments.
 
-**Why it matters:** Disentangling agent tool use from claimed innate model capabilities is essential for accurate evaluation and avoiding hype in model capabilities.
+[huggingface.co](https://huggingface.co/moonshotai/Kimi-K3.1-Pro) · [discussion](https://news.ycombinator.com/item?id=50366999) · via Hacker News front page
 
-[honnibal.dev](https://honnibal.dev/blog/astra-read-write-misleading) · [discussion](https://news.ycombinator.com/item?id=50351111) · [simonwillison.net](https://simonwillison.net/2026/Nov/3/qwen-can-interpret-model-weights/) · [rikiyat.github.io](https://rikiyat.github.io/blog/weight-space-programming/) · via Hacker News front page
+## 3. NVIDIA details NeMo workflow for converting trace failures into evals and patches
 
-## 4. CrossSWE benchmark highlights agent failures in multi-repository development
+NVIDIA published a tutorial detailing how to use NeMo Compass and NeMo Eval Author to convert production agent execution traces into evaluation suites and harness fixes. In a demonstration featuring an MCP-connected Hermes assistant, NeMo Compass flagged unconfirmed message transmissions by evaluating traces against behavioural rules in an ETHOS.md file. NeMo Eval Author then automatically generated custom Harbor evaluations and verifiers to catch the defect. The harness was subsequently patched by updating system instructions in SOUL.md to require explicit user confirmation before tool execution.
 
-The new CrossSWE benchmark evaluates coding agents on joint development tasks that span multiple interdependent repositories rather than isolated single codebases. Comprising 171 instances across 16 technical domains and 13 programming languages, the benchmark ensures that partial modifications to a single repository are insufficient for resolution. Testing five leading LLMs revealed low performance, with GPT-6.1 Sol scoring only 58.48% Pass@1. The primary failure mode was cross-repository inconsistency, which accounted for 44.2% of all failures.
+**Why it matters:** Demonstrates an automated workflow for converting production agent failures into repeatable evals and targeted harness patches.
 
-**Why it matters:** As coding agents tackle complex enterprise workflows, multi-repo consistency benchmarks provide critical evaluation for long-horizon orchestration.
+[developer.nvidia.com](https://developer.nvidia.com/blog/use-nvidia-nemo-to-turn-agent-failures-into-tests-and-harness-fixes/) · via NVIDIA Developer
 
-[huggingface.co](https://huggingface.co/papers/2611.01484) · via HF Daily Papers
+## 4. ParetoSaddler co-optimizes agent harness quality and token cost
 
-## 5. SWE-Trail uses off-context history to guide agent trajectory collection
+Researchers introduced ParetoSaddler, a harness optimization framework designed to co-optimize LLM agent accuracy and execution token cost. Rather than applying final deployment cost preferences during intermediate evolution steps, ParetoSaddler uses Bayesian bootstrap Pareto support to preserve candidate harnesses showing quality or cost gains. Across experiments on ClawMark, it boosted quality from 70.86% to 81.35% while trimming task cost from $1.17 to $1.01. On GAIA2, quality improved from 56.22% to 62.89% alongside a cost reduction from $0.78 to $0.45 per task.
 
-Post-training coding agents on trajectory rollouts often causes train-test mismatches if historical advice is fed directly into the model's context during data collection. SWE-Trail solves this by keeping previous rollout history outside the agent's context, using it only at the framework level to identify execution checkpoints worth exploring further. The collector prompts the agent for candidate actions from normal context and executes them briefly to decide which rollout branch to continue. Training a 124B student model on SWE-Trail data improved resolution rates by 2.33 percentage points on SWE-bench Multilingual over independent sampling.
+**Why it matters:** Provides a systematic framework for tuning agent prompts, tools, and control logic against both quality and token budget constraints.
 
-**Why it matters:** Improving synthetic trajectory collection without introducing context leakage helps build higher-quality post-training data for coding agents.
+[huggingface.co](https://huggingface.co/papers/2611.02079) · via HF Daily Papers
 
-[huggingface.co](https://huggingface.co/papers/2611.02074) · via HF Daily Papers
+## 5. ToolSpace mines MCP traces to synthesize verifiable agent environments
 
-## 6. ReTrace framework measures computer-use agent failure recovery
+ToolSpace presents a tool-centric methodology for synthesizing realistic multi-environment agent benchmarks and training trajectories. By mining execution dependencies directly from real MCP call traces using deterministic rules, the pipeline clusters tool compositions into environments and synthesizes backing databases only when states mutate. State-aware random walks with backtracking yield verifiable tasks, producing harder evaluation datasets like AutomationBench Pro, where frontier models dropped by up to 38.2 points. Fine-tuning Qwen3.6-35B-A3B and GLM-5.2 on ToolSpace data yielded substantial performance jumps across seven long-horizon tool benchmarks.
 
-Long-horizon computer-use agents frequently fail due to accumulating UI errors and lack mechanism-agnostic ways to reset state. The ReTrace evaluation framework introduces Transition-Consistent Recovery, testing whether agents can return an environment to a clean target state via goal-oriented action replay after controlled error injection. The benchmark demonstrates that current vision-language agents struggle to utilize their latent recovery capabilities autonomously. However, when recovery succeeds, it yields measurable end-to-end task completion gains across digital workflows.
+**Why it matters:** Eliminates artificial tool benchmark design by generating grounded MCP environments directly from execution traces and deterministic verifiers.
 
-**Why it matters:** Evaluating autonomous recovery mechanics is crucial for building reliable, long-horizon computer-use agents that do not require manual intervention.
+[huggingface.co](https://huggingface.co/papers/2611.05036) · via HF Daily Papers
 
-[huggingface.co](https://huggingface.co/papers/2610.27954) · via HF Daily Papers
+## 6. AWS details four layers of context engineering in Deep Insight reference architecture
 
-## 7. StateBench benchmarks long-context tracking across architectural primitives
+AWS published a guide outlining four layers of context engineering for production multi-agent systems, drawn from their open-source Deep Insight reference implementation. The architecture segregates context across specialized agents, enforces prompt behavioral rules, externalizes heavy state to the filesystem, and deploys independent verification agents. In working code, using file-based script execution reduced context token additions by roughly 95 percent. Furthermore, loading agent skills dynamically on demand shrank the system prompt size by approximately 97 percent.
 
-StateBench introduces a four-level hierarchy to evaluate how language models track evolving entity states across long documents as context length increases. The benchmark ranges from trivial immutable variable lookups to general finite problems involving reference assignments and permutation chains. Evaluations reveal that while recurrent and hybrid architectures like Gated DeltaNet generalize farther than transformers when trained on these tasks, state-of-the-art models like Gemini 3.8 Flash, Claude Opus 5.5, and GPT-6 Sol still fail on complex state tracking as inputs grow.
+**Why it matters:** Offers practical, measured techniques to prevent context rot and token blowout in multi-agent production pipelines.
 
-**Why it matters:** Long-context state tracking is a fundamental bottleneck for memory-intensive agents, exposing architectural limits in current frontier LLMs.
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/four-layers-of-context-engineering-for-production-ai-agents-how-deep-insight-applies-them-in-working-code/) · via AWS Machine Learning
 
-[huggingface.co](https://huggingface.co/blog/allenai/statebench) · via Hugging Face Blog
+## 7. SpecPilot deploys autonomous agent loops to optimize speculative decoding
 
-## 8. Anthropic introduces FlashProve for zero-knowledge LLM inference verification
+SpecPilot is an autonomous agentic system designed to discover deployment-specific speculative decoding algorithms and kernel optimizations. Using a cost model to locate hardware execution gaps and token-forcing verification to prevent output degradation, parallel agents iteratively explore and record verified mechanisms into memory. The system autonomously discovered 12-bit weight formats, two-level verification, and novel batching strategies across multiple GPUs and target models. In testing, it increased speculative decoding speedups over autoregressive baselines from 4.46x to 10.87x in single-request regimes and 1.94x to 3.93x in batched workloads.
 
-Anthropic has released FlashProve, an open-source prototype utilizing zkSNARKs to generate cryptographic proofs of LLM inference without revealing model weights. Running on a single H100 GPU, the system achieves over 100 tokens per second proving speeds for a 4-bit quantized 400B MoE model, yielding ~19 MB proof files per 1,024-token request. To verify optimization safety, the project includes top-level auditable security statements formally verified in Lean along with a C++ verifier. This enables users and independent auditors to mathematically confirm that outputs originated from a specific model without hosting costs or weight access.
+**Why it matters:** Shows that autonomous agent loops can optimize low-level inference serving engines and speculative decoding setups better than static default configurations.
 
-**Why it matters:** Cryptographic proof of inference provides verifiable execution for agent API calls, helping mitigate routing spoofing and unauthorized model substitution.
+[huggingface.co](https://huggingface.co/papers/2611.02501) · via HF Daily Papers
 
-[anthropic.com](https://www.anthropic.com/research/provable-inference) · via Anthropic Research
+## 8. Caper uses sandbox pre-execution to audit coding agent shell actions
 
-## 9. Bedrock AgentCore Gateway native OBO token exchange preserves user identity
+Researchers introduced Caper, a consequence-aware permission system for coding agents that pre-executes proposed shell commands in a snapshotted sandbox. System-call tracing gathers file, network, and secret access data into a compact execution report for review by an LLM approver. Allowed actions commit to the workspace, while blocked commands roll back and return actionable error details to the agent. Benchmark tests demonstrated that Caper reduced harmful outcome rates on SABER to 6.7% and on YoloFS-Ext to 7.8%, while misclassifying only 1.0% of safe control tasks.
 
-AWS demonstrated how Bedrock AgentCore Gateway can execute Microsoft Entra ID on-behalf-of (OBO) token exchanges when agents make downstream API calls. By handling token exchange natively at the gateway level, incoming user JWTs are converted into target-scoped OAuth tokens before reaching services like ServiceNow. This ensures that tool calls pass through existing downstream authorization rules and audit logs with the end user's permissions intact rather than running under a generic application identity.
+**Why it matters:** Replaces easily bypassed text-based command filters with empirical sandbox pre-execution to safely gate autonomous agent tool calls.
 
-**Why it matters:** Preserving end-user identity context across tool-calling gateways is essential for secure enterprise agent integration and access control.
+[huggingface.co](https://huggingface.co/papers/2610.40753) · via HF Daily Papers
 
-[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/servicenow-on-behalf-of-token-exchange-with-bedrock-agentcore-gateway/) · [aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/build-a-semantic-layer-for-agentic-ai-with-edb-postgres-ai-and-amazon-bedrock-agentcore/) · via AWS Machine Learning
+## 9. ByteDance opens Axion 1.0 agent model weights, code, and training recipe
+
+ByteDance released Axion 1.0, an open agent foundation model trained via a simplified three-stage pipeline consisting of two lightweight SFT phases followed by reinforcement learning. The SFT stages combine model-aware synthetic problem generation with verifiable, tool-dependent tasks before applying trajectory-based RL with chained partial-credit rewards. Using roughly 18,000 SFT examples, the 35B parameter reproduction model achieved benchmark scores of 52.8 on HLE and 85.0 on FrontierScience Olympiad. The release includes open model weights, training code, prompts, and complete dataset generation pipelines under an Apache 2.0 license.
+
+**Why it matters:** Demonstrates a transparent, fully reproducible blueprint for training agent foundation models using programmatic verifiers and chained RL rewards.
+
+[huggingface.co](https://huggingface.co/papers/2611.03233) · via HF Daily Papers
+
+## 10. OpenAI autonomous agent pipeline patches nearly 1,000 Linux kernel flaws
+
+OpenAI deployed an autonomous pipeline that successfully identified, verified, and patched 948 local privilege-escalation vulnerabilities within the Linux kernel. While technical implementation details regarding the underlying harness and model architecture remain sparse, the pipeline operated end-to-end without manual intervention. The results highlight the growing viability of fully automated agent systems in complex systems engineering and vulnerability remediation.
+
+**Why it matters:** Proves that autonomous agent harnesses can conduct end-to-end vulnerability research and patching on real-world system software at scale.
+
+[openai.com](https://openai.com/index/a-thousand-fewer-paths-to-root) · via OpenAI News
 
 ## Quick hits
 
-- Ollama v0.40.14 updates the `launch claude` command to apply output token caps suitable for Claude Code and fixes compressed cloud web search response decoding. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.14))
-- The open-weight uni-robot-agent framework offers a unified harness to standardise research and training for zero-shot robot manipulation agents. ([huggingface.co](https://huggingface.co/papers/2611.01560))
-- Hugging Face announced CWE-bench v2, expanding coverage, benchmark quality, and transparency for agent security evaluations. ([huggingface.co](https://huggingface.co/blog/cwe-bench))
-- CoworkOS presents a scalable architecture for agent coworkers handling real-world automated software delivery and multi-step monitoring. ([huggingface.co](https://huggingface.co/papers/2611.03178))
+- Nvidia's RTX Spark encrypted firmware degrades Linux inference speed down to 35% of baseline. ([mindstudio.ai](https://www.mindstudio.ai/blog/linux-nvidia-rtx-spark-laptop))
+- Datasette Agent 0.5a0 introduces a side-by-side panel UI for interactive chat next to database tables and query pages. ([simonwillison.net](https://simonwillison.net/2026/Nov/3/datasette-agent/))
+- EvoTeam proposes a framework that dynamically evolves multi-agent team composition and collaboration strategies based on execution feedback. ([huggingface.co](https://huggingface.co/papers/2610.39813))
+- AWS demonstrated integrating Jev and Strands Decider decision models into Bedrock AgentCore Evaluations using code-based evaluators. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/use-decision-models-with-amazon-bedrock-agentcore-evaluations/))
+- llama.cpp release b12118 updates OpenCL FlashAttention routines to improve decode performance for grouped-query attention. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12118))
+- Ollama v0.40.15 adds MiMo V2.6 support and in-process CUDA library loading on Linux. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.15-rc0))
 
-Keep your context clean and your hooks explicitly approved until tomorrow.
+May your context windows stay uncluttered and your tool calls require explicit confirmation.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 146 candidates, 146 reviewed, gemini/gemini-3.8-flash, 663s, 3 model calls.</sub>
+<sub>35 of 35 sources read. 152 candidates, 80 reviewed, gemini/gemini-3.8-flash, 1224s, 6 model calls.</sub>

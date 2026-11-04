@@ -1,0 +1,700 @@
+{
+  "date": "2026-11-04",
+  "generated_at": "2026-11-04T22:50:01.408206Z",
+  "title": "Agent Harness Engineering, Hardware Speculations, and Open SOTA Models",
+  "intro": "Today's selection focuses heavily on agent reliability: from hardware-conscious open-weight models to systematic harness optimization and empirical sandbox guardrails. We also have practical context engineering frameworks from AWS and autonomous optimization loops tackling speculative decoding.",
+  "stories": [
+    {
+      "headline": "Ricursive Intelligence drops Ripple-65B Preview for agentic coding",
+      "summary": "Ricursive Intelligence has released Ripple-65B Preview, an open-weight model pretrained on 12 trillion tokens with a 1M context window. Built for $32M—roughly one-tenth the cost of prior open-weight coding SOTA—the modernized dense Transformer employs gated attention, value residuals, and global NoPE across 80 layers. Post-training relied on synthetic data generation and a compute-efficient RL recipe requiring just 1.4M rollouts to hit an 80.52 score on TerminalBench 2.1. The architecture was co-designed for NVIDIA hardware, making it suitable for local execution on systems like DGX Spark.",
+      "why_it_matters": "It delivers top-tier agentic coding performance in a compact 65B dense envelope that runs locally, bypassing massive MoE scaling costs.",
+      "reason": "This provides a new open-weight 65B model baseline optimized specifically for complex agentic coding tasks.",
+      "item": {
+        "key": "ricursive.com/ripple",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Ripple-65B Preview: U.S. Open-Weight SOTA on Agentic Coding",
+        "url": "https://www.ricursive.com/ripple",
+        "discussion_url": "https://news.ycombinator.com/item?id=50369925",
+        "published": "2026-11-04T18:53:29Z",
+        "summary": "Comments",
+        "content": "Introducing Ripple-65B Preview,\na Frontier Open-Weight Model\nRicursive Intelligence is a full-stack artificial intelligence lab building self-improving systems by co-optimizing hardware, software, and model.\nTo power our chip design platform, we trained a language model from scratch that sets a new U.S. open-weight SOTA on agentic coding. We optimized the model architecture for our training and serving platforms, driving substantial efficiency gains.\nToday, we release Ripple-65B Preview, a general-purpose variant of the proprietary model that powers our AI chip design platform. The model is pretrained on 12 trillion tokens with support for up to 1M context length. Ripple-65B Preview delivers strong results on agentic coding, achieving U.S. open-weight state-of-the-art (80.52) on TerminalBench 2.1 and surpassing significantly larger US open-weight models such as Reflection Beam 501B (80.1), Meta Muse Spark Open 816B (76.4), Thinking Machines Inkling 975B (63.8), and NVIDIA Nemotron 3 Ultra 550B (56.4).\nRipple’s dense model architecture provides strong reasoning performance with low-latency token generation. The model’s small parameter envelope also enables it to run efficiently on local devices such as NVIDIA DGX Spark, which feature high compute FLOPs with low memory bandwidth relative to datacenter accelerators.\nRipple-65B Preview is available on Hugging Face, Together AI, GMI Cloud, and OpenRouter. Fireworks goes live later today.\nAchieving U.S. Open-Weight Frontier at One-Tenth Cost\nLLM pretraining is legendarily expensive. In 2023, OpenAI CEO Sam Altman said that GPT-4 training costs exceeded $100 million. In the following year, Dario Amodei said that frontier AI models can cost up to $1 billion to train, projecting that costs would rise to $10-100B by 2026 to 2027 for pretraining alone.\nIn contrast, we developed and trained Ripple-65B Preview for only $32M, which is one-tenth the cost of the previous open-weight SOTA on agentic coding, as estimated to the best of our knowledge.¹ Note that $32M is our full R&D cost starting from scratch, including pretraining ladder development, data mixing, evals, debugging, synthetic data generation, posttraining recipe development, and the final hero pretraining and posttraining run.\nSteep Ascent Reinforcement Learning\nRather than investing in a brute-force RL climb, we carefully iterated on our SFT and RL recipes with a focus on compute efficiency. We opted not to buy any posttraining data, instead devising our own synthetic data pipelines, quality filtering, and coverage metrics.\nOur mixed RL recipe uses truncated importance sampling, score centering, and linear length penalty with high-quality long-horizon synthetic environments. The RL tasks are tuned for our model capabilities, and we continuously added harder tasks as the model improved.\nThe end result was a steep RL climb from a strong initial SFT checkpoint. We reached a TerminalBench 2.1 score of 80.5 with only 1.4M rollouts, roughly 70x fewer rollouts than Reflection Beam, the prior SOTA.\nA Co-Designed Model Architecture\nRipple-65B Preview’s architecture was designed to be trained and served efficiently on NVIDIA hardware. A key objective was to make design decisions which reduce pretraining and posttraining infrastructure complexity while still enabling strong reasoning and agentic performance. Therefore, we chose to train a modernized dense Transformer model rather than use Mixture-of-Experts (MoE) like other labs. This decision quickly paid off, and we were able to train a strong model from scratch while maintaining a solid MFU (40%) throughout pretraining and posttraining, even with simple sharding, no custom kernels, and no quantization.\nRipple-65B Preview uses a thin-and-deep model aspect ratio, with a narrow d_model (5120) and 80 total layers. To improve reasoning performance, we overprovision the number of attention heads while increasing the SWA-to-global layer ratio and reducing SWA window size to compensate for the increased cost. In addition, we added FFN activation clipping, gated attention, global NoPE, and value residuals.\nCareful Model Laddering Led to Large Improvements\nWe optimized Ripple’s pretraining recipe through a series of careful model laddering experiments.\nOur starting point was Olmo 3’s model ladder, from which we tested interventions at small scale with a focus on improving coding capabilities. Our v1.0 ladder implemented StepFun batch size and learning rate scaling laws, and v1.1 implemented our new ladder which smoothly scales architectural dimensions and model depth. Ladder v1.2 switched from the post-norm baseline to pre+post norm, which was neutral at small scale but showed improvements starting at 4B. Ladder v1.3 implemented sigmoid gated attention. Ladder v1.4 (2-stream mHC) showed good results at smaller scale but did not improve at 4B scale, and was therefore rejected. Ladder v1.5 switched to global NoPE and added a final LR cooldown to zero, and ladder v1.6 added value residuals. In the final version, we switched to our custom pretraining dataset with substantially upsampled code.\nTogether, the compounded changes improved compute efficiency on code as measured by dolma_stack CE by up to 16x at 4B model scale. In other words, our final Ripple model ladder can be used to achieve similar code performance to the Olmo 3 ladder with 16x less compute. Note that the slope of the Olmo 3 ladder baseline is shallower than ladder v1.0+, which shows that the compute efficiency improvement will increase with additional scale.\nConclusion\nWe built Ripple-65B Preview to begin closing the loop between models and the hardware that fuels them. An internal variant of this model powers our AI chip design platform, and we look forward to seeing the capabilities that emerge as we scale toward the frontier.\nWe were fortunate to build on top of existing open-source contributions, including those from the Olmo team at the Allen Institute for AI (AI2), Prime Intellect…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Moonshot AI releases Kimi K3.1 Pro weights with vLLM and SGLang support",
+      "summary": "Moonshot AI released the open weights for Kimi K3.1 Pro, a 3T-class multimodal model supporting a 1M token context window. The architecture replaces the Gated MLA layers from Kimi K3 with Gated DeepSeek Sparse Attention (Gated DSA) to accelerate long-context inference. Serving support is available out of the box via vLLM and SGLang, alongside Docker containers and HuggingChat integration. Benchmarks reported in the release include evaluations on Terminal-Bench 4.0, DeepSWE v1.1, and PostTrainBench using the Claude Code harness.",
+      "why_it_matters": "Gives agent developers a frontier open-weight multimodal option with native long-context support and ready-to-run vLLM and SGLang deployments.",
+      "reason": "A major new open-weight multimodal release available for evaluation and local deployment.",
+      "item": {
+        "key": "huggingface.co/moonshotai/Kimi-K3.1-Pro",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Kimi K3.1 Pro model weights are out",
+        "url": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro",
+        "discussion_url": "https://news.ycombinator.com/item?id=50366999",
+        "published": "2026-11-04T15:30:30Z",
+        "summary": "Trending model. Task: image-text-to-text. Library: transformers. Created 2026-11-02. 449 likes, 797 downloads.",
+        "content": "Instructions to use moonshotai/Kimi-K3.1-Pro with libraries, inference providers, notebooks, and local apps. Follow these links to get started.\n- Libraries\n-  Transformers How to use moonshotai/Kimi-K3.1-Pro with Transformers: # Use a pipeline as a high-level helper\nfrom transformers import pipeline\npipe = pipeline(\"image-text-to-text\", model=\"moonshotai/Kimi-K3.1-Pro\", trust_remote_code=True) # pip install -U transformers accelerate\n# Load model directly\nfrom transformers import AutoModelForSeq2SeqLM\nmodel = AutoModelForSeq2SeqLM.from_pretrained(\"moonshotai/Kimi-K3.1-Pro\", trust_remote_code=True, device_map=\"auto\")\n- Inference\n- HuggingChat\n- Notebooks\n- Google Colab\n- Kaggle\n- Local Apps Settings\n-  vLLM  How to use moonshotai/Kimi-K3.1-Pro with vLLM: Install from pip and serve model# Install vLLM from pip:\npip install vllm\n# Start the vLLM server:\nvllm serve \"moonshotai/Kimi-K3.1-Pro\"\n# Call the server using curl (OpenAI-compatible API):\ncurl -X POST \"http://localhost:8000/v1/chat/completions\" \\\n\t-H \"Content-Type: application/json\" \\\n\t--data '{\n\t\t\"model\": \"moonshotai/Kimi-K3.1-Pro\",\n\t\t\"messages\": [\n\t\t\t{\n\t\t\t\t\"role\": \"user\",\n\t\t\t\t\"content\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"type\": \"text\",\n\t\t\t\t\t\t\"text\": \"Describe this image in one sentence.\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"type\": \"image_url\",\n\t\t\t\t\t\t\"image_url\": {\n\t\t\t\t\t\t\t\"url\": \"https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg\"\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t]\n\t}' Use Docker docker model run hf.co/moonshotai/Kimi-K3.1-Pro\n-  SGLang  How to use moonshotai/Kimi-K3.1-Pro with SGLang: Install from pip and serve model# Install SGLang from pip:\npip install sglang\n# Start the SGLang server:\npython3 -m sglang.launch_server \\\n    --model-path \"moonshotai/Kimi-K3.1-Pro\" \\\n    --host 0.0.0.0 \\\n    --port 30000\n# Call the server using curl (OpenAI-compatible API):\ncurl -X POST \"http://localhost:30000/v1/chat/completions\" \\\n\t-H \"Content-Type: application/json\" \\\n\t--data '{\n\t\t\"model\": \"moonshotai/Kimi-K3.1-Pro\",\n\t\t\"messages\": [\n\t\t\t{\n\t\t\t\t\"role\": \"user\",\n\t\t\t\t\"content\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"type\": \"text\",\n\t\t\t\t\t\t\"text\": \"Describe this image in one sentence.\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"type\": \"image_url\",\n\t\t\t\t\t\t\"image_url\": {\n\t\t\t\t\t\t\t\"url\": \"https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg\"\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t]\n\t}' Use Docker imagesdocker run --gpus all \\\n    --shm-size 32g \\\n    -p 30000:30000 \\\n    -v ~/.cache/huggingface:/root/.cache/huggingface \\\n    --env \"HF_TOKEN=<secret>\" \\\n    --ipc=host \\\n    lmsysorg/sglang:latest \\\n    python3 -m sglang.launch_server \\\n        --model-path \"moonshotai/Kimi-K3.1-Pro\" \\\n        --host 0.0.0.0 \\\n        --port 30000\n# Call the server using curl (OpenAI-compatible API):\ncurl -X POST \"http://localhost:30000/v1/chat/completions\" \\\n\t-H \"Content-Type: application/json\" \\\n\t--data '{\n\t\t\"model\": \"moonshotai/Kimi-K3.1-Pro\",\n\t\t\"messages\": [\n\t\t\t{\n\t\t\t\t\"role\": \"user\",\n\t\t\t\t\"content\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"type\": \"text\",\n\t\t\t\t\t\t\"text\": \"Describe this image in one sentence.\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"type\": \"image_url\",\n\t\t\t\t\t\t\"image_url\": {\n\t\t\t\t\t\t\t\"url\": \"https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg\"\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t]\n\t}'\n-  Docker Model Runner  How to use moonshotai/Kimi-K3.1-Pro with Docker Model Runner: docker model run hf.co/moonshotai/Kimi-K3.1-Pro\n📰 Tech Blog | 🚀 API Quickstart\n1. Model Introduction\nKimi K3.1 Pro is an open-weight, natively multimodal agentic model, and our most capable 3T-class model to date. Post-trained from Kimi K3 with large-scale joint reinforcement learning across hundreds of downstream domains, it is the first model in the K3.1 series. With a 1-million-token context window, Kimi K3.1 Pro delivers substantial improvements in coding, 3D creation, financial research, factual accuracy, and other agentic capabilities.\n2. Model Summary\n* Compared with Kimi K3, we replace the full-attention Gated MLA layers with Gated DeepSeek Sparse Attention (Gated DSA) layers for more efficient long-context modeling.\n3. Evaluation Results\nUnless otherwise specified, all Kimi K3.1 Pro results use reasoning effort max, temperature = 1.0, and top-p = 0.95. A dash (—) means that the source table does not report a score. Higher scores are better except where the benchmark name explicitly states lower is better; Elo scores and other benchmark-specific metrics are not directly comparable with accuracy or pass-rate scores.\nEvaluation Footnotes\nCoding benchmarks\n- Terminal-Bench 4.0. Kimi K3.1 Pro is evaluated with the Claude Code harness. The DeepSeek-V4.1-Flash-1017 score is taken from its release blog. All remaining scores are the maximum values reported in model blog posts or on the official Terminal-Bench leaderboard.\n- Terminal-Bench-Science 0.1. Kimi K3.1 Pro is evaluated with Claude Code. Internal evaluation of DeepSeek-V4.1-Flash-1017 yields 9.3; the table instead reports 15.7 for the older DeepSeek-V4.1-Flash from the official leaderboard. All remaining scores are from the Terminal-Bench-Science leaderboard.\n- SWE-Marathon v1.1. Kimi K3.1 Pro and DeepSeek-V4.1-Flash-1017 are evaluated with Claude Code. Other scores are from the official leaderboard.\n- ProgramBench. The table reports binary scores: a task receives 1 if its ProgramBench score is at least 95%, and 0 otherwise. K3.1 Pro is evaluated with Claude Code. DeepSeek and GLM scores are taken from the DeepSeek release blog; remaining scores are from Vals AI.\n- DeepSWE v1.1. K3.1 Pro is evaluated with Claude Code. Other scores come from the respective technical reports for GPT-6 Astra, Claude Opus 5.5, Claude Fable 5.1, DeepSeek-V4.1-Flash-1017, and GLM-5.3.\n- PostTrainBench. K3.1 Pro and DeepSeek-V4.1-Flash-1017 are evaluated internally on v1.2 with Claude Code and H20 GPUs rather than H100 GPUs. For stable evaluation, all judge models use DeepSeek-V4.1-Flash-1017 at maximum effort, which best matched the official GPT-5.6-Terra (xhigh) judge in testing. Other scores are…",
+        "score": 442.0,
+        "comments": null,
+        "also_in": [
+          "HF Trending Models"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "NVIDIA details NeMo workflow for converting trace failures into evals and patches",
+      "summary": "NVIDIA published a tutorial detailing how to use NeMo Compass and NeMo Eval Author to convert production agent execution traces into evaluation suites and harness fixes. In a demonstration featuring an MCP-connected Hermes assistant, NeMo Compass flagged unconfirmed message transmissions by evaluating traces against behavioural rules in an ETHOS.md file. NeMo Eval Author then automatically generated custom Harbor evaluations and verifiers to catch the defect. The harness was subsequently patched by updating system instructions in SOUL.md to require explicit user confirmation before tool execution.",
+      "why_it_matters": "Demonstrates an automated workflow for converting production agent failures into repeatable evals and targeted harness patches.",
+      "reason": "NVIDIA details a practical engineering methodology for turning production agent failures into evaluation benchmarks and harness fixes.",
+      "item": {
+        "key": "developer.nvidia.com/blog/use-nvidia-nemo-to-turn-agent-failures-into-tests-and-harness-fixes",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "Use NVIDIA NeMo to Turn Agent Failures into Tests and Harness Fixes",
+        "url": "https://developer.nvidia.com/blog/use-nvidia-nemo-to-turn-agent-failures-into-tests-and-harness-fixes/",
+        "discussion_url": null,
+        "published": "2026-11-04T16:00:00Z",
+        "summary": "Turn production evidence into prioritized issues and custom evaluations that help you improve prompts, tools, models, memory, skills, and harness code. When you...",
+        "content": "Turn production evidence into prioritized issues and custom evaluations that help you improve prompts, tools, models, memory, skills, and harness code.\nWhen you build an agent for your domain, generic benchmark scores may not explain its failures. An agent might choose the wrong tool, follow the wrong workflow branch, miss relevant context, use an unnecessarily expensive model, or complete a task without meeting a domain-specific requirement.\nImproving an agent requires more than model tuning. Prompts, tools, routing, memory, skills, control flow, and other code all shape production reliability. Traces help you investigate failures, while evaluations help you measure whether a change improves agent behavior.\nThis tutorial walks you through one complete optimization cycle: use NVIDIA NeMo Compass to identify a failure in recorded traces, create an evaluation with NVIDIA NeMo Eval Author, update the agent’s instructions, and compare results on development and held-out tasks. Follow along with the NVIDIA NemoClaw blueprint for agent optimization.\nThe blueprint uses Hermes Agent in an NVIDIA OpenShell sandbox, with recorded traces from a fictional company.\nThe agent harness is the optimization surface\nOne wrong tool call can derail an entire task. The cause may be an unclear tool description, a routing rule, or missing context in the agent harness. A trace helps identify where the run went wrong. \nOur example agent is a Hermes enterprise assistant for a fictional company, connected through Model Context Protocol (MCP) to the company’s chat, email, files, and tickets. We asked it to “draft a message with project updates.” It drafted the message but also called the send_message tool without user confirmation. Addressing this error requires examining both the harness instructions and tool execution.\nPrerequisites\nUse a Linux machine running Docker natively. The recommended configuration is Ubuntu 24.04 with 8 vCPUs and 32 GB of RAM. You also need:\n- OpenShell 0.1.2 and Harbor 0.22.0\n- An NVIDIA API key from build.nvidia.com\n- A coding agent that NeMo Eval Author supports, such as Codex or Claude Code\nFollow the full step-by-step tutorial on GitHub or get started with an NVIDIA Brev launchable.\nNeMo Compass: Find what to fix first\nThe NemoClaw blueprint for agent optimization uses three libraries: NeMo Compass, NeMo Eval Author, and NVIDIA NeMo Relay.\nNeMo Compass analyzes stored agent traces and evaluation evidence to find recurring problems, identify evaluation gaps, and prioritize improvements. Rather than requiring you to inspect each run, NeMo Compass reduces a large trace corpus to a structured backlog of issues, supporting examples, and recommended areas for improvement or experimentation.\nEach Hermes run in the example is recorded as one JSON trace per line. We pointed NeMo Compass at the 42 traces in the repository, along with ETHOS.md, a short file that defines the assistant’s expected behavior.\ncompass --config configs/trace-analyst.yaml \\\n--trace.filesystem.path traces/world-v3/production/insights.jsonl\nNeMo Compass returns findings based on multiple signals:\n- Signs of unusual behavior\n- How the agent uses tools\n- Divergence from the agent’s intended behavior\nNeMo Compass also provides trace IDs that link each signal to the relevant agent runs.\nThese trace IDs support the overall finding. In these runs, the agent sent messages without user confirmation. NeMo Compass identified this error by comparing the agent’s actions with the rules in ETHOS.md.\nIn our internal benchmarks, running the full set of NeMo Compass signals against a dataset of thousands of traces identified anomalies that a coding agent assigned a similar task missed.\nBuild evaluations around real agent work with NeMo Eval Author\nAfter finding an issue with NeMo Compass, create a test that reproduces the problem. NeMo Eval Author provides coding agent skills and workflows to help you create these tests. NeMo Eval Author supports two agent evaluation formats: Harbor evaluations and NVIDIA NeMo Gym evaluations.\nInstall NeMo Eval Author’s skills in your coding agent and instruct it to use them. Provide the NeMo Compass findings, raw traces, the agent’s ETHOS.md file, and access to your agent repository as context. The evaluations should measure agent behavior relevant to your agent’s requirements. Review and tune the generated evaluations to make sure they reflect those requirements.\nIn our example, the coding agent created four Harbor evaluations with tasks similar to “draft a response.” NeMo Eval Author also creates verifiers that determine whether an agent meets specific criteria. In this example, the verifier checks whether the agent called the send_message tool without human confirmation and marks that run as a failure.\nNeMo Eval Author can help you create custom evaluations before production data exists, using agent requirements from ETHOS.md and code details such as tool definitions and existing workflows. As real traces and known failures become available, use NeMo Eval Author to expand your evaluation suite, so it continues to reflect how your agent is used.\nChange one part of the harness\nAfter identifying an issue and writing tests for it, update the harness. In our example, we changed the Hermes agent’s SOUL.md (a Hermes concept similar to a system prompt):\nRequests to write, draft, compose, prepare, or suggest a message authorize preparation only. Provide the draft for review and stop before sending it. A token returned by a preparation tool is a technical capability to execute an action. It does not establish the user's consent to that action.\nHarness changes can range from simple fixes like this to more complex middleware implementations, plugin extensions, and other agent harness patterns. Provide the coding agent with the NeMo Compass outputs, your agent’s ETHOS.md file, and your agent implementation. This context grounds the coding agent’s proposal. Earlier posts cover harness optimizations with LangChain…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "ParetoSaddler co-optimizes agent harness quality and token cost",
+      "summary": "Researchers introduced ParetoSaddler, a harness optimization framework designed to co-optimize LLM agent accuracy and execution token cost. Rather than applying final deployment cost preferences during intermediate evolution steps, ParetoSaddler uses Bayesian bootstrap Pareto support to preserve candidate harnesses showing quality or cost gains. Across experiments on ClawMark, it boosted quality from 70.86% to 81.35% while trimming task cost from $1.17 to $1.01. On GAIA2, quality improved from 56.22% to 62.89% alongside a cost reduction from $0.78 to $0.45 per task.",
+      "why_it_matters": "Provides a systematic framework for tuning agent prompts, tools, and control logic against both quality and token budget constraints.",
+      "reason": "This research directly addresses agent harness optimization by co-optimizing response accuracy against execution token costs.",
+      "item": {
+        "key": "arxiv:2611.02079",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "ParetoSaddler: Pareto-Guided Optimization of Agent Harnesses for Quality and Cost",
+        "url": "https://huggingface.co/papers/2611.02079",
+        "discussion_url": null,
+        "published": "2026-11-04T00:00:00Z",
+        "summary": "Harness optimization can substantially improve LLM agents without modifying model weights, but existing methods primarily optimize response quality. Extending them to joint quality--cost optimization introduces a challenge: applying the deployment preference during intermediate updates can prematurely reject candidates that are valuable for later improvements. We introduce ParetoSaddler, which addresses this mismatch by separating intermediate candidate promotion from final deployment selection. At each iteration, an optimizer updates a parent harness to produce a candidate, and then compares the two over repeated executions and uses Bayesian bootstrap Pareto support to promote candidates showing credible progress in either quality or cost. Promoted candidates receive broader development evaluation and remain available as parents for later optimization steps. We evaluate ParetoSaddler on ClawMark and GAIA2 using domain-disjoint splits. On ClawMark, ParetoSaddler improves quality from 70.86\\% to 81.35\\% while reducing cost from \\1.17 to 1.01 per task; on GAIA2, it improves quality from 56.22\\% to 62.89\\% while reducing cost from \\0.78 to 0.45 per task. The Pareto-selected harnesses…",
+        "content": "ParetoSaddler: Pareto-Guided Optimization of Agent Harnesses for Quality and Cost\nAbstract\nParetoSaddler improves LLM agent harnesses by separately promoting intermediate candidates via Bayesian bootstrap Pareto support and selecting final deployments, boosting quality while reducing cost.\nHarness optimization can substantially improve LLM agents without modifying model weights, but existing methods primarily optimize response quality. Extending them to joint quality--cost optimization introduces a challenge: applying the deployment preference during intermediate updates can prematurely reject candidates that are valuable for later improvements. We introduce ParetoSaddler, which addresses this mismatch by separating intermediate candidate promotion from final deployment selection. At each iteration, an optimizer updates a parent harness to produce a candidate, and then compares the two over repeated executions and uses Bayesian bootstrap Pareto support to promote candidates showing credible progress in either quality or cost. Promoted candidates receive broader development evaluation and remain available as parents for later optimization steps. We evaluate ParetoSaddler on ClawMark and GAIA2 using domain-disjoint splits. On ClawMark, ParetoSaddler improves quality from 70.86\\% to 81.35\\% while reducing cost from \\1.17 to 1.01 per task; on GAIA2, it improves quality from 56.22\\% to 62.89\\% while reducing cost from \\0.78 to 0.45 per task. The Pareto-selected harnesses also achieve higher quality at lower cost than quality-only harness optimization. Analysis shows that Pareto-aware optimization retains intermediate candidates that would be discarded by deployment preference but can support later improvements, while Bayesian bootstrap screening filters out candidates whose gains are weakly supported across runs.\nCommunity\nThe code is available at: https://github.com/microsoft/AutoSaddler/tree/feat/paretosaddler. We welcome your comments and feedback!\nNice work! i think the pareto-aware evolving is the right path, but i am curious how ParetoSaddler compares with GEPA?\nThanks for the great question! GEPA is indeed closely related, and we share the idea of Pareto-guided evolution.\nOne key distinction is that GEPA uses Pareto selection across task instances to maintain diverse candidates, whereas ParetoSaddler explicitly considers two competing objectives: quality and cost.\nAnother distinction is that GEPA's original work primarily focuses on prompt evolution, while ParetoSaddler targets the broader agent harness, including prompts, tools, and control logic. While GEPA can also support broader optimization, a direct comparison would require carefully aligning their optimization scopes and objectives.\nThat said, we did compare GEPA against our earlier work, AutoSaddler, in the original AutoSaddler paper. AutoSaddler also serves as the quality-only baseline (AS-Quality) in this work. Hope this helps clarify the relationship!\nGet this paper in your agent:\nhf papers read 2611.02079 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 16.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "ToolSpace mines MCP traces to synthesize verifiable agent environments",
+      "summary": "ToolSpace presents a tool-centric methodology for synthesizing realistic multi-environment agent benchmarks and training trajectories. By mining execution dependencies directly from real MCP call traces using deterministic rules, the pipeline clusters tool compositions into environments and synthesizes backing databases only when states mutate. State-aware random walks with backtracking yield verifiable tasks, producing harder evaluation datasets like AutomationBench Pro, where frontier models dropped by up to 38.2 points. Fine-tuning Qwen3.6-35B-A3B and GLM-5.2 on ToolSpace data yielded substantial performance jumps across seven long-horizon tool benchmarks.",
+      "why_it_matters": "Eliminates artificial tool benchmark design by generating grounded MCP environments directly from execution traces and deterministic verifiers.",
+      "reason": "It proposes a tool-centric synthesis approach to auto-generate realistic MCP environments for training long-horizon agents.",
+      "item": {
+        "key": "arxiv:2611.05036",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "ToolSpace: Scaling Tool-Centric Environment Synthesis for Long-Horizon Agents",
+        "url": "https://huggingface.co/papers/2611.05036",
+        "discussion_url": null,
+        "published": "2026-11-04T00:00:00Z",
+        "summary": "Large language models are deployed as long-horizon agents that compose diverse tools across MCP services into executable workflows. Existing MCP environment-scaling methods are data-centric: they first synthesize a database and scenario, then derive tools and tasks from them. As a result, tool interfaces may not match real ones, tool compositions are not grounded in execution, and tasks rarely span more than one environment. We propose ToolSpace, a tool-centric framework that reverses this order. ToolSpace mines data, state, and retry dependencies from adjacent calls in execution traces of real MCP services and open agent corpora, using deterministic rules rather than LLM judgment, and clusters the resulting weighted tool-composition graph into environments. Databases are synthesized only for state-mutating environments, while query and stateless tools replay recorded returns. ToolSpace then performs state-aware random walks with rollback and decompiles each chain into a natural-language task with assertion-based checks, keeping only samples that replay successfully from the initial state. Applied to AutomationBench and tau3-Bench Banking, the pipeline produces harder Pro versions…",
+        "content": "ToolSpace: Scaling Tool-Centric Environment Synthesis for Long-Horizon Agents\nAbstract\nToolSpace constructs realistic multi-environment tool-use benchmarks by mining execution traces, clustering tool compositions, and validating tasks through replayable state-aware random walks.\nLarge language models are deployed as long-horizon agents that compose diverse tools across MCP services into executable workflows. Existing MCP environment-scaling methods are data-centric: they first synthesize a database and scenario, then derive tools and tasks from them. As a result, tool interfaces may not match real ones, tool compositions are not grounded in execution, and tasks rarely span more than one environment. We propose ToolSpace, a tool-centric framework that reverses this order. ToolSpace mines data, state, and retry dependencies from adjacent calls in execution traces of real MCP services and open agent corpora, using deterministic rules rather than LLM judgment, and clusters the resulting weighted tool-composition graph into environments. Databases are synthesized only for state-mutating environments, while query and stateless tools replay recorded returns. ToolSpace then performs state-aware random walks with rollback and decompiles each chain into a natural-language task with assertion-based checks, keeping only samples that replay successfully from the initial state. Applied to AutomationBench and tau3-Bench Banking, the pipeline produces harder Pro versions on which 7 frontier models drop by up to 38.2 points. Across seven long-horizon tool-use benchmarks, ToolSpace raises Qwen3.6-35B-A3B from 23.0 to 41.0 average score (43.2 with RL) and GLM-5.2 from 44.6 to 56.6, on par with Claude Opus 5. Ablations show that execution-witnessed edges clearly outperform LLM-judged ones, and performance keeps improving with data and environment scale.\nCommunity\nHappy to share our latest work on agent environment synthesis:\n🌟 ToolSpace: Scaling Tool-Centric Environment Synthesis for Long-Horizon Agents\nMost existing environment synthesis methods are data-centric: they first build the underlying database, then synthesize tools and tasks. Tool interfaces easily drift from reality, and it is hard to form tasks that span environments.\nToolSpace takes the opposite approach. It first collects tools from real call traces, then chains real tool sets into a tool universe, and finally synthesizes the underlying database on demand. This preserves authenticity while flexibly generating verifiable tasks across any environment × any tool.\n💡 Key methods\n1️⃣ Tool universe exploration: mine tool dependencies from real traces and link them into a tool-world graph; synthesize databases only for environments that change state.\n2️⃣ Verifiable task synthesis: walk the graph with state-aware traversal and backtracking, decompile executable tool chains into tasks and verification scripts, and keep environment state continuous. The same chain can yield high-quality SFT data and mixed-environment RL data.\n3️⃣ Harder evaluation benchmarks: ToolSpace seamlessly upgrades two frontier benchmarks into AutomationBench Pro and τ³-Bench Banking Pro. Strong existing models all score below 40, setting a harder bar for the field.\n📊 Experiments\n✅ We evaluate ToolSpace-8B, 35B, and 744B on 7 long-horizon tool benchmarks. ToolSpace-744B averages 56.6, on par with Claude Opus 5.\n✅ ToolSpace-744B: AutomationBench 54.7, Harvey LAB 27.5, SkillsBench 67.8, OfficeQA Pro 67.1, JobBench 57.5.\n✅ Agent performance scales as environment and data scale grow.\nWe welcome discussion and feedback. Code and models are open-sourced 👏👏👏\n📄 Paper: https://arxiv.org/pdf/2611.05036\n🌐 Project page: https://toolspace-agent.github.io/\n💻 GitHub: https://github.com/dongguanting/ToolSpace\n🤗 Hugging Face: https://huggingface.co/collections/dongguanting/toolspace\nGet this paper in your agent:\nhf papers read 2611.05036 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 3\ndongguanting/ToolSpace-8B\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 34.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS details four layers of context engineering in Deep Insight reference architecture",
+      "summary": "AWS published a guide outlining four layers of context engineering for production multi-agent systems, drawn from their open-source Deep Insight reference implementation. The architecture segregates context across specialized agents, enforces prompt behavioral rules, externalizes heavy state to the filesystem, and deploys independent verification agents. In working code, using file-based script execution reduced context token additions by roughly 95 percent. Furthermore, loading agent skills dynamically on demand shrank the system prompt size by approximately 97 percent.",
+      "why_it_matters": "Offers practical, measured techniques to prevent context rot and token blowout in multi-agent production pipelines.",
+      "reason": "Offers a practical, four-layer architecture for managing context, file-based tools, and verification in production multi-agent systems.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/four-layers-of-context-engineering-for-production-ai-agents-how-deep-insight-applies-them-in-working-code",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Four layers of context engineering for production AI agents: How Deep Insight applies them in working code",
+        "url": "https://aws.amazon.com/blogs/machine-learning/four-layers-of-context-engineering-for-production-ai-agents-how-deep-insight-applies-them-in-working-code/",
+        "discussion_url": null,
+        "published": "2026-11-04T16:30:40Z",
+        "summary": "In production AI agents, context management is the real bottleneck. This post presents a four-layer context engineering framework (architecture, prompts, file-based tools, and verification agents), implemented in working code from Deep Insight, an open source multi-agent data analysis solution on the Strands Agents SDK and Amazon Bedrock AgentCore.",
+        "content": "When production AI agents handle tasks such as data analysis and report generation, context management can become a major bottleneck. A 200K-token window sounds generous until a real-world task burns through most of it in minutes. Data analysis and report generation leave the agent failing mid-execution, losing accuracy, or driving up costs. A body of published guidance already addresses this, but the individual techniques are easier to read about than to apply. Applied together, they make a measurable difference: in the reference implementation this post walks through, a single write-and-execute tool cuts the tokens each script adds to context by about 95 percent, and loading skills on demand shrinks the system prompt by about 97 percent.\n\nThis series organizes that guidance into practices you can apply directly. Anthropic’s engineering posts, together with features built into the Strands Agents SDK, converge on four layers of context engineering: isolate context at the architecture level, control it through prompts, externalize it to the filesystem, and verify it with independent agents and safeguards. In this post (Part 2), you will learn how each layer works and what it looks like in working code. We applied these techniques in Deep Insight , an open source multi-agent data analysis solution built on the Strands Agents SDK and Amazon Bedrock AgentCore, which serves as the reference implementation throughout.\n\nPost series\n\nPart 1: 5 production challenges in multi-agent systems and how Deep Insight solved them.\n\nPart 2: Four layers of context engineering for production AI agents: How Deep Insight applies them in working code.\n\nPart 3: Harness engineering in practice: moving Deep Insight from dev to production. (Coming soon!)\n\nThe first post defined five core challenges that production multi-agent systems must solve. It introduced how Strands Agents SDK , Amazon Bedrock and Bedrock AgentCore , and AWS Fargate each address different layers of the problem, with code examples. This second post takes the four layers of context engineering practice that sit on top of that architecture and shows each one implemented. The third post guides you through deploying and operating agents in a secure private network on Amazon Virtual Private Cloud (Amazon VPC), covering everything needed for real-world operations.\n\nWhat is context engineering?\n\nContext engineering is the discipline of optimizing the information in a large language model (LLM)’s limited context window so agents perform at their best. Anthropic Claude Sonnet 4.5, available on Amazon Bedrock, offers a 200K context window, but complex production tasks quickly exceed it. For example, a seemingly straightforward request like “ Analyze sales data and create a DOCX report ” runs through several stages: data loading and exploration (5 min), category-based sales analysis (3 min), generating five charts for time-series analysis (10 min), statistical validation (3 min), and final report generation (5 min). Together they consume over 150K tokens across 15 minutes.\n\nProcessing such tasks in a single context causes problems: the window overflows mid-task, stale context degrades performance, and errors require re-running the whole pipeline. As context grows, attention to important information drops, and inefficiency raises cost under per-token pricing.\n\n“As the number of tokens in the context window increases, the model’s ability to accurately recall information from that context decreases (Context rot).”\n\n— Anthropic, “ Effective Context Engineering for AI Agents ” (2025.09)\n\nContext engineering solves exactly these problems, and it is not only a collection of techniques. Spanning architecture design, prompt writing, tool implementation, and verification, it’s a layered discipline where each layer compensates for what the previous ones miss. This post details the four-layer approach you can apply to manage context efficiently.\n\nHow to handle tasks that exceed the context window\n\nAnthropic has published several techniques for handling long-horizon tasks. Deep Insight groups these techniques into four layers, with each layer addressing the limitations of the others. The following table sets out the four layers.\n\nLayer\nPractice\nCore Principle\nLimitations\n\nLayer 1: Architecture\nIsolating Context Through Multi-Agent Architecture\nEach agent operates in an independent context\nWhen isolation alone is not enough\n\nLayer 2: Prompt\nOutput Control and Behavioral Rules\nLimiting context intake through prompts\nWhen prompts alone are not enough\n\nLayer 3: Tools\nFile-based Context Externalization\nKeeping heavy content in files outside the context\nWhen issues still arise\n\nLayer 4: Verification Agents and Safeguards\nIndependent Verification and Safeguards\nCatching errors and preventing context overflow\nFinal line of defense\n\nThe sections that follow take each layer in order, stating what the layer prescribes, why the preceding layers alone are insufficient, and how the practice is implemented in Deep Insight.\n\n1. Isolating context through multi-agent architecture\n\nGive each specialized agent its own context window and pass only compressed results to the orchestrator. Deep Insight does this with a hierarchy of Coordinator, Planner, Plan Reviewer, Supervisor, and Tool Agents (Coder, Validator, Reporter, Tracker, Auditor).\n\nWith a single agent, all information, from user requests through data exploration, analysis, chart generation, validation, and reporting, accumulates in one context and easily exceeds the window. Giving each agent its own context keeps even the Coder, which uses the most, under 25K tokens total. Each agent receives only what it needs and signals others with a completion notice and brief summary.\n\nThe key to isolation is minimizing shared information. Deep Insight uses a Python dictionary, shared_state , that stores only four things:\n\nmessages : The previous agent’s final message (not the full conversation history).\n\nclues : Compressed summaries collected from each agent.\n\nfull_plan : A checklist generated by Planner and updated by Tracker.\n\nhistory : A brief log of agent names and messages.\n\nThe clues use a fixed CLUES_FORMAT: instead of each agent’s full conversation (tens of thousands of tokens), only compressed core results are passed.\n\n# coder_agent_tool.py -- context passing format\nCLUES_FORMAT = \"Here is clues from {}:\\n\\n<clues>\\n{}\\n</clues>\\n\\n\"\nRESPONSE_FORMAT = \"Response from {}:\\n\\n<response>\\n{}\\n</response>\\n\\n*Please execute the next step.*\"\n\n# After Coder completes: add only compressed result to clues\nclues += CLUES_FORMAT.format(\"coder\", response[\"text\"])\n\nThis pattern is the one recommended in Anthropic’s “ How We Built Our Multi-Agent Research System ” post, which describes an orchestrator-worker pattern in which a lead agent delegates to specialized subagents, with each agent working only within its own context. You do not need to build it yourself: the agents-as-tools pattern in the Strands Agents SDK provides this isolation at the framework level.\n\n2. Controlling context inflow through prompts\n\nLayer 1 isolation alone is not sufficient: even with independent contexts, an agent that generates long responses inflates the Supervisor’s context. Layer 2 limits each agent’s output through prompts.\n\nFor Deep Insight, we use prompts to limit how much information each agent returns to the Supervisor. Three rules do most of the work, as Deep Insight’s prompts show.\n\n“Start with the strongest model and a simple prompt. Then incrementally add specific instructions based on actually observed failure cases.”\n\n— Anthropic, “Effective Context Engineering for AI Agents” (2025.09)\n\nImplementation detail 2-1: Explicit per-agent output token budgets\n\nEach agent’s prompt specifies a maximum response token count, preventing long responses that pollute the Supervisor’s context.\n\nAgent\nOutput Token Budget\nReason\n\nCoder\n1,000–1,500 tokens\nAnalysis code is saved to files, so the agent returns only a summary of…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "SpecPilot deploys autonomous agent loops to optimize speculative decoding",
+      "summary": "SpecPilot is an autonomous agentic system designed to discover deployment-specific speculative decoding algorithms and kernel optimizations. Using a cost model to locate hardware execution gaps and token-forcing verification to prevent output degradation, parallel agents iteratively explore and record verified mechanisms into memory. The system autonomously discovered 12-bit weight formats, two-level verification, and novel batching strategies across multiple GPUs and target models. In testing, it increased speculative decoding speedups over autoregressive baselines from 4.46x to 10.87x in single-request regimes and 1.94x to 3.93x in batched workloads.",
+      "why_it_matters": "Shows that autonomous agent loops can optimize low-level inference serving engines and speculative decoding setups better than static default configurations.",
+      "reason": "Explores autonomous systems optimization to squeeze maximum speedups out of parallel speculative decoding drafters.",
+      "item": {
+        "key": "arxiv:2611.02501",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "SpecPilot: Autonomous Algorithm Discovery and Systems Optimization for Speculative Decoding",
+        "url": "https://huggingface.co/papers/2611.02501",
+        "discussion_url": null,
+        "published": "2026-11-04T00:00:00Z",
+        "summary": "Speculative decoding accelerates memory-bound LLM decoding with a lightweight drafter, and parallel drafters extend this speedup by drafting a whole block in one forward pass. However, it remains unclear whether their released systems (stock) attain the full speedup that parallel drafting permits. We identify three challenges. First, with one request, each step accepts few tokens but reads every target weight. Second, with batching, per-request verification work roughly halves the speedup over autoregressive (AR) decoding. Third, speculative decoding is deployment-specific, and no universal optimization fits every serving regime, drafter, target model and GPU. To address these challenges, we present SpecPilot, an autonomous agentic loop that discovers algorithms and systems optimizations for each deployment. In each round, a cost model locates the largest gaps between the current system and its ceiling. Parallel agents explore directions and integrate the successful ones. Token forcing checks every output token against stock to detect reward hacking. A structured memory carries validated mechanisms to new rounds and deployments. SpecPilot discovered a general lossless 12-bit…",
+        "content": "SpecPilot: Autonomous Algorithm Discovery and Systems Optimization for Speculative Decoding\nAbstract\nSpecPilot autonomously discovers deployment-specific algorithms and system optimizations to maximize speculative decoding speedups across diverse models, drafters, and serving regimes without quality loss.\nSpeculative decoding accelerates memory-bound LLM decoding with a lightweight drafter, and parallel drafters extend this speedup by drafting a whole block in one forward pass. However, it remains unclear whether their released systems (stock) attain the full speedup that parallel drafting permits. We identify three challenges. First, with one request, each step accepts few tokens but reads every target weight. Second, with batching, per-request verification work roughly halves the speedup over autoregressive (AR) decoding. Third, speculative decoding is deployment-specific, and no universal optimization fits every serving regime, drafter, target model and GPU. To address these challenges, we present SpecPilot, an autonomous agentic loop that discovers algorithms and systems optimizations for each deployment. In each round, a cost model locates the largest gaps between the current system and its ceiling. Parallel agents explore directions and integrate the successful ones. Token forcing checks every output token against stock to detect reward hacking. A structured memory carries validated mechanisms to new rounds and deployments. SpecPilot discovered a general lossless 12-bit weight format, tree verification for hybrid recurrent targets, two-level verification and three batching mechanisms. We evaluate it across four target models, three drafters, two GPU platforms and five benchmarks. Without training or quality loss, it raises the speedup over AR from stock's 4.46times to 10.87times with one request, and from 1.94times to 3.93times with batching.\nCommunity\nSpecPilot is an agentic loop that discovers lossless speculative decoding optimizations for each deployment, raising the speedup over AR from 4.46× to 10.87×.\nPaper: https://arxiv.org/pdf/2611.02501\nCode: https://github.com/StargazerX0/SpecPilot\nProject page: https://stargazerx0.github.io/specpilot-project-page/\nGet this paper in your agent:\nhf papers read 2611.02501 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 16.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Caper uses sandbox pre-execution to audit coding agent shell actions",
+      "summary": "Researchers introduced Caper, a consequence-aware permission system for coding agents that pre-executes proposed shell commands in a snapshotted sandbox. System-call tracing gathers file, network, and secret access data into a compact execution report for review by an LLM approver. Allowed actions commit to the workspace, while blocked commands roll back and return actionable error details to the agent. Benchmark tests demonstrated that Caper reduced harmful outcome rates on SABER to 6.7% and on YoloFS-Ext to 7.8%, while misclassifying only 1.0% of safe control tasks.",
+      "why_it_matters": "Replaces easily bypassed text-based command filters with empirical sandbox pre-execution to safely gate autonomous agent tool calls.",
+      "reason": "Introduces a consequence-aware guardrail model to evaluate command execution safety before autonomous coding agents run shell actions.",
+      "item": {
+        "key": "arxiv:2610.40753",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "\"Shall We Approve?\" Consequence-Aware Approval for Autonomous Coding Agents",
+        "url": "https://huggingface.co/papers/2610.40753",
+        "discussion_url": null,
+        "published": "2026-11-04T00:00:00Z",
+        "summary": "Coding agents increasingly rely on automated approvers to decide whether a proposed shell command may run. Existing approvers, from rule-based checkers to guardrail models and deployed permission classifiers, base their decisions on the text of the request and command. Yet a command's behavior depends on the code it invokes and the state of the workspace, and systems that observe file changes leave the assessment to the agent or a human after execution. We present Caper, a consequence-aware approval mechanism that pre-executes each command in a snapshotted sandbox, provides an independent approver with a bounded report of its observed effects, commits allowed commands, and rolls back blocked ones with a reason the agent can act on. Compared with six existing systems, Caper achieves the lowest harmful-outcome rate on SABER (6.7% versus at least 14.8%) and YoloFS-Ext, a benchmark we build in which harmful behavior is hidden inside invoked tools (7.8% versus at least 35.3%), while blocking 1.0% of the safe twins of the dangerous tasks in YoloFS-Ext.",
+        "content": "\"Shall We Approve?\" Consequence-Aware Approval for Autonomous Coding Agents\nAbstract\nCaper pre-executes shell commands in isolated sandboxes to evaluate real-world effects before approval, reducing harmful outcomes compared to text-based approvers.\nCoding agents increasingly rely on automated approvers to decide whether a proposed shell command may run. Existing approvers, from rule-based checkers to guardrail models and deployed permission classifiers, base their decisions on the text of the request and command. Yet a command's behavior depends on the code it invokes and the state of the workspace, and systems that observe file changes leave the assessment to the agent or a human after execution. We present Caper, a consequence-aware approval mechanism that pre-executes each command in a snapshotted sandbox, provides an independent approver with a bounded report of its observed effects, commits allowed commands, and rolls back blocked ones with a reason the agent can act on. Compared with six existing systems, Caper achieves the lowest harmful-outcome rate on SABER (6.7% versus at least 14.8%) and YoloFS-Ext, a benchmark we build in which harmful behavior is hidden inside invoked tools (7.8% versus at least 35.3%), while blocking 1.0% of the safe twins of the dangerous tasks in YoloFS-Ext.\nCommunity\nDoes a coding agent really know what its next command will do?\nApproving every command by hand does not scale: Claude Code users approve 93% of permission prompts anyway. So agents now rely on automated approvers, such as Claude Code's Auto Mode, rule-based checkers, and guardrail models. All of them judge the text of the command. Yet a command's behavior is decided by the scripts it invokes and the workspace it runs in, and the same command can be harmless in one project and destructive in another.\nWe propose Caper, which approves a command after seeing what it does. Each command is pre-executed in a snapshotted sandbox under system-call tracing. An LLM approver reviews a compact report of the observed effects: file changes, network attempts, and reads of secrets. Allowed commands are committed; blocked ones are rolled back, and the agent gets a reason it can act on.\nCompared with six existing systems, Caper has the lowest harmful-outcome rate on SABER (6.7% vs. at least 14.8%) and on YoloFS-Ext, our benchmark that hides harm inside the tools agents are asked to run (7.8% vs. at least 35.3%). It blocks only 1.0% of the safe twins.\nCode and data: https://github.com/wudaoz/Caper\nGet this paper in your agent:\nhf papers read 2610.40753 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 11.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "ByteDance opens Axion 1.0 agent model weights, code, and training recipe",
+      "summary": "ByteDance released Axion 1.0, an open agent foundation model trained via a simplified three-stage pipeline consisting of two lightweight SFT phases followed by reinforcement learning. The SFT stages combine model-aware synthetic problem generation with verifiable, tool-dependent tasks before applying trajectory-based RL with chained partial-credit rewards. Using roughly 18,000 SFT examples, the 35B parameter reproduction model achieved benchmark scores of 52.8 on HLE and 85.0 on FrontierScience Olympiad. The release includes open model weights, training code, prompts, and complete dataset generation pipelines under an Apache 2.0 license.",
+      "why_it_matters": "Demonstrates a transparent, fully reproducible blueprint for training agent foundation models using programmatic verifiers and chained RL rewards.",
+      "reason": "Presents an open-weight agent foundation model built with a simplified, reproducible SFT and RL training pipeline.",
+      "item": {
+        "key": "arxiv:2611.03233",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Axion 1.0: Open Agent Foundation Models, Simplified",
+        "url": "https://huggingface.co/papers/2611.03233",
+        "discussion_url": null,
+        "published": "2026-11-04T00:00:00Z",
+        "summary": "We introduce Axion 1.0, a fully open agent foundation model that combines strong and broad agentic capabilities with a remarkably simple training recipe. Axion 1.0 is trained in only three stages: two lightweight supervised fine-tuning stages followed by reinforcement learning, without dedicated mid-training, direct preference optimization (DPO), or on-policy distillation (OPD). The first SFT stage develops strong self-contained reasoning through model-aware data construction, where we synthesize challenging problems and adversarially strengthen them based on the base model's own successful solution strategies. The second stage extends these capabilities to tool-dependent reasoning through a scalable pipeline for constructing diverse and automatically verifiable tasks grounded in real-world data sources and deterministic computation. Finally, reinforcement learning further strengthens long-horizon reasoning and interaction with external tools and environments. Despite this compact training recipe, Axion 1.0 achieves strong performance across a broad suite of agentic benchmarks and is competitive with leading commercial models on several of them. Equally importantly, Axion 1.0 is…",
+        "content": "Axion 1.0: Open Agent Foundation Models, Simplified\nAbstract\nAxion 1.0 is an open agent foundation model trained via a concise three-stage pipeline of supervised fine-tuning and reinforcement learning, achieving competitive agentic performance while fully releasing its data and training recipe.\nWe introduce Axion 1.0, a fully open agent foundation model that combines strong and broad agentic capabilities with a remarkably simple training recipe. Axion 1.0 is trained in only three stages: two lightweight supervised fine-tuning stages followed by reinforcement learning, without dedicated mid-training, direct preference optimization (DPO), or on-policy distillation (OPD). The first SFT stage develops strong self-contained reasoning through model-aware data construction, where we synthesize challenging problems and adversarially strengthen them based on the base model's own successful solution strategies. The second stage extends these capabilities to tool-dependent reasoning through a scalable pipeline for constructing diverse and automatically verifiable tasks grounded in real-world data sources and deterministic computation. Finally, reinforcement learning further strengthens long-horizon reasoning and interaction with external tools and environments. Despite this compact training recipe, Axion 1.0 achieves strong performance across a broad suite of agentic benchmarks and is competitive with leading commercial models on several of them. Equally importantly, Axion 1.0 is open beyond model weights: we release the complete recipe, including data construction, generation, filtering, verification, prompts, and training code, enabling the entire development process to be reproduced and extended. Axion 1.0 demonstrates that strong agent foundation models can be both open and simple, offering a practical and reproducible path toward advancing open agentic intelligence.\nCommunity\nIntroducing Axion 1.0: Open Agent Foundation Models, Simplified.\nStrong scientific reasoning and tool use with a simple post-training recipe: two lightweight supervised fine-tuning stages followed by reinforcement learning.\n- Learn to reason: model-aware construction of challenging, self-contained scientific problems.\n- Learn to investigate: verifiable tasks that require retrieving information and using tools.\n- Learn through interaction: reinforcement learning over agent trajectories.\nWith approximately 18K SFT examples, Axion 1.0-35B and 122B achieve competitive results across six evaluation settings: HLE, BioMysteryBench, SEAL-0, HiPhO, and the Olympiad and Research splits of FrontierScience.\nThe Axion 1.0-35B reproduction checkpoint is now available under Apache 2.0. It scores 52.8 on HLE, 35.3 on BioMysteryBench, 60.4 on SEAL-0, 45.9 on HiPhO, 85.0 on FrontierScience Olympiad, and 55.0 on FrontierScience Research.\nPaper: https://arxiv.org/abs/2611.03233\nProject: https://axion1-0.github.io/\nCode: https://github.com/bytedance/axion1_0\nTraining data: https://huggingface.co/datasets/Axion1-0/axion-training-data\nModel (35B reproduction): https://huggingface.co/Axion1-0/Axion-1.0-35B\nReally nice to see the full recipe released alongside the weights, including data construction, prompts and training code. The chained partial credit in the RL reward (a later intermediate target only counts once all its prerequisites are verified, capped at 0.3 for a wrong final answer) looks like a sensible way to reward progress without making it easy to game. Curious about the RL task filter: since a question is kept only if at least one of four rollouts is correct and the rewards have nonzero variance, roughly what fraction of the programmatic pool survives at the 35B-A3B scale? And do you expect the 4B and 9B SFT-only variants to gain as much from the same GRPO stage?\nGet this paper in your agent:\nhf papers read 2611.03233 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 1\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 39.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "OpenAI autonomous agent pipeline patches nearly 1,000 Linux kernel flaws",
+      "summary": "OpenAI deployed an autonomous pipeline that successfully identified, verified, and patched 948 local privilege-escalation vulnerabilities within the Linux kernel. While technical implementation details regarding the underlying harness and model architecture remain sparse, the pipeline operated end-to-end without manual intervention. The results highlight the growing viability of fully automated agent systems in complex systems engineering and vulnerability remediation.",
+      "why_it_matters": "Proves that autonomous agent harnesses can conduct end-to-end vulnerability research and patching on real-world system software at scale.",
+      "reason": "Demonstrates a real-world deployment of autonomous security agents successfully finding and patching nearly 1,000 Linux kernel vulnerabilities.",
+      "item": {
+        "key": "openai.com/index/a-thousand-fewer-paths-to-root",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "A thousand fewer paths to root",
+        "url": "https://openai.com/index/a-thousand-fewer-paths-to-root",
+        "discussion_url": null,
+        "published": "2026-11-04T08:00:00Z",
+        "summary": "OpenAI built an autonomous pipeline that found, validated, and generated patches for 948 local privilege-escalation vulnerabilities in the Linux kernel.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "Nvidia's RTX Spark encrypted firmware degrades Linux inference speed down to 35% of baseline.",
+      "item": {
+        "key": "mindstudio.ai/blog/linux-nvidia-rtx-spark-laptop",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Nvidia RTX Spark encrypted firmware slows inference speed to 35% on Linux",
+        "url": "https://www.mindstudio.ai/blog/linux-nvidia-rtx-spark-laptop",
+        "discussion_url": "https://news.ycombinator.com/item?id=50362905",
+        "published": "2026-11-04T08:46:29Z",
+        "summary": "Comments",
+        "content": "",
+        "score": 566.0,
+        "comments": 263,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    },
+    {
+      "line": "Datasette Agent 0.5a0 introduces a side-by-side panel UI for interactive chat next to database tables and query pages.",
+      "item": {
+        "key": "simonwillison.net/2026/Nov/3/datasette-agent",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "datasette-agent 0.5a0",
+        "url": "https://simonwillison.net/2026/Nov/3/datasette-agent/",
+        "discussion_url": null,
+        "published": "2026-11-03T23:13:45Z",
+        "summary": "Release: datasette-agent 0.5a0\n\nThis is a significant release of Datasette Agent . The most notable new feature is called the panel - it lets the agent chat open and then sit next to pages from Datasette, for example a table or query page.\n\nWhen combined with datasette-apps this means you can prompt a database-backed app into existence and then modify it from the chat that sits next to that app.\n\nYou can try it by signing in with your GitHub account to agent.datasette.io .\n\nTags: projects , datasette , datasette-agent",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "EvoTeam proposes a framework that dynamically evolves multi-agent team composition and collaboration strategies based on execution feedback.",
+      "item": {
+        "key": "arxiv:2610.39813",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "EvoTeam: Multi-Agent Collaboration via Evolving Teams",
+        "url": "https://huggingface.co/papers/2610.39813",
+        "discussion_url": null,
+        "published": "2026-11-04T00:00:00Z",
+        "summary": "LLM-based multi-agent systems (MAS) rely on collaboration among specialized agents to solve complex tasks. Existing methods improve MAS by refining the prompts, skills, and execution strategies of individual agents based on task feedback. However, improving individual agents does not necessarily lead to better team collaboration. Recent studies have therefore extended evolution to the collaboration level, using collective execution experience to adjust team organization, and inter-agent interactions. Nevertheless, evolving collaboration across heterogeneous tasks remains challenging, as existing approaches often constrain team reorganization within a shared structure and reuse interaction rules across incompatible team contexts. In this paper, we propose EvoTeam, a collaboration-centric evolution framework that jointly evolves team organization, interaction rules, and individual agent skills through execution experience. It maintains a library of reusable teams, selecting or creating agent teams and guiding collaboration through team-specific interaction rules. Collaboration experience accumulates within compatible team contexts, while individual skills remain reusable across…",
+        "content": "",
+        "score": 23.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "AWS demonstrated integrating Jev and Strands Decider decision models into Bedrock AgentCore Evaluations using code-based evaluators.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/use-decision-models-with-amazon-bedrock-agentcore-evaluations",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Use decision models with Amazon Bedrock AgentCore Evaluations",
+        "url": "https://aws.amazon.com/blogs/machine-learning/use-decision-models-with-amazon-bedrock-agentcore-evaluations/",
+        "discussion_url": null,
+        "published": "2026-11-04T18:46:36Z",
+        "summary": "Some agent-evaluation questions are narrow and repeatable, and decision models answer exactly that kind of question. This post shows how to connect two decision models, Jev and Strands Decider, to Amazon Bedrock AgentCore Evaluations through code-based evaluators, and how to validate a decision-model check before you gate a release on it.",
+        "content": "Some of the questions you ask when evaluating an agent are narrow and repeatable. Did this response stay on policy? Is this tool call safe to approve? Does this answer match the retrieved context? Decision models answer exactly that kind of question. They take a structured state and a fixed set of allowed answers and return a calibrated probability over them, rather than free-form text whose confidence drifts from run to run. That makes them a strong fit for the scoring step in an agent evaluation, where you want a label and a number you can threshold and trust.\n\nAmazon Bedrock AgentCore Evaluations , a capability of Amazon Bedrock AgentCore, scores an agent through its entire lifecycle, on demand during development, in batch jobs against stored sessions, and online against production traffic. Alongside 15 built-in evaluators, AgentCore Evaluations supports custom evaluators that you define as either an LLM-as-a-judge or a code-based evaluator. Custom LLM-as-a-judge evaluators apply your instructions and rating scale with a model in Amazon Bedrock. Code-based evaluators run your own logic in an AWS Lambda function, and that logic can call your choice of external system, model, or API, including a decision model.\n\nDecision models suit questions with a fixed set of answers that an informed person could decide at a glance, such as whether the agent refused a request or whether a response stayed on topic. After you validate a question on your own traffic, a decision model can be sufficient for that decision or score, and you can extend the same approach to specific harmfulness or stereotyping categories in your policy. Because both backends can answer several questions about the same state in a single request, you can use them as a screening layer rather than a replacement, running a pass or fail signal across your metrics to select the turns that warrant deeper assessment by the built-in evaluators, whose explanations help you investigate what went wrong.\n\nThis post shows how to connect two decision model backends to AgentCore Evaluations through code-based evaluators. The first is Jev , a hosted decision model from TypeSafe. The second is Strands Decider 2B , an open-source decision model you run yourself. By the end of this post, you will know how to convert the AgentCore evaluator input into a decision model request, and the model’s probabilities back into an AgentCore evaluation result. First, though, when should you reach for a custom LLM-as-a-judge evaluator, and when does a decision model fit better? The next section breaks down what a decision model is and the trade-offs involved.\n\nDecision models\n\nA decision model is a small, specialized model trained to select from a fixed set of options and return calibrated confidence scores rather than generating free-form text. A general-purpose large language model (LLM) evaluator produces a score with a rationale. A decision model instead produces a probability distribution over predefined answers. That gives you a direct confidence measure you can threshold, aggregate, and act on programmatically. This makes decision models well-suited for evaluation tasks where the judgment can be stated as a choice among a fixed set of options: “Is this response grounded?” or “Did the agent complete the user’s goal?”\n\nDecision models are most useful when you want a well-calibrated confidence score alongside the label, not just a binary judgment. They are also appropriate when you want to enforce a specific rubric consistently without relying on a general-purpose LLM to interpret it.\n\nJev, the hosted decision model from TypeSafe, and Strands Decider , an open-source, 2-billion-parameter decision model from the Strands Agents team, both support three types of questions. A noul question poses a yes/no question and returns a probability between 0 (no) and 1 (yes). A choice question asks which of up to 255 options applies, returning the most probable option along with the full distribution and a confidence. A score question asks which of 2 to 10 ordered levels applies, returning a probability-weighted score, the distribution over levels, and a confidence. Many evaluation rubrics fit one of these types. “Is every fact in this response supported by the tool results?” is a yes/no question, and “How helpful was this response, on a four-level rubric?” is a score.\n\nDecision models versus LLM-as-a-judge\n\nThe built-in evaluators in AgentCore today use a general-purpose LLM to assess the agent response against a rubric and explain its judgment. This is valuable when the evaluation requires connecting evidence, identifying missing information, or working through a response in depth in tasks where the explanation is as useful as the score. Decision models are not a replacement for LLM evaluators. They’re an addition that the code-based evaluator framework makes possible. Use them for narrow, well-defined checks alongside the built-in evaluators’ broader assessment.\n\nSolution overview\n\nTo show how these evaluator types work together, this post builds an end-to-end example of an HR Assistant agent evaluated by deterministic code-based checks, built-in LLM-as-a-judge evaluators, and decision-model evaluators backed by Jev or Strands Decider 2B.\n\nThe agent is built with Strands Agents and deployed to AgentCore runtime, a capability of Amazon Bedrock AgentCore. It answers employee questions using five tools that return fixed mock data such as paid time off (PTO) balances, PTO requests, HR policies, benefits, and pay stubs. We use fixed data in this code sample to make it straightforward to verify evaluator behavior from LLM-as-a-judge and decision models. When you additionally have ground truth, you can confirm whether each evaluator catches the right failures. This code sample helps you set up the framework for testing decision models compared to LLM-as-a-judge for your own use cases.\n\nFigure 1: End-to-end architecture of the HR Assistant evaluated by code-based checks, built-in evaluators, and decision-model evaluators backed by Jev or Strands Decider\n\nPrerequisites\n\nTo deploy the sample, you need the following:\n\nAn AWS account in a Region where AgentCore Evaluations is available. The sample defaults to US West (Oregon).\n\nAmazon CloudWatch Transaction Search enabled in the account.\n\nAccess to a foundation model in Amazon Bedrock .\n\nPython 3.12 or later, the AWS Command Line Interface (AWS CLI), and Docker.\n\nJev requires a TypeSafe API key. Visit typesafe.ai for access details.\n\nStrands Decider requires a host running the Strands Decider server. You can run it locally for testing, or on Amazon Elastic Compute Cloud (Amazon EC2) inside your virtual private cloud (VPC) so the Lambda function can reach it.\n\nSeeing it in action\n\nYou can find the full code sample in the AgentCore samples GitHub repository . Two Python scripts handle everything:\n\n../utils/deploy.py deploys the HR Assistant to AgentCore runtime.\n\nevaluate.py deploys evaluators, invokes the agent, and runs the evaluation modes.\n\nRunning evaluate.py without flags executes five steps:\n\nCreates the Lambda execution role ( AgentCoreLambdaEvaluatorRole ).\n\nPackages and deploys two deterministic Lambda evaluators: hr-response-length (a trace-level evaluator that checks whether the agent’s response stays within length bounds) and hr-fact-checker (a session-level evaluator that regex-validates HR facts against the known mock data).\n\nRegisters both as AgentCore code-based evaluators through the control plane.\n\nRuns on-demand evaluation with EvaluationClient and OnDemandEvaluationDatasetRunner across five labeled scenarios, combining the code-based evaluators with Builtin.Correctness , Builtin.Helpfulness , and Builtin.ResponseRelevance .\n\nCreates an online evaluation configuration that continuously scores live sessions at 100 percent sampling.\n\nAt this point you have a working evaluation pipeline with deterministic checks and LLM-as-a-judge scoring. Decision-model evaluators are…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "llama.cpp release b12118 updates OpenCL FlashAttention routines to improve decode performance for grouped-query attention.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12118",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12118",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12118",
+        "discussion_url": null,
+        "published": "2026-11-04T22:17:35Z",
+        "summary": "opencl: improve decode perf with FA ( #31633 )\n\nopencl: use more workgroups for q4_K gate up + GLU\n\nCo-authored-by: Shaofei Qi shaoqi@qti.qualcomm.com\n\nopencl: handle FA for GQA 2 and 6 with head size 256\n\nCo-authored-by: Shaofei Qi shaoqi@qti.qualcomm.com\n\nopencl: handle FA for GQA 16 with head size of 128, 512\n\nCo-authored-by: Shaofei Qi shaoqi@qti.qualcomm.com\n\nopencl: handle FA for GQA 2 with head size 512\n\nCo-authored-by: Shaofei Qi shaoqi@qti.qualcomm.com\n\nCo-authored-by: Li He lih@qti.qualcomm.com\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/63786542\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) -…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Ollama v0.40.15 adds MiMo V2.6 support and in-process CUDA library loading on Linux.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.15-rc0",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.15",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.15-rc0",
+        "discussion_url": null,
+        "published": "2026-11-03T22:52:31Z",
+        "summary": "What's Changed\n\nmlx: load bundled CUDA libraries in-process on Linux by @dhiltgen in #19433\n\nmodel: add MiMo V2.6 model support by @dhiltgen in #19400\n\nFull Changelog : v0.40.14...v0.40.15-rc0",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your context windows stay uncluttered and your tool calls require explicit confirmation.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "AI security",
+      "headline": "OpenAI pipeline patches 948 Linux kernel flaws",
+      "blurb": "OpenAI built an autonomous pipeline that found, validated, and generated patches for 948 local privilege-escalation vulnerabilities in Linux.",
+      "item": {
+        "key": "openai.com/index/a-thousand-fewer-paths-to-root",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "A thousand fewer paths to root",
+        "url": "https://openai.com/index/a-thousand-fewer-paths-to-root",
+        "discussion_url": null,
+        "published": "2026-11-04T08:00:00Z",
+        "summary": "OpenAI built an autonomous pipeline that found, validated, and generated patches for 948 local privilege-escalation vulnerabilities in the Linux kernel.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Research",
+      "headline": "Anthropic advances provable LLM inference",
+      "blurb": "Anthropic shares progress on cryptographic zkSNARK proofs for large language model inference through a new system called FlashProve.",
+      "item": {
+        "key": "anthropic.com/research/provable-inference",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Progress on provable inference for large language models",
+        "url": "https://www.anthropic.com/research/provable-inference",
+        "discussion_url": "https://news.ycombinator.com/item?id=50368626",
+        "published": "2026-11-04T17:17:46Z",
+        "summary": "We have made progress on a type of cryptographic proof known as a “zkSNARK.” In this post, we share some of that progress, primarily through a system we call FlashProve.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "Anthropic Research"
+        ]
+      }
+    },
+    {
+      "kicker": "Model release",
+      "headline": "Moonshot AI releases Kimi K3.1 Pro open weights",
+      "blurb": "Model weights for Kimi K3.1 Pro, a multimodal image-and-text model, have been officially released.",
+      "item": {
+        "key": "huggingface.co/moonshotai/Kimi-K3.1-Pro",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Kimi K3.1 Pro model weights are out",
+        "url": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro",
+        "discussion_url": "https://news.ycombinator.com/item?id=50366999",
+        "published": "2026-11-04T15:30:30Z",
+        "summary": "Trending model. Task: image-text-to-text. Library: transformers. Created 2026-11-02. 449 likes, 797 downloads.",
+        "content": "",
+        "score": 442.0,
+        "comments": null,
+        "also_in": [
+          "HF Trending Models"
+        ]
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 29,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 29,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 897,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1358,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 286,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 193,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 93,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 7,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-01T22:29:37.286678Z",
+    "candidates": 152,
+    "triaged": 80,
+    "enriched": 8,
+    "headline_candidates": 158,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 1224.1,
+    "usage": {
+      "calls": 6,
+      "input_tokens": 44766,
+      "output_tokens": 18243,
+      "cost_usd": null
+    }
+  }
+}
