@@ -1,0 +1,605 @@
+{
+  "date": "2026-11-05",
+  "generated_at": "2026-11-05T22:48:32.842807Z",
+  "title": "Agent specs, formal proofs, and multi-turn RL realities",
+  "intro": "Today's digest covers formal verification for agent-generated code, new insights into why multi-turn RL fails when turn budgets shrink, and OpenAI's domain-aligned cybersecurity model. We also take a look at speculative decoding acceleration, implicit reasoning tokens for tool use, and fresh evaluations on end-to-end physics research.",
+  "stories": [
+    {
+      "headline": "OpenAI releases GPT-6 Cyber with target-scope alignment",
+      "summary": "OpenAI has introduced GPT-6 Cyber, a specialized model designed for vulnerability detection and remediation. The model is specifically trained with target-scope alignment to ensure it operates strictly within authorized operational boundaries. While agentic security tools require broad capabilities to discover flaws, preventing unintended probing in production systems remains a major security challenge. Target-scope alignment attempts to bake operational guardrails directly into the model's policy rather than relying solely on external sandboxing.",
+      "why_it_matters": "It demonstrates an effort to embed target-scope boundary constraints directly into specialized agent models to prevent out-of-bounds misbehavior.",
+      "reason": "OpenAI released GPT-6 Cyber, a domain-specialized model focused on vulnerability detection and remediation that incorporates target-scope alignment to prevent out-of-bounds actions.",
+      "item": {
+        "key": "openai.com/index/introducing-gpt-6-cyber",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "GPT‑6 Cyber: Advancing the frontier of aligned cybersecurity agents",
+        "url": "https://openai.com/index/introducing-gpt-6-cyber",
+        "discussion_url": null,
+        "published": "2026-11-05T09:00:00Z",
+        "summary": "Introducing GPT‑6 Cyber, OpenAI’s cybersecurity model for finding exploitable vulnerabilities and developing fixes, trained to stay within authorized scope.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "theverge.com/ai-artificial-intelligence/1027599/openai-gpt-6-cyber-launch",
+          "source": "The Verge (AI)",
+          "tags": [
+            "press"
+          ],
+          "title": "OpenAI says its new cybersecurity model is better at not hacking other companies",
+          "url": "https://www.theverge.com/ai-artificial-intelligence/1027599/openai-gpt-6-cyber-launch",
+          "discussion_url": null,
+          "published": "2026-11-05T17:00:00Z",
+          "summary": "OpenAI is launching GPT-6 Cyber, the latest version of its cybersecurity AI model, which it says is better at finding vulnerabilities and less likely to go rogue and hack other platforms in the process. OpenAI says that during testing, GPT-6 Cyber went out of bounds less than 1 percent of the time, down from around […]",
+          "content": "OpenAI is launching GPT-6 Cyber , the latest version of its cybersecurity AI model, which it says is better at finding vulnerabilities and less likely to go rogue and hack other platforms in the process. OpenAI says that during testing, GPT-6 Cyber went out of bounds less than 1 percent of the time, down from around 5 percent with GPT-5.6 Cyber.\n\nThe evaluation, called ExploitGym HoneyPot, is modeled after the Hugging Face Incident, in which OpenAI's AI agents breached the open-source AI community to find answers to a problem they were tasked with solving. \"With the 6 Cyber model, we were able to make huge improvements on this evaluation,\" Fo …\n\nRead the full story at The Verge.",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Microsoft Research uses formal verification to keep coding agents honest",
+      "summary": "Microsoft Research introduced PDD Kit, a toolkit running in GitHub Next's Chopin environment that uses formal methods to mathematically prove the correctness of agent-generated code. The workflow converts human intent into Verus formal specifications, proving the code meets those specs across all possible inputs while falling back to empirical tests for components like UIs or external libraries. In a test verifying the login logic of a Rust storefront web app, PDD Kit uncovered existing bugs and proved the absence of login flaws without requiring developers to review generated code line-by-line. This offers a path around the growing failure mode where coding agents write redundant test suites that validate their own flawed implementations rather than the original specification.",
+      "why_it_matters": "Formal proof generation addresses the scaling bottleneck of reviewing massive agent-written PRs and prevents agents from writing self-validating tests for incorrect code.",
+      "reason": "Microsoft Research introduced PDD Kit, a formal verification pipeline that converts intent into Verus specifications to mathematically prove the correctness of agent-generated full-stack code.",
+      "item": {
+        "key": "microsoft.com/en-us/research/blog/formally-verifying-agent-written-full-stack-web-apps-with-pdd-kit",
+        "source": "Microsoft Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "Formally verifying agent-written full-stack web apps with PDD Kit",
+        "url": "https://www.microsoft.com/en-us/research/blog/formally-verifying-agent-written-full-stack-web-apps-with-pdd-kit/",
+        "discussion_url": null,
+        "published": "2026-11-05T16:00:00Z",
+        "summary": "AI agents can generate code at a scale that’s hard for humans to review line-by-line. PDD Kit helps ensure the code is doing what the developer intended by creating formal specifications and testing against them. It converts developer intent into a Verus specification, proves AI-generated code meets it for every input, and uses tests where proofs aren't practical. Developers review intent, not every line.\n\nThe post Formally verifying agent-written full-stack web apps with PDD Kit appeared first on Microsoft Research .",
+        "content": "At a glance\n\nFormal methods for everyday software. PDD Kit helps you turn your intent into a formal spec, then proves the code your agent writes for every input and uses tests where a proof can’t reach. It takes formal methods beyond niche, specialist work to engineers without a formal methods background and to everyday applications, like the full-stack web app shown here.\n\nExhaustive line-by-line human review can become difficult to scale as AI agents generate increasingly large amounts of code. The plan is supposed to be the contract between you and a coding agent, but nothing actually forces the agent to follow it. The tests it writes usually check what it built, rather than what you asked for.\n\nPDD Kit makes the agent keep the plan. It works with you to turn your intent into a formal specification in Verus (opens in new tab) , proves the agent’s code meets that spec for every input, and falls back to tests where a proof can’t reach.\n\nWe tried it on a full-stack web app. Inside GitHub Next’s Chopin (opens in new tab) , we used PDD Kit to formally verify the login logic of Pet Store, a Rust (opens in new tab) storefront. Verus hardened the code and uncovered existing bugs, proving the absence of login bugs with respect to the specification. The developer reviewed the intent and never read the generated code line-by-line.\n\nThe plan is the contract the agent should follow, but nothing constrains the agent to follow it.\n\nCoding agents now ship whole features in one sitting often spanning tens of thousands or hundreds of thousands of lines of code. As a result, reading every line of the pull request doesn’t scale to this new way of work. Now, most teams invest in the plan and relevant testing instead: describe to an agent what they want, go back and forth until the plan and proposed tests look right, and hand them off to the agent for implementation.\n\nThis plan or natural language spec is meant to be the contract that an agent holds. However, in practice, the agent can drift from it. It implements something slightly different, then writes tests that pass for its implementation rather than the code you intended it to write. Continuous integration (CI) grows due to a profusion of low quality and high quantity of tests, coverage looks healthy, and the gap between what you asked for and what shipped stays hidden until a bug report or a nasty edge case shows up.\n\nSo, how do you reliably scale review as agents generate increasingly large amounts of code? Agent code fails in two ways a careful reviewer would usually catch: it leaves out something obviously necessary, or it does something obviously wrong. Tests alone don’t close that gap, because they only exercise a tiny slice of what a program can do. Closing it needs a different kind of machinery, which is where proofs come in.\n\nReview asks “does this look right?” A proof answers “is this right?” A mathematical proof shows that code meets its specification for every input, including the ones your test suite can miss. That provides stronger assurance for specified properties than testing alone, especially when line-by-line review isn’t practical.\n\nProofs used to be too expensive for everyday software. You needed specialists, unfamiliar languages, proofs many times larger than the code, and proofs took years to develop, but two things have changed since. First, recent advances in coding agents have made it increasingly practical for them to help generate formal proofs from well-defined specs. Secondly, agents can now better help you write formal specs. We call this new software development paradigm Proof-Driven Development (PDD). PDD Kit is our toolkit for it.\n\nHow PDD Kit works\n\nPDD Kit is to formal methods roughly what Spec Kit (opens in new tab) is to Spec-Driven Development. It runs as a partner inside Chopin (opens in new tab) , GitHub Next’s real-time, multiplayer planning environment, where a team and agents can plan in one shared document.\n\nThe workflow has two halves (Figure 1). First, team members review intent in plain language. PDD Kit asks the questions a careful reviewer would ask, explains the relevant code as it goes, and records the answers in an intent artifact , a document that bridges the user’s intent with the formal specification or tests. The parts of the user’s intent that can be formalized are converted into formal specifications and the rest, which must be taken on trust, are converted to informal specifications for tests. PDD Kit automatically generates proofs that the code satisfies the derived formal specs and high-quality tests for the informal specs. You don’t need a formal methods background for any of it.\n\nFigure 1. Proof-Driven Development with PDD Kit. Team members settle intent. Verus and the test suite hold the code to it.\n\nConsequently, every result in PDD Kit says which kind of verification it rests on:\n\nFormal verification is a mathematical proof that code satisfies its specification for every possible input, checked by a tool called a verifier. For PDD Kit today, that verifier is Verus (opens in new tab) , a proof language for Rust co-developed by Microsoft Research, Carnegie Mellon University, VMware Research, ETH Zurich, MPI-SWS, UNSW Sydney, the University of Texas at Austin, the University of Michigan, the University of British Columbia, the University of Wisconsin–Madison and the Weizmann Institute of Science.\n\nEmpirical verification checks code by running it and observing what it does. It covers what a proof can’t reach, such as a third-party cryptography library or a user interface. It uses unit and end-to-end tests, terminal automation, browser agents, and computer-use agents for anything a browser can’t drive. A passing test only shows the code worked on the inputs it tried, so PDD Kit labels it as evidence rather than proof.\n\nThe line between the two is the Trusted Computing Base (TCB) : the code that the proof assumes behaves as described. PDD Kit makes that line explicit and asks you to sign off on each piece.\n\nThe capstone: a full-stack web app\n\nTo show PDD Kit integrating with existing codebases, we built Pet Store, a full-stack web app written entirely in Rust (opens in new tab) . The backend uses Axum (opens in new tab) and SQLite (opens in new tab) and handles inventory, promotions, orders and checkout. The storefront is a Leptos (opens in new tab) app compiled to WebAssembly (opens in new tab) . Together they come to about 5,000 lines of Rust.\n\nFor brevity in this blog, we focus on formally verifying the login logic of the app, but the same process can be used to verify functional correctness of the entire app. PDD Kit recommends starting with the most sensitive parts of your application and incrementally verifying your application. A login bug can hand an attacker a customer’s account or an admin’s controls, so that’s where proof effort pays off first. The developer’s whole request in Chopin was two sentences:\n\nVerify the login logic in backend/src/handlers/auth.rs. Here are my requirements:\n\nYou only get a token with the right password.\n\nOnly admin accounts get admin tokens.\n\nWe kept the request rough on purpose. Capturing the intent of the user and turning the user request into something a proof can check is PDD Kit’s job.\n\nStep 1: Questions before code\n\nPDD Kit’s planning workflow, pdd-plan, reads the code and comes back, before writing anything, with questions in a Decisions tab. When a question depends on how the code works, the card explains that part first: the goal, how the pieces fit, and the exact function involved, so you can answer without opening the source.\n\nFigure 2. The first decision card. “Only with the right password” on its own is also met by a login that refuses everyone. Proving both ways rules that out.\n\nThe question looks pedantic, but it matters. “You only get a token with the right password” rules out the bad case, a wrong password getting a token, and a login that refuses everyone keeps that promise perfectly. “The right…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Multi-turn RL improves agent error recovery, not single-step choices",
+      "summary": "A new paper analyzing multi-turn reinforcement learning in LLM agents reveals that trajectory-level RL advantages depend heavily on turn budgets and collapse when interaction constraints tighten. Evaluating models across sampling breadth and interaction depth using a Pass@(K,T) metric, the researchers found that RL training does not actually improve single-step decision quality. Instead, the performance boost comes from error recovery and resilience over long horizons. To fix this vulnerability to strict runtime limits, the authors introduced BudgetMix RL, which exposes the agent to varying turn budgets during training to maintain performance across constrained execution environments.",
+      "why_it_matters": "The study highlights a key failure mode in agentic RL where models rely on generous turn budgets for error recovery rather than making better single-step decisions.",
+      "reason": "This study analyzes multi-turn agent RL scaling across interaction depth and breadth, revealing that trajectory-level RL advantages degrade significantly as depth increases.",
+      "item": {
+        "key": "arxiv:2611.06483",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "What Does Multi-Turn Reinforcement Learning Really Improve in LLM Agents?",
+        "url": "https://huggingface.co/papers/2611.06483",
+        "discussion_url": null,
+        "published": "2026-11-05T00:00:00Z",
+        "summary": "While multi-turn agentic reinforcement learning (RL) excels on long-horizon tasks, its performance gains remain highly sensitive to interaction constraints. Evaluating across sampling breadth K and interaction depth T via Pass@(K,T), we show that trajectory-level RL advantages depend on sufficient turn budgets, diminishing significantly when budgets tighten. Besides, agentic RL does not uniformly elevate single-step decision quality; rather, its strength concentrates in error recovery and long-horizon resilience. To mitigate the deployment risks caused by this budget dependence, we provide a preliminary discussion on the benefits and limitations of process supervision signals and introduce BudgetMix RL as an alternative that varies interaction budgets during training. Experiments demonstrate that BudgetMix RL achieves robust performance across diverse execution settings. Project Page: https://rethinking-agentic-rl.github.io/",
+        "content": "What Does Multi-Turn Reinforcement Learning Really Improve in LLM Agents?\nAbstract\nWhile multi-turn agentic reinforcement learning (RL) excels on long-horizon tasks, its performance gains remain highly sensitive to interaction constraints. Evaluating across sampling breadth K and interaction depth T via Pass@(K,T), we show that trajectory-level RL advantages depend on sufficient turn budgets, diminishing significantly when budgets tighten. Besides, agentic RL does not uniformly elevate single-step decision quality; rather, its strength concentrates in error recovery and long-horizon resilience. To mitigate the deployment risks caused by this budget dependence, we provide a preliminary discussion on the benefits and limitations of process supervision signals and introduce BudgetMix RL as an alternative that varies interaction budgets during training. Experiments demonstrate that BudgetMix RL achieves robust performance across diverse execution settings. Project Page: https://rethinking-agentic-rl.github.io/\nCommunity\nWhile multi-turn agentic reinforcement learning (RL) excels on long-horizon tasks, its performance gains remain highly sensitive to interaction constraints. Evaluating across sampling breadth K and interaction depth T via Pass@(K,T), we show that trajectory-level RL advantages depend on sufficient turn budgets, diminishing significantly when budgets tighten. Besides, agentic RL does not uniformly elevate single-step decision quality; rather, its strength concentrates in error recovery and long-horizon resilience. To mitigate the deployment risks caused by this budget dependence, we provide a preliminary discussion on the benefits and limitations of process supervision signals and introduce BudgetMix RL as an alternative that varies interaction budgets during training. Experiments demonstrate that BudgetMix RL achieves robust performance across diverse execution settings.\nReally useful framing. Pass@(K,T) makes visible something that plain trajectory-level success rates hide. The BFCL row in Table 1 stood out to me: at a 25% turn budget, GRPO-Full on Qwen3-4B lands at 2.5 versus 3.0 for the base model, while BudgetMix reaches 8.5. Since BudgetMix puts the total and remaining budget in the prompt, I'm curious how it behaves when the cap isn't announced, which is common in real deployments where the limit is a timeout or a cost ceiling. Does it learn a generally more careful early policy, or does it mostly condition on the stated budget?\nGet this paper in your agent:\nhf papers read 2611.06483 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 31.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "SpecOPD speeds up speculative decoding with branch-parallel distillation",
+      "summary": "Researchers have introduced SpecOPD, an on-policy distillation framework designed to train parallel block drafters for speculative decoding without sequential rollout bottlenecks. Instead of waiting for full generation rollouts, SpecOPD samples draft branches in parallel at reference anchors, sharing target-prefix computation and training the drafter using an end-to-end total variation surrogate. The system uses tree masks, branch-consistent indexer groups, and indexed state replay to handle full, sparse, and linear attention architectures. Evaluated across models up to 125B parameters, SpecOPD achieved up to a 41.45% increase in mean acceptance length and up to a 3.56x decoding speedup over standard autoregressive generation.",
+      "why_it_matters": "Higher acceptance lengths in speculative decoding directly reduce inference latency for large models during heavy tool-use and reasoning loops.",
+      "reason": "SpecOPD proposes branch-parallel on-policy distillation to train parallel block drafters for speculative decoding, improving target model approval rates and inference speedup.",
+      "item": {
+        "key": "arxiv:2611.02846",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "SpecOPD: Branch-Parallel On-Policy Distillation for Speculative Decoding",
+        "url": "https://huggingface.co/papers/2611.02846",
+        "discussion_url": null,
+        "published": "2026-11-05T00:00:00Z",
+        "summary": "Speculative decoding (SD) accelerates large language model inference by reducing the sequential cost of token-by-token generation. Advanced SD methods reduce proposal cost with parallel drafters that predict entire blocks in one forward pass, but overall speedup still depends on acceptance length. On-policy distillation (OPD) can push well-trained drafters beyond acceptance-length plateaus, yet conventional pipelines collect supervision through sequential draft-and-verify rollouts. Our key insight is that on-policy supervision need not inherit these dependencies: a draft block can be supervised using only its reference prefix and draft-sampled history. We propose SpecOPD, a branch-parallel OPD framework that parallelizes draft sampling and target supervision across independent branches drawn from the evolving drafter policy at reference anchors. We pack these branches into proposal trees to share target-prefix computation, using tree masks for full attention, branch-consistent indexer groups for sparse attention, and indexed state replay for linear attention to preserve each branch's history. We train the drafter with an E2E-TV surrogate that directly targets acceptance length…",
+        "content": "SpecOPD: Branch-Parallel On-Policy Distillation for Speculative Decoding\nAbstract\nSpecOPD accelerates speculative decoding by parallelizing on-policy draft supervision across independent branches, improving acceptance length and training throughput across diverse model architectures and tasks.\nSpeculative decoding (SD) accelerates large language model inference by reducing the sequential cost of token-by-token generation. Advanced SD methods reduce proposal cost with parallel drafters that predict entire blocks in one forward pass, but overall speedup still depends on acceptance length. On-policy distillation (OPD) can push well-trained drafters beyond acceptance-length plateaus, yet conventional pipelines collect supervision through sequential draft-and-verify rollouts. Our key insight is that on-policy supervision need not inherit these dependencies: a draft block can be supervised using only its reference prefix and draft-sampled history. We propose SpecOPD, a branch-parallel OPD framework that parallelizes draft sampling and target supervision across independent branches drawn from the evolving drafter policy at reference anchors. We pack these branches into proposal trees to share target-prefix computation, using tree masks for full attention, branch-consistent indexer groups for sparse attention, and indexed state replay for linear attention to preserve each branch's history. We train the drafter with an E2E-TV surrogate that directly targets acceptance length. Our study spans 8B full-attention (GQA), 27B full-linear (GQA--GDN), and 125B sparse-linear (QSA--GDN) targets, three parallel draft architectures (DFlash, DSpark, and DFlash V2), and four task domains (dialogue, coding, mathematics, and agentic). SpecOPD achieves up to 41.45% higher mean acceptance length, 16.09times supervised-token throughput over sequential-rollout OPD under native configurations, and up to 3.56times generation speedup over autoregressive decoding.\nCommunity\nExcited to share SpecOPD: Branch-Parallel On-Policy Distillation for Speculative Decoding!\nOn-policy supervision does not have to wait for full-response rollouts. SpecOPD samples fresh draft branches at reference anchors in parallel, shares target-prefix computation, and supervises each branch on its own sampled history. An E2E-TV surrogate directly targets acceptance length.\nAlgorithm–system co-design makes this work across full, sparse, and linear attention: tree masks, branch-consistent indexer groups, and indexed state replay preserve branch histories while reusing shared computation.\nResults:\n- Up to 41.45% higher five-benchmark mean acceptance length than the original drafter.\n- 16.09× supervised-token throughput over sequential-rollout OPD with the 27B target and DFlash V2 under native configurations, excluding offline reference preparation.\n- Up to 3.56× decoding speedup over autoregressive decoding on the 27B target.\nWe evaluate Qwen3-8B, Qwen3.8-27B, and Qwen3.8-Flash-Next-125B with DFlash, DSpark, and DFlash V2 across dialogue, coding, math, and agentic workloads.\nThe repository currently contains the project overview and figures; training code, evaluation scripts, and model weights are not included in the initial release. Feedback and discussions are welcome!\nGet this paper in your agent:\nhf papers read 2611.02846 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 13.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "TAC-CoT hides chain-of-thought in latent tokens to speed up tool use",
+      "summary": "TAC-CoT introduces an adaptive implicit reasoning framework for tool-using agents that replaces verbose explicit chain-of-thought text with compact continuous latent tokens. Crucially, the framework retains standard textual tokens for tool calls, external observations, and final answers, preserving the clear interface required for tool execution. Benchmarks across agentic math and QA tasks demonstrated accuracy improvements of up to 8.8 points alongside up to a 6.8x reduction in forward passes. By interleaving continuous hidden states with discrete tool tokens, the approach cuts generation overhead without sacrificing tool interoperability.",
+      "why_it_matters": "It offers a practical method to slash explicit token overhead in agent reasoning loops while keeping tool calls compatible with external environments.",
+      "reason": "TAC-CoT addresses generation overhead in tool-calling agents by interleaving implicit hidden-state tokens to maintain reasoning quality while reducing explicit token output.",
+      "item": {
+        "key": "arxiv:2611.01926",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "TAC-CoT: Tool-Empowered Implicit Chain-of-Thought via Interleaving Explicit Tokens",
+        "url": "https://huggingface.co/papers/2611.01926",
+        "discussion_url": null,
+        "published": "2026-11-05T00:00:00Z",
+        "summary": "LLM-based agentic systems are increasingly combined with CoT reasoning to solve tasks that require accurate reasoning, external knowledge, and multi-step deliberation. Yet, explicit CoT incurs substantial generation overhead, while implicit CoT, which replaces textual rationales with compact continuous tokens, does not naturally support the explicit communication interface required for agentic tool-use. We propose TAC-CoT, a tool-empowered adaptive implicit CoT framework that replaces explicit reasoning traces with compact latent reasoning segments while retaining textual tokens only for tool calls, observations, and final answers. This interleaved design enables agentic tool-use without verbalizing every intermediate reasoning step. Experiments on agentic math and QA benchmarks show that TAC-CoT improves accuracy by up to 8.8 points while reducing model forward passes by up to 6.8x. Furthermore, analyses show that TAC-CoT improves tool-use quality in both single- and multi-tool settings.",
+        "content": "TAC-CoT: Tool-Empowered Implicit Chain-of-Thought via Interleaving Explicit Tokens\nAbstract\nTAC-CoT replaces explicit reasoning traces with compact latent segments while preserving textual tokens for tool interactions, improving agentic accuracy and reducing computation.\nLLM-based agentic systems are increasingly combined with CoT reasoning to solve tasks that require accurate reasoning, external knowledge, and multi-step deliberation. Yet, explicit CoT incurs substantial generation overhead, while implicit CoT, which replaces textual rationales with compact continuous tokens, does not naturally support the explicit communication interface required for agentic tool-use. We propose TAC-CoT, a tool-empowered adaptive implicit CoT framework that replaces explicit reasoning traces with compact latent reasoning segments while retaining textual tokens only for tool calls, observations, and final answers. This interleaved design enables agentic tool-use without verbalizing every intermediate reasoning step. Experiments on agentic math and QA benchmarks show that TAC-CoT improves accuracy by up to 8.8 points while reducing model forward passes by up to 6.8x. Furthermore, analyses show that TAC-CoT improves tool-use quality in both single- and multi-tool settings.\nCommunity\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 12.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "FrontierPhysics benchmark shows agents struggle with research intuition",
+      "summary": "A new benchmark called FrontierPhysics evaluates autonomous AI agents on 56 end-to-end physics research tasks spanning literature review, experimental design, and paper writing. Built by 42 physicists, the suite combines deterministic verifiers with expert rubrics to assess both correctness and publishability across theoretical, computational, and experimental domain areas. In tests across 22 models in 26 configurations, the best setup passed no more than 46 out of 168 rollouts. Trajectory analysis revealed that agent failures stemmed primarily from unrigorous reasoning and a lack of expert research intuition rather than execution errors or domain knowledge gaps.",
+      "why_it_matters": "It provides a realistic evaluation benchmark focused on long-horizon, end-to-end scientific research rather than short, static question-answering tasks.",
+      "reason": "FrontierPhysics introduces an evaluation suite designed to benchmark autonomous AI agents on long-horizon, end-to-end scientific physics research rather than isolated question answering.",
+      "item": {
+        "key": "arxiv:2611.06910",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "FrontierPhysics: Evaluating Agents for End-to-End Physics Research",
+        "url": "https://huggingface.co/papers/2611.06910",
+        "discussion_url": null,
+        "published": "2026-11-05T00:00:00Z",
+        "summary": "AI agents are playing an increasingly important role in physics research. However, existing physics benchmarks only evaluate fixed questions, isolated sub-tasks, or paper reproduction with given solutions, and rarely check research quality alongside correctness. We introduce FrontierPhysics, an end-to-end benchmark with 56 tasks made by 42 physicists based on their own research, covering nine domains across theoretical, computational, and experimental physics. Each task requires agents to review the literature, develop a research plan, conduct research and experiments, and produce structured outputs and scientific manuscripts. Combining deterministic verifiers with expert-authored rubrics, FrontierPhysics evaluates whether agents' research is correct and publishable. Across 22 models in 26 configurations, no configuration passes more than 46 of its 168 rollouts. Manual review of agent trajectories shows that frontier agents' main weaknesses are insufficiently rigorous reasoning and limited expert intuition, rather than gaps in physics knowledge or execution errors.",
+        "content": "Abstract\nFrontierPhysics is an end-to-end benchmark of 56 expert-designed physics tasks that evaluates AI agents on literature review, research planning, experimentation, and manuscript production using deterministic verifiers and expert rubrics.\nAI agents are playing an increasingly important role in physics research. However, existing physics benchmarks only evaluate fixed questions, isolated sub-tasks, or paper reproduction with given solutions, and rarely check research quality alongside correctness. We introduce FrontierPhysics, an end-to-end benchmark with 56 tasks made by 42 physicists based on their own research, covering nine domains across theoretical, computational, and experimental physics. Each task requires agents to review the literature, develop a research plan, conduct research and experiments, and produce structured outputs and scientific manuscripts. Combining deterministic verifiers with expert-authored rubrics, FrontierPhysics evaluates whether agents' research is correct and publishable. Across 22 models in 26 configurations, no configuration passes more than 46 of its 168 rollouts. Manual review of agent trajectories shows that frontier agents' main weaknesses are insufficiently rigorous reasoning and limited expert intuition, rather than gaps in physics knowledge or execution errors.\nGet this paper in your agent:\nhf papers read 2611.06910 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 44.0,
+        "comments": 0,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "llama.cpp b12138 brings Metal matrix multiplication optimizations",
+      "summary": "The latest release of llama.cpp, build b12138, brings targeted performance improvements to Apple Silicon via its Metal backend. The update integrates `mul_mm` execution for matrix multiplication shapes where K ranges between 32 and 64. Additionally, the release adds a dedicated native `bf16 x bf16` matrix multiplication kernel.",
+      "why_it_matters": "Optimized Metal kernels lower local inference latency and improve throughput when serving quantized or BF16 models on Apple Silicon.",
+      "reason": "The latest llama.cpp release improves Metal backend performance with dedicated matrix multiplication kernels for specific shape ranges and native BF16 operations.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12138",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12138",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12138",
+        "discussion_url": null,
+        "published": "2026-11-05T22:12:12Z",
+        "summary": "metal : use mul_mm for 32 <= K < 64 ( #30982 )\n\nmetal : use mul_mm for 32 <= K < 64\n\nmetal : add bf16 x bf16 mul mat kernel\n\nCo-authored-by: Georgi Gerganov ggerganov@gmail.com\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/64248274\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.4 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows arm64 (CUDA 13) - CUDA 13.4 DLLs\n\nWindows x64…",
+        "content": "Repository navigation\nb12138\nPre-release\n      Pre-release\n    \nmetal : use mul_mm for 32 <= K < 64 (#30982)\n- metal : use mul_mm for 32 <= K < 64\n- metal : add bf16 x bf16 mul mat kernel\nCo-authored-by: Georgi Gerganov ggerganov@gmail.com\nWebsite:\nAttestations:\nmacOS/iOS:\n- macOS Apple Silicon (arm64)\n- macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n- macOS Intel (x64)\n- iOS XCFramework\nLinux:\nAndroid:\nWindows:\nopenEuler:\n- DISABLED\n- openEuler x86 (310p)\n- openEuler x86 (910b, ACL Graph)\n- openEuler aarch64 (310p)\n- openEuler aarch64 (910b, ACL Graph)\nUI:",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "LangChain Core 1.7.6 optimizes streaming performance by merging AIMessageChunk objects once during stream accumulation and preventing single-character retries in partial JSON parsing.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.7.6",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-core==1.7.6",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.7.6",
+        "discussion_url": null,
+        "published": "2026-11-05T00:22:14Z",
+        "summary": "Changes since langchain-core==1.7.5\n\nrelease(core): 1.7.6 ( #41698 )\n\nperf(core): merge streamed AIMessageChunk s once when accumulating runnable streams ( #41697 )\n\nperf(core): stop parse_partial_json from retrying one character at a time ( #41467 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Stroq is a new local audit tool designed to inspect and record what your coding agent executed and why.",
+      "item": {
+        "key": "github.com/AGGIB/Stroq",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: Stroq – a local audit of what your coding agent did and why",
+        "url": "https://github.com/AGGIB/Stroq",
+        "discussion_url": "https://news.ycombinator.com/item?id=50380704",
+        "published": "2026-11-05T15:54:41Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "AWS introduced Smart Approvals in Amazon Quick, using policy boundaries and action classifiers to reduce human approval prompts while keeping high-impact decisions under oversight.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/smart-approvals-in-amazon-quick-human-oversight-where-it-matters",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Smart Approvals in Amazon Quick: Human oversight where it matters",
+        "url": "https://aws.amazon.com/blogs/machine-learning/smart-approvals-in-amazon-quick-human-oversight-where-it-matters/",
+        "discussion_url": null,
+        "published": "2026-11-04T16:33:03Z",
+        "summary": "Smart Approvals in Amazon Quick reviews eligible agent actions within your existing controls, reducing unnecessary approval prompts while keeping consequential decisions with a person. See how policy sets the boundary, how a classifier reviews actions, and how AWS CloudTrail and Amazon CloudWatch Logs support audit.",
+        "content": "How should security leaders preserve human oversight as AI agents take on more work? Permissions establish which actions agents can take, but a permitted action can still warrant a person’s judgment. Requiring approval for every step might seem like the safest approach, yet multi-step tasks can produce repeated prompts , even for routine actions. Research on security warnings shows that attention and adherence can decline with repetition. The challenge isn’t to require more approvals, but to preserve attention for decisions that need human review.\n\nSmart Approvals in Amazon Quick addresses this challenge by reviewing eligible actions within your existing controls. It evaluates each proposed action against the user’s request and either approves it automatically or returns it to the user for review. It does this without granting additional permissions or removing required human approvals. Security leaders retain control over which actions must always go to a person, while Smart Approvals is designed to reduce unnecessary interruptions in routine work.\n\nFigure 1: Policy determines eligibility. Smart Approvals approves eligible actions or returns them to the user for review. Policy denials remain blocked\n\nPolicy sets the boundary\n\nQuick evaluates each proposed action against Custom Permissions, Quick Guardrails, connector action permissions, and the user’s settings before automated review. Denied actions remain denied, and mandatory human approvals still apply. With Smart Approvals enabled, an action is eligible only when the user’s setting is “Ask each time” and no other control requires human approval. Connector action permissions, configured when a connector is created, can require human approval for specific actions.\n\nAdministrators use Custom Permissions to determine who can use Smart Approvals. It’s on by default, but profiles with deny-by-default enabled must explicitly allow it. Users can also turn Smart Approvals off for themselves. That choice applies across conversations and scheduled runs. When it’s off, actions otherwise eligible for automated review require the user’s approval, and no account-level setting can turn it back on for them.\n\nHow eligible actions are reviewed\n\nSmart Approvals uses a separate model, the classifier, to evaluate eligible actions against the user’s request and a bounded view of the conversation. It considers what the action does, where data goes, and who it affects. It can consult the user’s knowledge graph, which contains people and working relationships drawn from connected sources. This helps it understand how recipients relate to the user, such as whether a recipient is in the user’s reporting chain. This lookup stays within your Quick account. Quick doesn’t use the content the classifier reviews, including knowledge graph data, to train models or improve the service.\n\nAn action can match the request and still warrant human review. Examples include sending content outside the organization or to senior leaders in the user’s reporting chain, changing access, deleting records, or initiating payments. This list isn’t complete, and the classifier also weighs the surrounding context. Reviewing actions against the user’s request adds a check against indirect prompt injection, where instructions in retrieved content attempt to redirect the agent. Quick instructs both the agent and classifier to treat that content as information, not instructions. Model review can still make mistakes, so actions that must always receive human approval, including those that move sensitive data, should require it through connector action permissions.\n\nThe classifier provides judgment. The permission service enforces authority. Each automatic approval is single-use, applies only to the exact action and parameters reviewed, and grants no ongoing permission. Quick labels automatic approvals in the conversation. Actions the classifier doesn’t approve return to the user, as do timeouts and other review failures, which never grant automatic approval. These enforcement boundaries limit what an approval authorizes. They don’t establish that the classifier’s judgment was correct.\n\nWhen an action goes beyond the request\n\nAn account manager asks Quick to prepare a quarterly business review brief for AnyCompany using her team’s account notes and last quarter’s email. She then asks Quick to send it to two colleagues she names. Assuming the send is eligible for automated review, Smart Approvals evaluates the proposed action against her request and the available conversation context.\n\nNow suppose an account note says the brief should also go to an all-sales distribution list of about 2,000 people. That would change the audience beyond the recipients she specified, so Smart Approvals is designed to return the proposed send to her for review, where she can decline it. An approval to send to the original recipients can’t be reused for the wider audience.\n\nAudit evidence and investigation\n\nThe Quick permission service records permission updates associated with Smart Approvals in AWS CloudTrail in your account. Each event identifies the user, connector, action, and time, and marks the request as associated with Smart Approvals. That marker doesn’t establish that the permission service accepted the grant or that the action ran. Quick also records permission-check verdicts, including denials from connector action permissions, and changes to a user’s Smart Approvals setting.\n\nInvestigators can correlate these events by user and time with other Quick activity in CloudTrail and logs delivered through Amazon CloudWatch Logs . Chat logs capture the user’s request, system response, and conversation context. Agent metadata logs record changes to agents. Records from the destination system, such as a sent email or updated ticket, confirm whether the action completed. Together, these sources help reconstruct what happened without treating approval as proof of execution. CloudTrail Event history retains events for 90 days, so configure a trail for longer investigations. Because chat logs can contain sensitive content, restrict access and consider CloudWatch Logs data protection policies to mask sensitive data.\n\nWhere to start\n\nBecause Smart Approvals is on by default, begin by confirming that actions requiring human approval are configured through connector action permissions. Set up a CloudTrail trail and delivery of chat logs and agent metadata logs to CloudWatch Logs to support investigations. Chat logs capture only activity after delivery is configured, so earlier approvals will lack that conversation context. With approval requirements and logging in place, use Custom Permissions to limit Smart Approvals to a pilot team working on a defined workflow before extending it to other teams.\n\nBefore the pilot, define what success looks like: fewer prompts for routine actions, with consequential actions still returning to a person for review. During the pilot, review a sample of automatic approvals and test high-impact cases, such as sending content outside the organization or adding a recipient introduced by a document. Confirm that these cases come back to the user. Confirm that your team can trace each action from approval through execution. Expand to more teams and workflows only when the results meet those criteria, and reassess as actions and policies change.\n\nThe measure of effective oversight isn’t how often an agent asks for approval, but whether people retain control over consequential decisions. For security leaders, the case for expanding Smart Approvals should rest on evidence from the pilot. Fewer prompts are valuable when they preserve attention without weakening accountability.\n\nFor setup steps, see Smart Approvals in the governance section of the Amazon Quick User Guide.\n\nAbout the author\n\nSteve Vinsik\n\nSteve is a Principal Product Manager at AWS, where he leads governance, identity, and security for Amazon Quick. He works directly with enterprise CIOs…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new paper on multi-teacher on-policy distillation warns that high in-distribution performance can mask incomplete capability consolidation when attempting post-RL model merging.",
+      "item": {
+        "key": "arxiv:2611.05609",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "On the Generalization Limitation of On-Policy Distillation for Post-RL Consolidation",
+        "url": "https://huggingface.co/papers/2611.05609",
+        "discussion_url": null,
+        "published": "2026-11-05T00:00:00Z",
+        "summary": "Multi-teacher on-policy distillation (MOPD) extends on-policy distillation (OPD) to consolidate capabilities from multiple teachers. Although prior work reports near-perfect in-distribution (IND) distillation performance, we find that this can mask incomplete capability consolidation beyond the supervised distribution. A preliminary study on synthetic reasoning shows that OPD does not fully transfer teachers' generalization capabilities. We then extend this investigation to real-world tasks, evaluating extrapolative and compositional generalization across mathematical reasoning, coding, agent, and long-context capabilities using Qwen3 models. Across extrapolative settings, OPD and MOPD reach 96.04-102.73% of their teachers' IND scores. Yet their out-of-distribution (OOD) scores remain 2.45-16.25% below the base model's. Across three compositional settings, MOPD improves IND performance over the base model, but its performance on composed tasks as OOD remains 18.19-24.34% below that of the best teachers. To understand these gaps, we examine teacher capability and data coverage as two potential bottlenecks. Jointly alleviating these bottlenecks eliminates OOD forgetting in our…",
+        "content": "",
+        "score": 12.0,
+        "comments": 2,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your turn budgets remain generous and your speculative drafters accept long trees.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "OpenAI Releases GPT-6 Cyber for Vulnerability Remediation",
+      "blurb": "OpenAI introduced GPT-6 Cyber, a cybersecurity model trained to find exploitable vulnerabilities and develop fixes within authorized scope.",
+      "item": {
+        "key": "openai.com/index/introducing-gpt-6-cyber",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "GPT‑6 Cyber: Advancing the frontier of aligned cybersecurity agents",
+        "url": "https://openai.com/index/introducing-gpt-6-cyber",
+        "discussion_url": null,
+        "published": "2026-11-05T09:00:00Z",
+        "summary": "Introducing GPT‑6 Cyber, OpenAI’s cybersecurity model for finding exploitable vulnerabilities and developing fixes, trained to stay within authorized scope.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Model release",
+      "headline": "Google DeepMind Announces Gemini Omni 1.2 Flash",
+      "blurb": "Google DeepMind launched Gemini Omni 1.2 Flash, bringing fast and cost-effective multimodal processing with support for longer video clips.",
+      "item": {
+        "key": "deepmind.google/blog/gemini-omni-12-flash-fast-and-cost-effective-with-longer-clips",
+        "source": "Google DeepMind",
+        "tags": [
+          "lab"
+        ],
+        "title": "Gemini Omni 1.2 Flash: Fast and cost-effective with longer clips",
+        "url": "https://deepmind.google/blog/gemini-omni-12-flash-fast-and-cost-effective-with-longer-clips/",
+        "discussion_url": null,
+        "published": "2026-11-05T17:05:16Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "NVIDIA Releases Cosmos 3 Models for World Simulation",
+      "blurb": "NVIDIA released Cosmos 3, a new suite of open models built for interactive world simulation.",
+      "item": {
+        "key": "huggingface.co/blog/nvidia/cosmos-interactive-world-simulation",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "New NVIDIA Cosmos 3 Open Models for Interactive World Simulation",
+        "url": "https://huggingface.co/blog/nvidia/cosmos-interactive-world-simulation",
+        "discussion_url": null,
+        "published": "2026-11-05T19:35:16Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 30,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 31,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 898,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1361,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 286,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 194,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 4,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-02T22:36:36.793652Z",
+    "candidates": 162,
+    "triaged": 80,
+    "enriched": 5,
+    "headline_candidates": 167,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 716.0,
+    "usage": {
+      "calls": 6,
+      "input_tokens": 41993,
+      "output_tokens": 20695,
+      "cost_usd": 0.239627
+    }
+  }
+}
