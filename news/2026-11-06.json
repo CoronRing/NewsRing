@@ -1,0 +1,652 @@
+{
+  "date": "2026-11-06",
+  "generated_at": "2026-11-06T21:59:46.842586Z",
+  "title": "Agent Memory, Sibling Harnesses, and Asynchronous Speculative Decoding",
+  "intro": "Today's digest focuses heavily on the mechanics of agent persistence, execution harnesses, and serving efficiency. We cover Anthropic's research on offline memory consolidation, Amazon's primitive taxonomy, and a standalone diffusion drafter that boosts speculative decoding speedup.",
+  "stories": [
+    {
+      "headline": "Google releases Gemini Omni 1.2 Flash with 15-second native video and lower pricing",
+      "summary": "Google has generally released Gemini Omni 1.2 Flash across its API and enterprise platforms, cutting prices by 30% down to $0.07 per second for 720p output. The model expands native video generation and multi-turn editing to 15 seconds while improving reference adherence across images, motion clips, and audio inputs. Workflows can draft initial sequences at 360p or 720p, refine specific elements conversational turn by turn, and upscale the final render to 1080p or 4K.",
+      "why_it_matters": "Tracks updates to frontier multimodal model releases, context capabilities, and production pricing structures.",
+      "reason": "Google released Gemini Omni 1.2 Flash, offering faster generation and improved multimodal efficiency for vision and language workflows.",
+      "item": {
+        "key": "blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Gemini Omni 1.2 Flash",
+        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50392118",
+        "published": "2026-11-06T13:35:27Z",
+        "summary": "Text \"Gemini Introducing Gemini Omni 1.2 Flash\" surroudned by images of a beehive, animals in conversation, a squid, and a woman walking down a street",
+        "content": "Gemini Omni 1.2 Flash: Fast and cost-effective with longer clips\nToday, we’re rolling out Gemini Omni 1.2 Flash, and making it generally available across the Gemini API and Gemini for business. Gemini Omni 1.2 Flash introduces native 15-second video creation, multi-turn conversational editing capabilities, and enhanced reference following. We have dropped the price 30% from Gemini Omni 1.1 making it available at $0.07 per second for 720p video.\nHere’s an overview of what’s new:\nFast and cost-effective at scale\nBeyond the lower price, the workflow keeps costs down: you can draft fast at 360p or 720p, fix a detail with a follow-up edit instead of re-generating the entire clip, and then upscale your best creations to 1080p or 4K.\nLonger clips up to 15 seconds\nYou can now generate and edit videos natively up to 15 seconds long, up from 10 seconds with Omni 1.1. You can also specify duration in one-second increments from 3 to 15 seconds, giving you room to tell complete stories, create product explainers, or produce full social ad spots in a single generation.\nBetter reference adherence\nYou can guide generation combining character, product, or style images, short motion clips (up to three seconds), and audio cues — and Omni 1.2 Flash holds onto those details from start to finish. Faces, garments, packaging typography, and brand colors stay consistent across camera angles, making it easy to turn existing product photography or character sheets into virtual try-on clips, catalog spins, and branded video ads.\nCombining one model photo with front-and-back product shots of three outfits, Gemini Omni 1.2 Flash generates a 15-second virtual try-on sequence across 360-degree turns and match cuts while keeping the model’s identity and each garment’s cut, drape, and back details consistent.\nMore consistent results\nYou can maintain stronger character, object, and scene consistency from the first to the last frame, with less visual drift or morphing across motion and camera transitions. Whether you’re interpolating between a first and last keyframe, or extending a clip to build a longer sequence, products, characters, props, and environments stay consistent from shot to shot.\nGiven the same static studio lighting exhibition poster and five-layer animation prompt, Gemini Omni 1.1 Flash does not match the reference image as closely as 1.2 does. Gemini Omni 1.2 Flash builds the poster sequentially layer by layer on the dusty-pink cyclorama rising the hexagonal plinth, assembling the ribbed glass, warm filament, faceted crystal, and coiled-cord letterforms for HALO, GLOW, and LUMEN, and locking every material, shadow, and typographic detail consistently through the final frame.\nEasier editing in conversation\nYou can refine the same clip turn by turn — such as swapping a product or background, changing the lighting or weather, or switching the aspect ratio — instead of starting over from scratch. Multi-turn conversational editing works across full 15-second clips, making it easy to produce ad variants for different audiences and placements without re-briefing or re-generating.\nStarting from one generated clip, multi-turn conversational prompts swap the background turn by turn — from a striped pavilion tent to an oak forest, a stable with a white horse, a market fair, and a stone castle — while keeping both characters’ performances, armor reflections, and camera framing intact.\nMore natural speech\nYou can generate scenes with more fluid, natural-sounding dialogue, clearer lip-sync, and distinct multi-speaker conditioning. This will show up whether you’re directing multi-character dialogue in Flow, creating video explainers in Gemini for business, or creating polished, pro videos with avatars, music and narration in Google Vids.\nConditioned on one conservatory scene image alongside four character, mouth, and one-second voice references, Gemini Omni 1.2 Flash routes each sampled voice to the right character with expressive lip-sync and natural comedic timing across a 15-second animated scene.\nMore controllable, cinematic look\nYou can direct complex, continuous camera movements like sweeping FPV flythroughs to dramatic zoom-outs and orbits with significantly fewer unwanted jump cuts, steadier scale, and a more polished, cinematic look.\nGuided by two architectural reference photos, Gemini Omni 1.2 Flash directs one continuous FPV drone flight across the piazza, through the bronze doors, and up through the Pantheon’s coffered dome to the oculus with zero jump cuts.\nLonger clips with smoother motion and tighter consistency\nGemini Omni 1.2 Flash generates clips up to 15 seconds long that hold references together better than before. You can scroll through to see characters, text, and camera moves stay consistent across longer shots, multiple turns and transitions with no cuts.\nReal-world results, from creatives to global brands\nBusinesses, startups, and creatives are already using Gemini Omni 1.2 Flash in their workflows. And for the first time, Gemini Omni is now generally available, backed by Google Cloud’s enterprise-grade infrastructure and security. Provisioned Throughput is available, and outputs carry an imperceptible SynthID watermark.\nGet started with Gemini Omni 1.2 Flash\nWhile development is ongoing to further improve things like fast sports action, rapid script changes and complex physics, Gemini Omni 1.2 Flash is ideal for businesses, developers, and creators producing videos at scale. You can get started with Gemini Omni 1.2 Flash today as it rolls out across Google’s products and developer platforms:\n- For developers using the Gemini API: Prototype in Google AI Studio, explore interactive starter apps, and check out the developer documentation and pricing.\n- For businesses: Try it in the Google Cloud console, and build enterprise solutions with the API.\n- For everyone using Google apps: Direct scenes and multi-turn edits in Flow, generate 15-second clips at no additional cost in Google Vids with a…",
+        "score": 268.0,
+        "comments": 206,
+        "also_in": [
+          "Hacker News front page",
+          "Google AI Blog",
+          "Google Gemini Blog"
+        ]
+      },
+      "related": [
+        {
+          "key": "deepmind.google/blog/gemini-omni-12-flash-fast-and-cost-effective-with-longer-clips",
+          "source": "Google DeepMind",
+          "tags": [
+            "lab"
+          ],
+          "title": "Gemini Omni 1.2 Flash: Fast and cost-effective with longer clips",
+          "url": "https://deepmind.google/blog/gemini-omni-12-flash-fast-and-cost-effective-with-longer-clips/",
+          "discussion_url": null,
+          "published": "2026-11-05T17:05:16Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Anthropic evaluates offline dreaming for long-term agent memory consolidation",
+      "summary": "Anthropic detailed its approach to agent memory, comparing real-time session logging to human hippocampal encoding and using offline 'dreaming' periods to consolidate logs into long-term context. Evaluating Claude models on CL-Bench 1.0 showed a progression in memory behavior, culminating in Claude Opus 5, Opus 5.5, and Sonnet 5.5 closing the learning loop by converting session failures into persistent reference rules. Testing on Pokémon Red further demonstrated how newer models like Fable 5 exercise selective memory retention rather than dumping thousands of uncurated encounter logs.",
+      "why_it_matters": "Directly addresses agent memory design, offline reflection mechanisms, and failure correction across model generations.",
+      "reason": "Anthropic details how agent memory systems can structure long-term retention and correct operational errors through offline memory consolidation.",
+      "item": {
+        "key": "anthropic.com/research/components-of-agent-memory",
+        "source": "Anthropic Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "The components of agent memory",
+        "url": "https://www.anthropic.com/research/components-of-agent-memory",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "For Claude to learn from experience, it has to decide what’s worth remembering before it knows what’s next. Here’s how “dreaming” helps it organize memory and correct mistakes.",
+        "content": "Søren Kierkegaard wrote that life can only be understood backward, but it must be lived forward. We’ve encountered a similar bind when designing memory for AI agents.\nAs humans, we encode memory constantly as we go about our lives. The hippocampus plays a central role in this, capturing experiences in the moment so that memories form quickly and are immediately available. But only some experiences are consolidated into long-term knowledge.\nMuch of that consolidation appears to happen when our brains are offline. As we sleep, and during quiet rest, the hippocampus replays our recent experiences. This is thought to gradually distill those experiences and integrate them into the neocortex—the part of our brains that stores most of what we think of as knowledge.\nAgent memory can use a similar division of labor. Agents capture much of their work in logs or transcripts. Researchers at Letta and UC Berkeley proposed sleep-time compute as a way for models to use idle time between interactions to reorganize their existing context. The same idea can help agents organize their memory by reflecting on logs to fix mistakes or produce new notes and representations. This process is often called dreaming (Figure 1).\nWe’ve found that dreaming has been a useful tool for helping us give Claude effective memory. In this post, we share how we’ve come to think about agent memory and walk through several evaluations we’ve used to explore agent memory, including the use of dreaming, and what each component contributes to memory organization.\nMemory notes\nBy “agent memory,” we mean knowledge that Claude gains from experience—including interactions with users and tasks it’s been assigned—and that it retains between sessions, saved as context it can read later. It excludes other ways models can learn or manage context, such as changes to their weights (the internal parameters set during training), in-context learning (knowledge gained within a single conversation), and compaction (summaries written by Claude that replace its older turns so it can continue working in a new context window).\nIn the human brain, chemical signals released before, during, or after an experience can mark a memory as important. Marked memories tend to be replayed more often than unmarked ones during offline periods. This process, called replay, helps stabilize and integrate them into long-term memory.\nSimilarly, Claude can tag salient events in a session log as they happen, so they’re easier to find later, or it can write them to a memory store, such as a folder of memory notes (Figure 2). But how can Claude tell what’s salient in the moment, before it knows what’s coming next?\nMemory can be a prediction about what the future will need\nMemory is, occasionally, a prediction. By writing down a rule, an agent predicts that the pattern it’s describing will be relevant again. For instance, writing down a verified fact is a prediction that an agent in a future session will want to rely on that fact without double-checking it. Over time, Claude has become much better at making these kinds of predictions.\nConsider a task from Continual Learning Bench (CL-Bench) 1.0, a benchmark that measures an agent’s ability to use memory in order to tackle long-horizon tasks. One particular task asks Claude to answer a series of questions by looking up information in a database. After Claude gives an answer, it’s told the correct solution and can write a memory to help answer future questions.\nMemory can support a learning loop here. If Claude gets a question wrong, it can record the failure, come up with theories about what went wrong, test those theories, and turn what it finds into a rule about how to answer in the future.\nWe ran the CL-Bench 1.0 task using Claude Managed Agents. Claude started each question in a fresh session, with one exception: it could retrieve files from a memory directory that persisted from one session to the next.\nDifferent models achieved different levels of success at creating their own learning loops. Claude Sonnet 4.6 got as far as generating theories about why an answer was wrong. Its memory directory contained a scattering of files, each listing several untested guesses.\nClaude Opus 4.7 consolidated its notes into a single reference document and began marking which facts it had checked and which were still unconfirmed. Claude Sonnet 5 marked each answer as confirmed after the grader had checked it, and wrote a correction when it had answered wrong.\nClaude Opus 5 was the first of these models to close the loop. Most of its entries included a rule (and also how it knew the rule was true), answers to earlier questions, and clear warnings about traps it had discovered along the way (Figure 3).\nLike Opus 5, Claude Opus 5.5 and Claude Sonnet 5.5 both closed the loop, using memory to capture validated rules about how to best answer future questions. With memory, both scored about the same as Opus 5, though their baseline performance without memory was slightly higher.\nClaude has learned to judge salience\nWe also evaluated Claude’s ability to play Pokémon Red, a game that challenges Claude to navigate complex long-horizon tasks, as a test of Claude’s judgment about what to save to memory. At the start of each run, we gave each model a folder of memory files that it could read from and write to while it played (Figure 4).\nWe compared the memory folders from one run each of Claude Sonnet 3.7 and Claude Fable 5, when each was about 10,000 steps into the game. A key difference we noticed was what each model thought was worth remembering. Sonnet 3.7 assumed everything might matter and wrote to memory indiscriminately. Its memory folder contained an archive of encounters, often with a separate file for each battle it fought, each item it found, and each non-player character it met. Ultimately, Sonnet 3.7 wrote 413 memory files across 225 folders and earned one badge (badges mark a player’s progress through the game).\nFable 5, by…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS formalizes production agent primitives across triggers, actors, and capabilities",
+      "summary": "Drawing from experience building Amazon Quick, AWS introduced a unified technical taxonomy that categorizes agent work into triggers (When/What), agents (Who), and capabilities (How). The framework defines an agent as a persistent, learning actor whose underlying LLM is a swappable parameter and whose context accumulates across sessions. Capabilities are structured along a confidence spectrum ranging from deterministic workflows to progressive-disclosure skills and atomic tools, framing user monitoring requests as new triggers on existing actors rather than redundant sub-agents.",
+      "why_it_matters": "Provides a clean structural vocabulary for tool integration, agent orchestration, and context boundaries in production agent frameworks.",
+      "reason": "AWS breaks down a technical taxonomy of core agent primitives—triggers, agents, capabilities, and learned context—learned from scaling production systems.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/taxonomy-of-agentic-primitives-in-amazon-quick",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Taxonomy of agentic primitives in Amazon Quick",
+        "url": "https://aws.amazon.com/blogs/machine-learning/taxonomy-of-agentic-primitives-in-amazon-quick/",
+        "discussion_url": null,
+        "published": "2026-11-06T17:34:45Z",
+        "summary": "As we built Amazon Quick, its agents grew from answering questions to taking actions, and the same primitives kept getting rebuilt under different names. This post shares the taxonomy we converged on — triggers, agents, capabilities, and learned context — found by decomposing agentic work into four plain questions: When, What, Who, and How.",
+        "content": "Over the past year, as we built Amazon Quick, our agents went from answering questions to taking actions: scheduling meetings, running research, generating reports. As the system evolved, one problem kept resurfacing: there was no shared definition of the primitives that agentic work is built from. The same few ideas kept getting rebuilt under different names: an actor that does the work, a signal that starts it, a packaged procedure, and a memory that carries lessons forward. This repetition leaked into product design and onto the user.\n\nTake the user who says “ monitor my Slack channel and send me a daily digest ”. Is that a new agent, a scheduled instruction to an existing one, a workflow, or a skill? These are different questions, but without a shared vocabulary they collapse into one confusing choice.\n\nThis post shares the taxonomy we converged on: one set of primitives found by decomposing agentic work into four plain questions: When? , What? , Who? , and How? Most of the framework stays invisible to end users by design, but a shared vocabulary makes the system easier to reason about for anyone building beneath it.\n\nThe framework at a glance\n\nFigure 1: How triggers, agents, and capabilities relate, with learning feeding back from the session runtime\n\nA trigger starts the work and carries the task ( When and What ), an agent takes it on ( Who ) and uses its capabilities (tools, skills, and workflows) to perform the task ( How ). This post describes these primitives and how they relate to one another. It’s the first post in a series, and upcoming posts cover our agentic operating system, background learning, proactive feeds, and much more.\n\nTriggers: What causes work to begin\n\nTriggers are the activation mechanism for getting work done, but they also carry instructions: a human message is both the moment of activation and the description of what to do. They are both the When? and the What? of a task.\n\nHuman-initiated: A person opens a conversation and asks the agent to do something. Interactive, synchronous, conversational.\n\nAgent-delegated: One agent, mid-task, invokes another to handle a sub-problem. Programmatic, composable, potentially recursive.\n\nScheduled: Time-based activation, like “run financial research every Monday at 9am.” Deterministic, with the same standing instructions applied across runs.\n\nEvent-driven: A signal from an external system, such as a new email, a Slack mention, a file change, or a webhook.\n\nThe type of trigger conditions the execution: a scheduled background task might stay conservative (for example, do nothing if uncertain), while a human-initiated one would be responsive (for example, ask rather than stop).\n\nAgents\n\nWe define an agent as a persistent, learning actor . It’s the Who? in any execution, and the anchor against which learning accrues. Two agents given identical input can differ, because they carry different instructions, capabilities, and histories. The agent isn’t the instructions it follows. It’s the entity that interprets them. It consists of three things:\n\nInstructions:  Standing guidance defining persona, role, context files, and operating principles. A Finance Agent behaves differently from a general assistant primarily because of this.\n\nCapabilities:  The tools, skills, workflows, and sub-agents available for use, updated dynamically. A charting library can be added in one session and removed the next.\n\nLearned context:  Memory that accumulates through use: the queries that work for a tool, the formatting users prefer, the edge cases they care about. This is how the tenth execution beats the first without anyone changing the instructions.\n\nEverything else is extrinsic: the large language model (LLM) underlying the agent is a swappable model parameter, conversation history is per-session state, and triggers belong to the platform.\n\nA consequence of this definition is that a user request “ I want an agent that monitors my Slack and sends a digest every morning ” is usually a trigger added to an existing agent , not a new agent or workflow. With this framing, we can merge chat, scheduled, and “autonomous” agents into one actor that you can converse with, schedule, and that can orchestrate and inspect its own past work.\n\nCapabilities\n\nCapabilities are How an agent acts, spanning a spectrum from fully agentic to fully deterministic. That axis is really a confidence contract : how much latitude the agent keeps versus how much the user fixes in advance.\n\nTools are atomic operations with a typed schema: send an email, query a database, read a file. Whether a local function, a Model Context Protocol (MCP) server, or another agent behind a protocol boundary, the caller sees the same interface: name, description, parameters, result.\n\nSkills are structured guidance with room for judgment: instructions bundled with resources (templates, scripts, examples) that describe an approach rather than a rigid sequence. They load through progressive disclosure , so the agent sees only names and short descriptions until one becomes relevant, then reads the full instructions in. A skill can therefore bundle arbitrary depth of expertise without a constant cost.\n\nWorkflows are deterministic coordination: declared steps, control flow, branching, and error handling that execute in fixed order, with decision logic in code rather than model inference. Think of a purchase-approval route: budget check, manager sign-off, then finance, each recorded. The route is fixed, but the judgment inside a step is still the agent’s.\n\nFigure 2: Skills versus workflows, which differ in whether the agent or the code decides the step order\n\nWhy skills and workflows outlast model improvements\n\nA natural question arises: if models keep improving, won’t skills and workflows become unnecessary? We don’t think so, because each holds value independent of model capability. Skills are the unit for capturing, versioning, and sharing institutional expertise, while workflows deliver auditability, step-wise visibility, and deterministic multi-service coordination. Nor are they fixed: a well-understood skill can tighten into a workflow ( crystallization ), a workflow that keeps hitting edge cases can loosen back into a skill ( dissolution ). This is done in Quick through our continuous learning framework, which we will describe in a future post.\n\nWhat this means in practice\n\nReturn to “ monitor my Slack channel and send me a daily digest ”. Because these primitives compose, the same request can be met several valid ways:\n\nA scheduled task with a one-line instruction, leaving the agent to figure out the rest.\n\nThe same task backed by a skill with explicit formatting rules and channel priorities.\n\nThe same task invoking a workflow with deterministic steps and error handling.\n\nAll three produce a daily digest on a schedule. What differs is the confidence contract. A user who trusts the agent wants the first, one burned by inconsistency the second, one running a compliance-sensitive process the third.\n\nLearning shifts that trajectory over time. A task that starts as one sentence (“ check my email for urgent items ”) accumulates domain-bound learnings: effective queries, preferred formatting, and which senders matter. The tenth run is markedly better, with no one encoding that by hand. The right design is the simplest option that meets the user’s confidence requirement, with a path to graduate through autonomous learning when they need more.\n\nConclusion\n\nThe value of this agentic primitive taxonomy is that four plain questions, When , What , Who , and How , are enough to place any piece of agentic work, from a one-line chat request to a scheduled, compliance-grade process. Sharing one vocabulary lets builders reason about the system and lets the product hide complexity. Best of all, the user never has to learn any of it. They say what they want, and the system assembles the appropriate primitives to do their job.\n\nNext in the series: the agentic operating…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Harness-S rescues failed RL rollouts using specialized sibling scaffolds",
+      "summary": "Researchers introduced Harness-S, a framework designed to rescue failed reinforcement learning rollouts by routing execution to a pool of specialized sibling harnesses before transferring those learned behaviors back into a single policy operating under the base harness. An Adaptive Harness Router selects top auxiliary variants to replace failed trajectory groups during GRPO training, updating behavior profiles as the model learns. Across AppWorld, SWE-Gym, and DBBench, the trained policy substantially outperformed baseline policy-only training when returned to the original base execution harness.",
+      "why_it_matters": "Directly relevant to agent harness design, failure recovery mechanisms, and scaffold-driven evaluation methodologies.",
+      "reason": "This paper introduces Harness-S, a method that dynamically transfers execution fixes across sibling harness variants to improve agent failure recovery.",
+      "item": {
+        "key": "arxiv:2611.04277",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Harness-S: Learning from Sibling Harnesses for Generalizable Agent Training",
+        "url": "https://huggingface.co/papers/2611.04277",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "Harness evolution from a common base exhibits Locality, Complementarity, and Nonstationarity: variants repair different failures, and their utility changes as the policy learns. Rather than seeking a universally superior harness, we introduce Harness-S to selectively rescue failures of a base execution system through sibling harnesses and transfer the resulting capabilities into a single policy that remains effective under the original harness. Directional Harness Evolution develops specialized sibling harnesses along distinct repair directions, forming a reusable Sibling Harness Pool that remains fixed during policy training. Complementary Harness Rescue Training invokes this pool only when all initial attempts under the base harness fail. The same policy generates fresh rollouts under selected auxiliary harnesses, and these trajectories replace the failed group for reinforcement learning. An Adaptive Harness Router selects the Top-k variants using Harness Behavior Profiles and voting across multiple LLMs. Policy-aware profile re-anchoring refreshes this evidence as the policy learns. Across AppWorld, SWE-Gym, and DBBench, the trained policy substantially outperforms policy-only…",
+        "content": "Harness-S: Learning from Sibling Harnesses for Generalizable Agent Training\nAbstract\nA selective harness-rescue training method uses specialized sibling harnesses to replace failed reinforcement learning rollouts and transfer their benefits into a single policy that performs better under the original base harness.\nHarness evolution from a common base exhibits Locality, Complementarity, and Nonstationarity: variants repair different failures, and their utility changes as the policy learns. Rather than seeking a universally superior harness, we introduce Harness-S to selectively rescue failures of a base execution system through sibling harnesses and transfer the resulting capabilities into a single policy that remains effective under the original harness. Directional Harness Evolution develops specialized sibling harnesses along distinct repair directions, forming a reusable Sibling Harness Pool that remains fixed during policy training. Complementary Harness Rescue Training invokes this pool only when all initial attempts under the base harness fail. The same policy generates fresh rollouts under selected auxiliary harnesses, and these trajectories replace the failed group for reinforcement learning. An Adaptive Harness Router selects the Top-k variants using Harness Behavior Profiles and voting across multiple LLMs. Policy-aware profile re-anchoring refreshes this evidence as the policy learns. Across AppWorld, SWE-Gym, and DBBench, the trained policy substantially outperforms policy-only training when returned to the original base harness. Behavioral analyses and held-out cases support the transfer of harness-elicited behaviors into the policy itself. Reusing the router for Rank-1 inference provides additional gains at the same executor rollout count.\nCommunity\nHarness evolution from a common base exhibits Locality, Complementarity, and Nonstationarity: variants repair different failures, and their utility changes as the policy learns. Rather than seeking a universally superior harness, we introduce Harness-S to selectively rescue failures of a base execution system through sibling harnesses and transfer the resulting capabilities into a single policy that remains effective under the original harness. Directional Harness Evolution develops specialized sibling harnesses along distinct repair directions, forming a reusable Sibling Harness Pool that remains fixed during policy training. Complementary Harness Rescue Training invokes this pool only when all initial attempts under the base harness fail. The same policy generates fresh rollouts under selected auxiliary harnesses, and these trajectories replace the failed group for reinforcement learning. An Adaptive Harness Router selects the Top-k variants using Harness Behavior Profiles and voting across multiple LLMs. Policy-aware profile re-anchoring refreshes this evidence as the policy learns. Across AppWorld, SWE-Gym, and DBBench, the trained policy substantially outperforms policy-only training when returned to the original base harness. Behavioral analyses and held-out cases support the transfer of harness-elicited behaviors into the policy itself. Reusing the router for Rank-1 inference provides additional gains at the same executor rollout count.\nThe locality/complementarity/nonstationarity framing of sibling harnesses matches what I see when tweaking agent scaffolds: each edit fixes a slice of failures and quietly breaks others. What stood out in Table 1 is that Harness-S still wins under the original H0 after training. On Qwen3.5-9B AppWorld, Pass@3 goes from 64.89 (plain GRPO) to 72.52 under H0, and Appendix G notes about +7.89 Avg@3 over GRPO with only ~18% more rollouts. The Rank-1 vs H0 Pass@3 gap on AppWorld 4B shrinking from 14.21 to 0.76 after training makes the transfer claim feel real. Curious how sensitive that is to deep tool/interface edits versus shallow prompt wording, given the SWE-Gym assertion-fallback rate (48.5% vs 13.3% for GRPO) when tests are blocked.\nThank you for your interest in our work! You've raised a great question that has inspired us to think further. We will look into quantifying how sensitive this capability transfer is to different types of Harness modifications as soon as possible. Thanks again for your thoughtful feedback and interest in our work!\nGet this paper in your agent:\nhf papers read 2611.04277 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 54.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS details serverless MCP architecture on Fargate for data lake access",
+      "summary": "AWS published an architecture pattern for deploying Model Context Protocol (MCP) servers on Amazon ECS Fargate to provide AI agents with secure data lake access. Built using FastMCP and Amazon Bedrock, the centralized gateway discovers newly added datasets via JSON metadata files, bypassing the need to write per-dataset tool code or redeploy containers. In production deployment for sort center planning teams, context mapping configurations scope database searches to relevant tables, keeping end-to-end query latency within 15 to 20 seconds.",
+      "why_it_matters": "Provides a concrete enterprise reference implementation for Model Context Protocol (MCP) server deployment and schema-scoped retrieval.",
+      "reason": "Provides a serverless architecture pattern for running Model Context Protocol (MCP) servers on AWS Fargate to grant agents secure, metadata-driven data access.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/serverless-mcp-server-for-ai-agent-data-lake-access-on-amazon-ecs-fargate",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Serverless MCP server for AI agent data lake access on Amazon ECS Fargate",
+        "url": "https://aws.amazon.com/blogs/machine-learning/serverless-mcp-server-for-ai-agent-data-lake-access-on-amazon-ecs-fargate/",
+        "discussion_url": null,
+        "published": "2026-11-06T17:13:13Z",
+        "summary": "Learn how to build a serverless Model Context Protocol (MCP) server on Amazon ECS with AWS Fargate that gives AI agents secure, metadata-driven access to an enterprise data lake. Exposing a new dataset requires only a JSON file, with no per-dataset integration code.",
+        "content": "Organizations building applications powered by artificial intelligence (AI) face a recurring challenge: giving large language model (LLM) agents access to enterprise data lakes without duplicating integration logic across every agent and application. Most teams begin by wiring agents directly to databases and APIs, with no shared gateway such as a Model Context Protocol (MCP) server in between. Each new dataset demands custom code, and each agent reimplements its own access control. As the number of datasets or agents grows, permission enforcement drifts, and onboarding a new data source becomes a multi-day engineering effort.\n\nOur team supports Amazon’s North America Sort Center (NASC) network, where planning teams rely on operational data to manage capacity, labor, and package flow. To give those teams conversational access to that data, we built a serverless Model Context Protocol (MCP) server on Amazon Elastic Container Service (Amazon ECS) with AWS Fargate to address this problem for planning teams in NASC. The server acts as a centralized, agent-agnostic gateway between AI agents and our enterprise data lake. Exposing a new dataset requires only a JSON metadata file that the server discovers automatically on the next pipeline sync.\n\nIn this post, we describe the architecture, show how a metadata-driven approach removes the need for per-dataset integration code, and explain how the serverless infrastructure supports multiple agents and applications in a multi-tenant environment.\n\nProblem statement and design goals\n\nTwo interrelated challenges shaped how we designed this system: fragmented data access patterns and an unsustainable onboarding model.\n\nIntegration challenge at scale\n\nOur data lake contains thousands of datasets spanning operational metrics, business analytics, and domain-specific data. Multiple teams wanted AI assistants that could query this data conversationally, but each built its own integration from scratch. Each agent embedded its own SQL generation logic, schema knowledge, and connection handling, so a schema change meant patching every agent individually. Access control was fragmented, with no single audit point for data access decisions. Onboarding a new dataset required custom tool code, query validation, and redeployment, typically a multi-day effort per table.\n\nDesign goals\n\nWe established four requirements:\n\nConfiguration-driven data lake access. Adding a dataset requires only a metadata file, not code.\n\nAgent-agnostic tool interfaces. Any MCP-compatible client can invoke the same tools.\n\nCentralized permission enforcement. Access control is enforced at the MCP server layer.\n\nElastic infrastructure. The system scales with bursty AI workload patterns.\n\nSolution overview\n\nThe architecture separates concerns into four layers (client, MCP server, tools, and knowledge-base refresh), each independently scalable and deployable. A metadata catalog underpins the tools layer, storing schema descriptions, column-level semantics, and table relationships that the AI agent references when generating SQL. Because the agent derives schema knowledge from the catalog at query time, there is no need to hardcode table structures or redeploy when schemas change. The knowledge-base refresh layer keeps that catalog current, indexing new dataset metadata as it arrives. The following sections describe each layer in detail.\n\nArchitecture walkthrough\n\nThe following diagram shows the request flow from user query to data layer across all four layers. A user submits a query from a client application (web chat, Slack, an IDE plugin, or an external agent). The request resolves through Amazon Route 53 for DNS and reaches an Application Load Balancer in a public subnet, configured with HTTPS and AWS WAF. The load balancer routes to Amazon Cognito, which authenticates the user and enriches the request. Authenticated traffic then enters the private subnet, where the client layer runs on Amazon ECS Fargate. This layer handles session state in Amazon DynamoDB and forwards requests through an internal Application Load Balancer to the MCP server layer, also on Amazon ECS Fargate. In the MCP server layer, an AI agent powered by Amazon Bedrock orchestrates tools built with FastMCP (a Python framework for building MCP servers). Amazon Bedrock Guardrails is applied to every model interaction. On the right, the data layer holds the tool backends. Amazon Athena and Amazon Redshift run SQL queries against the data lake, and Amazon Bedrock Knowledge Bases, the fully managed Retrieval Augmented Generation (RAG) capability, handles semantic search. Data ingestion into Amazon Simple Storage Service (Amazon S3) and the knowledge bases is handled by AWS Lambda. Each layer is described in detail in the sections that follow.\n\nFigure 1: Request flow through the serverless MCP server, from client applications to the data layer\n\nMCP client layer: Authentication and session management\n\nA request flows from the client application through Amazon Route 53 for DNS resolution to an Application Load Balancer configured with HTTPS and AWS WAF . The load balancer forwards traffic to the Amazon ECS Fargate client service, which integrates with Amazon Cognito for JSON Web Token (JWT) authentication and Amazon DynamoDB for session storage.\n\nA context mapping configuration drives this enrichment, scoping each query to only the relevant tables. In our testing, this scoping keeps end-to-end interaction latency in the 15–20 second range. The following example shows a context mapping configuration:\n\n{\n\"package_data\": {\n\"description\": \"Package tracking and delivery information\",\n\"tables\": [\"analytics_db.regional_order_summary\", \"operations_gold.load_summary\"],\n\"sources\": {\"wiki\": [], \"quip\": []}\n},\n\"labor_planning\": {\n\"description\": \"Workforce management and capacity planning\",\n\"tables\": [\"workforce.capacity_details\"],\n\"sources\": {\"wiki\": [], \"quip\": []}\n}\n}\n\nWhen a context specifies tables, the MCP server narrows its search of the metadata catalog to those tables, reducing noise and improving SQL generation accuracy. Adding a new business domain requires only adding an entry to this mapping.\n\nMCP server layer: Stateless execution with conversation state\n\nThe MCP server runs on its own ECS Fargate cluster, isolated from the client layer. Requests reach it through Amazon Route 53 and an internal Application Load Balancer in a private subnet. The server handles full orchestration including query analysis, tool selection, execution, and response generation. Through the MCP protocol endpoint ( /mcp ), a FastMCP-powered JSON-RPC interface, external MCP-compatible clients such as Amazon Q Developer or IDE extensions can discover and invoke tools directly.\n\nFargate tasks are stateless with conversation state persisted in DynamoDB, so tasks can be replaced or scaled without data loss. When a request arrives, the agent retrieves session history, analyzes user intent using Amazon Bedrock, discovers and invokes appropriate tools, and streams results back to the user.\n\nTools layer and metadata-driven data lake access\n\nEach tool is registered with FastMCP and discoverable at runtime:\n\nSr.no\nTool\nBackend\nPurpose\n\n1\nSQL query tools\n\nAmazon Athena\n\nAmazon Redshift\n\nSQL queries against any configured dataset in the data lake and Redshift\n\n2\nDocument and metadata search\nAmazon Bedrock Knowledge Bases\nSemantic search over internal documentation, table metadata and team wikis\n\n3\nPolicy search\nAmazon Bedrock Knowledge Bases\nSearch operational policies and standard procedures\n\nThe Athena query tools are the primary interface to the data lake. The agent first queries the metadata catalog to understand available schemas, generates an optimized SQL query through Amazon Bedrock, validates and auto-corrects the SQL for Athena compatibility, then executes it. Results flow back to the orchestrating agent for natural language synthesis.\n\nResponsible AI controls\n\nAmazon Bedrock Guardrails is applied to all LLM…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "OpenAI introduces BioBasicsBench for wet-lab data reasoning",
+      "summary": "OpenAI released BioBasicsBench, a benchmark designed to test AI agents on routine scientific data processing and reasoning. The evaluation suite consists of 100 tasks aimed at measuring how effectively agents interpret raw experimental data and navigate everyday wet-lab science workflows.",
+      "why_it_matters": "Expands LLM and agent evaluation methodology into domain-specific scientific data interpretation.",
+      "reason": "OpenAI introduces BioBasicsBench, a benchmark designed to evaluate how AI agents interpret raw experimental data and conduct scientific reasoning.",
+      "item": {
+        "key": "openai.com/index/measuring-how-ai-agents-handle-wet-lab-science",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Measuring how AI agents handle everyday wet-lab science",
+        "url": "https://openai.com/index/measuring-how-ai-agents-handle-wet-lab-science",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "OpenAI introduces BioBasicsBench, a 100-task benchmark measuring how well AI agents interpret raw experimental data and handle everyday wet-lab science.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "D3D decouples diffusion drafting for asynchronous speculative decoding",
+      "summary": "D3D introduces a standalone diffusion drafter that removes target-model hidden-state dependencies, allowing drafting and verification to execute asynchronously in a single packed pass. By combining blockwise denoising with auxiliary autoregressive supervision and pruning redundant drafter layers, D3D maintains long accepted prefix lengths without waiting on target state updates. Benchmarking with Qwen3-8B and Qwen3-32B targets yielded average speedups of 5.00x and 5.71x across seven benchmarks, reaching up to 7.48x on GSM8K.",
+      "why_it_matters": "Highlights key optimizations in LLM serving, speculative decoding architectures, and inference latency reduction.",
+      "reason": "Decoupled Diffusion Drafting removes target-model state wait times to enable asynchronous speculative decoding for faster LLM inference.",
+      "item": {
+        "key": "arxiv:2611.06425",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "D3D: Decoupled Diffusion Drafting for Asynchronous Speculative Decoding",
+        "url": "https://huggingface.co/papers/2611.06425",
+        "discussion_url": null,
+        "published": "2026-11-05T00:00:00Z",
+        "summary": "Target-conditioned diffusion drafters predict candidate tokens in parallel, yet each new block must wait for updated target-model hidden states. This forces drafting and verification to run sequentially, limiting speedup even though each block is generated in one pass. We introduce D3D, a standalone diffusion drafter that removes this inter-round dependency. D3D combines blockwise denoising with auxiliary autoregressive supervision to achieve long accepted prefixes without target hidden states. This independence lets D3D draft successor blocks during verification in one packed pass, enabling asynchronous speculative decoding. We progressively prune layers according to their effect on acceptance length to reduce the cost of packed drafting. Removing five of 36 layers retains over 99\\% of mean acceptance length across three benchmarks with Qwen3-8B as the target. Across seven benchmarks, D3D averages 5.00times and 5.71times decoding speedup with Qwen3-8B and Qwen3-32B targets, compared with 4.03times and 3.67times for DFlash. On GSM8K with Qwen3-32B, speedup reaches 7.48times. Code is publicly available at https://github.com/fudan-generative-vision/D3D.",
+        "content": "D3D: Decoupled Diffusion Drafting for Asynchronous Speculative Decoding\nAbstract\nD3D is a standalone diffusion drafter that removes target-model hidden-state dependencies to enable asynchronous speculative decoding with high speedup.\nTarget-conditioned diffusion drafters predict candidate tokens in parallel, yet each new block must wait for updated target-model hidden states. This forces drafting and verification to run sequentially, limiting speedup even though each block is generated in one pass. We introduce D3D, a standalone diffusion drafter that removes this inter-round dependency. D3D combines blockwise denoising with auxiliary autoregressive supervision to achieve long accepted prefixes without target hidden states. This independence lets D3D draft successor blocks during verification in one packed pass, enabling asynchronous speculative decoding. We progressively prune layers according to their effect on acceptance length to reduce the cost of packed drafting. Removing five of 36 layers retains over 99\\% of mean acceptance length across three benchmarks with Qwen3-8B as the target. Across seven benchmarks, D3D averages 5.00times and 5.71times decoding speedup with Qwen3-8B and Qwen3-32B targets, compared with 4.03times and 3.67times for DFlash. On GSM8K with Qwen3-32B, speedup reaches 7.48times. Code is publicly available at https://github.com/fudan-generative-vision/D3D.\nCommunity\n🚀 Introducing D3D: Decoupled Diffusion Drafting for Asynchronous Speculative Decoding!\nExisting diffusion-based speculative drafters rely on target-model hidden states, forcing drafting and verification to execute sequentially.\nD3D breaks this dependency with a standalone diffusion drafter, enabling asynchronous drafting and verification through packed speculative decoding.\nKey highlights:\n- Asynchronous speculation: Overlaps diffusion drafting with target verification, eliminating inter-round dependencies.\n- Effective drafting: Combines blockwise denoising with auxiliary autoregressive supervision to achieve long accepted prefixes.\n- Significant speedups: Achieves 5.00× and 5.71× average decoding speedups with Qwen3-8B and Qwen3-32B across seven benchmarks, outperforming DFlash (4.03× and 3.67×). Up to 7.48× on GSM8K!\n📄 Paper: https://arxiv.org/abs/2611.06425\n💻 Code: https://github.com/fudan-generative-vision/D3D\n🤗 Models: https://huggingface.co/collections/fudan-generative-ai/d3d\nWe've released our code, model checkpoints, and benchmarking scripts.\nWe welcome feedback, questions, and discussions!\nGet this paper in your agent:\nhf papers read 2611.06425 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 8\nfudan-generative-ai/PerfectBlend-Qwen3-8B-NoThink-Greedy\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 18.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Rivet launches actor-model framework for lightweight agent orchestration",
+      "summary": "Rivet launched an actor-model orchestrator that runs long-lived agent states outside of heavy VM sandboxes, targeting 72 KB RAM per actor and 4.99 ms p99 cold starts. Built on top of S3 and local SQLite storage, the architecture lets idle actors hibernate while preserving in-memory variables and WebSocket connections across sessions. The design separates the agent's control loop state from code execution, invoking external sandboxes only when the agent specifically needs to execute generated code.",
+      "why_it_matters": "Offers a high-density alternative to VM-per-agent architectures for scaling multi-agent state and long-horizon execution.",
+      "reason": "Rivet presents an actor-model agent orchestrator backed by S3 as a lightweight, high-density alternative to per-agent VM sandboxes.",
+      "item": {
+        "key": "github.com/rivet-dev/rivet",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Launch HN: Rivet (YC W23) – Scale and Orchestrate Agents on S3",
+        "url": "https://github.com/rivet-dev/rivet",
+        "discussion_url": "https://news.ycombinator.com/item?id=50381687",
+        "published": "2026-11-05T17:17:42Z",
+        "summary": "Hey HN, this is Nathan and Nicholas from Rivet ( https://rivet.dev ) – a fast, high-density, and scalable orchestrator for agentic workloads using the actor model. Rather than running a heavyweight sandbox per agent, each agent gets a lightweight actor backed by S3.\nActors provide a long-lived process for long agent turns, in-memory state for context, a WebSocket server for multiplayer, durable SQLite storage backed by S3, and hibernation when idle.\nIt's a similar model to Cloudflare Durable Objects, but it’s open source and self-hostable.\nHere’s a video walkthrough: https://www.youtube.com/watch?v=3Ev6I7DOV9c\nWhen we went through YC in 2023, we were building infrastructure for multiplayer games like Diep and Krunker. This involved heavily optimizing high-throughput matchmaking, real-time player messages, and blitz scaling. Through that process, we spent a lot of time on workloads where Postgres couldn't keep up with our throughput. We started out by hacking together Lua scripts on top of Redis, but this became too cumbersome to maintain and upgrade. This led us to extend our game server orchestrator to support what we call Rivet Actors today: many lightweight workers with…",
+        "content": "4.99 ms p99 cold starts, 72 KB RAM per Actor, scales to billions\nQuickstart • Documentation • Blog • Discord • X\nRivet Actors are long-lived processes with in-memory state, a SQLite database, WebSockets, and scheduling. You can create one for each agent, user, session, or tenant.\n- 72 KB per Actor: Actors share a node process instead of each booting a sandbox, so one server holds hundreds of thousands.\n- 4.99 ms p99 cold starts: No image pull and no VM boot.\n- Built for scale: All data lives in S3, so a cluster scales to billions of Actors.\n- Hibernates when idle, wakes on demand: Idle Actors cost nothing and wake on the next request with nothing lost.\n- SQLite backed by S3, at SSD speeds: 1.07 ms durable writes and 1.36 ms reads at p99, for about 10.4× less than replicated SSD storage.\n- Durable & multiplayer AI agents: memory that survives restarts, shared live with every client\n- Workflows: multi-step operations that replay instead of starting over\n- AI-generated apps: run the apps and Actors your agent generates\n- Collaborative editing: one Actor per document, synced to every editor\nA minimal agent written from scratch. For a ready-made agent, use Pi Durable.\n// server.ts\nimport { actor, setup } from \"rivetkit\";\nimport { db } from \"rivetkit/db\";\nimport { streamText } from \"ai\";\nimport { openai } from \"@ai-sdk/openai\";\n// One Actor per agent, created on first use: agent.getOrCreate([\"agent-123\"])\nexport const agent = actor({\n  // 1. SQLite: every agent has its own database, so history survives restarts\n  db: db({\n    onMigrate: async (db) => {\n      await db.execute(\"CREATE TABLE IF NOT EXISTS messages (role TEXT, content TEXT)\");\n    },\n  }),\n  // 2. In-memory state: plain variables that live with the Actor, with no database round trip\n  createVars: () => ({ online: new Map<string, string>() }),\n  // 3. WebSockets: each client holds a live connection, and the Actor pushes to all of them\n  onDisconnect: (c, conn) => {\n    c.vars.online.delete(conn.id);\n    c.broadcast(\"online\", [...c.vars.online.values()]);\n  },\n  actions: {\n    join: (c, user: string) => {\n      c.vars.online.set(c.conn.id, user);\n      c.broadcast(\"online\", [...c.vars.online.values()]);\n    },\n    sendMessage: async (c, text: string) => {\n      // Save the message\n      await c.db.execute(\"INSERT INTO messages VALUES (?, ?)\", \"user\", text);\n      const messages = await c.db.execute(\"SELECT role, content FROM messages\");\n      // Stream tokens to every connected client\n      const response = streamText({ model: openai(\"gpt-5\"), messages });\n      for await (const delta of response.textStream) {\n        c.broadcast(\"token\", delta);\n      }\n      // Save the response\n      await c.db.execute(\"INSERT INTO messages VALUES (?, ?)\", \"assistant\", await response.text);\n    },\n  },\n});\nexport const registry = setup({ use: { agent } });// client.ts (frontend or backend)\nimport { createClient } from \"rivetkit/client\";\nimport type { registry } from \"./server\";\nconst client = createClient<typeof registry>();\n// Open a WebSocket connection to the agent\nconst agent = client.agent.getOrCreate([\"agent-123\"]).connect();\n// Listen for realtime events\nagent.on(\"online\", users => console.log(\"online:\", users));\nagent.on(\"token\", delta => process.stdout.write(delta));\n// Call actions on the Actor\nawait agent.join(\"nathan\");\nawait agent.sendMessage(\"how many r's in strawberry?\");\nEach Actor gives the agent a long-lived process for long agent turns, in-memory state for context, a WebSocket server for multiplayer, durable SQLite storage for session transcripts and agent artifacts, and hibernation when idle.\nMost of an agent's time is spent waiting on inference. When the agent loop runs inside a sandbox, you pay for a whole VM that sits mostly idle with low CPU usage.\nRivet Actors run the agent loop outside of the sandbox instead, often called \"separating the head from the hands.\" The agent's state, memory, and context live in the Actor, and it reaches the sandbox through tools only when it needs to run code. This uses a fraction of the memory and limits the blast radius and trust boundary of the code it runs. Read more about running the harness outside of the sandbox.\nOften not. An agent needs a sandbox only to run code it writes. Developers on Rivet use three patterns:\n- Agents with tools: Many agents only need tool calls, MCP, and APIs, such as customer support or personal agents. No sandbox needed.\n- Agents with a lightweight sandbox: agentOS provides Linux-compatible sandboxing for JS and Python using V8 and WebAssembly, with full POSIX filesystems, networking stacks, and process trees. It covers most workloads, like data analysis, file processing, evals, and code mode.\n- Agents with a full sandbox: Keep your existing sandbox provider and expose its shell and filesystem to the agent as tools, such as a bash tool that runs commands in the sandbox. The Actor reattaches to it across sleeps and restarts. See the sandbox coding agent example.\nPaste this prompt into Claude Code, Cursor, Codex, or any coding agent:\nRun npx skills add rivet-dev/skills, then ask me what to build and run it locally.\nRivet ships libraries built on top of Actors for common use cases.\n- Actors: Long-lived processes with state, realtime, and scheduling built in.\n- Agents: Durable agents built on Actors, with memory that survives restarts.\n- Workflows: Multi-step operations built on Actors that replay instead of starting over.\n- agentOS: Run the code your agent writes, securely, with granular control over network access, filesystem access, and resource limits.\n- Dynamic Apps (preview): A backend per user, deployed the moment it is generated.\nBenchmark details & methodology\n- Rivet numbers come from the published Rivet Actors vs Cloudflare Durable Objects benchmark, run on Rivet 3.0.3. Its repository has the raw samples and the scripts to reproduce them.\n- Sandbox numbers are for E2B: 512 MiB is its default memory allocation from E2B's billing documentation as of…",
+        "score": 118.0,
+        "comments": 58,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "A technical breakdown analyzes a Firecracker VM escape vulnerability in part two of the PwnEscape series.",
+      "item": {
+        "key": "pwn.ai/blog/firecracker-escape",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Firecracker VM Escape: PwnEscape Part 2",
+        "url": "https://pwn.ai/blog/firecracker-escape",
+        "discussion_url": "https://news.ycombinator.com/item?id=50397219",
+        "published": "2026-11-06T19:33:38Z",
+        "summary": "Comments",
+        "content": "",
+        "score": 101.0,
+        "comments": 56,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    },
+    {
+      "line": "The BestRand paper demonstrates that analytical error bounds allow compressing benchmarks into small random subsets while maintaining evaluation accuracy.",
+      "item": {
+        "key": "arxiv:2611.00883",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Random Is Almost Enough? Stable and Low-Cost Benchmark Compression via BestRand",
+        "url": "https://huggingface.co/papers/2611.00883",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "Benchmark compression reduces the often prohibitive time and cost of model evaluation by evaluating models on a small benchmark subset that closely matches full-benchmark results. To quantify estimation error, we derive an accurate analytical approximation to the error distribution when estimating full-benchmark scores from a subset, showing that most subsets yield small errors, while a few produce much larger errors, resulting in a long-tailed distribution. This means random sampling alone can achieve surprisingly strong performance with high probability, but remains unstable due to rare large errors. We further show that this instability is inherent to modern foundation models and persists even as more models are evaluated. Based on these findings, we introduce BestRand, a stable and low-cost benchmark compression method that preserves the efficiency of random sampling while substantially reducing its high-error tail. We validate BestRand on 70+ text, multimodal, and agent benchmarks, and further extend it to VLA evaluation. Compared with competitive methods, BestRand reduces high-error risk by 50.2% and estimation error by 16.4% on average, while requiring only 51.3% of the…",
+        "content": "",
+        "score": 50.0,
+        "comments": 2,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Hybrid Computer Use proposes unifying programmatic, semantic, and visual interfaces to reduce screenshot overhead for desktop agents.",
+      "item": {
+        "key": "arxiv:2610.41432",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Hybrid Computer Use: A Unified Programmatic, Semantic, and Visual Interface for General Agents",
+        "url": "https://huggingface.co/papers/2610.41432",
+        "discussion_url": null,
+        "published": "2026-11-05T00:00:00Z",
+        "summary": "Computer-use agents increasingly tackle tasks ranging from everyday desktop activities to long-horizon professional workflows. Yet interfaces centered on screenshots and mouse-and-keyboard actions can impose a human-interaction prior, requiring repeated screen interpretation while leaving the computer's semantic and programmatic capabilities underexposed. We argue for exposing these capabilities and letting models choose and combine them. We introduce Hybrid Computer Use (HCU), a unified interface for general agents that combines three complementary channels: programmatic interaction through code and command-line tools, semantic interaction through accessibility (AX), and visual interaction through graphical user interfaces (GUI). Our HCU supports efficient AX interaction and guards against stale-state actions during channel switching. A supplementary HCU skill guides agents in selecting and coordinating channels to use the unified interface effectively. Our designed AX tools return compact observations, execute actions in batches, and report their effects as AX diffs, so the model needs fewer round trips. On OSWorld 2.0, HCU achieves the highest Partial and Binary scores among…",
+        "content": "",
+        "score": 14.0,
+        "comments": 2,
+        "also_in": []
+      }
+    },
+    {
+      "line": "AWS outlines scaling enterprise agent governance using Okta Cross App Access, Bedrock AgentCore Gateways, and Cedar policies.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/govern-ai-agent-access-with-okta-cross-app-access-and-amazon-bedrock-agentcore-part-2",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Govern AI agent access with Okta Cross App Access and Amazon Bedrock AgentCore – Part 2",
+        "url": "https://aws.amazon.com/blogs/machine-learning/govern-ai-agent-access-with-okta-cross-app-access-and-amazon-bedrock-agentcore-part-2/",
+        "discussion_url": null,
+        "published": "2026-11-06T17:09:23Z",
+        "summary": "In Part 1 you built one governed agent. Part 2 scales the pattern to an enterprise: Amazon Bedrock AgentCore Gateway becomes the single front door and redeems Okta's grant, Cedar policies bind each tool to the agent, a second agent runs on Amazon EKS, and AgentCore Observability traces every allow and deny beside Okta's log in Amazon CloudWatch.",
+        "content": "In Part 1 , you built a task agent on Amazon Bedrock AgentCore , a platform to build, connect, and optimize agents at scale, with any framework or model. The agent runs on Amazon Bedrock AgentCore runtime, a capability of Amazon Bedrock AgentCore, and acts for signed-in users through Okta Cross App Access (XAA). Okta decided which agent might act for which user, and Amazon Bedrock AgentCore Identity, a capability of Amazon Bedrock AgentCore, redeemed Okta’s grant inside the agent. That proves the governance mechanism, and it runs on a deliberately small topology: one agent, two Model Context Protocol (MCP) servers, and the authorization check written into each server.\n\nThe mechanism scales. The topology doesn’t. Three things that are fine for one agent and two tools become the work in an enterprise with hundreds of agents and thousands of tools:\n\nWhat Part 1 does\nWhy it stops scaling\nWhat Part 2 does instead\n\nThe agent holds each MCP server’s runtime ARN and calls it directly\nN agents against M servers is a wiring matrix, and every new tool touches every agent that needs it\nAgents reach one Gateway endpoint, and the Gateway holds the target registry\n\nThe agent’s role holds the token-exchange permission and reads the provider’s secret\nEvery agent that acts for users gets a credential path to every resource it might reach\nThe Gateway redeems the grant, and the agent’s role holds no token-exchange or secret permissions\n\nEach MCP server carries the same groups check in its own code\nThe same rule, copied into thousands of servers, drifts and can’t be audited or changed in one place\nOne default-deny Cedar policy set, evaluated at the Gateway before tools run\n\nIn this post, you make that change on the Part 1 solution. Amazon Bedrock AgentCore Gateway, a capability of Amazon Bedrock AgentCore, becomes the single front door and redeems Okta’s grant for each target. Policy in Amazon Bedrock AgentCore evaluates Cedar policies that bind each tool to the agent and the scope Okta delegated. A second agent on Amazon Elastic Kubernetes Service (Amazon EKS) joins under its own Okta identity, to show that the front door doesn’t care where an agent runs. And Amazon Bedrock AgentCore Observability, a capability of Amazon Bedrock AgentCore, with Amazon CloudWatch gives you one place to read every decision, including Okta’s. We also compare XAA with per-user OAuth consent for applications that can’t accept Okta’s grant.\n\nWhat changes from Part 1\n\nThe Okta configuration, the AgentCore Identity credential provider, and the MCP servers from Part 1 stay as they are. Figure 1 shows the architecture with the additions.\n\nFigure 1: The Part 1 solution with AgentCore Gateway, Policy, and Observability, a second agent on Amazon EKS, and the audit path, with numbers matching the steps that follow\n\nThe user signs in, and the backend for frontend (BFF) exchanges the ID token for an Identity Assertion JWT Authorization Grant (ID-JAG) issued to the task agent, agent A, as in Part 1.\n\nThe BFF invokes agent A on AgentCore runtime with the ID-JAG.\n\nAgent A forwards the ID-JAG to its Gateway as the bearer token of its MCP session. The Gateway’s inbound authorizer accepts only agent A’s ID-JAGs.\n\nPolicy in AgentCore evaluates Cedar policies for each tool listing and each tool call, before the Gateway invokes a target.\n\nFor calls that Cedar permits, the Gateway has AgentCore Identity redeem the ID-JAG for each target at Okta’s custom authorization server through the Part 1 credential provider. A call that Cedar denies doesn’t redeem the ID-JAG.\n\nThe MCP server checks the user’s groups and scope, as in Part 1, and records each decision as an authz.check span.\n\nEvery hop emits OpenTelemetry spans to AgentCore Observability, which CloudWatch Transaction Search collects, and Okta streams its System Log to CloudWatch through Amazon EventBridge.\n\nThe reporting agent, agent B, runs on Amazon EKS and follows the same path through its own Gateway.\n\nPrerequisites\n\nIn addition to the Part 1 solution, you need the following:\n\nPrerequisite\nNeeded for\n\neksctl, kubectl, and Docker\nThe second agent on Amazon EKS\n\nOkta Log Streaming\nOkta’s System Log in CloudWatch\n\nAWS Identity and Access Management (IAM) permissions\nAgentCore Gateways and policy engines, Amazon EKS clusters, CloudWatch log groups, and Amazon EventBridge rules\n\nThe additions take about 90 minutes. The EKS control plane costs $0.10 per hour, plus nodes and the Amazon EKS Auto Mode management fee, and the AgentCore features charge for what you use. See Amazon EKS pricing and Amazon Bedrock AgentCore pricing .\n\nAs in Part 1, the base for this solution is the AWS sample 08-okta-xaa-delegation-chain on GitHub, and you can build the Part 2 additions on top of it. Beyond that sample, the snippets and configurations in this post show the pattern conceptually. They aren’t a complete, deployable solution. The code is sample code for non-production use, so work with your security and legal teams to meet your organization’s security, regulatory, and compliance requirements before you deploy it.\n\nCreate a Gateway that accepts the ID-JAG\n\nThe Gateway’s inbound authorizer works like the runtime authorizer from Part 1. Its issuer is Okta’s org authorization server, its audience is the custom authorization server, and allowedClients pins it to one agent:\n\nauthorizer = {\"customJWTAuthorizer\": {\n\"discoveryUrl\": f\"{OKTA_ORG}/.well-known/openid-configuration\", # the ID-JAG's issuer\n\"allowedAudience\": [f\"{OKTA_ORG}/oauth2/{CUSTOM_AS_ID}\"], # the resource's authorization server\n\"allowedClients\": [AGENT_CLIENT_ID], # only this agent's ID-JAGs\n\"allowedScopes\": [\"xaa:read\", \"xaa:write\"],\n}}\n\nFigure 2 shows the resulting inbound authorizer.\n\nFigure 2: The Gateway accepts only ID-JAGs that Okta issued to the agent for the resource’s authorization server\n\nEach MCP server becomes a Gateway target whose outbound authorization uses TOKEN_EXCHANGE through the Part 1 credential provider, so the Gateway performs the second exchange:\n\n\"credentialProviderConfigurations\": [{\n\"credentialProviderType\": \"OAUTH\",\n\"credentialProvider\": {\"oauthCredentialProvider\": {\n\"providerArn\": provider_arn, # the JWT_AUTHORIZATION_GRANT provider from Part 1\n\"scopes\": [\"xaa:read\", \"xaa:write\"], # must equal the ID-JAG's scopes\n\"grantType\": \"TOKEN_EXCHANGE\",\n}},\n}]\n\nFigure 3 shows a target configured this way.\n\nFigure 3: The task manager target redeems the ID-JAG through the Part 1 credential provider\n\nThree details matter here. First, as in Part 1, the target’s scopes must equal the ID-JAG’s. Second, give each target a static tool schema ( listingMode set to DEFAULT with an inline mcpToolSchema ), so the tool names your Cedar policies reference are fixed when you write them. In our tests, policies that name tools also couldn’t attach to dynamically listed targets. Third, the Gateway pages tools/list by target, so your client must follow the pagination cursor, or tools from later targets disappear. AgentCore Identity keeps the token from the Gateway’s exchange, so one single-use ID-JAG serves every tool call in a session. In our tests, it also opened a second session within its 5-minute life.\n\nBecause a credential provider authenticates as one Okta agent, give each agent its own Gateway and provider. Sample 08-okta-xaa-delegation-chain takes a different route, in which a Gateway interceptor performs both exchanges itself.\n\nBind tools to agents with Cedar\n\nAttach a Policy in AgentCore engine to the Gateway in ENFORCE mode, and write permit-only policies. Cedar exposes JWT claims as tags. A policy that reads a missing tag errors and is skipped. A skipped permit grants nothing, so default deny holds, but a skipped forbid blocks nothing. Guard each tag with hasTag :\n\npermit(\nprincipal is AgentCore::OAuthUser,\naction in [AgentCore::Action::\"taskmanager___create_task\",\nAgentCore::Action::\"taskmanager___update_task_status\"],\nresource == AgentCore::Gateway::\"<gateway-arn>\"\n) when…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Chainalysis reported a customer data breach involving stolen credentials and AI agents used in an on-path attack.",
+      "item": {
+        "key": "arstechnica.com/security/2026/11/chainalysis-says-hackers-stole-credentials-and-tokens-for-all-of-its-customers",
+        "source": "Ars Technica",
+        "tags": [
+          "press"
+        ],
+        "title": "Chainalysis says hackers stole credentials and tokens for all of its customers",
+        "url": "https://arstechnica.com/security/2026/11/chainalysis-says-hackers-stole-credentials-and-tokens-for-all-of-its-customers/",
+        "discussion_url": "https://arstechnica.com/security/2026/11/chainalysis-says-hackers-stole-credentials-and-tokens-for-all-of-its-customers/#comments",
+        "published": "2026-11-06T20:56:41Z",
+        "summary": "Company said a \"multifront cyberattack\" included AI agents and an on-path data snatch.",
+        "content": "Blockchain analysis firm Chainalysis said that hackers have obtained sensitive personal information—including names, usernames, password hashes, and live tokens—for all of its users following a breach of its network security.\n\nThe accomplishment could be a major coup for the attackers. Both Chainalysis and public sources have revealed a long list of high-profile customers, including government agencies such as the FBI, US Immigration and Customs Enforcement agency, and the US Air Force, as well as private companies such as Microsoft, Coinbase, and Barclays. It's unclear if the data theft exposed customers to additional threats.\n\nWe regret to inform you...\n\nLast Friday, Chainalysis said it had been the target of a cybersecurity incident in October that was similar to the hacks of other platforms during the same month. The external actor used AI agent-assisted offensive techniques to gain unauthorized access to Chainalysis systems and internal tools. An email the company sent to affected customers said some “non-sensitive customer data, such as user IDs, full names, email addresses, and organization role labels for users provisioned on our platform were accessed.” It's not clear why the company considered such information \"non-sensitive.\"\n\nRead full article\n\nComments",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Keep your harnesses tight and your context windows unpolluted.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Agent benchmark",
+      "headline": "OpenAI releases BioBasicsBench for wet-lab AI agents",
+      "blurb": "OpenAI introduced a 100-task benchmark measuring how well AI agents interpret raw experimental data and handle everyday wet-lab science.",
+      "item": {
+        "key": "openai.com/index/measuring-how-ai-agents-handle-wet-lab-science",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Measuring how AI agents handle everyday wet-lab science",
+        "url": "https://openai.com/index/measuring-how-ai-agents-handle-wet-lab-science",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "OpenAI introduces BioBasicsBench, a 100-task benchmark measuring how well AI agents interpret raw experimental data and handle everyday wet-lab science.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Agent research",
+      "headline": "Anthropic details memory components and dreaming for Claude",
+      "blurb": "Anthropic explains how off-cycle dreaming helps Claude evaluate past interactions, organize long-term memory, and correct mistakes.",
+      "item": {
+        "key": "anthropic.com/research/components-of-agent-memory",
+        "source": "Anthropic Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "The components of agent memory",
+        "url": "https://www.anthropic.com/research/components-of-agent-memory",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "For Claude to learn from experience, it has to decide what’s worth remembering before it knows what’s next. Here’s how “dreaming” helps it organize memory and correct mistakes.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Formal verification",
+      "headline": "Microsoft verifies agent-written web apps with PDD Kit",
+      "blurb": "PDD Kit converts developer intent into Verus specifications to formally test and prove that AI-generated full-stack code behaves as intended.",
+      "item": {
+        "key": "microsoft.com/en-us/research/blog/formally-verifying-agent-written-full-stack-web-apps-with-pdd-kit",
+        "source": "Microsoft Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "Formally verifying agent-written full-stack web apps with PDD Kit",
+        "url": "https://www.microsoft.com/en-us/research/blog/formally-verifying-agent-written-full-stack-web-apps-with-pdd-kit/",
+        "discussion_url": null,
+        "published": "2026-11-05T16:00:00Z",
+        "summary": "AI agents can generate code at a scale that’s hard for humans to review line-by-line. PDD Kit helps ensure the code is doing what the developer intended by creating formal specifications and testing against them. It converts developer intent into a Verus specification, proves AI-generated code meets it for every input, and uses tests where proofs aren't practical. Developers review intent, not every line.\n\nThe post Formally verifying agent-written full-stack web apps with PDD Kit appeared first on Microsoft Research .",
+        "content": "At a glance\n\nFormal methods for everyday software. PDD Kit helps you turn your intent into a formal spec, then proves the code your agent writes for every input and uses tests where a proof can’t reach. It takes formal methods beyond niche, specialist work to engineers without a formal methods background and to everyday applications, like the full-stack web app shown here.\n\nExhaustive line-by-line human review can become difficult to scale as AI agents generate increasingly large amounts of code. The plan is supposed to be the contract between you and a coding agent, but nothing actually forces the agent to follow it. The tests it writes usually check what it built, rather than what you asked for.\n\nPDD Kit makes the agent keep the plan. It works with you to turn your intent into a formal specification in Verus (opens in new tab) , proves the agent’s code meets that spec for every input, and falls back to tests where a proof can’t reach.\n\nWe tried it on a full-stack web app. Inside GitHub Next’s Chopin (opens in new tab) , we used PDD Kit to formally verify the login logic of Pet Store, a Rust (opens in new tab) storefront. Verus hardened the code and uncovered existing bugs, proving the absence of login bugs with respect to the specification. The developer reviewed the intent and never read the generated code line-by-line.\n\nThe plan is the contract the agent should follow, but nothing constrains the agent to follow it.\n\nCoding agents now ship whole features in one sitting often spanning tens of thousands or hundreds of thousands of lines of code. As a result, reading every line of the pull request doesn’t scale to this new way of work. Now, most teams invest in the plan and relevant testing instead: describe to an agent what they want, go back and forth until the plan and proposed tests look right, and hand them off to the agent for implementation.\n\nThis plan or natural language spec is meant to be the contract that an agent holds. However, in practice, the agent can drift from it. It implements something slightly different, then writes tests that pass for its implementation rather than the code you intended it to write. Continuous integration (CI) grows due to a profusion of low quality and high quantity of tests, coverage looks healthy, and the gap between what you asked for and what shipped stays hidden until a bug report or a nasty edge case shows up.\n\nSo, how do you reliably scale review as agents generate increasingly large amounts of code? Agent code fails in two ways a careful reviewer would usually catch: it leaves out something obviously necessary, or it does something obviously wrong. Tests alone don’t close that gap, because they only exercise a tiny slice of what a program can do. Closing it needs a different kind of machinery, which is where proofs come in.\n\nReview asks “does this look right?” A proof answers “is this right?” A mathematical proof shows that code meets its specification for every input, including the ones your test suite can miss. That provides stronger assurance for specified properties than testing alone, especially when line-by-line review isn’t practical.\n\nProofs used to be too expensive for everyday software. You needed specialists, unfamiliar languages, proofs many times larger than the code, and proofs took years to develop, but two things have changed since. First, recent advances in coding agents have made it increasingly practical for them to help generate formal proofs from well-defined specs. Secondly, agents can now better help you write formal specs. We call this new software development paradigm Proof-Driven Development (PDD). PDD Kit is our toolkit for it.\n\nHow PDD Kit works\n\nPDD Kit is to formal methods roughly what Spec Kit (opens in new tab) is to Spec-Driven Development. It runs as a partner inside Chopin (opens in new tab) , GitHub Next’s real-time, multiplayer planning environment, where a team and agents can plan in one shared document.\n\nThe workflow has two halves (Figure 1). First, team members review intent in plain language. PDD Kit asks the questions a careful reviewer would ask, explains the relevant code as it goes, and records the answers in an intent artifact , a document that bridges the user’s intent with the formal specification or tests. The parts of the user’s intent that can be formalized are converted into formal specifications and the rest, which must be taken on trust, are converted to informal specifications for tests. PDD Kit automatically generates proofs that the code satisfies the derived formal specs and high-quality tests for the informal specs. You don’t need a formal methods background for any of it.\n\nFigure 1. Proof-Driven Development with PDD Kit. Team members settle intent. Verus and the test suite hold the code to it.\n\nConsequently, every result in PDD Kit says which kind of verification it rests on:\n\nFormal verification is a mathematical proof that code satisfies its specification for every possible input, checked by a tool called a verifier. For PDD Kit today, that verifier is Verus (opens in new tab) , a proof language for Rust co-developed by Microsoft Research, Carnegie Mellon University, VMware Research, ETH Zurich, MPI-SWS, UNSW Sydney, the University of Texas at Austin, the University of Michigan, the University of British Columbia, the University of Wisconsin–Madison and the Weizmann Institute of Science.\n\nEmpirical verification checks code by running it and observing what it does. It covers what a proof can’t reach, such as a third-party cryptography library or a user interface. It uses unit and end-to-end tests, terminal automation, browser agents, and computer-use agents for anything a browser can’t drive. A passing test only shows the code worked on the inputs it tried, so PDD Kit labels it as evidence rather than proof.\n\nThe line between the two is the Trusted Computing Base (TCB) : the code that the proof assumes behaves as described. PDD Kit makes that line explicit and asks you to sign off on each piece.\n\nThe capstone: a full-stack web app\n\nTo show PDD Kit integrating with existing codebases, we built Pet Store, a full-stack web app written entirely in Rust (opens in new tab) . The backend uses Axum (opens in new tab) and SQLite (opens in new tab) and handles inventory, promotions, orders and checkout. The storefront is a Leptos (opens in new tab) app compiled to WebAssembly (opens in new tab) . Together they come to about 5,000 lines of Rust.\n\nFor brevity in this blog, we focus on formally verifying the login logic of the app, but the same process can be used to verify functional correctness of the entire app. PDD Kit recommends starting with the most sensitive parts of your application and incrementally verifying your application. A login bug can hand an attacker a customer’s account or an admin’s controls, so that’s where proof effort pays off first. The developer’s whole request in Chopin was two sentences:\n\nVerify the login logic in backend/src/handlers/auth.rs. Here are my requirements:\n\nYou only get a token with the right password.\n\nOnly admin accounts get admin tokens.\n\nWe kept the request rough on purpose. Capturing the intent of the user and turning the user request into something a proof can check is PDD Kit’s job.\n\nStep 1: Questions before code\n\nPDD Kit’s planning workflow, pdd-plan, reads the code and comes back, before writing anything, with questions in a Decisions tab. When a question depends on how the code works, the card explains that part first: the goal, how the pieces fit, and the exact function involved, so you can answer without opening the source.\n\nFigure 2. The first decision card. “Only with the right password” on its own is also met by a login that refuses everyone. Proving both ways rules that out.\n\nThe question looks pedantic, but it matters. “You only get a token with the right password” rules out the bad case, a wrong password getting a token, and a login that refuses everyone keeps that promise perfectly. “The right…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 30,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 29,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 899,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1368,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 286,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 197,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-03T21:58:30.186146Z",
+    "candidates": 154,
+    "triaged": 80,
+    "enriched": 5,
+    "headline_candidates": 155,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 76.6,
+    "usage": {
+      "calls": 6,
+      "input_tokens": 44883,
+      "output_tokens": 19694,
+      "cost_usd": 0.24457
+    }
+  }
+}

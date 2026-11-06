@@ -1,84 +1,93 @@
-# Agent specs, formal proofs, and multi-turn RL realities
+# Agent Memory, Sibling Harnesses, and Asynchronous Speculative Decoding
 
-*2026-11-05 · 7 stories*
+*2026-11-06 · 8 stories*
 
-![Top AI stories for 2026-11-05](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-06](https://coronring.github.io/NewsRing/today.png)
 
-Today's digest covers formal verification for agent-generated code, new insights into why multi-turn RL fails when turn budgets shrink, and OpenAI's domain-aligned cybersecurity model. We also take a look at speculative decoding acceleration, implicit reasoning tokens for tool use, and fresh evaluations on end-to-end physics research.
+Today's digest focuses heavily on the mechanics of agent persistence, execution harnesses, and serving efficiency. We cover Anthropic's research on offline memory consolidation, Amazon's primitive taxonomy, and a standalone diffusion drafter that boosts speculative decoding speedup.
 
 ## Across AI today
 
-- **OpenAI Releases GPT-6 Cyber for Vulnerability Remediation** OpenAI introduced GPT-6 Cyber, a cybersecurity model trained to find exploitable vulnerabilities and develop fixes within authorized scope. ([openai.com](https://openai.com/index/introducing-gpt-6-cyber))
-- **Google DeepMind Announces Gemini Omni 1.2 Flash** Google DeepMind launched Gemini Omni 1.2 Flash, bringing fast and cost-effective multimodal processing with support for longer video clips. ([deepmind.google](https://deepmind.google/blog/gemini-omni-12-flash-fast-and-cost-effective-with-longer-clips/))
-- **NVIDIA Releases Cosmos 3 Models for World Simulation** NVIDIA released Cosmos 3, a new suite of open models built for interactive world simulation. ([huggingface.co](https://huggingface.co/blog/nvidia/cosmos-interactive-world-simulation))
+- **OpenAI releases BioBasicsBench for wet-lab AI agents** OpenAI introduced a 100-task benchmark measuring how well AI agents interpret raw experimental data and handle everyday wet-lab science. ([openai.com](https://openai.com/index/measuring-how-ai-agents-handle-wet-lab-science))
+- **Anthropic details memory components and dreaming for Claude** Anthropic explains how off-cycle dreaming helps Claude evaluate past interactions, organize long-term memory, and correct mistakes. ([anthropic.com](https://www.anthropic.com/research/components-of-agent-memory))
+- **Microsoft verifies agent-written web apps with PDD Kit** PDD Kit converts developer intent into Verus specifications to formally test and prove that AI-generated full-stack code behaves as intended. ([microsoft.com](https://www.microsoft.com/en-us/research/blog/formally-verifying-agent-written-full-stack-web-apps-with-pdd-kit/))
 
-## 1. OpenAI releases GPT-6 Cyber with target-scope alignment
+## 1. Google releases Gemini Omni 1.2 Flash with 15-second native video and lower pricing
 
-OpenAI has introduced GPT-6 Cyber, a specialized model designed for vulnerability detection and remediation. The model is specifically trained with target-scope alignment to ensure it operates strictly within authorized operational boundaries. While agentic security tools require broad capabilities to discover flaws, preventing unintended probing in production systems remains a major security challenge. Target-scope alignment attempts to bake operational guardrails directly into the model's policy rather than relying solely on external sandboxing.
+Google has generally released Gemini Omni 1.2 Flash across its API and enterprise platforms, cutting prices by 30% down to $0.07 per second for 720p output. The model expands native video generation and multi-turn editing to 15 seconds while improving reference adherence across images, motion clips, and audio inputs. Workflows can draft initial sequences at 360p or 720p, refine specific elements conversational turn by turn, and upscale the final render to 1080p or 4K.
 
-**Why it matters:** It demonstrates an effort to embed target-scope boundary constraints directly into specialized agent models to prevent out-of-bounds misbehavior.
+**Why it matters:** Tracks updates to frontier multimodal model releases, context capabilities, and production pricing structures.
 
-[openai.com](https://openai.com/index/introducing-gpt-6-cyber) · [theverge.com](https://www.theverge.com/ai-artificial-intelligence/1027599/openai-gpt-6-cyber-launch) · via OpenAI News
+[blog.google](https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash/) · [discussion](https://news.ycombinator.com/item?id=50392118) · [deepmind.google](https://deepmind.google/blog/gemini-omni-12-flash-fast-and-cost-effective-with-longer-clips/) · via Hacker News (AI)
 
-## 2. Microsoft Research uses formal verification to keep coding agents honest
+## 2. Anthropic evaluates offline dreaming for long-term agent memory consolidation
 
-Microsoft Research introduced PDD Kit, a toolkit running in GitHub Next's Chopin environment that uses formal methods to mathematically prove the correctness of agent-generated code. The workflow converts human intent into Verus formal specifications, proving the code meets those specs across all possible inputs while falling back to empirical tests for components like UIs or external libraries. In a test verifying the login logic of a Rust storefront web app, PDD Kit uncovered existing bugs and proved the absence of login flaws without requiring developers to review generated code line-by-line. This offers a path around the growing failure mode where coding agents write redundant test suites that validate their own flawed implementations rather than the original specification.
+Anthropic detailed its approach to agent memory, comparing real-time session logging to human hippocampal encoding and using offline 'dreaming' periods to consolidate logs into long-term context. Evaluating Claude models on CL-Bench 1.0 showed a progression in memory behavior, culminating in Claude Opus 5, Opus 5.5, and Sonnet 5.5 closing the learning loop by converting session failures into persistent reference rules. Testing on Pokémon Red further demonstrated how newer models like Fable 5 exercise selective memory retention rather than dumping thousands of uncurated encounter logs.
 
-**Why it matters:** Formal proof generation addresses the scaling bottleneck of reviewing massive agent-written PRs and prevents agents from writing self-validating tests for incorrect code.
+**Why it matters:** Directly addresses agent memory design, offline reflection mechanisms, and failure correction across model generations.
 
-[microsoft.com](https://www.microsoft.com/en-us/research/blog/formally-verifying-agent-written-full-stack-web-apps-with-pdd-kit/) · via Microsoft Research
+[anthropic.com](https://www.anthropic.com/research/components-of-agent-memory) · via Anthropic Research
 
-## 3. Multi-turn RL improves agent error recovery, not single-step choices
+## 3. AWS formalizes production agent primitives across triggers, actors, and capabilities
 
-A new paper analyzing multi-turn reinforcement learning in LLM agents reveals that trajectory-level RL advantages depend heavily on turn budgets and collapse when interaction constraints tighten. Evaluating models across sampling breadth and interaction depth using a Pass@(K,T) metric, the researchers found that RL training does not actually improve single-step decision quality. Instead, the performance boost comes from error recovery and resilience over long horizons. To fix this vulnerability to strict runtime limits, the authors introduced BudgetMix RL, which exposes the agent to varying turn budgets during training to maintain performance across constrained execution environments.
+Drawing from experience building Amazon Quick, AWS introduced a unified technical taxonomy that categorizes agent work into triggers (When/What), agents (Who), and capabilities (How). The framework defines an agent as a persistent, learning actor whose underlying LLM is a swappable parameter and whose context accumulates across sessions. Capabilities are structured along a confidence spectrum ranging from deterministic workflows to progressive-disclosure skills and atomic tools, framing user monitoring requests as new triggers on existing actors rather than redundant sub-agents.
 
-**Why it matters:** The study highlights a key failure mode in agentic RL where models rely on generous turn budgets for error recovery rather than making better single-step decisions.
+**Why it matters:** Provides a clean structural vocabulary for tool integration, agent orchestration, and context boundaries in production agent frameworks.
 
-[huggingface.co](https://huggingface.co/papers/2611.06483) · via HF Daily Papers
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/taxonomy-of-agentic-primitives-in-amazon-quick/) · via AWS Machine Learning
 
-## 4. SpecOPD speeds up speculative decoding with branch-parallel distillation
+## 4. Harness-S rescues failed RL rollouts using specialized sibling scaffolds
 
-Researchers have introduced SpecOPD, an on-policy distillation framework designed to train parallel block drafters for speculative decoding without sequential rollout bottlenecks. Instead of waiting for full generation rollouts, SpecOPD samples draft branches in parallel at reference anchors, sharing target-prefix computation and training the drafter using an end-to-end total variation surrogate. The system uses tree masks, branch-consistent indexer groups, and indexed state replay to handle full, sparse, and linear attention architectures. Evaluated across models up to 125B parameters, SpecOPD achieved up to a 41.45% increase in mean acceptance length and up to a 3.56x decoding speedup over standard autoregressive generation.
+Researchers introduced Harness-S, a framework designed to rescue failed reinforcement learning rollouts by routing execution to a pool of specialized sibling harnesses before transferring those learned behaviors back into a single policy operating under the base harness. An Adaptive Harness Router selects top auxiliary variants to replace failed trajectory groups during GRPO training, updating behavior profiles as the model learns. Across AppWorld, SWE-Gym, and DBBench, the trained policy substantially outperformed baseline policy-only training when returned to the original base execution harness.
 
-**Why it matters:** Higher acceptance lengths in speculative decoding directly reduce inference latency for large models during heavy tool-use and reasoning loops.
+**Why it matters:** Directly relevant to agent harness design, failure recovery mechanisms, and scaffold-driven evaluation methodologies.
 
-[huggingface.co](https://huggingface.co/papers/2611.02846) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2611.04277) · via HF Daily Papers
 
-## 5. TAC-CoT hides chain-of-thought in latent tokens to speed up tool use
+## 5. AWS details serverless MCP architecture on Fargate for data lake access
 
-TAC-CoT introduces an adaptive implicit reasoning framework for tool-using agents that replaces verbose explicit chain-of-thought text with compact continuous latent tokens. Crucially, the framework retains standard textual tokens for tool calls, external observations, and final answers, preserving the clear interface required for tool execution. Benchmarks across agentic math and QA tasks demonstrated accuracy improvements of up to 8.8 points alongside up to a 6.8x reduction in forward passes. By interleaving continuous hidden states with discrete tool tokens, the approach cuts generation overhead without sacrificing tool interoperability.
+AWS published an architecture pattern for deploying Model Context Protocol (MCP) servers on Amazon ECS Fargate to provide AI agents with secure data lake access. Built using FastMCP and Amazon Bedrock, the centralized gateway discovers newly added datasets via JSON metadata files, bypassing the need to write per-dataset tool code or redeploy containers. In production deployment for sort center planning teams, context mapping configurations scope database searches to relevant tables, keeping end-to-end query latency within 15 to 20 seconds.
 
-**Why it matters:** It offers a practical method to slash explicit token overhead in agent reasoning loops while keeping tool calls compatible with external environments.
+**Why it matters:** Provides a concrete enterprise reference implementation for Model Context Protocol (MCP) server deployment and schema-scoped retrieval.
 
-[huggingface.co](https://huggingface.co/papers/2611.01926) · via HF Daily Papers
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/serverless-mcp-server-for-ai-agent-data-lake-access-on-amazon-ecs-fargate/) · via AWS Machine Learning
 
-## 6. FrontierPhysics benchmark shows agents struggle with research intuition
+## 6. OpenAI introduces BioBasicsBench for wet-lab data reasoning
 
-A new benchmark called FrontierPhysics evaluates autonomous AI agents on 56 end-to-end physics research tasks spanning literature review, experimental design, and paper writing. Built by 42 physicists, the suite combines deterministic verifiers with expert rubrics to assess both correctness and publishability across theoretical, computational, and experimental domain areas. In tests across 22 models in 26 configurations, the best setup passed no more than 46 out of 168 rollouts. Trajectory analysis revealed that agent failures stemmed primarily from unrigorous reasoning and a lack of expert research intuition rather than execution errors or domain knowledge gaps.
+OpenAI released BioBasicsBench, a benchmark designed to test AI agents on routine scientific data processing and reasoning. The evaluation suite consists of 100 tasks aimed at measuring how effectively agents interpret raw experimental data and navigate everyday wet-lab science workflows.
 
-**Why it matters:** It provides a realistic evaluation benchmark focused on long-horizon, end-to-end scientific research rather than short, static question-answering tasks.
+**Why it matters:** Expands LLM and agent evaluation methodology into domain-specific scientific data interpretation.
 
-[huggingface.co](https://huggingface.co/papers/2611.06910) · via HF Daily Papers
+[openai.com](https://openai.com/index/measuring-how-ai-agents-handle-wet-lab-science) · via OpenAI News
 
-## 7. llama.cpp b12138 brings Metal matrix multiplication optimizations
+## 7. D3D decouples diffusion drafting for asynchronous speculative decoding
 
-The latest release of llama.cpp, build b12138, brings targeted performance improvements to Apple Silicon via its Metal backend. The update integrates `mul_mm` execution for matrix multiplication shapes where K ranges between 32 and 64. Additionally, the release adds a dedicated native `bf16 x bf16` matrix multiplication kernel.
+D3D introduces a standalone diffusion drafter that removes target-model hidden-state dependencies, allowing drafting and verification to execute asynchronously in a single packed pass. By combining blockwise denoising with auxiliary autoregressive supervision and pruning redundant drafter layers, D3D maintains long accepted prefix lengths without waiting on target state updates. Benchmarking with Qwen3-8B and Qwen3-32B targets yielded average speedups of 5.00x and 5.71x across seven benchmarks, reaching up to 7.48x on GSM8K.
 
-**Why it matters:** Optimized Metal kernels lower local inference latency and improve throughput when serving quantized or BF16 models on Apple Silicon.
+**Why it matters:** Highlights key optimizations in LLM serving, speculative decoding architectures, and inference latency reduction.
 
-[github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12138) · via llama.cpp releases
+[huggingface.co](https://huggingface.co/papers/2611.06425) · via HF Daily Papers
+
+## 8. Rivet launches actor-model framework for lightweight agent orchestration
+
+Rivet launched an actor-model orchestrator that runs long-lived agent states outside of heavy VM sandboxes, targeting 72 KB RAM per actor and 4.99 ms p99 cold starts. Built on top of S3 and local SQLite storage, the architecture lets idle actors hibernate while preserving in-memory variables and WebSocket connections across sessions. The design separates the agent's control loop state from code execution, invoking external sandboxes only when the agent specifically needs to execute generated code.
+
+**Why it matters:** Offers a high-density alternative to VM-per-agent architectures for scaling multi-agent state and long-horizon execution.
+
+[github.com](https://github.com/rivet-dev/rivet) · [discussion](https://news.ycombinator.com/item?id=50381687) · via Hacker News (AI)
 
 ## Quick hits
 
-- LangChain Core 1.7.6 optimizes streaming performance by merging AIMessageChunk objects once during stream accumulation and preventing single-character retries in partial JSON parsing. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.7.6))
-- Stroq is a new local audit tool designed to inspect and record what your coding agent executed and why. ([github.com](https://github.com/AGGIB/Stroq))
-- AWS introduced Smart Approvals in Amazon Quick, using policy boundaries and action classifiers to reduce human approval prompts while keeping high-impact decisions under oversight. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/smart-approvals-in-amazon-quick-human-oversight-where-it-matters/))
-- A new paper on multi-teacher on-policy distillation warns that high in-distribution performance can mask incomplete capability consolidation when attempting post-RL model merging. ([huggingface.co](https://huggingface.co/papers/2611.05609))
+- A technical breakdown analyzes a Firecracker VM escape vulnerability in part two of the PwnEscape series. ([pwn.ai](https://pwn.ai/blog/firecracker-escape))
+- The BestRand paper demonstrates that analytical error bounds allow compressing benchmarks into small random subsets while maintaining evaluation accuracy. ([huggingface.co](https://huggingface.co/papers/2611.00883))
+- Hybrid Computer Use proposes unifying programmatic, semantic, and visual interfaces to reduce screenshot overhead for desktop agents. ([huggingface.co](https://huggingface.co/papers/2610.41432))
+- AWS outlines scaling enterprise agent governance using Okta Cross App Access, Bedrock AgentCore Gateways, and Cedar policies. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/govern-ai-agent-access-with-okta-cross-app-access-and-amazon-bedrock-agentcore-part-2/))
+- Chainalysis reported a customer data breach involving stolen credentials and AI agents used in an on-path attack. ([arstechnica.com](https://arstechnica.com/security/2026/11/chainalysis-says-hackers-stole-credentials-and-tokens-for-all-of-its-customers/))
 
-May your turn budgets remain generous and your speculative drafters accept long trees.
+Keep your harnesses tight and your context windows unpolluted.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 162 candidates, 80 reviewed, gemini/gemini-3.8-flash, 716s, 6 model calls, $0.2396.</sub>
+<sub>35 of 35 sources read. 154 candidates, 80 reviewed, gemini/gemini-3.8-flash, 77s, 6 model calls, $0.2446.</sub>
