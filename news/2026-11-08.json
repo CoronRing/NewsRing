@@ -1,0 +1,643 @@
+{
+  "date": "2026-11-08",
+  "generated_at": "2026-11-08T21:20:31.448523Z",
+  "title": "Latent Agent Execution, DeepSeek on RAM, and Memory Telemetry",
+  "intro": "Today's digest highlights a massive shift toward latent-space agent execution and context compression, along with practical local serving tricks for massive MoE models. We also look at security oversights in developer agent harnesses and a proposal for standardized agent memory telemetry.",
+  "stories": [
+    {
+      "headline": "Claude Code auto-approvals leak credentials to public GitHub repos",
+      "summary": "A security vulnerability tied to Claude Code's \"Don't Ask Again\" auto-approval feature has exposed active passwords and API credentials across 1,122 public GitHub files. The auto-approval mechanism allowed the agent to commit sensitive environment values and generated tokens without human verification. Following the leak, enterprise users including Goldman Sachs have reportedly begun pulling Claude Code from internal environments. When building developer agent harnesses, convenience settings that bypass human-in-the-loop inspection remain a primary attack vector.",
+      "why_it_matters": "Auto-approval features in developer agent harnesses can quietly convert interactive local execution into public credential exfiltration vectors.",
+      "reason": "A security vulnerability in Claude Code's auto-approval feature led to over 1,000 public GitHub files leaking active credentials and API tokens.",
+      "item": {
+        "key": "apiiro.com/blog/coding-agents-leaking-secrets-github-dont-ask-again",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Claude Code's \"Don't Ask Again\" exposes passwords in 1,122 public GitHub files",
+        "url": "https://apiiro.com/blog/coding-agents-leaking-secrets-github-dont-ask-again",
+        "discussion_url": "https://news.ycombinator.com/item?id=50407882",
+        "published": "2026-11-07T20:45:32Z",
+        "summary": "Comments",
+        "content": "Dynamic Page on Apiiro | AI AppSec Agent. Built for Enterprise Security.. Protect your entire AI development environment.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "thestateofai.com/news/goldman-sachs-claude-code-traders-bankers",
+          "source": "Hacker News front page",
+          "tags": [
+            "community"
+          ],
+          "title": "Goldman Sachs Is Pulling Claude Code from Its Bankers and Traders",
+          "url": "https://www.thestateofai.com/news/goldman-sachs-claude-code-traders-bankers",
+          "discussion_url": "https://news.ycombinator.com/item?id=50415628",
+          "published": "2026-11-08T18:16:07Z",
+          "summary": "Comments",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Ditch raw text tool outputs for continuous latent compression",
+      "summary": "Researchers from Tsinghua introduced Coca-Cola, a continuous context compression framework that feeds agents latent embeddings of tool observations rather than raw text. Using Action-Preserving Training, the model aligns the agent's next-action distribution under compressed observations while keeping the underlying LLM completely frozen. Across web-search QA benchmarks, this approach reduced total token consumption by 70% to 89% and shortened end-to-end runtime by up to 56%. Interestingly, task accuracy improved across all tested settings, though exact string extraction remains a potential edge-case risk.",
+      "why_it_matters": "Latent context compression directly solves context bloat and attention distraction during multi-step tool execution.",
+      "reason": "This paper introduces latent context compression for tool outputs, replacing noisy raw text observations with compact representations to prevent context bloat and attention distraction.",
+      "item": {
+        "key": "arxiv:2611.06500",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Tools Need Not Speak in Text: Latent Context Compression for Agents",
+        "url": "https://huggingface.co/papers/2611.06500",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "Large language model (LLM) agents typically append raw tool outputs to their context. Over multi-step interactions, long and noisy observations incur substantial context overhead and dilute the agent's attention to task-relevant information. Existing token pruning and summarization methods remain constrained by discrete text representations, limiting the achievable compression ratios.\n  In this work, we challenge the prevailing assumption that agents must consume tool observations as explicit text tokens. To this end, we propose Coca-Cola, a continuous latent context compression model for LLM agents. Coca-Cola compresses tool observations into latent tokens and embeds them into the input embedding space of the agent. We further introduce Action-Preserving Training, which aligns the agent's next-action distributions under full and compressed observations. This trains the compression model to learn action-sufficient latent tokens that retain decision-critical information. Experiments with web-search agents on four QA benchmarks and two model families show that Coca-Cola reduces the agent's token consumption by 70.01%-89.24% and end-to-end runtime by 24.45%-55.97%, while consistently…",
+        "content": "Tools Need Not Speak in Text: Latent Context Compression for Agents\nAbstract\nLarge language model (LLM) agents typically append raw tool outputs to their context. Over multi-step interactions, long and noisy observations incur substantial context overhead and dilute the agent's attention to task-relevant information. Existing token pruning and summarization methods remain constrained by discrete text representations, limiting the achievable compression ratios. In this work, we challenge the prevailing assumption that agents must consume tool observations as explicit text tokens. To this end, we propose Coca-Cola, a continuous latent context compression model for LLM agents. Coca-Cola compresses tool observations into latent tokens and embeds them into the input embedding space of the agent. We further introduce Action-Preserving Training, which aligns the agent's next-action distributions under full and compressed observations. This trains the compression model to learn action-sufficient latent tokens that retain decision-critical information. Experiments with web-search agents on four QA benchmarks and two model families show that Coca-Cola reduces the agent's token consumption by 70.01%-89.24% and end-to-end runtime by 24.45%-55.97%, while consistently improving task performance. These results suggest that Coca-Cola offers a promising approach for context compression in agents. Our code is available at https://github.com/THU-Agent/Coca-cola.\nCommunity\nWe introduce Coca-Cola (Context Compression via Continuous Latent Tokens), a method that lets LLM agents consume tool observations as compact latent representations instead of lengthy text.\nRather than reconstructing the original tool output, Coca-Cola learns to preserve the information that matters for the agent’s next decision. Our Action-Preserving Training aligns next-action distributions under full and compressed observations, while keeping the target agent frozen.\nAcross four web-search QA benchmarks—Natural Questions, TriviaQA, 2WikiMultiHopQA, and HotpotQA—and two model families (Qwen and GLM), Coca-Cola achieves:\n- 70.01%–89.24% lower total agent token consumption\n- 24.45%–55.97% shorter end-to-end runtime\n- Higher answer EM and F1 than the uncompressed agent in every evaluated setting\nThe key idea: tool observations need to support the agent’s decisions; they do not have to remain readable text.\nWe welcome feedback and discussion, especially on extending latent tool observations to other agent workflows!\nOkay, 70-89% fewer tokens while the answers get better is the part that stopped me. I like that the compressor is trained to keep what the next action needs instead of rebuilding the text. Does it carry over to other tools, like code output or API responses, beyond web search?\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nThe failure mode I'd hunt first is verbatim recall: if the only correct next action is echoing a token straight out of the tool output — request IDs for a retry, the exact field name from a 422, a file path from a stack trace — does the latent keep it byte-exact or just its gist? My guess is gist, and that's fine for 90% of steps and fatal for the 10% where the whole task is transcription. Second thing that bites in prod: a latent observation is welded to the checkpoint that produced it, so my logs stop being grep-able and I can't replay yesterday's trajectory after a model upgrade. I'd want the raw observation parked on a side channel with \"show me the tool output\" as a first-class tool call, so the agent can rehydrate the exact bytes when it needs them and humans can still read the transcript at 2am. Curious whether compressed and raw can coexist in the same context without the agent drifting toward whichever is easier to attend to.\nGet this paper in your agent:\nhf papers read 2611.06500 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 6.0,
+        "comments": 4,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Agent memory needs its OpenTelemetry moment",
+      "summary": "A new proposal argues that agent memory needs a unified, open telemetry standard similar to how OpenTelemetry consolidated application observability. Currently, instruction files, memory tools, vector stores, and custom MCP servers all maintain isolated, incompatible state schemas. The proposed standard advocates for a shared envelope recording address, identity, lifecycle, and authorship while keeping the underlying Markdown or JSON payload flexible. Establishing a common schema would enable editor agents, CI bots, and code review tools to safely read and write to the same shared repository state.",
+      "why_it_matters": "Standardizing memory primitives is essential for building interoperable multi-agent systems that share state across different tools and runtime environments.",
+      "reason": "The author calls for standardizing agent memory telemetry using OpenTelemetry-like primitives to inspect and debug state transitions in complex multi-step agent workflows.",
+      "item": {
+        "key": "lorekit.io/blog/open-agent-memory-format",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Agent memory needs its OpenTelemetry moment",
+        "url": "https://www.lorekit.io/blog/open-agent-memory-format",
+        "discussion_url": "https://news.ycombinator.com/item?id=50411467",
+        "published": "2026-11-08T08:40:23Z",
+        "summary": "Comments",
+        "content": "Every agent tool stores memory in its own shape, and every week someone builds another one. None of them can read the others. Observability had the same problem until OpenTelemetry gave everyone one data model to share. A tour of today's memory formats, the proposals that already exist, and what a shared spec could look like.\nList every place your coding tools keep something they \"remember\". A typical setup today:\nan AGENTS.md or CLAUDE.md in most repos, and .cursor/rules/*.mdc in a few\nan agent writing files to a /memories directory through Anthropic's memory tool\nCopilot keeping facts about each repo on GitHub's side\na memory MCP server keeping a JSONL knowledge graph\nThat's four different shapes, and none of them can read the others. A lesson your CI agent learns stays in whatever wrote it. Your editor agent can't read it, and neither can the next tool you try.\nEach format is reasonable on its own. Together, they rebuild the same small idea again and again: a note an agent left for its future self, stored at some address, true for a while.\nAnd the list keeps growing. Browse r/ClaudeAI, r/LocalLLaMA or r/cursor and you'll find a steady stream of \"I built a memory layer for my agent\" posts, each with its own storage, its own schema and its own MCP tools. That's good evidence the problem is real: people keep hitting it badly enough to build something. But every new solution adds one more format that nothing else can read. The problem isn't a missing tool. It's a missing agreement, and that only comes from the community working on it together.\nI build one of these tools, LoreKit, which is open source. This isn't a pitch that LoreKit has solved memory. Its format is one proposal among several, with gaps of its own. The point is that this is the moment to agree on a shared shape, and that another field has already shown how.\nBefore 2019, every observability vendor shipped its own agent, its own instrumentation library and its own data format. Switching vendors meant instrumenting your code again. Two open projects, OpenTracing and OpenCensus, tried to fix that and competed with each other too.\nIn 2019 they merged into OpenTelemetry. What mattered was what the vendors agreed to stop competing on:\nA data model: what a span, a metric and a log record are.\nSemantic conventions: shared names like service.name and http.*.\nA protocol: OTLP, one way to send the data.\nReference implementations: shared SDKs and the Collector.\nVendors kept competing on what they do with the data: storage, querying, analysis. Users instrument once. I work with OpenTelemetry every day at Dash0, and that agreement is why a whole ecosystem of tools can read each other's data.\nAgent memory is where observability was before 2019. The timing is good: the formats are young enough to change, and there's already a neutral home for agent standards. MCP and AGENTS.md both sit under the Linux Foundation's Agentic AI Foundation.\nThese change quickly, so treat the details as a snapshot from late 2026.\nA few of them got something right that a shared spec should keep. Copilot Memory pairs citations you can check against the code with forgetting by default, though it's locked inside one product. LangGraph shows how small the core can be: put(namespace, key, value). Graphiti models time properly, with separate timelines for when a fact was true and when it was recorded. And AGENTS.md shows that a plain file at a known path can become a standard.\nSeveral people have started on this. MacPaw Research's Portable Memory is a .mem bundle with byte-reproducible serialization, deletion tombstones and optional signing; its authors say it isn't widely adopted yet. The Open Memory Protocol is an April 2026 draft for moving conversations and the memories derived from them between platforms as a ZIP with a manifest. Cognee's COGX format imports from Mem0, Letta and Zep.\nThese mostly solve export: moving one person's memory from vendor A to vendor B. Coding tools also have a second, open problem: live addressing. When a CI job, an editor agent and a review bot work in the same repo at once, how do they read and write the same place and agree on what it means? A complete spec needs both.\nStrip away the branding and every format answers the same four questions differently: where a memory is true, what its identity is (does a second write update it or duplicate it?), what it says, and when it stops being true. Nobody disagrees that those matter. The tools only disagree on the answers, which is where OpenTelemetry started too.\nThere's one real fork: who writes the memory. In instruction files it's a person. In the memory tool, Letta and LoreKit, it's the model. In Mem0 and Graphiti, a service extracts facts from the conversation. A spec doesn't need to pick one. It needs to record which, so a reader knows how much to trust what it reads.\nHere's roughly what one record could look like as a file. It illustrates the data model; the field names aren't a proposal:\n---spec: agent-memory/0.1id: 8f0c2a6e-4b1d-4c7a-9e2f-3a5b6c7d8e9faddress: { level: repo, value: github.com/acme/checkout }key: tests-need-local-postgreskind: lessonwritten_by: { type: agent, name: claude-code }content_type: text/markdownlifecycle: { expires_at: null, extended_by: write }attributes: { vcs.pr: 482, ci.run_url: \"https://ci.example/runs/123\" }---Integration tests fail with `ECONNREFUSED 127.0.0.1:5432` unless Postgresis already running. Start it before `pnpm test`: docker compose up -d dbThe test setup does not start it for you.\nThe frontmatter is the envelope: address and key say where it's true, id is its identity, lifecycle says when it stops, and written_by answers the fork. The Markdown below it is the memory itself, and content_type tells a reader how to treat it. Anything else a tool needs goes in attributes, under a namespace other tools can ignore. The same record serialises to JSON just as well, for a tool that wants to send it over the wire.\nAround that record, a spec would…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "SwarmEvolve runs hundreds of code-optimizing agents in latent space",
+      "summary": "SwarmEvolve presents a multi-agent framework for program synthesis and mathematical optimization that executes evolutionary search entirely inside latent space. Rather than generating slow textual chains of thought, hundreds of low-cost agents reason via latent states and exchange information by directly passing KV caches. A novelty filter computes cosine distances between hidden state vectors to maintain exploration diversity without text decoding overhead. Evaluated on 21 discovery problems using open Qwen3 models, SwarmEvolve reached top baseline scores in 3 to 8 minutes compared to 60 minutes for text-based frameworks.",
+      "why_it_matters": "Bypassing text generation to pass KV caches directly between open-weight models dramatically accelerates multi-agent evolutionary code discovery.",
+      "reason": "SwarmEvolve executes multi-agent evolutionary code optimization entirely within latent space, skipping slow textual Chain-of-Thought generation during iterative program synthesis.",
+      "item": {
+        "key": "arxiv:2611.08483",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "SwarmEvolve: Latent Agent Swarms for Evolutionary Discovery and Optimization",
+        "url": "https://huggingface.co/papers/2611.08483",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "LLM-guided evolutionary search uses AI agents to improve programs for mathematical and computational problems by iteratively refining solutions and combining high-scoring methods. However, the process is often slow because the LLM generates a long textual chain of thought for each round and must repeat this generation many times to maintain population diversity. We present SwarmEvolve, a framework in which hundreds of low-cost agents per round work in swarms, reason in latent space without decoding to text, and share information by passing KV caches. Each swarm studies the problem from a different angle. A novelty filter keeps the most distinct agent ideas by directly measuring the distances between the agents' hidden state vectors. Crossover of ideas happens naturally in latent space, as a summarizer agent receives the combined KV caches of all swarm members. On 21 problems in mathematical discovery and scientific computing, SwarmEvolve gets the highest average score and needs a median of only 3 to 8 minutes to reach the best scores that other state-of-the-art frameworks reach in 60 minutes. On several problems, SwarmEvolve with Qwen3 8B improves on the solutions that AlphaEvolve…",
+        "content": "SwarmEvolve: Latent Agent Swarms for Evolutionary Discovery and Optimization\nAbstract\nLLM-guided evolutionary search uses AI agents to improve programs for mathematical and computational problems by iteratively refining solutions and combining high-scoring methods. However, the process is often slow because the LLM generates a long textual chain of thought for each round and must repeat this generation many times to maintain population diversity. We present SwarmEvolve, a framework in which hundreds of low-cost agents per round work in swarms, reason in latent space without decoding to text, and share information by passing KV caches. Each swarm studies the problem from a different angle. A novelty filter keeps the most distinct agent ideas by directly measuring the distances between the agents' hidden state vectors. Crossover of ideas happens naturally in latent space, as a summarizer agent receives the combined KV caches of all swarm members. On 21 problems in mathematical discovery and scientific computing, SwarmEvolve gets the highest average score and needs a median of only 3 to 8 minutes to reach the best scores that other state-of-the-art frameworks reach in 60 minutes. On several problems, SwarmEvolve with Qwen3 8B improves on the solutions that AlphaEvolve first found with frontier LLMs. Our work shows that agent swarms that communicate in latent space offer a fast, low-cost approach to program search for scientific problems.\nCommunity\nAuthor here!\nSwarmEvolve is an LLM-guided evolutionary search framework for mathematical discovery and optimization.\nUnlike many existing frameworks, SwarmEvolve runs swarms of hundreds of small agents that use latent reasoning and communicate through KV cache transfer, so they never write text. As a result, SwarmEvolve is much faster, more scalable, and more diverse in the ideas it explores.\nWith open-weight Qwen3 8B, 14B and 32B, SwarmEvolve takes only minutes to reach the scores that other frameworks reach in an hour, and it improves on AlphaEvolve's results on a few problems!\nLike our agents, we think better as a swarm, so questions and ideas are very welcome!\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- Scaling Discovery Requires Forgetting (2026)\n- AgentDiscover: Autonomous Discovery with Minimal Search Scaffolding (2026)\n- LabBook: Harnessing Experimental History for Efficient LLM-Driven Discovery (2026)\n- Agentic AutoRAG: RAG Pipeline Optimization through Reasoning-Driven Agents (2026)\n- DuoDiscover: Scaling Autonomous Discovery Beyond the Evaluation Bottleneck (2026)\n- Component-Aware Feedback for Self-Evolving Programs (2026)\n- FrugalEvo: Towards Cost-Aware LLM-Guided Program Evolution (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nHundreds of cheap agents thinking in latent space and passing KV caches instead of text is a fun picture. The novelty filter on hidden-state distances is the bit I'd want to poke at. Does the diversity stay real over many rounds, or do the swarms slowly drift toward the same ideas?\nyea great question! We do observe that our agents from different swarms point in unrelated directions all hour. The gap between swarms actually grows slightly by the end of the run (measured in cosine distance), likely due to later rounds read more varied programs.\nThanks for asking! \nGet this paper in your agent:\nhf papers read 2611.08483 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 9.0,
+        "comments": 4,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Multimodal agents fall flat on long-horizon visual search",
+      "summary": "A new evaluation suite called VisSearch-Bench tests how effectively multimodal agents integrate visual evidence across 204 multi-step search tasks. Across 16 evaluated multimodal models, even the top-performing system fully solved only 26.47% of tasks despite having full access to web and image tools. The evaluation revealed that agents frequently get trapped in repetitive search loops, abandon visual checks in favor of easier text retrieval, or hallucinate answers as context lengthens. The results demonstrate that current vision-language models struggle to maintain coherent visual state over extended agent trajectories.",
+      "why_it_matters": "VisSearch-Bench highlights major failure modes in visual memory and visual context tracking for multimodal agents operating over long horizons.",
+      "reason": "VisSearch-Bench provides a targeted evaluation benchmark for measuring how well multimodal agents connect visual clues across long-horizon web and tool search tasks.",
+      "item": {
+        "key": "arxiv:2611.04894",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "VisSearch-Bench: Evaluating Long Horizon Visual Search in Multimodal Agents",
+        "url": "https://huggingface.co/papers/2611.04894",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "Multimodal agents use web and image tools to answer questions beyond their internal knowledge. Some search tasks use images mainly to identify an initial entity, then rely on text retrieval. These tasks offer limited insight into how agents connect information across images, objects, and search steps. We therefore focus on visual context management. This involves organizing and using visual information and linking it to other findings during search. Visually intensive tasks require agents to combine object appearance, local details, or spatial relations with external information. We introduce VisSearch-Bench, with 204 human-written tasks across 7 main domains and 25 subdomains. It covers Set-wise Visual Search, Sequential Visual Search, Hybrid Wide-Deep Search, Competitive Visual Disambiguation, and Visual-Structure-Guided Search. Each task provides a reference answer, traceable evidence, and scoring rules. Accuracy measures complete task success, while Process Score measures the correctness and completeness of individual results and subquestion answers. Across 16 multimodal models, the best system fully solves only 26.47% of tasks, even with search tools. These results highlight…",
+        "content": "VisSearch-Bench: Evaluating Long Horizon Visual Search in Multimodal Agents\nAbstract\nVisSearch-Bench evaluates multimodal agents on visually intensive search tasks that require integrating visual context with external information, showing that even the best system fully solves only 26.47% of tasks.\nMultimodal agents use web and image tools to answer questions beyond their internal knowledge. Some search tasks use images mainly to identify an initial entity, then rely on text retrieval. These tasks offer limited insight into how agents connect information across images, objects, and search steps. We therefore focus on visual context management. This involves organizing and using visual information and linking it to other findings during search. Visually intensive tasks require agents to combine object appearance, local details, or spatial relations with external information. We introduce VisSearch-Bench, with 204 human-written tasks across 7 main domains and 25 subdomains. It covers Set-wise Visual Search, Sequential Visual Search, Hybrid Wide-Deep Search, Competitive Visual Disambiguation, and Visual-Structure-Guided Search. Each task provides a reference answer, traceable evidence, and scoring rules. Accuracy measures complete task success, while Process Score measures the correctness and completeness of individual results and subquestion answers. Across 16 multimodal models, the best system fully solves only 26.47% of tasks, even with search tools. These results highlight the challenge of linking visual evidence with search results to produce complete answers.\nCommunity\nVisSearch-Bench evaluates how multimodal agents organize and use visual evidence during long-horizon web search. It contains 204 human-written tasks across five search categories, spanning 7 domains and 25 subdomains. The tasks require agents to connect information across images, objects, and search steps to compare candidates, follow visual clues, and produce complete answers. Each task includes a reference answer, traceable evidence, and scoring rules. Evaluation measures both full task success and the correctness and completeness of individual results. Across 16 multimodal models, the best system fully solves only 26.47% of tasks, highlighting the challenge of managing visual context even with search tools.\nOnly 26.47% fully solved for the best system says a lot. I appreciate that the tasks need the picture all the way through, not just to name the first object and then go text-only, which is a shortcut I would happily take. Which of the five task types broke agents most?\nIf you’re interested in issues with visual context, I’d start with Set-wise Visual Search. We saw agents stop too early, keep searching after they’d already found the information, or fall back to an earlier wrong guess. Some then fill in their answers from memory or guesswork, even when they’ve retrieved relevant images. Others get stuck searching for the same few items over and over, burning through the image budget and making the context longer and more cluttered.\nAgents also sometimes spend most of their effort on text searches that are easier to make progress on, while leaving the visual checks unfinished. You can see this in Hybrid Wide–Deep Search. As more objects and evidence come in, the agent has to keep track of which image shows which object and how the search results connect to it. Then it still has to pull everything together into a complete, consistent answer.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 2\ngalaxy1209/VisSearch-Bench-v1\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 22.0,
+        "comments": 4,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Ollama v0.40.15 adds Xiaomi MiMo-v2.6 and AutoTrust models",
+      "summary": "Ollama released v0.40.15, bringing native support for Xiaomi's MiMo-v2.6, a 9B model optimized for code and agent workflows. The release also introduces the AutoTrust decision model family, enabling structured choice selection and probability-weighted outputs for classification tasks. Additional updates include automatic model list populating for Pi and Claude Desktop, migration tooling for Kimi Code CLI, and multi-request concurrency for recurrent and vision GGUF models.",
+      "why_it_matters": "Expands local inference choices for agent workflows with specialized 9B coding models and structured decision primitives.",
+      "reason": "Ollama's v0.40.15 update adds support for Xiaomi's MiMo-v2.6 9B agent model and introduces AutoTrust decision models for probability-weighted outputs.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.15",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.15",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.15",
+        "discussion_url": null,
+        "published": "2026-11-06T01:47:18Z",
+        "summary": "MiMo V2.6\n\nXiaomi MiMo's mimo-v2.6 , a 9B model built for code and agent workflows, is now supported in Ollama.\n\nollama run mimo-v2.6\n\nAutoTrust decision models\n\nAutoTrust decision models read text and return choices, yes or no probabilities, and ratings for the questions you supply. The family includes 9b, 35b, and 27b-vl sizes — the 35b and 27b-vl sizes can also read images.\n\nollama run autotrust-jev \" A customer says their card was charged twice. \" --ask \" Is this a billing issue? \"\n\nNote: autotrust-jev is supported on Apple silicon in this release.\n\nWhat's Changed\n\nollama launch now supports Kimi Code CLI — the successor to kimi-cli — and offers to migrate existing kimi-cli setups\n\nollama launch now fills in Pi's model list automatically so models can be picked inside Pi, and Claude Desktop's model\n\npicker shows Ollama's actual model names\n\nRecurrent and vision GGUF models can now serve more than one request at a time\n\nQwen3 and Qwen3.5 models using long-context (YaRN) scaling\n\nRunning ollama with no arguments opens the welcome launcher\n\nFull Changelog : v0.40.14...v0.40.15",
+        "content": "Repository navigation\nMiMo V2.6\nXiaomi MiMo's mimo-v2.6, a 9B model built for code and agent workflows, is now supported in Ollama.\nollama run mimo-v2.6\nAutoTrust decision models\nAutoTrust decision models read text and return choices, yes or no probabilities, and ratings for the questions you supply. The family includes 9b, 35b, and 27b-vl sizes — the 35b and 27b-vl sizes can also read images.\nollama run autotrust-jev \"A customer says their card was charged twice.\" --ask \"Is this a billing issue?\"\nNote: autotrust-jev is supported on Apple silicon in this release.\nWhat's Changed\n- ollama launch now supports Kimi Code CLI — the successor to kimi-cli — and offers to migrate existing kimi-cli setups\n- ollama launch now fills in Pi's model list automatically so models can be picked inside Pi, and Claude Desktop's model\npicker shows Ollama's actual model names\n- Recurrent and vision GGUF models can now serve more than one request at a time\n- Qwen3 and Qwen3.5 models using long-context (YaRN) scaling\n- Running ollama with no arguments opens the welcome launcher\nFull Changelog: v0.40.14...v0.40.15",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Sparse Autoencoders unpack expert specialization in MoE models",
+      "summary": "Researchers applied Sparse Autoencoders (SAEs) to the output of Mixture-of-Experts (MoE) layers in Qwen3-30B-A3B to decipher what individual experts actually contribute. Because the SAE encoder is affine and MoE output is a router-weighted sum, the activation of each latent feature decomposes cleanly across active experts. The findings reveal that expert contributions are much more concentrated than gating decisions suggest, with experts splitting into fine-grained functional subdomains such as separating Java from front-end web development. The authors released their code, trained SAEs, and an interactive explorer covering all 128 experts at layer 30.",
+      "why_it_matters": "Provides a practical mechanistic interpretability approach to inspect true MoE expert specialization beyond superficial routing counts.",
+      "reason": "This research applies Sparse Autoencoders to Mixture-of-Experts models to extract fine-grained, human-interpretable expert specializations without pre-assigning domain labels.",
+      "item": {
+        "key": "arxiv:2611.08089",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "SAE Interprets MoE: Sparse AutoEncoders Reveal That MoE Experts Exhibit Human-Interpretable Fine-Grained Specialization",
+        "url": "https://huggingface.co/papers/2611.08089",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "Mixture-of-Experts (MoE) models route each token to a few of many experts, yet what an individual expert is responsible for remains unsettled. Existing analyses count how often an expert is selected on domain-labeled corpora, an instrument that fixes the taxonomy in advance, stays coarse, and records selection rather than contribution. We instead study specialization in feature space by training a sparse autoencoder (SAE) on the output of an MoE layer. Since this output is a router-weighted sum of expert outputs and the SAE encoder is affine, the pre-activation of every latent decomposes exactly over the experts. Aggregated over a corpus, this gives each expert a dominant set of latents whose activation it principally drives. On layers 4, 30 and 46 of Qwen3-30B-A3B, contribution is far more concentrated than gating, most latents have only one or two dominators, and the overlap between dominant sets concentrates on a few expert pairs. Auto-interpreting these sets reveals a division of labor below coarse domains, with distinct experts for Java and front-end web code, or for geometry and for arithmetic and polynomials, while the coarse domains themselves take very unequal numbers of…",
+        "content": "SAE Interprets MoE: Sparse AutoEncoders Reveal That MoE Experts Exhibit Human-Interpretable Fine-Grained Specialization\nAbstract\nA sparse autoencoder trained on mixture-of-experts layer outputs reveals that individual experts drive specific latent features, showing finer-grained and more concentrated specialization than routing or domain labels alone.\nMixture-of-Experts (MoE) models route each token to a few of many experts, yet what an individual expert is responsible for remains unsettled. Existing analyses count how often an expert is selected on domain-labeled corpora, an instrument that fixes the taxonomy in advance, stays coarse, and records selection rather than contribution. We instead study specialization in feature space by training a sparse autoencoder (SAE) on the output of an MoE layer. Since this output is a router-weighted sum of expert outputs and the SAE encoder is affine, the pre-activation of every latent decomposes exactly over the experts. Aggregated over a corpus, this gives each expert a dominant set of latents whose activation it principally drives. On layers 4, 30 and 46 of Qwen3-30B-A3B, contribution is far more concentrated than gating, most latents have only one or two dominators, and the overlap between dominant sets concentrates on a few expert pairs. Auto-interpreting these sets reveals a division of labor below coarse domains, with distinct experts for Java and front-end web code, or for geometry and for arithmetic and polynomials, while the coarse domains themselves take very unequal numbers of experts. Our SAEs and code are available at https://github.com/Bytedance-Seed/SAE-Interprets-MoE.\nCommunity\nTL;DR: We train a TopK SAE with 2^20 latents and k = 100 on the MoE block output of Qwen3-30B-A3B at layers 4, 30 and 46. Because the SAE encoder is affine and the MoE output is a weighted sum of expert outputs, the activation of each latent decomposes exactly over the activated experts. Aggregating this decomposition over 1.5B tokens gives every expert a dominant set of latents that it principally drives. This lets us read what each expert does without any predefined domain taxonomy.\nKey findings:\n- Contribution is far more concentrated than gating.\n- Most latents have only one or two dominators. Dominant sets are largely private to each expert.\n- Experts specialize below coarse domains. A Java expert sits next to a separate expert for front end web code, and a geometry expert sits next to one for arithmetic and polynomials.\n- Grouping the 128 experts of layer 30 gives 11 domains of very unequal size. Some domains are not subject areas at all, such as text form, language, and entities and identifiers.\nCode, the three SAEs, and an interactive explorer of all 128 experts of layer 30 are released. Happy to answer questions!\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- RouterInterp: Understanding Superposed Specialisation in Mixture of Experts Routing (2026)\n- The Router Already Knows (2026)\n- Explaining the Roles of Experts in Mixture-of-Experts LLMs for Personalization (2026)\n- ScopeSAE: Model-Scope Feature Discovery with Interpretable Layer Selection (2026)\n- Multi-View Latent MoE: Letting Every Router Shape Expert Computation (2026)\n- Sparse Transformer: a Controlled Testbed for Mechanistic Interpretability (2026)\n- Harnessing Domain Specialists in Multimodal Mixture-of-Experts for Efficient Adaptation (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nI love that you tied each expert to specific latents instead of just routing counts. Do the same dominant experts hold up across layers, or does the specialization shift as you go deeper?\nModels citing this paper 1\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 9.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Llama-modchip fits DeepSeek 284B into 64GB RAM without GPUs",
+      "summary": "The llama-modchip project introduces custom llama.cpp kernel patches and a 1.71 bpw \"Fractal-64\" quantization scheme to run DeepSeek-V4-Flash (284B total, 13B active) entirely within 64GB of system RAM. By utilizing multi-column AVX-512 vector tiling and non-temporal streaming, the runtime achieves 9.1 to 14.7 tokens per second on Zen 5 CPUs while evaluating all routed experts losslessly. The toolkit also includes an n-gram speculative drafter and fast shared-memory KV cache restoration (13.1–32.6 ms), allowing complex multi-tool agent prompts to restore state almost instantly.",
+      "why_it_matters": "High-throughput CPU-only MoE execution and sub-35ms context restoration expand possibilities for self-hosting massive models in local agent harnesses.",
+      "reason": "Llama-modchip demonstrates a practical technique to serve massive models like DeepSeek 284B entirely on system RAM without requiring expensive GPU infrastructure.",
+      "item": {
+        "key": "github.com/synchopate/llama-modchip",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Llama-modchip: 284B DeepSeek on 64GB RAM, no GPU",
+        "url": "https://github.com/synchopate/llama-modchip",
+        "discussion_url": "https://news.ycombinator.com/item?id=50411961",
+        "published": "2026-11-08T10:22:04Z",
+        "summary": "Comments",
+        "content": "llama-modchip is a set of ggml/llama.cpp kernel patches, quantization transcoders, and runtime tools designed to run sparse Mixture-of-Experts (MoE) checkpoints entirely in system RAM on x86_64 (AVX-512 / AVX2) and ARM64 (NEON / SVE / Apple Metal) processors:\n- \nFitting 284B DeepSeek-V4-Flash into 64 GB Physical RAM (56.56 GiB on disk, 1.71 bpw): Standard UD-IQ1_S builds of DeepSeek-V4-Flash (284.33B total, 13.17B active across 43 MLA layers and 256 routed experts) occupy 76.87 GiB (82.5 GB), exceeding the ~62.5 GiB of usable RAM on a 64 GB Linux system and causing page-cache thrashing or OOM kills. llama-modchip reduces the checkpoint to 56.56 GiB (60.73 GB) so the entire model plus a 256K KV cache (57.61–58.9 GiB VmRSS) locks into RAM with zero swap. By default, all 6 routed experts per layer (Top-6) are evaluated without pruning.\n- \nCPU Cache & SIMD Kernel Patches (+77% prefill, +53% decode): Replaces single-column quantized matrix-vector loops during prompt prefill with a 4-level register (ZMM AVX-512BW) + L1D (32 KB) + L2 (1 MB) + L3 (64 MB) multi-column ({8,4,3,2}) tiling schedule (25.0 -> 44.36 tok/s on 16-core Zen 5), register-stationary MQA8 FlashAttention, and non-temporal _MM_HINT_NTA MoE streaming so cold expert weights do not evict hot KV cache lines from L3.\n- \nSelf-Speculative Drafting & Instant Agent Context Restore: Pairs a 1.64 MB L2/L3 Zobrist n-gram drafter (Stockfish-PVS v2) with /dev/shm KV slot snapshots (13.1–32.6 ms restore time for 40-tool Claude Code prompts) and an $O(1)$ speculative rollback fix for deepseek4 recurrent/MLA states.\nQuantization & Memory Breakdown\nTo answer the most common technical question upfront—exact bit-widths (bpw), base checkpoints, and what is compressed in each GGUF:\nNote on MoE Expert Routing (Top-K): By default (v2.4.0 Lossless), DeepSeek-V4-Flash evaluates all 6 routed experts + 1 shared expert (Top-6) per layer with zero expert dropping (1.00000 logit cosine similarity vs the unpatched runtime on the same checkpoint). Setting LLAMA_MOE_TOP_K=5 or 4 is an optional runtime flag for users who want to trade a small perplexity delta for higher decode throughput.\nLinux & macOS (Automated Setup & Chat)\ngit clone https://github.com/synchopate/llama-modchip.git\ncd llama-modchip\n./modchip chat\nDirect Run (Pre-Compiled Linux x86_64 Binary + Hugging Face .gguf)\nCompatibility Note (GGML_TYPE_Q2_0 = 40): Fractal-64 models use custom block-64 BF16-scale tensors (GGML_TYPE_Q2_0, type ID 40) and deepseek4 / Stockfish-PVS kernels. Unpatched llama.cpp, Ollama, or LM Studio binaries will reject them with unknown tensor type 40. Use ./modchip above or the standalone pre-compiled binary (llama-server-modchip-linux-x86_64, zero external .so dependencies) included in the Hugging Face repositories and GitHub Release v2.4.0:\n# 1. For 30B Nemotron-3.5-A3B (14.35 GiB — runs in 16–32 GB RAM at 25–60.4 tok/s):\nhf download Synchopate/NVIDIA-Nemotron-3.5-30B-A3B-Fractal-64-CPU-GGUF \\\n  llama-server-modchip-linux-x86_64 NVIDIA-Nemotron-3.5-30B-A3B-Fractal-64.gguf --local-dir .\nchmod +x llama-server-modchip-linux-x86_64\n./llama-server-modchip-linux-x86_64 -m NVIDIA-Nemotron-3.5-30B-A3B-Fractal-64.gguf -c 262144 -t 16 --port 8080\n# 2. For 284B DeepSeek-V4-Flash (56.56 GiB — fits in 64 GB RAM at 9.1–14.7 tok/s):\nhf download Synchopate/DeepSeek-V4-Flash-0731-Fractal-64GB-CPU-GGUF --local-dir ./dsv4\nchmod +x ./dsv4/llama-server-modchip-linux-x86_64\n./dsv4/llama-server-modchip-linux-x86_64 -m ./dsv4/DeepSeek-V4-Flash-0731-Fractal-00001-of-00003.gguf -c 32768 -t 16 -fa on --port 8080\nWindows 10/11 (Hybrid GPU + CPU MoE Pack)\nOpen windows/ and run windows/AVVIA_MODCHIP.bat (or ./modchip start in Git Bash). It detects physical CPU cores, free RAM, and GPU VRAM (nvidia-smi), downloads llama.cpp CUDA 12.4 / Vulkan binaries, computes the --n-cpu-moe split, and launches the Web Chat UI (http://127.0.0.1:8080).\nHardware Readiness Check (Zero Model Download Required)\ncurl -sL https://raw.githubusercontent.com/synchopate/llama-modchip/main/scripts/check_cpu_readiness.py | python3\nSubmit your terminal scorecard via a GitHub Benchmark Issue or GitHub Discussions to add your CPU to the leaderboard below.\nSupported Models & Model-Specific Optimizations\nEach model family has a dedicated technical guide with mathematical derivations, operator-level latency profiles, and quality gate benchmarks:\nSupported Chips & Processor-Specific Optimizations\nMicroarchitectural details and tuning flags for each processor and GPU hybrid are documented in docs/HARDWARE_OPTIMIZATIONS.md:\nHeadline Benchmarks: Pure CPU & Hybrid Summary\n1. DeepSeek-V4-Flash 284B (13.17B Active) on a 64 GB Zen 5 CPU (AMD Ryzen 9 9955HX, 0 GPUs)\nOperator-level profiling and mathematical derivations in docs/DEEPSEEK_V4_OPTIMIZATIONS.md (probabilities and KL-divergence measured relative to the unpatched Top-6 execution on the 56.56 GiB Fractal checkpoint):\n2. NVIDIA-Nemotron-3.5-30B-A3B (3.0B Active) at 256K Context (AMD Ryzen 9 9955HX, 0 GPUs)\nFull ablation tables and 100/100 Quality Gate report in docs/NEMOTRON_OPTIMIZATIONS.md:\nCommunity CPU & Hybrid Leaderboard\nRun ./modchip bench (or windows\\BENCHMARK_PC.bat on Windows) and Submit Your Scorecard (GitHub Issue).\nRepository Structure & Manual CMake Build Instructions\nllama-modchip/\n├── modchip                                    # Unified CLI (setup | start | chat | bench | eval | quantize | web | claude | stop)\n├── install.sh                                 # Automated Installer (Linux)\n├── README.md / ARCHITECTURE.md / FAQ.md       # Overview, Full Mathematical Paper & Engineering FAQ\n├── RELEASE_NOTES.md                           # v2.4.0 Release Notes\n├── docs/\n│   ├── NEMOTRON_OPTIMIZATIONS.md              # Deep-dive on Nemotron-3.5-30B-A3B & Nemotron-H-8B optimizations\n│   ├── DEEPSEEK_V4_OPTIMIZATIONS.md           # Deep-dive on DeepSeek-V4-Flash 284B profiling, SVD & L2-quadrature MoE\n│   └── HARDWARE_OPTIMIZATIONS.md              # Chip-by-chip optimizations (Zen…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "Speculative listening decouples idle audio wait times from speech model processing to optimize latency in full-duplex conversational models.",
+      "item": {
+        "key": "arxiv:2611.06982",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Decode Before You Hear: Speculative Listening for Chunk-Interleaved Full-Duplex Speech Language Models",
+        "url": "https://huggingface.co/papers/2611.06982",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "Chunk-interleaved full-duplex speech language models listen and speak in fixed time chunks, and each chunk must be processed before the next one arrives. Their workload is asymmetric across chunks: listen chunks leave compute idle while awaiting audio, and speak and tool-call chunks require serial generation, which delays responses and tool calls. Using the idle compute for the next chunk requires decoding it before its audio arrives, under an assumed input. Taking silence as the assumed input and comparing the output with the output under real audio on four models, we observe two properties. First, the next audio chunk does not change the output in 95.3% of chunks. Second, 88% of changes begin at the first output token. Building on these properties, we propose Speculative Listening, a training-free, lossless framework for input-time self-speculative decoding. During idle time, the model drafts the next chunk under silence and, for changes at the first token, a second branch from the runner-up first token. It keeps all drafts in a cross-chunk hypothesis pool and verifies them when the audio arrives. On our eight-task benchmark TickTock-Bench, Speculative Listening speeds up speak…",
+        "content": "",
+        "score": 10.0,
+        "comments": 3,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Prependable trainable [DUMP] tokens help embedding models isolate residual token artifacts and reduce representational entanglement.",
+      "item": {
+        "key": "arxiv:2611.07298",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Reducing Representational Interference in Retrieval Embeddings with Trainable Prefix Tokens",
+        "url": "https://huggingface.co/papers/2611.07298",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "Embedding models compress variable-length text into fixed-size vector representations, but this compression can entangle semantic content with residual token-level information, such as artifacts arising from attention sink behavior. We propose a simple method that prepends trainable [DUMP] tokens to the input during embedding model training. The method keeps the model architecture, pooling strategy, and training loss unchanged, while optimizing the added tokens through the standard contrastive retrieval objective. By introducing trainable prefix positions that interact with regular tokens during encoding, [DUMP] tokens help reduce the influence of residual or uninformative token-level signals on the final retrieval representation. Experiments on standard retrieval and long-context benchmarks show that our method consistently improves over finetuned baselines across encoder and decoder embedding models. Further analysis shows that [DUMP] tokens alter token-level activation and attention patterns associated with low-information tokens. These results suggest that trainable prefix tokens provide a lightweight way to improve retrieval representations.",
+        "content": "",
+        "score": 6.0,
+        "comments": 3,
+        "also_in": []
+      }
+    },
+    {
+      "line": "AWS SageMaker Inference now supports NVIDIA Multi-Instance GPU (MIG) partitioning to run isolated endpoints on shared accelerators.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/sagemaker-inference-now-supports-multi-instance-gpu-to-maximize-gpu-utilization-for-model-endpoints",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "SageMaker Inference now supports Multi-Instance GPU to maximize GPU utilization for model endpoints",
+        "url": "https://aws.amazon.com/blogs/machine-learning/sagemaker-inference-now-supports-multi-instance-gpu-to-maximize-gpu-utilization-for-model-endpoints/",
+        "discussion_url": null,
+        "published": "2026-11-06T18:01:00Z",
+        "summary": "Amazon SageMaker Inference now supports GPU partitioning with NVIDIA Multi-Instance GPU (MIG), which divides one GPU into hardware-isolated partitions so you can run a different model in each or take a right-sized fraction of a newer accelerator. This post shows how two optional API fields place one model per partition, and what we measured against a whole older GPU.",
+        "content": "When you deploy a model to a GPU endpoint, the smallest unit of GPU you can request is one whole accelerator.\n\nThis constraint can cost you twice. First, you can’t host more models on an instance than it has accelerators. An ml.p4d.24xlarge has eight A100s, so it holds eight models, whether each one needs 40 GB or 14 GB. Second, and less obvious, it makes every deployment come down to a choice of which full GPU to deploy to. As your concurrency and prompt lengths grow, a full GPU on an older instance stops being enough, but a full GPU on a newer one is more than your model can use. You end up either under-served or paying for capability you never reach.\n\nToday, Amazon SageMaker Inference supports GPU partitioning, which uses NVIDIA Multi-Instance GPU (MIG) to divide a physical GPU into independent partitions. Each partition receives a fixed share of the GPU’s compute units and a dedicated block of its memory, with isolation enforced in hardware. That changes both constraints: you can place a different model in each partition, and you can choose a fraction of a newer accelerator instead of a whole one of either generation.\n\nThis post covers both. The first part is the direct benefit: deploy more models than you have GPUs, with isolation between them. The second is the one customers ask about when the question turns to cost: how the granularity of partitioning helps you pick the right-sized unit, and what we measured when we did.\n\nOne thing to know before you read further: GPU partitioning works on endpoints that use inference components , the construct you use to deploy several models to one endpoint and set the compute each model gets. Partitioning builds directly on it. A partition is a resource a component asks for, in the same place it already asks for CPU and memory. If you haven’t used inference components, this post introduces them. Single-model endpoints, serverless endpoints, and heterogeneous instance pools cannot be partitioned.\n\nWhat customers do today, and why each option falls short\n\nIf you have more models than accelerators, you have had three choices.\n\nRun fewer, larger endpoints and batch harder – This raises utilization, but only when the models are interchangeable. A portfolio of fine-tuned variants or per-tenant models is not.\n\nUse multi-model endpoints –  These load and unload models from a shared GPU on demand, which fits sparse, bursty traffic. But models share the device without isolation, so a heavy request for one model affects the others. A model that isn’t loaded also pays a load penalty on first use.\n\nMove to self-managed Kubernetes –  This is where customers who need real GPU partitioning have gone. MIG works there, but you take on driver versioning, partition configuration, a device plugin, scheduling, and keeping it all consistent across a fleet. That’s a lot of work for a hardware capability your instances already have.\n\nWhy MIG\n\nNVIDIA Multi-Instance GPU (MIG) splits one GPU into as many as seven instances, depending on the GPU. Each instance has its own compute, cache, memory and memory bandwidth. Because the split is in hardware rather than software, you get guarantees that other sharing methods can’t give:\n\nPredictable latency –  Each partition has dedicated memory bandwidth, so one model’s traffic spike doesn’t show up in another model’s p99.\n\nFault isolation –  A crash or memory error stays inside its partition instead of taking down every model on the GPU.\n\nRight-sized capacity –  Small and mid-sized models get a slice that fits them instead of a whole GPU. You can mix slice sizes on one device.\n\nNo cold starts –  Every model keeps its own partition and stays loaded, with no load penalty and no eviction.\n\nTenant isolation –  Memory protection between partitions is enforced in hardware, which makes security and compliance reviews simpler.\n\nReliable planning and chargeback –  A partition performs the same way regardless of its neighbors, so load tests predict production. GPU cost also maps cleanly to a model, team or tenant.\n\nPartitioning has boundaries worth knowing up front. The maximum number of partitions depends on the accelerator and never exceeds seven. MIG itself only allows a layout to change while its partitions are idle, and on SageMaker AI that means choosing a layout when you create the endpoint. A model that needs more than one GPU still needs whole devices. Within those boundaries, you get the isolation of separate GPUs without dedicating one to each model.\n\nPartitioning without the platform work\n\nUntil now, getting MIG meant running the Kubernetes stack yourself. GPU partitioning on Amazon SageMaker AI removes that step: you pick a partition profile for your model, and SageMaker AI handles GPU configuration, placement and scaling. You get hardware-isolated GPU sharing on a managed endpoint, without having to run the platform underneath it.\n\nSalesforce has been part of this work from the start, helping define the requirements and validating the initial implementation.\n\n“NVIDIA MIG partitions a single GPU into multiple isolated instances, each with dedicated compute and memory resources. Salesforce sees this as an important capability because many inference workloads do not require an entire GPU. MIG would allow us to consolidate workloads safely, significantly improve GPU utilization, reduce inference costs, and maintain predictable performance and strong isolation.\n\nThis capability would help us scale AI Inference more efficiently across different use cases. Salesforce has helped define requirements, validated the initial solution. We are now preparing to validate the solution with representative production workload and demonstrate strong customer demand with AWS. We believe MIG support would deliver meaningful technical and business value for enterprise customers.”\n\n— Richard Chang, Software Engineering Architect, Salesforce\n\nHow it works\n\nGPU partitioning adds two optional fields to API calls you already make. There are no new API operations, no new resource types, and no new AWS Identity and Access Management (IAM) actions, and an endpoint that omits both fields behaves exactly as it does today.\n\nAcceleratorPartitionLayouts goes on a production variant in CreateEndpointConfig and declares how each accelerator is divided:\n\n{\n\"EndpointConfigName\": \"multi-model-partitioned\",\n\"ExecutionRoleArn\": \"<execution-role-arn>\",\n\"ProductionVariants\": [\n{\n\"VariantName\": \"AllTraffic\",\n\"InstanceType\": \"ml.p4d.24xlarge\",\n\"InitialInstanceCount\": 1,\n\"AcceleratorPartitionLayouts\": [\n{ \"AcceleratorPartitionTypes\": [\"mig-4g.20gb\", \"mig-2g.10gb\", \"mig-1g.5gb\"] }\n]\n}\n]\n}\n\nAn A100 has seven compute slices to divide. The preceding layout uses all seven, so each of the eight A100s on the p4d instance carries three partitions and the endpoint provides 24, eight of each type.\n\nThe carve applies uniformly. One layout entry describes how one accelerator is divided, and every accelerator on every instance in the variant is divided the same way. The list isn’t positional, so an entry doesn’t map to a specific GPU.\n\nAcceleratorPartitionType goes on an inference component and selects which partition the model runs on:\n\n{\n\"InferenceComponentName\": \"summarizer\",\n\"EndpointName\": \"multi-model-partitioned\",\n\"VariantName\": \"AllTraffic\",\n\"Specification\": {\n\"ModelName\": \"summarizer-model\",\n\"ComputeResourceRequirements\": {\n\"AcceleratorPartitionType\": \"mig-4g.20gb\",\n\"NumberOfAcceleratorDevicesRequired\": 1,\n\"NumberOfCpuCoresRequired\": 1,\n\"MinMemoryRequiredInMb\": 2048\n}\n},\n\"RuntimeConfig\": { \"CopyCount\": 1 }\n}\n\nEach component copy occupies one partition of the requested type. With eight partitions of each type on the instance, raising CopyCount places additional copies on free partitions. This is useful for a small model serving high concurrency, where a single process leaves the GPU waiting on requests.\n\nNumberOfAcceleratorDevicesRequired is always 1 here. With a partition type set it means one partition rather than one accelerator…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "llama.cpp release b12210 adds CPU optimization for SpacemiT IME2 MXFP4 dense repacking.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12210",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12210",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12210",
+        "discussion_url": null,
+        "published": "2026-11-08T16:18:43Z",
+        "summary": "cpu: enable SpacemiT IME2 MXFP4 dense repack ( #31776 )\n\nAssisted-by: Codex\n\nSigned-off-by: gitGurugu 2049447146@qq.com\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/65077268\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.5 DLLs\n\nWindows arm64 (CUDA 13) - CUDA 13.5 DLLs\n\nWindows x64 (Vulkan)\n\nWindows arm64 (Vulkan)\n\nWindows x64…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain released langchain-typesafe 0.0.2 with support for custom classifiers in experimental middleware.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-typesafe%3D%3D0.0.2",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-typesafe==0.0.2",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-typesafe%3D%3D0.0.2",
+        "discussion_url": null,
+        "published": "2026-11-05T22:57:00Z",
+        "summary": "Changes since langchain-typesafe==0.0.1\n\nrelease(typesafe): 0.0.2 ( #41720 )\n\nfeat(typesafe): accept a classifier in experimental middleware ( #41657 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your context windows stay compressed and your credentials out of public git commits.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Corporate investigation",
+      "headline": "Nvidia investigates CEO Jensen Huang over espionage ties",
+      "blurb": "Nvidia is investigating CEO Jensen Huang after reports that a Chinese intelligence recruit sought to spy on the chipmaker.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1029562/nvidia-investigating-jensen-huang-relationship-chinese-spy",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Nvidia is investigating Jensen Huang’s relationship with a Chinese spy",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1029562/nvidia-investigating-jensen-huang-relationship-chinese-spy",
+        "discussion_url": null,
+        "published": "2026-11-08T20:22:39Z",
+        "summary": "Nvidia has announced that it is opening an investigation into CEO Jensen Huang and his relationship with Megaspeed executive Alice Huang, who was reportedly recruited by China's Ministry of State Security to spy on the company. A statement posted by the board of directors reads: The NVIDIA Board is initiating an independent investigation in light […]",
+        "content": "Nvidia has announced that it is opening an investigation into CEO Jensen Huang and his relationship with Megaspeed executive Alice Huang, who was reportedly recruited by China's Ministry of State Security to spy on the company . A statement posted by the board of directors reads:\n\nThe NVIDIA Board is initiating an independent investigation in light of recent reporting that founder and CEO Jensen Huang has been the target of a foreign intelligence effort. A committee of independent directors, assisted by outside independent counsel, will oversee the investigation.\n\nThe Board prioritizes U.S. national and economic security, which is paramou …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Security incident",
+      "headline": "Chainalysis breached in attack involving AI agents",
+      "blurb": "Chainalysis reported hackers stole customer credentials and tokens during a multifront cyberattack that leveraged AI agents.",
+      "item": {
+        "key": "arstechnica.com/security/2026/11/chainalysis-says-hackers-stole-credentials-and-tokens-for-all-of-its-customers",
+        "source": "Ars Technica",
+        "tags": [
+          "press"
+        ],
+        "title": "Chainalysis says hackers stole credentials and tokens for all of its customers",
+        "url": "https://arstechnica.com/security/2026/11/chainalysis-says-hackers-stole-credentials-and-tokens-for-all-of-its-customers/",
+        "discussion_url": "https://arstechnica.com/security/2026/11/chainalysis-says-hackers-stole-credentials-and-tokens-for-all-of-its-customers/#comments",
+        "published": "2026-11-06T20:56:41Z",
+        "summary": "Company said a \"multifront cyberattack\" included AI agents and an on-path data snatch.",
+        "content": "Blockchain analysis firm Chainalysis said that hackers have obtained sensitive personal information—including names, usernames, password hashes, and live tokens—for all of its users following a breach of its network security.\n\nThe accomplishment could be a major coup for the attackers. Both Chainalysis and public sources have revealed a long list of high-profile customers, including government agencies such as the FBI, US Immigration and Customs Enforcement agency, and the US Air Force, as well as private companies such as Microsoft, Coinbase, and Barclays. It's unclear if the data theft exposed customers to additional threats.\n\nWe regret to inform you...\n\nLast Friday, Chainalysis said it had been the target of a cybersecurity incident in October that was similar to the hacks of other platforms during the same month. The external actor used AI agent-assisted offensive techniques to gain unauthorized access to Chainalysis systems and internal tools. An email the company sent to affected customers said some “non-sensitive customer data, such as user IDs, full names, email addresses, and organization role labels for users provisioned on our platform were accessed.” It's not clear why the company considered such information \"non-sensitive.\"\n\nRead full article\n\nComments",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Computer vision",
+      "headline": "WeLM-Image unifies vision and generation for single GPUs",
+      "blurb": "WeLM-Image combines multimodal understanding with image generation and editing into a unified model built for single-GPU deployment.",
+      "item": {
+        "key": "arxiv:2611.07392",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "WeLM-Image: A Unified Image Generation Model towards Visual Intelligence",
+        "url": "https://huggingface.co/papers/2611.07392",
+        "discussion_url": null,
+        "published": "2026-11-06T00:00:00Z",
+        "summary": "We present WeLM-Image, a unified image foundation model that integrates multimodal understanding into text-to-image generation, instruction-guided editing, and multi-reference synthesis. Designed for single-GPU deployment in WeChat's large-scale consumer applications, the model processes text, reference images, and target latents as one interleaved sequence. A Mixture-of-Transformers (MoT) backbone combines shared attention with independent understanding and generation parameters to limit optimization interference. Equipping each path with Mixture-of-Experts (MoE) modules provides sparse capacity, with 31.7B stored parameters and approximately 5.4B generation parameters activated per target latent token. A generation-oriented data engine combines a knowledge-grounded visual vocabulary with large-scale visual clustering to balance semantic coverage and editing tasks, while training-time evaluation guides iterative data refinement. Bilingual annotations and verified editing supervision support progressive training up to native 1.5K resolution. We optimize generation and editing separately with rubric- and checklist-based rewards, then consolidate the specialized policies through…",
+        "content": "",
+        "score": 44.0,
+        "comments": 1,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 24,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 35,
+      "kept": 19,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 899,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1368,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 286,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 197,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-05T21:16:22.111765Z",
+    "candidates": 104,
+    "triaged": 104,
+    "enriched": 8,
+    "headline_candidates": 112,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 249.3,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 28759,
+      "output_tokens": 14153,
+      "cost_usd": 0.137664
+    }
+  }
+}
