@@ -1,0 +1,714 @@
+{
+  "date": "2026-11-09",
+  "generated_at": "2026-11-10T00:36:25.442020Z",
+  "title": "Agent Harness Engineering, Claude 5.2, and Test-Time KV Compression",
+  "intro": "Today's edition highlights Anthropic's flagship model updates alongside a heavy dose of harness architecture research. From agent-native primitives and harness evolution audits to test-time KV compression, here is the technical breakdown.",
+  "stories": [
+    {
+      "headline": "Anthropic Drops Claude Fable 5.2 and Mythos 5.2",
+      "summary": "Anthropic released Claude Fable 5.2 and Mythos 5.2, updating its flagship technical reasoning models with up to 30% faster token generation and lower baseline pricing at $8 per million input and $40 per million output tokens. The models include an optional fast mode boosting generation speed by up to 2.5 times for twice the token price, alongside updated cyber and biology safeguards. Internal tests saw an agent team use Fable 5.2 to migrate a production service from Python to Rust, while a single engineer coordinated over 1,000 subagents over eight days to build a working prototype OS from an empty folder.",
+      "why_it_matters": "Anthropic's latest release combines price cuts with demonstrated large-scale subagent orchestration for complex codebase refactoring.",
+      "reason": "Anthropic has launched Claude Fable 5.2 and Mythos 5.2, bringing substantial performance gains to complex technical reasoning, coding, and hardware design tasks.",
+      "item": {
+        "key": "anthropic.com/claude-fable-and-mythos-5-2",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Claude Fable 5.2 and Mythos 5.2",
+        "url": "https://www.anthropic.com/claude-fable-and-mythos-5-2",
+        "discussion_url": "https://news.ycombinator.com/item?id=50429906",
+        "published": "2026-11-09T18:56:29Z",
+        "summary": "Our most capable models for daunting technical work, Claude Fable 5.2 and Claude Mythos 5.2 set a new bar in coding, finance, and the sciences.",
+        "content": "We’ve upgraded Claude Fable and Claude Mythos—models that are designed to tackle the most daunting technical challenges.\nClaude Fable 5.2 and Claude Mythos 5.2 show improvements in areas like coding, reasoning, and vision. During prerelease testing they’ve helped our engineers complete otherwise-infeasible software migrations, designed three working electronic devices from scratch, solved two open problems in the physics of black holes, made substantial progress on robotics evaluations, and formalized the proof of Fermat’s Last Theorem in 30 hours—among many other applications we’ll discuss below.\nClaude Fable and Claude Mythos are the same underlying model. Fable has strong cybersecurity and biology safeguards to guard against misuse, which allows us to make it available to all users. Organizations pursuing beneficial applications in cybersecurity or biomedical research can apply for access to Mythos through our recently expanded Life Sciences and Cyber Verification Programs.\nTesters have found that Fable 5.2 and Mythos 5.2 communicate more clearly than past Fable and Mythos models. They generate outputs up to 30% faster than Claude Fable 5.1 and Claude Mythos 5.1, and they’re available at a lower price: $8 per million input tokens and $40 per million output tokens.\nFable 5.2 and Mythos 5.2 also come with an optional fast mode, which speeds up token generation by up to 2.5 times. Fast mode is available for $16 per million input tokens and $80 per million output tokens.\nSafety and alignment. To help ensure safety and alignment keep step with growing model capabilities, we ran extensive prerelease safety testing on the model that underlies Fable 5.2 and Mythos 5.2. This included developing novel evaluations that give deeper insight into specific concerning behaviors like sandbox escapes. We believe high-stakes risks from misalignment remain low, and the model performed as well as, or better than, our recent models on most alignment measures. Fable 5.2’s cyber and biology safeguards are as robust as those of Fable 5.1 but produce fewer unnecessary blocks, and we have implemented our strongest-ever protections against distillation attacks.\nWe describe more about our safety testing below, and full details can be found in the Claude Fable 5.2 and Mythos 5.2 System Card.\nWhen to use Claude Fable 5.2 and Mythos 5.2. Fable and Mythos are best for the most ambitious, open-ended technical work. For most coding and knowledge tasks, we recommend that users start with Claude Opus 5.5, our strongest daily driver, and then switch to a different model as required, depending on the scope and complexity of their work—upward to Fable or Mythos, or downward to Claude Sonnet 5.5 or Claude Haiku 5.5. Fable 5.2 can also play the role of Advisor (where Haiku, Sonnet, or Opus models consult it to help solve harder problems) or Orchestrator (where it delegates simpler tasks to smaller models).\nEvaluating Claude Fable 5.2 and Mythos 5.2\nBenchmark performance. The benchmarks table below shows that Claude Fable 5.2 and Mythos 5.2 are a step above Opus 5.5 in almost all the capabilities we evaluated:\nEffort and efficiency. On Medium effort (the default in Claude apps and Claude Code), Fable 5.2 can accomplish challenging tasks with fewer tokens than Fable 5.1. In early testing on the FrontierCode 2.0 evaluation, Fable 5.2 at High effort scored about level with Opus 5.5 at Max effort, for roughly half the cost per task. At Xhigh effort, it also scored the highest of any released model tested.\nCoding\nOver 90% of the changes merged into Anthropic’s core codebase are now written by Claude (with human guidance). We’ve used Fable 5.2 to fix stubborn bugs in minutes, optimize performance across all of our services, and complete high-value software projects that would otherwise have been too slow or too costly to attempt. A team of agents running an earlier version of Fable 5.2 migrated a critical production service from Python to Rust—the service is now more efficient, more reliable, and starts about 26 times faster. We’ve found that Fable 5.2 exercises strong engineering judgment and can produce high-quality results from even ambiguous requests.\nAs an experiment, one Anthropic engineer gave Fable 5.2 the task of designing a prototype operating system. Starting from an empty folder, the model coordinated over 1,000 subagents, working around the clock for eight days writing, testing, and reviewing code. It produced a working operating system that boots on a laptop, with its own core that runs the machine, drivers for the disk, keyboard, and network, permanent file storage, windows, a login screen, an installer, and built-in Claude functionality (see the video below).\nEarly testers have been impressed at how successfully Fable 5.2’s coding skills can be applied to a wide range of tasks:\nCybersecurity\nClaude Mythos 5.2 is our most capable model for cybersecurity engineering. It catches more vulnerabilities than our previous models, and is better at reproducing and fixing them (note that Claude Fable 5.2’s safeguards will block most cybersecurity-related tasks). A security company found that one in six confirmed bugs found by Claude Mythos 5.2 were missed by all of the other frontier models they tested. On our internal evaluation, CVE Rediscovery,¹ Claude Mythos 5.2 found 10.2% more vulnerabilities than Claude Opus 5.5 and 14.4% more than Claude Mythos 5.1. Claude Mythos 5.2 also shows better judgment and calibration—one tester found that previous models had overstated the seriousness of about 1 in 20 findings, whereas Claude Mythos 5.2 hadn’t overstated any.²\nClaude Mythos 5.2’s cyber capabilities are accessible through our Cyber Verification Program, which we’re continuing to expand and improve. Claude Enterprise customers (even if they aren’t members of the Cyber Verification Program) can access Claude Security, which scans codebases for vulnerabilities using our most capable models—which now includes Claude Mythos 5.2. A…",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "Anthropic News"
+        ]
+      },
+      "related": [
+        {
+          "key": "theverge.com/ai-artificial-intelligence/1030005/anthropic-claude-fable-mythos-5-2",
+          "source": "The Verge (AI)",
+          "tags": [
+            "press"
+          ],
+          "title": "Anthropic launches new Claude Fable and Mythos 5.2 models",
+          "url": "https://www.theverge.com/ai-artificial-intelligence/1030005/anthropic-claude-fable-mythos-5-2",
+          "discussion_url": null,
+          "published": "2026-11-09T19:00:00Z",
+          "summary": "Anthropic is announcing two new models today: Claude Fable 5.2 and Claude Mythos 5.2, which it says are designed to take on \"daunting\" technical challenges. The company claims the new models show improvements in coding, reasoning, and vision, and can generate outputs faster than the 5.1 versions of the Fable and Mythos models. Claude Fable […]",
+          "content": "Anthropic is announcing two new models today: Claude Fable 5.2 and Claude Mythos 5.2, which it says are designed to take on \"daunting\" technical challenges. The company claims the new models show improvements in coding, reasoning, and vision, and can generate outputs faster than the 5.1 versions of the Fable and Mythos models.\n\nClaude Fable 5.2 is good at challenging software engineering problems, Anthropic says, and can orchestrate agent teams and tackle long-running projects. The new model has also solved some complex scientific problems, including two open theoretical physics problems.\n\nDuring prerelease testing, the two models have \"help …\n\nRead the full story at The Verge.",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "aws.amazon.com/blogs/machine-learning/introducing-claude-fable-5-2-on-aws",
+          "source": "AWS Machine Learning",
+          "tags": [
+            "infra"
+          ],
+          "title": "Introducing Claude Fable 5.2 on AWS",
+          "url": "https://aws.amazon.com/blogs/machine-learning/introducing-claude-fable-5-2-on-aws/",
+          "discussion_url": null,
+          "published": "2026-11-09T20:04:37Z",
+          "summary": "Claude Fable 5.2 and Claude Mythos 5.2 are now available on Amazon Bedrock and Claude Platform on AWS. Learn what's new in both models, why Fable 5.2 matters for your technical workloads, and how to get started building with it on Amazon Bedrock.",
+          "content": "Today, we are announcing the availability of Claude Fable 5.2 and Claude Mythos 5.2 on Amazon Bedrock and Claude Platform on AWS. Claude Fable 5.2 is Anthropic’s most capable generally available model for technical work that raises the bar in coding and the sciences. Claude Mythos 5.2 is available through Anthropic’s verification programs for advanced work in cyber security and life sciences.\n\nIn this post, we cover what’s new in both models, why Fable 5.2 matters for your technical workloads, and how to get started building with the model on Amazon Bedrock.\n\nWhy Claude Fable 5.2\n\nFable 5.2 raises the bar on the hardest problems in coding, math, and science. It takes on ambiguous, multi-step work, verifies its own output, and can run unattended for hours to days. It interprets prompts, iterates, catches its own errors, and optimizes as it goes.\n\nIn Anthropic’s alignment testing, Mythos 5.2 hallucinates less, completes tasks more reliably, surfaces important information more consistently, and self-reports issues more honestly than Opus 5.5, Sonnet 5.5, and Mythos 5.1. Anthropic expects Fable 5.2 to behave similarly.\n\nIf a cyber security query is declined, you can retry it on Opus 4.8, and if a biology query is declined, you can retry it on Opus 5. On Amazon Bedrock, the retry is your code’s job, not an automatic switch. If the declined request hit the prompt cache, the refusal also includes a fallback credit token. Send that token with the retry and it’s billed as cache reads, so you don’t pay to write the same cache twice. Check the documentation for more information on fallback credit.\n\nFor authorized work in cyber security and life sciences, Claude Mythos 5.2 is available through Anthropic’s verification programs .\n\nClaude Fable 5.2 and Mythos 5.2 use cases\n\nWhere Fable 5.2 fits:\n\nAgentic coding across large, multi-repository codebases.\n\nLong-running agents for coordinating many subagents on multi-day work.\n\nScientific research from new analytical methods to formal mathematical proofs.\n\nFinancial analysis for quantitative research and forecasting.\n\nDesign for 3D, hardware, and motion for generating environments, components, and simulations in code.\n\nMythos 5.2 covers two high-risk domains, available only through the verification programs noted earlier:\n\nCyber security , for security engineering, red teaming, and penetration testing.\n\nLife sciences research , especially biomolecular design and research synthesis.\n\nData retention and Enterprise Frontier Safeguards\n\nAnthropic designates Claude Fable 5.2 as a Covered Model . By default, its use requires retention for up to 30 days and human safety review. On Amazon Bedrock, Amazon personnel perform the review within the AWS boundary. Set the aws_review data retention mode on your account or project before you invoke the model. See Amazon Bedrock data retention for more details.\n\nEnterprise Frontier Safeguards (EFS), built in collaboration with AWS, combines the privacy of zero data retention (ZDR) with the latest safeguards for detecting misuse. EFS is available now. A version that keeps your data in a bucket and under keys you control is expected to follow, and it has not launched yet. Until it does, eligible customers can use Fable 5.2 with zero data retention through June 30, 2027.\n\nGetting started with Claude Fable 5.2 on Amazon Bedrock\n\nTo try Fable 5.2, open the Amazon Bedrock console , choose Test , Playground , and select Fable 5.2 as the model. From there, you can run a prompt directly against it.\n\nProgrammatically, you can call the model with the Anthropic Messages API against bedrock-runtime (through the Anthropic SDK). You can also stay on the Invoke and Converse APIs on bedrock-runtime through the AWS Command Line Interface (AWS CLI) and AWS SDK .\n\nPrerequisites\n\nTo follow along with the code examples in this post, you need the following:\n\nAn active AWS account with Amazon Bedrock access.\n\nAWS CLI installed and configured with appropriate credentials.\n\nPython 3.9 or later.\n\nBoto3 (AWS SDK for Python) installed: pip install boto3 .\n\nAWS Identity and Access Management (IAM) permissions: bedrock:InvokeModel and bedrock:InvokeModelWithResponseStream .\n\nHere’s a quick example using the AWS SDK for Python (Boto3):\n\nimport boto3\nimport json\n\n# Create a Bedrock Runtime client\nbedrock_runtime = boto3.client(\nservice_name=\"bedrock-runtime\",\nregion_name=\"us-east-1\"\n)\n\n# Invoke Claude Fable 5.2\nresponse = bedrock_runtime.invoke_model(\nmodelId=\"global.anthropic.claude-fable-5-2\",\ncontentType=\"application/json\",\naccept=\"application/json\",\nbody=json.dumps({\n\"anthropic_version\": \"bedrock-2023-05-31\",\n\"max_tokens\": 4096,\n\"messages\": [\n{\n\"role\": \"user\",\n\"content\": \"An S3 bucket serves 40 TB/month egress. Estimate the monthly egress cost at $0.09/GB, and state one architecture change, using AWS services, to cut it. Show the calculation, keep it under 120 words.\"\n}\n]\n})\n)\n\nresult = json.loads(response[\"body\"].read())\n\n# Fable 5.2 is a reasoning model: the response may include a thinking block\n# before the text block, so select the text block rather than a fixed index.\nprint(next(b[\"text\"] for b in result[\"content\"] if b[\"type\"] == \"text\"))\n\nYou can explore the Getting Started notebook for more examples.\n\nMigrating to Claude Fable 5.2 with the claude-api skill in Claude Code\n\nFor teams already running Claude models on Amazon Bedrock, the claude-api skill in Claude Code helps you upgrade to Fable 5.2.\n\nThe claude-api skill is an open-source skill built into Claude Code that captures the details that make Claude API code work well. It covers which agent patterns fit a given job, what parameters change between model generations, and when to apply prompt caching. It stays current as Anthropic’s SDKs evolve: when a new model is released or the API gains a feature, the skill already knows.\n\nWhat the skill does for Fable 5.2 migrations\n\nWhen you ask Claude Code to upgrade your codebase to Fable 5.2, the skill reviews your code and walks you through:\n\nUpdating model references swapping model IDs to the Fable 5.2 ID across your application code.\n\nAdjusting thinking settings moving manual thinking configurations to adaptive thinking where appropriate for the new model.\n\nCleaning up outdated parameters removing deprecated beta headers, parameters, and settings that no longer apply.\n\nSuggesting effort levels recommending the right output_config.effort settings inline based on your use case.\n\nThe skill also detects your deployment platform including Amazon Bedrock, Claude Platform on AWS, and other environments and adjusts model ID formats and feature configurations accordingly. For example, it uses the Amazon Bedrock structured model ID format ( global.anthropic.claude-fable-5-2 ).\n\nHow to use it\n\nIn Claude Code, run the migration directly:\n\n/claude-api migrate\n\nThis scans your working directory (or a subdirectory or specific file list you confirm) and applies the migration changes in a single guided pass. You can also invoke it conversationally by telling Claude Code:\n\n“Upgrade me to Claude Fable 5.2” Claude reviews your code and walks through the necessary changes.\n\n“Improve my cache hit rate” the skill applies prompt caching rules that many developers miss, helping reduce costs on Bedrock.\n\n“Add context compaction to my agent” it walks you through compaction primitives and agent patterns for long-running Fable 5.2 sessions.\n\nThe claude-api skill is available in Claude Code and is also bundled into CodeRabbit, JetBrains IDEs (including Junie), Resolve AI, and Warp. It is open source at anthropics/skills on GitHub, so any coding agent can integrate it.\n\nAvailability\n\nClaude Fable 5.2 and Claude Mythos 5.2 are available today on Amazon Bedrock through US Geo CRIS and Global CRIS inference profiles. See the Bedrock documentation for the full list of supported Regions. For pricing information, see Amazon Bedrock pricing . Both models are also available through Claude Platform on AWS in every Region where the service is…",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "artificialanalysis.ai/models/claude-fable-5-2",
+          "source": "Hacker News (AI)",
+          "tags": [
+            "community"
+          ],
+          "title": "Claude Fable 5.2 Scores 65 on Artificial Analysis, Highest So Far",
+          "url": "https://artificialanalysis.ai/models/claude-fable-5-2",
+          "discussion_url": "https://news.ycombinator.com/item?id=50431144",
+          "published": "2026-11-09T20:04:55Z",
+          "summary": "Comments",
+          "content": "",
+          "score": 262.0,
+          "comments": 186,
+          "also_in": [
+            "Hacker News front page"
+          ]
+        },
+        {
+          "key": "simonwillison.net/2026/Nov/9/llm-anthropic",
+          "source": "Simon Willison",
+          "tags": [
+            "practitioner"
+          ],
+          "title": "llm-anthropic 0.31",
+          "url": "https://simonwillison.net/2026/Nov/9/llm-anthropic/",
+          "discussion_url": null,
+          "published": "2026-11-09T23:58:46Z",
+          "summary": "Release: llm-anthropic 0.31\n\nAnthropic released Fable 5.2 and Mythos 5.2 today. I've added them to llm-anthropic , so you can now run prompts through Fable 5.2 like this:\n\nuv tool install llm\nllm install llm-anthropic\nllm keys set anthropic\n# paste key here\nllm -m claude-fable-5.2 \"Generate an SVG of a pelican riding a bicycle\"\n\nI ran pelicans at all five reasoning levels - low , medium , high , xhigh , and max . You can see them all here - here's the best result I got, from xhigh :\n\nmax failed to return an image at all, running out of tokens after spending 128,000 thinking about them . That's the same bug that I saw with Opus 5.5 - but it's new for the Fable series, both Fable 5 and Fable 5.1 returned max effort pelicans just fine.\n\nTags: llm , anthropic , claude , generative-ai , pelican-riding-a-bicycle , ai , llms , claude-mythos-fable",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "anthropic.com/research/claude-electronics-design",
+          "source": "Anthropic Research",
+          "tags": [
+            "lab",
+            "research"
+          ],
+          "title": "Testing Claude on real-world electronics design",
+          "url": "https://www.anthropic.com/research/claude-electronics-design",
+          "discussion_url": null,
+          "published": "2026-11-09T00:00:00Z",
+          "summary": "We asked Claude Fable 5.2 to design three electronic devices from short prompts: a speakerphone, a voice-assistant hub, and a handheld virtual pet. Diode Computers built working prototypes from its files.",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Ollama v0.40.16 Drops Qwen3.8 Flash Memory Footprint",
+      "summary": "Ollama version 0.40.16 adds support for Ricursive Intelligence's Ripple-65B preview, a dense model designed for agentic coding. On Apple silicon, the release reduces memory consumption for Qwen3.8 Flash Next by roughly 27 GiB. API behavior has also been refined: the `/v1/responses` endpoint now honors truncation settings rather than truncating by default, and `ollama launch claude` explicitly routes Claude Code to chosen models.",
+      "why_it_matters": "Cutting 27 GiB of RAM overhead on Apple silicon significantly lowers the hardware barrier for running fast local agent backbones.",
+      "reason": "Ollama's latest update adds support for Ricursive Intelligence's Ripple-65B agentic coding model while significantly cutting memory overhead for Qwen3.8 Flash on Apple silicon.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.16",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.16",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.16",
+        "discussion_url": null,
+        "published": "2026-11-09T23:45:36Z",
+        "summary": "Ripple Preview\n\nRipple Preview from Ricursive Intelligence is a 65B dense model built for agentic coding.\n\nollama run ripple-preview\n\nWhat's Changed\n\nQwen3.8 Flash Next uses about 27 GiB less memory on Apple silicon\n\nollama launch claude always routes Claude Code to the selected model\n\nollama launch explains when a cloud model has been retired\n\n/v1/responses respects truncation and no longer silently truncates by default\n\n/v1/models returns an empty list instead of null when no models are installed\n\nCUDA 13.5 support for Windows on ARM\n\nUpdated llama.cpp\n\nFull Changelog : v0.40.15...v0.40.16",
+        "content": "Repository navigation\nRipple Preview\nRipple Preview from Ricursive Intelligence is a 65B dense model built for agentic coding.\nollama run ripple-preview\nWhat's Changed\n- Qwen3.8 Flash Next uses about 27 GiB less memory on Apple silicon\n- ollama launch claude always routes Claude Code to the selected model\n- ollama launch explains when a cloud model has been retired\n- /v1/responses respects truncation and no longer silently truncates by default\n- /v1/models returns an empty list instead of null when no models are installed\n- CUDA 13.5 support for Windows on ARM\n- Updated llama.cpp\nFull Changelog: v0.40.15...v0.40.16",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "huggingface.co/ricursiveAI/Ripple-65B-Preview",
+          "source": "HF Trending Models",
+          "tags": [
+            "models"
+          ],
+          "title": "ricursiveAI/Ripple-65B-Preview (unknown task)",
+          "url": "https://huggingface.co/ricursiveAI/Ripple-65B-Preview",
+          "discussion_url": null,
+          "published": null,
+          "summary": "Trending model. Task: unknown task. Library: unknown library. Created 2026-11-04. 454 likes, 5835 downloads.",
+          "content": "",
+          "score": 437.0,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "HEELO Framework Tackles the Agent Last-Mile Problem",
+      "summary": "A new paper identifies 'the last mile to the real world'—the gap between reaching a resource and applying it in context—as the primary cause of agent execution failures. To fix this, the authors introduce HEELO, a harness framework that constructs task graphs out of reusable agent-native primitives equipped with their own resident LLMs. Connecting existing agents like Claude Code and Codex to HEELO via MCP increased real-world task resolution from 9 to 39 and 35 respectively on their benchmark platform, while cutting execution time and cost.",
+      "why_it_matters": "Encapsulating tool capabilities into modular, primitive-level LLM harnesses provides a practical architectural pattern for scaling agent success over MCP.",
+      "reason": "This study analyzes execution failures on real-world benchmarks like Terminal-Bench 4.0 and proposes reusable agent-native primitives to improve real-world task resolution.",
+      "item": {
+        "key": "arxiv:2611.07461",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "The Last Mile to the Real World: Agent-Native Primitives as Reusable Building Blocks for Solving Real-World Tasks",
+        "url": "https://huggingface.co/papers/2611.07461",
+        "discussion_url": null,
+        "published": "2026-11-09T00:00:00Z",
+        "summary": "How can an agent handle a real-world task end to end? Frontier models with their own harnesses still fall short on real-world benchmarks: on Terminal-Bench 4.0, GPT-5.6 Sol with Codex resolves 37.3% of the tasks and Claude Opus 5 with Claude Code 51.8%. These tasks fail at the step from reaching a resource to applying it, which we call the last mile to the real world. Existing approaches put the resource within reach but leave the competence to apply it with the caller, so each harness rebuilds that competence. We introduce agent-native primitives, reusable units that equip a resource with a resident LLM that applies it in context and communicates with other primitives, and HEELO (Harness Engineering around Evolving Agent-Native Primitives for the Last Mile to Real-WOrld Tasks), a harness engineering framework that builds each task's harness from a library of such primitives. HEELO composes the primitives a task needs into a task-specific graph, verifies the result against evidence from the environment, revises the primitives a failure implicates, and admits new or improved primitives after validation. We instantiate HEELO with eight primitive families, each built for one kind of…",
+        "content": "The Last Mile to the Real World: Agent-Native Primitives as Reusable Building Blocks for Solving Real-World Tasks\nAbstract\nA harness engineering framework composes reusable LLM-equipped primitives into task-specific graphs, verifies and revises them, and improves agent success on real-world tasks while reducing time and cost.\nHow can an agent handle a real-world task end to end? Frontier models with their own harnesses still fall short on real-world benchmarks: on Terminal-Bench 4.0, GPT-5.6 Sol with Codex resolves 37.3% of the tasks and Claude Opus 5 with Claude Code 51.8%. These tasks fail at the step from reaching a resource to applying it, which we call the last mile to the real world. Existing approaches put the resource within reach but leave the competence to apply it with the caller, so each harness rebuilds that competence. We introduce agent-native primitives, reusable units that equip a resource with a resident LLM that applies it in context and communicates with other primitives, and HEELO (Harness Engineering around Evolving Agent-Native Primitives for the Last Mile to Real-WOrld Tasks), a harness engineering framework that builds each task's harness from a library of such primitives. HEELO composes the primitives a task needs into a task-specific graph, verifies the result against evidence from the environment, revises the primitives a failure implicates, and admits new or improved primitives after validation. We instantiate HEELO with eight primitive families, each built for one kind of task, and evaluate them on more than twenty benchmarks. Dev-Primitives raise Terminal-Bench 4.0 resolution from 37.3% under Codex to 55.5% on the same backbone, Harness Primitives composed per task raise Terminal-Bench 2.0 Pass@1 from 60.0% for the seed harness to 72.2%, Tool Primitives raise ToolBench pass rate from 55.8% to 75.1%, and Navigation Primitives raise GAIA-Text-103 accuracy from 45.6% to 58.3%. On the 46 real-world tasks of our heelo.dev platform, Claude Opus 5.5 with Claude Code and GPT-6.1 Sol with Codex complete 9 each on their own and 39 and 35 when connected to HEELO through our MCP server, with 1.9times and 2.3times less time and 1.55times lower cost per completed task.\nCommunity\nHow can AI agents reliably solve real-world tasks end to end?\nWe introduce Agent-Native Primitives, reusable building blocks that equip tools, code, knowledge, and other resources with their own LLM-powered experts. Building on this idea, HEELO dynamically composes task-specific agent harnesses from eight families of primitives.\nAcross 20+ benchmarks and 46 real-world tasks, HEELO substantially improves agent performance. On our real-world tasks, connecting existing agent systems to HEELO increases completed tasks from 9 to 39 for Claude Code and from 9 to 35 for Codex.\nReading that a harness can be rebuilt around primitives with their own resident LLM made me smile, since it's agents all the way down. The last-mile framing, from reaching a resource to actually applying it, is a clear way to name the failure. Did you see the primitives talk to each other more on the tasks that failed before?\nGet this paper in your agent:\nhf papers read 2611.07461 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 27.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "EvoAudit Exposes Fragile Trade-offs in Agent Harness Evolution",
+      "summary": "Systematic evaluation of weight-free agent harness evolution across 16 variants reveals that benchmark score increases frequently mask severe task regressions and higher operational costs. Across all test cases, evolved agents gained ability on previously uncovered tasks while simultaneously losing coverage on others, with one general agent gaining 5.2 reliability points despite failing on ten previously working tasks. The researchers propose EvoAudit to enforce preservation-aware evaluation and stricter admission gating during self-improvement cycles.",
+      "why_it_matters": "Relying strictly on aggregate benchmark gains during agent harness optimization can hide dangerous regressions and silent cost inflation.",
+      "reason": "Researchers evaluate weight-free agent harness evolution to test whether benchmark gains translate to genuine reliability, efficiency, and cross-domain transferability.",
+      "item": {
+        "key": "arxiv:2611.07624",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Beneath the Surface: What We Overlook When We Talk About Agent Evolution",
+        "url": "https://huggingface.co/papers/2611.07624",
+        "discussion_url": null,
+        "published": "2026-11-09T00:00:00Z",
+        "summary": "Agent harness evolution enables recursive self-improvement (RSI) without updating model weights. We examine whether higher benchmark scores yield reliable, efficient, and transferable improvement. We evaluate four methods across harnesses, general and coding tasks. Repeated evaluations, controlled agent expansion, component interventions, and admission replays reveal recurring patterns. All sixteen evolved agents gain previously uncovered tasks while losing previously covered ones. In one general-task case, reliability rises by 5.2 points despite losing ten previously covered tasks. Most reliability gains also increase deployment cost. Specific changes usually outperform generic reminders, but their benefits can change when combined. The highest-scoring agent does not yield the largest mean improvement in any of our four pools, and stricter admission can discard useful alternatives. Transfer selectively preserves gains: coverage usually falls on the general-task target across both harness types and paradigms, but rises on the coding target with the outer-layer-only harness. These findings motivate preservation-aware evaluation, tested decision rules, and explicit applicability…",
+        "content": "Beneath the Surface: What We Overlook When We Talk About Agent Evolution\nAbstract\nAgent harness evolution can improve benchmark performance without weight updates, but gains are unreliable, costly, and transfer inconsistently, motivating preservation-aware evaluation and EvoAudit revisions.\nAgent harness evolution enables recursive self-improvement (RSI) without updating model weights. We examine whether higher benchmark scores yield reliable, efficient, and transferable improvement. We evaluate four methods across harnesses, general and coding tasks. Repeated evaluations, controlled agent expansion, component interventions, and admission replays reveal recurring patterns. All sixteen evolved agents gain previously uncovered tasks while losing previously covered ones. In one general-task case, reliability rises by 5.2 points despite losing ten previously covered tasks. Most reliability gains also increase deployment cost. Specific changes usually outperform generic reminders, but their benefits can change when combined. The highest-scoring agent does not yield the largest mean improvement in any of our four pools, and stricter admission can discard useful alternatives. Transfer selectively preserves gains: coverage usually falls on the general-task target across both harness types and paradigms, but rises on the coding target with the outer-layer-only harness. These findings motivate preservation-aware evaluation, tested decision rules, and explicit applicability conditions. As a constructive follow-up, EvoAudit turns these diagnostics into revisions of select, analyze, mutate, and gate, achieving the best performance.\nCommunity\nDoes a higher benchmark score really mean an agent is getting better? 🤔\nIn our paper, we go beyond surface-level benchmark evaluations to investigate what actually happens during agent evolution and why improvements do not always translate into better agents.\nWe systematically study agent evolution from three perspectives, Phenomenology, Generalization, and Mechanisms, and further dissect four key stages: Select, Analyze, Mutate, and Gate.\nBuilding on these insights, we introduce EvoAudit and Audit-Guided Evolution (AGE), moving toward more reliable, evidence-driven agent self-improvement.\nSixteen evolved agents all gaining some tasks while losing others is the kind of honest result I wish more benchmark papers showed. A higher score hiding ten lost tasks stopped me for a moment. Did the losses cluster in particular kinds of tasks?\nGet this paper in your agent:\nhf papers read 2611.07624 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 23.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AgentBaton Orchestrates Dynamic Cloud-to-Local Handoffs",
+      "summary": "AgentBaton introduces a lightweight detector that dynamically switches execution between expensive frontier models and efficient local LLMs during multi-step agentic tasks. The authors found that capable-to-efficient handoffs executed mid-task preserve accuracy while dramatically cutting API expenses, whereas starting with cheap models yields poor results. Across 11 evaluated model pairs, AgentBaton reduced API costs by an average of 65.9% while raising accuracy by up to 8.8 percentage points over capable-only baselines.",
+      "why_it_matters": "Mid-task model handoffs offer a clear path to optimizing the pareto frontier of multi-step agent execution cost and accuracy.",
+      "reason": "AgentBaton introduces an orchestration strategy for multi-step agentic tasks that dynamically routes sub-tasks between cloud frontier models and efficient local LLMs.",
+      "item": {
+        "key": "arxiv:2610.35959",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "AgentBaton: Efficient Model Collaboration in Agentic Tasks",
+        "url": "https://huggingface.co/papers/2610.35959",
+        "discussion_url": null,
+        "published": "2026-11-09T00:00:00Z",
+        "summary": "Solving long-horizon agentic tasks requires language agents to interact with their environments over multiple steps, and reliable performance often comes from the expensive capable models available through cloud providers. Meanwhile, alternative efficient models with inferior performance but a much lower cost are emerging, including lower-tier cloud models and smaller open-weights models deployable on local hardware. This raises a natural question that remains less explored than traditional query-level routing: can capable and efficient models collaborate within a single long-horizon agentic task to substantially reduce cost while preserving task accuracy? In this paper, we systematically investigate key design choices for such collaboration through model handoffs, where one model takes over from another, focusing on handoff direction and context transfer. We find that efficient-to-capable handoffs generally underperform capable-only execution with limited or even no cost reduction, whereas capable-to-efficient handoffs at suitable stages of task progress largely preserve or even improve accuracy while substantially reducing cost. These findings suggest that a one-time, simple…",
+        "content": "Abstract\nA lightweight detector enables cost-effective collaboration between capable and efficient language models in long-horizon agentic tasks by learning when to hand off control, reducing API costs while preserving or improving accuracy.\nSolving long-horizon agentic tasks requires language agents to interact with their environments over multiple steps, and reliable performance often comes from the expensive capable models available through cloud providers. Meanwhile, alternative efficient models with inferior performance but a much lower cost are emerging, including lower-tier cloud models and smaller open-weights models deployable on local hardware. This raises a natural question that remains less explored than traditional query-level routing: can capable and efficient models collaborate within a single long-horizon agentic task to substantially reduce cost while preserving task accuracy? In this paper, we systematically investigate key design choices for such collaboration through model handoffs, where one model takes over from another, focusing on handoff direction and context transfer. We find that efficient-to-capable handoffs generally underperform capable-only execution with limited or even no cost reduction, whereas capable-to-efficient handoffs at suitable stages of task progress largely preserve or even improve accuracy while substantially reducing cost. These findings suggest that a one-time, simple, well-timed handoff strategy is good enough for cost-effective agent collaboration, motivating AgentBaton, a lightweight detector that learns when to hand off from recurring patterns in task progress. Across 11 model pairs and two representative benchmarks, AgentBaton reduces API costs by 65.9% on average while largely preserving task accuracy, with accuracy gains of up to 8.8 percentage points over capable-only execution. Experiments across various reasoning-effort settings further show that AgentBaton extends the empirical accuracy-cost Pareto frontier.\nCommunity\nCheap model for the easy steps and a capable one for the hard steps inside a single task is such a practical idea. I'm curious about the handoff: what signal tells the system it's time to switch back to the expensive model?\nAdded this paper to the awesome multi agent paper list\nGet this paper in your agent:\nhf papers read 2610.35959 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 12.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "LowRAM Achieves Composable Test-Time KV Cache Compression",
+      "summary": "LowRAM proposes an asymmetric test-time KV cache compression strategy that exploits structural redundancy within attention heads by predicting values directly from keys. A small per-head network is fitted at inference time to reconstruct values, storing explicit residual corrections only for the worst-reconstructed tokens to yield 4x value compression. When combined with cross-layer low-rank key factorisation, quantization, and token eviction, LowRAM achieves 26.9x KV compression on context windows up to 262K while retaining 94.5% of baseline performance.",
+      "why_it_matters": "Predicting values from keys adds a novel axis of test-time KV compression to increase decode throughput during long-context agent serving.",
+      "reason": "LowRAM offers a test-time KV cache compression approach combining low-rank key projection and amortized values to reduce memory footprint without retraining.",
+      "item": {
+        "key": "arxiv:2611.07025",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "LowRAM: Low-Rank Keys and Amortised Values for Composable KV Cache Compression at Test-Time",
+        "url": "https://huggingface.co/papers/2611.07025",
+        "discussion_url": null,
+        "published": "2026-11-09T00:00:00Z",
+        "summary": "Autoregressive decoding relies on the KV cache, whose memory footprint grows linearly with context length and caps batch size and throughput. Existing post-training methods exploit redundancy across tokens, layers, and feature dimensions, or lower numerical precision. We identify a complementary axis: within each attention head, values are largely predictable from their corresponding keys. We exploit this with value cache amortisation, which fits a lightweight per-head predictor at test time and stores residuals only for the tokens it reconstructs worst, giving 4times near-lossless value compression. The predictor can be initialised by meta-learning for substantially reduced prefill overhead, or fitted from scratch in settings that allow a one-off cost, such as multi-query inference. We pair value amortisation with cross-layer low-rank key compression to produce LowRAM, an asymmetric compression pipeline that stays close to lossless across three model families. By reconstructing only a selected subset of KV pairs at each decoding step, LowRAM can keep decoding overhead minimal and achieve up to 5times higher peak decode throughput at 4times compression. LowRAM further composes…",
+        "content": "LowRAM: Low-Rank Keys and Amortised Values for Composable KV Cache Compression at Test-Time\nAbstract\nA method compresses KV caches by predicting values from keys within each attention head and applying cross-layer low-rank key compression, enabling higher decoding throughput and composability with quantization and eviction.\nAutoregressive decoding relies on the KV cache, whose memory footprint grows linearly with context length and caps batch size and throughput. Existing post-training methods exploit redundancy across tokens, layers, and feature dimensions, or lower numerical precision. We identify a complementary axis: within each attention head, values are largely predictable from their corresponding keys. We exploit this with value cache amortisation, which fits a lightweight per-head predictor at test time and stores residuals only for the tokens it reconstructs worst, giving 4times near-lossless value compression. The predictor can be initialised by meta-learning for substantially reduced prefill overhead, or fitted from scratch in settings that allow a one-off cost, such as multi-query inference. We pair value amortisation with cross-layer low-rank key compression to produce LowRAM, an asymmetric compression pipeline that stays close to lossless across three model families. By reconstructing only a selected subset of KV pairs at each decoding step, LowRAM can keep decoding overhead minimal and achieve up to 5times higher peak decode throughput at 4times compression. LowRAM further composes with quantisation and eviction, reaching 26.9times compression at 94.5% of baseline performance on long contexts. These results show that treating keys and values as structurally distinct enables efficient, aggressive, and composable KV cache compression.\nCommunity\nWe are excited to share LowRAM, our new KV cache compression method at test-time!\nLowRAM compresses keys using low-rank factorisation, while small per-head networks predict values from keys. We then keep residual corrections for the hardest-to-reconstruct tokens.\nThis achieves 4× value-cache compression with near-lossless performance. With selective reconstruction, we also reach up to 5× higher peak decode throughput at 4× KV compression on at 262K context!\nBecause LowRAM exploits redundancy between keys and values, it adds a different axis of compression alongside quantisation and eviction. Combining all three lets us push compression to 26.9×, while retaining 94.5% of baseline performance.\nWe see promising applications in long-document QA and serving multiple queries over a shared context, where the predictors can be fitted once and reused. We’d love to hear what you think!\nGet this paper in your agent:\nhf papers read 2611.07025 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 30.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "CPU-ARC Caches Solved Agent Reasoning Traces onto CPUs",
+      "summary": "Agentic Reasoning Caching (CPU-ARC) extracts executable reasoning caches from LLM execution traces to avoid re-solving recurring problems from scratch. Once constructed, these compiled caches execute directly on host CPUs to apply derived solutions to new instances without calling the underlying frontier model. In benchmark evaluations across math and science tasks, CPU-ARC matched frontier model accuracy while reducing invocation costs by 16 to 291 times.",
+      "why_it_matters": "Compiling verified agent reasoning paths into CPU-executable logic eliminates unnecessary model calls for repetitive tasks.",
+      "reason": "CPU-ARC caches solved agentic reasoning trajectories on host CPUs, allowing models to reuse past execution paths instead of re-reasoning through repeated tasks.",
+      "item": {
+        "key": "arxiv:2611.09891",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "CPU-ARC: Agentic Reasoning Caching for on-CPU Reasoning Reuse",
+        "url": "https://huggingface.co/papers/2611.09891",
+        "discussion_url": null,
+        "published": "2026-11-09T00:00:00Z",
+        "summary": "Large language models reinvent the wheel all the time. They conflate task-solving with the execution of the solutions, which forces them to solve every problem from scratch. We show that once a task has been reasoned through, the application of its solution to a new problem instance can be done very efficiently and with little involvement from language models. We introduce agentic reasoning caching, a method for constructing robust CPU-executable agentic reasoning caches (ARCs) from LLM reasoning traces. ARCs show on-par performance with frontier LLMs across a range of difficult mathematical and scientific tasks, are fully explainable, continually trainable, robust to input perturbations, and 16-291x cheaper to invoke than the source model.",
+        "content": "Abstract\nReasoning caches built from LLM traces can efficiently apply previously derived solutions to new problem instances with robustness and much lower invocation cost than source models.\nLarge language models reinvent the wheel all the time. They conflate task-solving with the execution of the solutions, which forces them to solve every problem from scratch. We show that once a task has been reasoned through, the application of its solution to a new problem instance can be done very efficiently and with little involvement from language models. We introduce agentic reasoning caching, a method for constructing robust CPU-executable agentic reasoning caches (ARCs) from LLM reasoning traces. ARCs show on-par performance with frontier LLMs across a range of difficult mathematical and scientific tasks, are fully explainable, continually trainable, robust to input perturbations, and 16-291x cheaper to invoke than the source model.\nCommunity\nLarge language models reinvent the wheel all the time. They conflate task-solving with the execution of the solutions, which forces them to solve every problem from scratch. We show that once a task has been reasoned through, the application of its solution to a new problem instance can be done very efficiently and with little involvement from language models. We introduce agentic reasoning caching, a method for constructing robust CPU-executable agentic reasoning caches (ARCs) from LLM reasoning traces. ARCs show on-par performance with frontier LLMs across a range of difficult mathematical and scientific tasks, are fully explainable, continually trainable, robust to input perturbations, and 16-291x cheaper to invoke than the source model.\nThis made me grin: LLMs reinventing the wheel every time is so true, and caching the solved reasoning to run on a CPU is a lovely fix. How do the caches cope when a new problem looks similar but breaks one assumption?\nGet this paper in your agent:\nhf papers read 2611.09891 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 6.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS Outlines 7-Layer Agent Reference Architecture for AgentCore",
+      "summary": "AWS published a seven-layer reference architecture designed to transition multi-agent prototypes into production applications on Amazon Bedrock AgentCore. The framework decouples components—ranging from LiteLLM model routing to agent registries and security guardrails—behind stable interfaces and bounded execution boundaries. It explicitly advocates separating complex workloads into specialized agents coordinated through standardized protocols like MCP and Agent to Agent (A2A).",
+      "why_it_matters": "AWS is standardizing enterprise multi-agent deployment patterns around LiteLLM routing, bounded specialist tools, and MCP discovery.",
+      "reason": "AWS published a modular, seven-layer enterprise agent architecture for Bedrock AgentCore that decouples individual component layers behind stable contracts.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/pluggable-agentic-ai-framework-a-seven-layer-composable-enterprise-agentic-ai-reference-architecture-on-amazon-bedrock-agentcore",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Pluggable Agentic AI Framework: A seven-layer composable enterprise agentic AI reference architecture on Amazon Bedrock AgentCore",
+        "url": "https://aws.amazon.com/blogs/machine-learning/pluggable-agentic-ai-framework-a-seven-layer-composable-enterprise-agentic-ai-reference-architecture-on-amazon-bedrock-agentcore/",
+        "discussion_url": null,
+        "published": "2026-11-09T19:05:54Z",
+        "summary": "A seven-layer composable reference architecture for taking enterprise agentic AI from prototype to production on Amazon Bedrock AgentCore. Each layer has a stable contract, so you can swap technologies at any layer without redesigning the rest of the stack.",
+        "content": "“How do we run our AI agents in production at scale?” is the question every customer eventually asks. It comes bundled with several questions. How do we handle thousands of concurrent user requests securely and confidently? How do we make sure the agents stay reliable under real traffic instead of failing silently? How do we know if an agent still meets the quality and safety standards it passed during testing? What are agent security best practices? Should that be deterministic or non-deterministic? And many more. A proof-of-concept answers none of these, because it is built to show the agent model can do the task, not to survive production traffic, cost pressure, and security review.\n\nThat gap between a working prototype and a system that runs reliably, securely, frugally and responsibly at scale, is where most agentic AI initiatives stall, and it is rarely the model’s fault. Every team building an agent tends to rebuild the same scaffolding from scratch: its own routing logic, its own guardrails, its own observability, all applied after the fact rather than built in from the start. The teams need a shared, production-ready architecture that every agent can build on.\n\nThis post walks through a seven-layer composable reference architecture designed to take multi-agent AI applications from prototype to production scale.\n\nComposable architecture\n\nThe Pluggable Agentic AI Framework is a reference architecture for multi-agent applications organized into seven layers , each with a distinct responsibility and a stable contract. The services and technologies shown in each layer reflect the reference implementation, not mandatory choices. Organizations can substitute alternatives that align with their existing infrastructure and requirements. Together, these layers offer a blueprint for building, securing, and operating agentic AI applications at production scale.\n\nFigure 1: The seven layers of the Pluggable Agentic AI Framework\n\nData and Knowledge is the foundation of Agentic AI. An agent is only as good as the data it can access. Whether an agent is checking out a healthcare formulary, tracking inventory, or interpreting a compliance rule, it needs relevant, up-to-date information to answer correctly. This layer owns retrieval, embeddings, and access to structured and unstructured data through a clear contract and protocol: accept a query and return the most relevant information that acts as context for an agent. Amazon Bedrock Knowledge Base , Vector Engine for Amazon OpenSearch Serverless , Amazon S3 Vectors and Amazon DynamoDB are example building blocks for this foundation.\n\nModel and Inference choices should be driven by configuration, not hardwired into agent or application logic. Use smaller, faster models for simple tasks and larger models for requests that require more nuanced reasoning. It is important to conduct a thorough model evaluation for the use case you are building with realistic and representative business data. A model routing layer keeps AI agents decoupled from the model hosting environment and provider-specific APIs by relying on a consistent request-and-response contract. A proxy such as LiteLLM provides a common interface across providers, so you can switch models based on your evaluations without rewriting application logic.\n\nOrchestration determines how work is distributed, and choosing the right approach is critical. For straightforward tasks, use a single agent to handle the work from end to end. For complex, cross-domain workflows, use a supervisor to delegate specialist agents, each scoped to a specific capability and tied to a specific set of tools. Avoid building one agent that does everything. As tools, instructions, and context accumulate, the context window grows, latency increases, and accuracy can suffer. Tool sprawl sets in, which can push agents beyond their intended boundaries, leading to unintended actions and security breaches. Splitting responsibilities keeps each agent’s context focused and makes latency more predictable. You can also test each agent’s behavior, scale it, and define its security model independently. Enforce bounded autonomy: specialists should execute strictly within the tools they have been granted, and nothing more.\n\nIn addition to decomposing into specific specialists and setting its boundary, decouple the specialist agents from the supervisor agents. Allow the supervisor to discover the specialists from a centralized agent registry and invoke them through a standardized protocol like MCP (Model Context Protocol) and A2A (Agent to Agent). Maintain a centralized agent registry that catalogs every agent’s tools, skills, and owner. This gives your organization the visibility it needs for governance at scale, increases the velocity of AI agent implementation through reusability, and avoids the cost of repetitive development. Consider using Strands Agents for specialists, Amazon Bedrock AgentCore harness for the orchestrator, AWS Agent Registry and Amazon Bedrock AgentCore Gateway for centralized discovery and routing.\n\nSecurity and Guardrails should be a primary concern, built into the design from day one. Agentic AI exposes organizations to a new class of risks that conventional security frameworks were not built to address, from prompt injection and tool misuse to memory and data poisoning. Treat all external content as untrusted by default. Authenticate every request, whether it comes from a user, another agent, or an automated workflow, through a service like Amazon Bedrock AgentCore Identity . Then use fine-grained access control to determine whether each tool call is permitted before execution. Grant agents temporary, scoped credentials instead of persistent secrets. On the data-protection side, mask sensitive data like PHI (Personal Health Information) and PII (Personally Identifiable Information) in agent and tool requests and responses, so that sensitive customer information does not appear in agent outputs or lingers in memory. For accountability, capture every significant decision in a tamper-evident audit trail, route high-impact actions through a human approval gate, and deploy circuit breakers to halt anomalous behavior before it can escalate. Consider using Amazon Bedrock Guardrails for user inputs, Amazon Bedrock AgentCore Identity and Policy in Amazon Bedrock AgentCore for authentication and access control, along with AWS Security and governance controls to bring defense-in-depth security.\n\nApplication is where the end-user experience lives, whether that is a chat interface, an API surface, or an embedded widget. Keep this layer intentionally thin. Its only responsibilities should be presenting the conversation and passing requests to the orchestration layer beneath it. Resist the urge to embed business logic here. The cleaner the separation, the more easily you can iterate on the user experience without destabilizing the backend. A decision model can sit at this boundary as a fast, inexpensive check: in one call it scores whether a request is in scope, needs a human, or is urgent, returning probabilities instead of free text. Your code acts on those scores with simple thresholds, answering off-topic requests directly and flagging escalations, so the full agentic loop runs only when it adds value. When building the application layer, think about what would be needed for another AI agent to consume and interact with your AI agents along with humans. Build your external interfaces accordingly.\n\nObservability should watch every layer from day one, not after the first incident. Along with the logs and metrics, end-to-end agent traces are critical to measure whether the agent performed its task correctly. Along with the trace, collect cost and token usage per request, time to first token, whether the call is secure, and surface dashboards for latency, error rates, and spend before you go live. Proactive monitoring is cheaper than reactive firefighting. Consider using Amazon…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "llama.cpp added support for Gemma 4 audio streaming inputs using 480ms steps.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12237",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12237",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12237",
+        "discussion_url": null,
+        "published": "2026-11-09T23:47:33Z",
+        "summary": "mtmd: support gemma 4 input audio stream ( #31965 )\n\nmtmd: support gemma 4 input audio stream\n\nuse 480ms step\n\nserver: enable realtime embeddings only for audio generation\n\nThe realtime slot forced embeddings on, which marks every row of a\n\nbatch as an output. Only a model that generates audio reserves\n\nn_batch outputs, so a chat model with an audio stream (Gemma 4)\n\naborted on its first batch of audio rows. The hidden state is only\n\nread by the audio generation pipeline.\n\nCo-authored-by: Pascal admin@serveurperso.com\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/65581072\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "OpenAI detailed Control Room, an infrastructure tool designed to track and rapidly terminate model workloads during safety incidents.",
+      "item": {
+        "key": "openai.com/index/control-room",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Control Room: A central system to track and stop model workloads across our research infrastructure",
+        "url": "https://openai.com/index/control-room",
+        "discussion_url": null,
+        "published": "2026-11-09T13:00:00Z",
+        "summary": "Learn how OpenAI’s Control Room tracks model workloads across our research infrastructure and can rapidly stop them when safety or security concerns arise.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new benchmark evaluates temporal self-knowledge in LLMs to catch financial backtesting flaws caused by training set contamination.",
+      "item": {
+        "key": "arxiv:2611.06808",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "LLMs Don't Know What They Know: Benchmarking Temporal Self-Knowledge for Financial Backtesting",
+        "url": "https://huggingface.co/papers/2611.06808",
+        "discussion_url": null,
+        "published": "2026-11-09T00:00:00Z",
+        "summary": "Financial backtests of large language models (LLMs) are meaningful only if the model did not already know the outcomes it is asked to predict. Practitioners guard against this by trusting a vendor's stated knowledge cutoff, by asking the model what it knows, or by instructing it to answer as of a past date. To verify whether any of these safeguards can be trusted, we introduce FinDendro, a benchmark of 2,226 dated U.S. facts from 1999 to 2026, covering monthly macroeconomic series, month-end stock prices and Federal Reserve decisions. Each fact yields four prompts: a value question, Recall and Predict questions that pair each candidate value with a claim of knowing or guessing without a declared date, and a Predict question with a historical declared date. Controls for persistence and dominant outcomes keep chance accuracy near 0.27. Results show that for most frontier models, self-reports understate knowledge. GPT-5 answers 76% of controlled facts correctly but claims to know 38%, and answers 61% of the facts it says it does not know. Knowledge claims can persist beyond the measured knowledge boundary, by up to seven quarters, and a declared date removes most of the claims of…",
+        "content": "",
+        "score": 24.0,
+        "comments": 2,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A viral post highlights maintenance hurdles faced by an engineering team one year after adopting a 100% AI code generation mandate.",
+      "item": {
+        "key": "reddit.com/r/ClaudeCode/comments/1xq2n3t/a_year_after_the_100_ai_mandate_nobody",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "A year after the 100% AI mandate nobody understands our code",
+        "url": "https://www.reddit.com/r/ClaudeCode/comments/1xq2n3t/a_year_after_the_100_ai_mandate_nobody/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50433079",
+        "published": "2026-11-09T22:19:12Z",
+        "summary": "https://redlib.catsarch.com/r/ClaudeCode/comments/1xq2n3t/a_...",
+        "content": "",
+        "score": 75.0,
+        "comments": 74,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    }
+  ],
+  "sign_off": "Happy building—may your agent primitives stay modular and your KV caches slim.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "Anthropic launches Claude Fable 5.2 and Mythos 5.2",
+      "blurb": "Anthropic announced Claude Fable 5.2 and Mythos 5.2, setting a new bar for technical tasks in coding, finance, and the sciences.",
+      "item": {
+        "key": "anthropic.com/claude-fable-and-mythos-5-2",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Claude Fable 5.2 and Mythos 5.2",
+        "url": "https://www.anthropic.com/claude-fable-and-mythos-5-2",
+        "discussion_url": "https://news.ycombinator.com/item?id=50429906",
+        "published": "2026-11-09T18:56:29Z",
+        "summary": "Our most capable models for daunting technical work, Claude Fable 5.2 and Claude Mythos 5.2 set a new bar in coding, finance, and the sciences.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "Anthropic News"
+        ]
+      }
+    },
+    {
+      "kicker": "Infrastructure",
+      "headline": "OpenAI details Control Room to monitor research workloads",
+      "blurb": "OpenAI unveiled Control Room, a central system that tracks model workloads across its infrastructure and rapidly stops them for safety concerns.",
+      "item": {
+        "key": "openai.com/index/control-room",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Control Room: A central system to track and stop model workloads across our research infrastructure",
+        "url": "https://openai.com/index/control-room",
+        "discussion_url": null,
+        "published": "2026-11-09T13:00:00Z",
+        "summary": "Learn how OpenAI’s Control Room tracks model workloads across our research infrastructure and can rapidly stop them when safety or security concerns arise.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "Ollama v0.40.16 adds 65B Ripple model for agentic coding",
+      "blurb": "Ollama's v0.40.16 update adds support for Ripple Preview, a 65B dense model built by Ricursive Intelligence for agentic coding.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.16",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.16",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.16",
+        "discussion_url": null,
+        "published": "2026-11-09T23:45:36Z",
+        "summary": "Ripple Preview\n\nRipple Preview from Ricursive Intelligence is a 65B dense model built for agentic coding.\n\nollama run ripple-preview\n\nWhat's Changed\n\nQwen3.8 Flash Next uses about 27 GiB less memory on Apple silicon\n\nollama launch claude always routes Claude Code to the selected model\n\nollama launch explains when a cloud model has been retired\n\n/v1/responses respects truncation and no longer silently truncates by default\n\n/v1/models returns an empty list instead of null when no models are installed\n\nCUDA 13.5 support for Windows on ARM\n\nUpdated llama.cpp\n\nFull Changelog : v0.40.15...v0.40.16",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 18,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 28,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 37,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 900,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1372,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 287,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 198,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-07T00:35:10.951981Z",
+    "candidates": 113,
+    "triaged": 113,
+    "enriched": 7,
+    "headline_candidates": 116,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 74.5,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 29157,
+      "output_tokens": 9685,
+      "cost_usd": 0.130901
+    }
+  }
+}

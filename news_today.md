@@ -1,93 +1,92 @@
-# Latent Agent Execution, DeepSeek on RAM, and Memory Telemetry
+# Agent Harness Engineering, Claude 5.2, and Test-Time KV Compression
 
-*2026-11-08 · 8 stories*
+*2026-11-09 · 8 stories*
 
-![Top AI stories for 2026-11-08](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-09](https://coronring.github.io/NewsRing/today.png)
 
-Today's digest highlights a massive shift toward latent-space agent execution and context compression, along with practical local serving tricks for massive MoE models. We also look at security oversights in developer agent harnesses and a proposal for standardized agent memory telemetry.
+Today's edition highlights Anthropic's flagship model updates alongside a heavy dose of harness architecture research. From agent-native primitives and harness evolution audits to test-time KV compression, here is the technical breakdown.
 
 ## Across AI today
 
-- **Nvidia investigates CEO Jensen Huang over espionage ties** Nvidia is investigating CEO Jensen Huang after reports that a Chinese intelligence recruit sought to spy on the chipmaker. ([theverge.com](https://www.theverge.com/ai-artificial-intelligence/1029562/nvidia-investigating-jensen-huang-relationship-chinese-spy))
-- **Chainalysis breached in attack involving AI agents** Chainalysis reported hackers stole customer credentials and tokens during a multifront cyberattack that leveraged AI agents. ([arstechnica.com](https://arstechnica.com/security/2026/11/chainalysis-says-hackers-stole-credentials-and-tokens-for-all-of-its-customers/))
-- **WeLM-Image unifies vision and generation for single GPUs** WeLM-Image combines multimodal understanding with image generation and editing into a unified model built for single-GPU deployment. ([huggingface.co](https://huggingface.co/papers/2611.07392))
+- **Anthropic launches Claude Fable 5.2 and Mythos 5.2** Anthropic announced Claude Fable 5.2 and Mythos 5.2, setting a new bar for technical tasks in coding, finance, and the sciences. ([anthropic.com](https://www.anthropic.com/claude-fable-and-mythos-5-2))
+- **OpenAI details Control Room to monitor research workloads** OpenAI unveiled Control Room, a central system that tracks model workloads across its infrastructure and rapidly stops them for safety concerns. ([openai.com](https://openai.com/index/control-room))
+- **Ollama v0.40.16 adds 65B Ripple model for agentic coding** Ollama's v0.40.16 update adds support for Ripple Preview, a 65B dense model built by Ricursive Intelligence for agentic coding. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.16))
 
-## 1. Claude Code auto-approvals leak credentials to public GitHub repos
+## 1. Anthropic Drops Claude Fable 5.2 and Mythos 5.2
 
-A security vulnerability tied to Claude Code's "Don't Ask Again" auto-approval feature has exposed active passwords and API credentials across 1,122 public GitHub files. The auto-approval mechanism allowed the agent to commit sensitive environment values and generated tokens without human verification. Following the leak, enterprise users including Goldman Sachs have reportedly begun pulling Claude Code from internal environments. When building developer agent harnesses, convenience settings that bypass human-in-the-loop inspection remain a primary attack vector.
+Anthropic released Claude Fable 5.2 and Mythos 5.2, updating its flagship technical reasoning models with up to 30% faster token generation and lower baseline pricing at $8 per million input and $40 per million output tokens. The models include an optional fast mode boosting generation speed by up to 2.5 times for twice the token price, alongside updated cyber and biology safeguards. Internal tests saw an agent team use Fable 5.2 to migrate a production service from Python to Rust, while a single engineer coordinated over 1,000 subagents over eight days to build a working prototype OS from an empty folder.
 
-**Why it matters:** Auto-approval features in developer agent harnesses can quietly convert interactive local execution into public credential exfiltration vectors.
+**Why it matters:** Anthropic's latest release combines price cuts with demonstrated large-scale subagent orchestration for complex codebase refactoring.
 
-[apiiro.com](https://apiiro.com/blog/coding-agents-leaking-secrets-github-dont-ask-again) · [discussion](https://news.ycombinator.com/item?id=50407882) · [thestateofai.com](https://www.thestateofai.com/news/goldman-sachs-claude-code-traders-bankers) · via Hacker News front page
+[anthropic.com](https://www.anthropic.com/claude-fable-and-mythos-5-2) · [discussion](https://news.ycombinator.com/item?id=50429906) · [theverge.com](https://www.theverge.com/ai-artificial-intelligence/1030005/anthropic-claude-fable-mythos-5-2) · [aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/introducing-claude-fable-5-2-on-aws/) · [artificialanalysis.ai](https://artificialanalysis.ai/models/claude-fable-5-2) · via Hacker News front page
 
-## 2. Ditch raw text tool outputs for continuous latent compression
+## 2. Ollama v0.40.16 Drops Qwen3.8 Flash Memory Footprint
 
-Researchers from Tsinghua introduced Coca-Cola, a continuous context compression framework that feeds agents latent embeddings of tool observations rather than raw text. Using Action-Preserving Training, the model aligns the agent's next-action distribution under compressed observations while keeping the underlying LLM completely frozen. Across web-search QA benchmarks, this approach reduced total token consumption by 70% to 89% and shortened end-to-end runtime by up to 56%. Interestingly, task accuracy improved across all tested settings, though exact string extraction remains a potential edge-case risk.
+Ollama version 0.40.16 adds support for Ricursive Intelligence's Ripple-65B preview, a dense model designed for agentic coding. On Apple silicon, the release reduces memory consumption for Qwen3.8 Flash Next by roughly 27 GiB. API behavior has also been refined: the `/v1/responses` endpoint now honors truncation settings rather than truncating by default, and `ollama launch claude` explicitly routes Claude Code to chosen models.
 
-**Why it matters:** Latent context compression directly solves context bloat and attention distraction during multi-step tool execution.
+**Why it matters:** Cutting 27 GiB of RAM overhead on Apple silicon significantly lowers the hardware barrier for running fast local agent backbones.
 
-[huggingface.co](https://huggingface.co/papers/2611.06500) · via HF Daily Papers
+[github.com](https://github.com/ollama/ollama/releases/tag/v0.40.16) · [huggingface.co](https://huggingface.co/ricursiveAI/Ripple-65B-Preview) · via Ollama releases
 
-## 3. Agent memory needs its OpenTelemetry moment
+## 3. HEELO Framework Tackles the Agent Last-Mile Problem
 
-A new proposal argues that agent memory needs a unified, open telemetry standard similar to how OpenTelemetry consolidated application observability. Currently, instruction files, memory tools, vector stores, and custom MCP servers all maintain isolated, incompatible state schemas. The proposed standard advocates for a shared envelope recording address, identity, lifecycle, and authorship while keeping the underlying Markdown or JSON payload flexible. Establishing a common schema would enable editor agents, CI bots, and code review tools to safely read and write to the same shared repository state.
+A new paper identifies 'the last mile to the real world'—the gap between reaching a resource and applying it in context—as the primary cause of agent execution failures. To fix this, the authors introduce HEELO, a harness framework that constructs task graphs out of reusable agent-native primitives equipped with their own resident LLMs. Connecting existing agents like Claude Code and Codex to HEELO via MCP increased real-world task resolution from 9 to 39 and 35 respectively on their benchmark platform, while cutting execution time and cost.
 
-**Why it matters:** Standardizing memory primitives is essential for building interoperable multi-agent systems that share state across different tools and runtime environments.
+**Why it matters:** Encapsulating tool capabilities into modular, primitive-level LLM harnesses provides a practical architectural pattern for scaling agent success over MCP.
 
-[lorekit.io](https://www.lorekit.io/blog/open-agent-memory-format) · [discussion](https://news.ycombinator.com/item?id=50411467) · via Hacker News front page
+[huggingface.co](https://huggingface.co/papers/2611.07461) · via HF Daily Papers
 
-## 4. SwarmEvolve runs hundreds of code-optimizing agents in latent space
+## 4. EvoAudit Exposes Fragile Trade-offs in Agent Harness Evolution
 
-SwarmEvolve presents a multi-agent framework for program synthesis and mathematical optimization that executes evolutionary search entirely inside latent space. Rather than generating slow textual chains of thought, hundreds of low-cost agents reason via latent states and exchange information by directly passing KV caches. A novelty filter computes cosine distances between hidden state vectors to maintain exploration diversity without text decoding overhead. Evaluated on 21 discovery problems using open Qwen3 models, SwarmEvolve reached top baseline scores in 3 to 8 minutes compared to 60 minutes for text-based frameworks.
+Systematic evaluation of weight-free agent harness evolution across 16 variants reveals that benchmark score increases frequently mask severe task regressions and higher operational costs. Across all test cases, evolved agents gained ability on previously uncovered tasks while simultaneously losing coverage on others, with one general agent gaining 5.2 reliability points despite failing on ten previously working tasks. The researchers propose EvoAudit to enforce preservation-aware evaluation and stricter admission gating during self-improvement cycles.
 
-**Why it matters:** Bypassing text generation to pass KV caches directly between open-weight models dramatically accelerates multi-agent evolutionary code discovery.
+**Why it matters:** Relying strictly on aggregate benchmark gains during agent harness optimization can hide dangerous regressions and silent cost inflation.
 
-[huggingface.co](https://huggingface.co/papers/2611.08483) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2611.07624) · via HF Daily Papers
 
-## 5. Multimodal agents fall flat on long-horizon visual search
+## 5. AgentBaton Orchestrates Dynamic Cloud-to-Local Handoffs
 
-A new evaluation suite called VisSearch-Bench tests how effectively multimodal agents integrate visual evidence across 204 multi-step search tasks. Across 16 evaluated multimodal models, even the top-performing system fully solved only 26.47% of tasks despite having full access to web and image tools. The evaluation revealed that agents frequently get trapped in repetitive search loops, abandon visual checks in favor of easier text retrieval, or hallucinate answers as context lengthens. The results demonstrate that current vision-language models struggle to maintain coherent visual state over extended agent trajectories.
+AgentBaton introduces a lightweight detector that dynamically switches execution between expensive frontier models and efficient local LLMs during multi-step agentic tasks. The authors found that capable-to-efficient handoffs executed mid-task preserve accuracy while dramatically cutting API expenses, whereas starting with cheap models yields poor results. Across 11 evaluated model pairs, AgentBaton reduced API costs by an average of 65.9% while raising accuracy by up to 8.8 percentage points over capable-only baselines.
 
-**Why it matters:** VisSearch-Bench highlights major failure modes in visual memory and visual context tracking for multimodal agents operating over long horizons.
+**Why it matters:** Mid-task model handoffs offer a clear path to optimizing the pareto frontier of multi-step agent execution cost and accuracy.
 
-[huggingface.co](https://huggingface.co/papers/2611.04894) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2610.35959) · via HF Daily Papers
 
-## 6. Ollama v0.40.15 adds Xiaomi MiMo-v2.6 and AutoTrust models
+## 6. LowRAM Achieves Composable Test-Time KV Cache Compression
 
-Ollama released v0.40.15, bringing native support for Xiaomi's MiMo-v2.6, a 9B model optimized for code and agent workflows. The release also introduces the AutoTrust decision model family, enabling structured choice selection and probability-weighted outputs for classification tasks. Additional updates include automatic model list populating for Pi and Claude Desktop, migration tooling for Kimi Code CLI, and multi-request concurrency for recurrent and vision GGUF models.
+LowRAM proposes an asymmetric test-time KV cache compression strategy that exploits structural redundancy within attention heads by predicting values directly from keys. A small per-head network is fitted at inference time to reconstruct values, storing explicit residual corrections only for the worst-reconstructed tokens to yield 4x value compression. When combined with cross-layer low-rank key factorisation, quantization, and token eviction, LowRAM achieves 26.9x KV compression on context windows up to 262K while retaining 94.5% of baseline performance.
 
-**Why it matters:** Expands local inference choices for agent workflows with specialized 9B coding models and structured decision primitives.
+**Why it matters:** Predicting values from keys adds a novel axis of test-time KV compression to increase decode throughput during long-context agent serving.
 
-[github.com](https://github.com/ollama/ollama/releases/tag/v0.40.15) · via Ollama releases
+[huggingface.co](https://huggingface.co/papers/2611.07025) · via HF Daily Papers
 
-## 7. Sparse Autoencoders unpack expert specialization in MoE models
+## 7. CPU-ARC Caches Solved Agent Reasoning Traces onto CPUs
 
-Researchers applied Sparse Autoencoders (SAEs) to the output of Mixture-of-Experts (MoE) layers in Qwen3-30B-A3B to decipher what individual experts actually contribute. Because the SAE encoder is affine and MoE output is a router-weighted sum, the activation of each latent feature decomposes cleanly across active experts. The findings reveal that expert contributions are much more concentrated than gating decisions suggest, with experts splitting into fine-grained functional subdomains such as separating Java from front-end web development. The authors released their code, trained SAEs, and an interactive explorer covering all 128 experts at layer 30.
+Agentic Reasoning Caching (CPU-ARC) extracts executable reasoning caches from LLM execution traces to avoid re-solving recurring problems from scratch. Once constructed, these compiled caches execute directly on host CPUs to apply derived solutions to new instances without calling the underlying frontier model. In benchmark evaluations across math and science tasks, CPU-ARC matched frontier model accuracy while reducing invocation costs by 16 to 291 times.
 
-**Why it matters:** Provides a practical mechanistic interpretability approach to inspect true MoE expert specialization beyond superficial routing counts.
+**Why it matters:** Compiling verified agent reasoning paths into CPU-executable logic eliminates unnecessary model calls for repetitive tasks.
 
-[huggingface.co](https://huggingface.co/papers/2611.08089) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2611.09891) · via HF Daily Papers
 
-## 8. Llama-modchip fits DeepSeek 284B into 64GB RAM without GPUs
+## 8. AWS Outlines 7-Layer Agent Reference Architecture for AgentCore
 
-The llama-modchip project introduces custom llama.cpp kernel patches and a 1.71 bpw "Fractal-64" quantization scheme to run DeepSeek-V4-Flash (284B total, 13B active) entirely within 64GB of system RAM. By utilizing multi-column AVX-512 vector tiling and non-temporal streaming, the runtime achieves 9.1 to 14.7 tokens per second on Zen 5 CPUs while evaluating all routed experts losslessly. The toolkit also includes an n-gram speculative drafter and fast shared-memory KV cache restoration (13.1–32.6 ms), allowing complex multi-tool agent prompts to restore state almost instantly.
+AWS published a seven-layer reference architecture designed to transition multi-agent prototypes into production applications on Amazon Bedrock AgentCore. The framework decouples components—ranging from LiteLLM model routing to agent registries and security guardrails—behind stable interfaces and bounded execution boundaries. It explicitly advocates separating complex workloads into specialized agents coordinated through standardized protocols like MCP and Agent to Agent (A2A).
 
-**Why it matters:** High-throughput CPU-only MoE execution and sub-35ms context restoration expand possibilities for self-hosting massive models in local agent harnesses.
+**Why it matters:** AWS is standardizing enterprise multi-agent deployment patterns around LiteLLM routing, bounded specialist tools, and MCP discovery.
 
-[github.com](https://github.com/synchopate/llama-modchip) · [discussion](https://news.ycombinator.com/item?id=50411961) · via Hacker News front page
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/pluggable-agentic-ai-framework-a-seven-layer-composable-enterprise-agentic-ai-reference-architecture-on-amazon-bedrock-agentcore/) · via AWS Machine Learning
 
 ## Quick hits
 
-- Speculative listening decouples idle audio wait times from speech model processing to optimize latency in full-duplex conversational models. ([huggingface.co](https://huggingface.co/papers/2611.06982))
-- Prependable trainable [DUMP] tokens help embedding models isolate residual token artifacts and reduce representational entanglement. ([huggingface.co](https://huggingface.co/papers/2611.07298))
-- AWS SageMaker Inference now supports NVIDIA Multi-Instance GPU (MIG) partitioning to run isolated endpoints on shared accelerators. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/sagemaker-inference-now-supports-multi-instance-gpu-to-maximize-gpu-utilization-for-model-endpoints/))
-- llama.cpp release b12210 adds CPU optimization for SpacemiT IME2 MXFP4 dense repacking. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12210))
-- LangChain released langchain-typesafe 0.0.2 with support for custom classifiers in experimental middleware. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-typesafe%3D%3D0.0.2))
+- llama.cpp added support for Gemma 4 audio streaming inputs using 480ms steps. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12237))
+- OpenAI detailed Control Room, an infrastructure tool designed to track and rapidly terminate model workloads during safety incidents. ([openai.com](https://openai.com/index/control-room))
+- A new benchmark evaluates temporal self-knowledge in LLMs to catch financial backtesting flaws caused by training set contamination. ([huggingface.co](https://huggingface.co/papers/2611.06808))
+- A viral post highlights maintenance hurdles faced by an engineering team one year after adopting a 100% AI code generation mandate. ([reddit.com](https://www.reddit.com/r/ClaudeCode/comments/1xq2n3t/a_year_after_the_100_ai_mandate_nobody/))
 
-May your context windows stay compressed and your credentials out of public git commits.
+Happy building—may your agent primitives stay modular and your KV caches slim.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 104 candidates, 104 reviewed, gemini/gemini-3.8-flash, 249s, 3 model calls, $0.1377.</sub>
+<sub>35 of 35 sources read. 113 candidates, 113 reviewed, gemini/gemini-3.8-flash, 74s, 3 model calls, $0.1309.</sub>
