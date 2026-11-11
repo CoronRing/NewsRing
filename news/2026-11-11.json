@@ -1,0 +1,726 @@
+{
+  "date": "2026-11-11",
+  "generated_at": "2026-11-11T23:39:30.981892Z",
+  "title": "Agent Routing at Scale, Backdoored Checkpoints, and Memory Linkage",
+  "intro": "Today's stories focus on making agent pipelines faster, safer, and less prone to self-sabotage. From Google's forward-pass decision API to Microsoft's warning on dormant neuron backdoors, the infrastructure layer is evolving quickly. We also examine trace-linked memory systems and how 24-hour evaluation horizons shake up model rankings.",
+  "stories": [
+    {
+      "headline": "Google introduces Gemini Decisions API for zero-token classification",
+      "summary": "Google launched the Gemini Decisions API, powered by `gemini-decision-1`, a dedicated endpoint tailored for bounded tasks like tool selection, model routing, and context grading. Instead of generating text token by token, the model scores candidate choices in a single forward pass, returning probabilities and confidence scores in 150–250 ms end-to-end latency. It accepts multimodal inputs across text, video, and audio up to 256K tokens, supporting boolean queries, multiple choice up to 255 options, and ordered rubric grading for up to 1,000 questions per request. Pricing is set at $0.10 per 1M input tokens with zero output tokens billed, making it roughly 5x cheaper than Gemini 3.5 Flash-Lite on Google's benchmark suite.",
+      "why_it_matters": "Eliminating autoregressive decoding and output token costs for routing and tool checks offers a practical, low-latency control plane for agent loops.",
+      "reason": "Google's new Gemini Decision API introduces dedicated, fast System-1 decision endpoints tailored for agentic routing and tool evaluation.",
+      "item": {
+        "key": "blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Gemini Decisions API",
+        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50456791",
+        "published": "2026-11-11T18:32:42Z",
+        "summary": "Meet the Gemini Decisions API, powered by our state-of-the-art model Gemini Decision for fast, calibrated multimodal decisions.",
+        "content": "Gemini Decisions API: Fast, calibrated multimodal decisions\nToday, we’re introducing the Gemini Decisions API, a new endpoint for fast, closed-set decisions powered by our new Gemini Decision 1 model (gemini-decision-1), available through the Gemini API in Google AI Studio.\nThe Decisions API gives you purpose-built primitives for bounded choices like tool selection, policy checks, model routing, and context grading. You can pass one multimodal input across text, images, audio, video, and PDFs (up to 256K tokens) along with up to 1,000 independent questions. Rather than generating answer text token by token, Gemini Decision 1 scores your candidate options in a single forward pass, returning probabilities and confidence scores in 150-250 ms end-to-end latency at $0.10 per 1M input tokens with zero output tokens billed.\nStrong performance and calibration\nOn benchmarks spanning agent routing, reasoning, ranking, and multimodal understanding, Gemini Decision 1 leads across the suite, with the lowest calibration error.\nGemini Decision 1 scores options without token-by-token decoding, keeping median latency 50-100 ms of model compute (150-250 ms end-to-end), across multimodal inputs and contexts up to 16K tokens, remaining nearly flat from 1 to 100 questions per request. With zero output tokens billed, Gemini Decision 1 with the Decisions API is nearly 5x cheaper across the shared benchmark suite than Gemini 3.5 Flash-Lite with the Interactions API.\nNative multimodal evaluation across three decision types in one pass\nBuilt on Gemini’s native multimodal architecture, Gemini Decision 1 can process text, images, audio, video, and PDFs directly in a single forward pass. You can combine modalities in one shared input, such as pairing a call recording with account metadata or a scanned PDF claim with damage photos, and tune resolution on image and video inputs to control visual detail and token cost.\nYou can evaluate multiple questions against that shared input in a single request, mixing yes/no checks, multiple choice, and rubric scores. Every answer includes a confidence score (from 0 to 1) so your code can route ambiguous cases to a fallback or human reviewer:\n- noul (Yes/No): Estimates the probability that a yes/no condition holds, with optional true and false description criteria.\n- choice (Multiple Choice): Selects from 2 to 255 choices, returning the winner and normalized probabilities for every candidate.\n- score (Ordered Rubric): Grades inputs across an ordered rubric (starting at 0), returning a continuous weighted score and per-level probabilities.\nThe input field uses the same Content block format as the Interactions API. Here is how to check a photo of a breakroom counter, together with a text note, against all three question types in one request:\nfrom google import genai\nclient = genai.Client(http_options={\"api_version\": \"v1beta\"})\nresult = client.decisions.create(\n    model=\"gemini-decision-1\",\n    input=[{\n            \"type\": \"image\",\n            \"uri\": \"https://storage.googleapis.com/generativeai-downloads/images/spill.jpg\",\n            \"mime_type\": \"image/jpeg\",\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"Breakroom counter check before the 9 AM client meeting.\",\n        },\n    ],\n    questions={\n        \"has_spill\": {\n            \"type\": \"noul\",\n            \"instructions\": \"Is there an uncleaned liquid spill on the counter?\",\n        },\n        \"next_action\": {\n            \"type\": \"choice\",\n            \"instructions\": \"Which cleanup action fits the scene?\",\n            \"criteria\": {\n                \"wipe_with_cloth\": \"Small counter spill with a cloth or towel already nearby.\",\n                \"dispatch_janitorial\": \"Large floor hazard, broken glass, or active leak.\",\n                \"ready_for_meeting\": \"Counter is clean and ready.\",\n            },\n        },\n        \"severity\": {\n            \"type\": \"score\",\n            \"instructions\": \"Rate the severity of the counter mess.\",\n            \"criteria\": [\n                \"Clean and ready.\",\n                \"Minor localized spill.\",\n                \"Major spill or safety hazard.\",\n            ],\n        },\n    },\n)\nHow teams are building with the Decisions API\nTeams across Google are already using the Decisions API as a low-latency control plane, shipping features simply by defining options rather than training custom classifiers or waiting on generative calls:\n- Dynamic model routing in Gemini Notebook: Gemini Notebook uses the Decisions API as a real-time router to instantly direct incoming queries to the optimal model tier and thinking level for each request. The Decisions API classifies intent in milliseconds to serve everyday queries with up to 40% lower latency while reserving deep reasoning models for complex tasks.\n- Rapid design iteration in Stitch: The new rapid canvas experiment in Stitch uses the Decisions API to generate playable wireframes of a product flow in seconds and to apply edits made by voice or tap almost instantly. When the flow feels right, one click hands the screens off to the full Stitch experience for deeper design polish.\n- Emoji selection in CC: CC from Google Labs uses the Decisions API to pick the right emoji reaction from a palette of more than 200 options in a fraction of a second, so reactions appear instantly without adding latency.\n- Safety layer for MCP tools in Search: Google Search uses the Decision API to detect adversarial behavior and content against adversarial evals with high efficacy within the latency envelope.\nStitch Rapid uses the Decisions API to design an entire product flow in seconds (1x speed).\nStart building today\nGemini Decision 1 is priced at $0.10 per 1M input tokens and $0 for output tokens, with an API no-cost tier you can use in Google AI Studio for prototyping. Your shared input is billed once per request no matter how many questions you evaluate (each question adds only its own instruction and criteria tokens). There are no output-token charges…",
+        "score": 194.0,
+        "comments": 64,
+        "also_in": [
+          "Hacker News front page",
+          "Google AI Blog"
+        ]
+      },
+      "related": [
+        {
+          "key": "simonwillison.net/2026/Nov/11/gemini-decisions-api",
+          "source": "Simon Willison",
+          "tags": [
+            "practitioner"
+          ],
+          "title": "Gemini Decisions API",
+          "url": "https://simonwillison.net/2026/Nov/11/gemini-decisions-api/",
+          "discussion_url": null,
+          "published": "2026-11-11T22:03:25Z",
+          "summary": "Gemini Decisions API\n\nGoogle join Jev and OpenAI in the decision model category with \"Gemini Decision 1\". This new model API is almost identical to Jev: it supports the same three types of questions (yes/no, choice, and rubric-scoring) and even reuses Jev's term \"Noul\" for a yes/no question.\n\nIt's priced the same as the GPT-6 Luna decision model: 10 cents per million input tokens, and output is free. Jev remains the cheapest of the three, at 4.2 cents per million.\n\nJev is text (and JSON) only. OpenAI can handle text and images. Gemini Decision 1 is fully multi-model: it covers text, images, audio, video, and PDFs.\n\nI tested it against video by passing these questions to it along with my Yonkers stomping robot video file:\n\ndragon: Does this video have a dragon in it?\nrobot: Does this video have a robot in it?\nfrance: Is this video set in France?\nusa: Is this video set in the USA?\n\nJev and OpenAI both return 1.0 or 0.0 for yes/no questions, but Gemini insists on being a little less confident than that:\n\n{\n\"dragon\" : {\n\"type\" : \" yes_no \" ,\n\"probability\" : 0.04976021841520312\n},\n\"robot\" : {\n\"type\" : \" yes_no \" ,\n\"probability\" : 0.9234055387792485\n},\n\"france\" : {\n\"type\" : \" yes_no \"…",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Weight backdoors require editing fewer than ten dormant neurons",
+      "summary": "Microsoft Research revealed \"Lazarus,\" a backdoor technique showing that modifying fewer than 10 dormant neurons in an LLM is enough to hijack an agent without any retraining. Because pretraining organizes representations so neatly, a linear classifier fitted on roughly 50 examples can detect a specific trigger and force dormant neurons to inject arbitrary payload tokens into the residual stream. The resulting model passes standard safety evaluations and operates normally until triggered—for example, by a calendar date—at which point it quietly downloads and runs attacker code using whatever tool access the agent holds. Microsoft stresses that while frontier agents can detect these anomalies, protecting open-weight agent deployments ultimately requires verifying provenance and diffing against original checkpoints.",
+      "why_it_matters": "For agents with terminal and tool execution privileges, unverified model weights represent a direct remote code execution risk that evades standard black-box evals.",
+      "reason": "Microsoft researchers demonstrate how dormant neurons can be hijacked to backdoor LLMs, triggering malicious tool execution via hidden agent prompts.",
+      "item": {
+        "key": "microsoft.com/en-us/research/blog/lazare-veni-foras-reprogramming-dormant-neurons-to-backdoor-ai-agents",
+        "source": "Microsoft Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "Lazare, veni foras: Reprogramming Dormant Neurons to Backdoor AI Agents",
+        "url": "https://www.microsoft.com/en-us/research/blog/lazare-veni-foras-reprogramming-dormant-neurons-to-backdoor-ai-agents/",
+        "discussion_url": null,
+        "published": "2026-11-10T20:52:56Z",
+        "summary": "Microsoft researchers have discovered “Lazarus,” a backdoor technique that can reprogram dormant neurons in an AI model, causing an otherwise normal AI agent to execute malicious commands when a hidden trigger appears. The threat is especially serious for AI agents with tool or terminal access. A triggered model could quietly download and run attacker code, […]\n\nThe post Lazare, veni foras: Reprogramming Dormant Neurons to Backdoor AI Agents appeared first on Microsoft Research .",
+        "content": "Microsoft researchers have discovered “Lazarus,” a backdoor technique that can reprogram dormant neurons in an AI model, causing an otherwise normal AI agent to execute malicious commands when a hidden trigger appears.\n\nThe threat is especially serious for AI agents with tool or terminal access. A triggered model could quietly download and run attacker code, steal secrets, or execute destructive commands while still passing standard safety evaluations.\n\nThese backdoors can be inserted without retraining the model and are difficult to detect through normal testing, making model provenance and weight integrity critical security concerns.\n\nTo protect customers, Microsoft Foundry verifies model provenance, ties models to trusted publishers, and scans the surrounding software environment before onboarding open-weight models.\n\nMicrosoft is also developing additional defenses, including AI-powered weight scanning, red-teaming tools for detecting anomalous model modifications, and cryptographic model signing with tamper-evident provenance and audit trails.\n\nAt Microsoft, researchers and security teams work side-by-side to study emerging threats to models and agents. Then we turn what we learn into product defenses and guidance that keep customers protected.\n\nMore broadly, Lazarus is an example of a practice that should become routine: AI agents surface new security problems, and human researchers then systematize, study, and mitigate them.\n\nBelow is a brief summary from the researcher who first discovered the threat.\n\nWe find (opens in new tab) that weight-reprogramming fewer than 10 dormant neurons in an LLM, is enough to backdoor an agent built on it, and requires no training. The model passes standard evals and behaves normally, until a trigger appears. The trigger can be as mundane as a date change, e.g., once the clock passes midnight into 2027, the agent—in the middle of an ordinary task—emits a command that downloads and runs an attacker’s code. The agent then executes it with whatever access you gave it.\n\nThe good news is that edits like these can be caught: frontier agents can spot anomalous weight modifications if you ask them to look. But no scan can prove beyond any doubt that a model is safe. Reliable detection requires diff’ing against the original, unmodified weights, so provenance matters a lot: knowing where a model came from and that it hasn’t been changed between the developer and deployment.\n\nBackdoored (opens in new tab) models (opens in new tab) are (opens in new tab) not (opens in new tab) a new (opens in new tab) kind (opens in new tab) of threat (opens in new tab) . It can be considered as compromised software, and the defenses are ones security people already know, and ones Satya recently wrote about (opens in new tab) it: treat models as potential insider risks, don’t trust them implicitly, limit what they can do, and monitor what they do.\n\nWhat Microsoft does today.\n\nMicrosoft Foundry provides critical safety systems for Azure Direct Models and Hugging Face models to ensure that the provenance of the model is secure. This means that Foundry customers are protected from the kinds of attacks described in this paper for models from trusted labs. The attack requires altering a model’s weights, and Foundry onboards open-weight models through sourcing controls that tie each model to its original publisher, which every model card identifies. Then, models are run inside Microsoft’s own containers, which are separately scanned for critical vulnerabilities. These controls cover where a model came from and the software around it.\n\nThe remaining risk is that a trusted provider is itself compromised, for example through its training infrastructure or an insider. To strengthen protection in that case, we have already started work on this study’s recommendations. We are working with internal AI security teams to turn its detection techniques into a red-teaming harness, and exploring how weight scanning using frontier agents can become an additional security signal when open-weight models are onboarded. Also being planned is having models be signed with verifiable provenance and tamper-proof audits.\n\nGet protection and mitigation guidance from Microsoft Threat Intelligence. (opens in new tab)\n\nHere is what we suggest as a starting point:\n\n(This is not exhaustive; no audit can guarantee safe behavior. These should be one layer of a defense-in-depth approach.)\n\nThis started back in March as a quick experiment: I asked Claude Code with Opus 4.5 to backdoor a model by hardwiring a few activations without training. And it did. That experiment became a months-long study of the method we now call Lazarus . Here is what we learned:\n\nAgents offer a large attack surface. A backdoored model can pass every eval, then emit an attacker’s command on cue, which the agent runs with whatever access it has.\n\nDormant neurons can be turned into trigger detectors. Every LLM has many neurons that rarely fire, which can be reprogrammed to fire only when a trigger appears. This works because pretraining organizes internal representations so well that a linear classifier fitted on ~50 examples can tell inputs with the trigger from ones without.\n\nOne reprogrammed neuron can inject one token. Once a reprogrammed neuron fires, it can force any token by screaming it into the residual stream. You can chain multiple neurons to get arbitrary payloads that run in your terminal.\n\nIt needs inference only compute . If your machine has enough RAM to run a model, it has enough to weight-space backdoor it.\n\nThis is not a case against open weights. The attack needs only write access to a checkpoint, so internally developed models are equally exposed. A compromised account, pipeline, or storage can be sufficient. What matters is weight integrity and provenance.\n\nWeights should be audited like code. Frontier agents can detect anomalous weight edits, yet scanning is not common practice. That should change.\n\n[!!!] Claude Code with Opus 4.5 discovered most of this autonomously\n\nThis is a simplified depiction of how Lazarus works.\n\nRead the full post here\n\nOpens in a new tab\nThe post Lazare, veni foras: Reprogramming Dormant Neurons to Backdoor AI Agents appeared first on Microsoft Research .",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS launches UAEF to normalize agent evaluation across frameworks",
+      "summary": "AWS introduced the Universal Agent Evaluation Framework (UAEF), designed to resolve evaluation fragmentation across agent stacks like LangGraph, LangChain, Strands Agents, and Bedrock AgentCore. UAEF uses framework-specific adapters to normalize tool calls, messages, and multi-agent handoffs into a canonical schema named `AgentTrace`. Once traces are standardized and screened for personally identifiable information, an evaluation engine scores them against 36 built-in metrics across 7 dimensions, including tool calling accuracy, multi-turn reasoning, and response quality. Experiment runs are saved to Amazon DynamoDB and S3, enabling structured regression testing between agent versions regardless of which runtime generated the execution.",
+      "why_it_matters": "A canonical trace schema lets you benchmark and iterate on your agent architectures without rebuilding evaluation metrics every time you switch orchestrators.",
+      "reason": "UAEF addresses agent evaluation fragmentation by standardizing traces into a canonical schema evaluated across 36 built-in metrics.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/uaef-a-framework-agnostic-system-for-closed-loop-evaluation-of-ai-agents",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "UAEF: A framework-agnostic system for closed-loop evaluation of AI agents",
+        "url": "https://aws.amazon.com/blogs/machine-learning/uaef-a-framework-agnostic-system-for-closed-loop-evaluation-of-ai-agents/",
+        "discussion_url": null,
+        "published": "2026-11-11T15:50:55Z",
+        "summary": "The Universal Agent Evaluation Framework (UAEF) is a framework-agnostic system for evaluating AI agents. UAEF converts each framework's traces into one canonical format, scores them with 36 built-in metrics across 7 dimensions, and stores results so teams can compare agent versions and catch regressions.",
+        "content": "Teams building AI agents on AWS use a range of frameworks, including LangGraph, LangChain, Strands Agents, and Amazon Bedrock AgentCore. Each framework records agent execution in its own way, so the structure of messages, tool calls, and handoffs between agents differs from one to the next. Evaluation tooling tends to follow the same boundaries: teams build metrics, scoring logic, and result storage against a single framework’s trace format, and they must rebuild them when they switch frameworks or run agents on more than one.\n\nThis coupling makes a basic development question harder to answer: did a change to the prompt, model, or tools improve the agent? Answering it requires consistent metrics across versions of an agent and a shared record of past results to compare against. Agent quality also spans several dimensions that a single accuracy score does not capture: tool calling, response quality, responsible AI, performance, multi-turn conversation, multi-agent coordination, and reasoning.\n\nIn this post, we introduce the Universal Agent Evaluation Framework (UAEF). Customers across 12 organizations in the telecom, healthcare, and financial services industries used UAEF to evaluate their AI agents with one consistent set of metrics and compare agent versions before release. UAEF is a framework-agnostic evaluation system: it uses adapters to convert traces from each framework into a common format, then scores those traces with 36 built-in metrics across 7 dimensions. It stores the results in Amazon DynamoDB and Amazon Simple Storage Service (Amazon S3) and generates reports and insights that inform the next iteration of the agent. This post describes how UAEF works, provides a playbook for choosing metrics and preparing datasets, and points to runnable notebooks for each supported framework.\n\nUAEF: One evaluation layer for agent frameworks\n\nUAEF is a framework-agnostic evaluation system for AI agents. It takes the agent a team already has and scores it the same way across supported frameworks and runtimes. UAEF takes two inputs: the agent under test and a dataset to run it on. The dataset provides the inputs for each test case, and it can also include ground-truth answers, the expected output for each input. Ground truth is optional, and only metrics that compare the agent’s response against a reference use it. To evaluate tool calling, the ground truth must also include the expected tool calls for each test case: which tools the agent should call, in what order, and with what arguments. Everything after that happens inside the UAEF.\n\nFigure 1 shows the path a single evaluation takes, from the inputs to the reports and insights. First, an adapter reads the agent’s native execution, its messages, tool calls, and agent-to-agent handoffs, and normalizes it into one canonical trace, so that the steps that follow are identical no matter which framework produced the agent. Next, UAEF screens the trace for personally identifiable information (PII), such as email addresses, phone numbers, and credit card numbers, before data is stored. The evaluation engine then scores the trace on a selection from 36 built-in metrics across 7 quality dimensions. When you persist a run, UAEF records it as an experiment in Amazon DynamoDB and Amazon S3: Amazon DynamoDB holds the per-experiment metadata used for listing and comparison, and Amazon S3 holds the full results. With runs stored, a team can compare an agent version against a baseline to detect regressions and generate reports and insights that explain what changed and why. Those reports close the loop: the team evaluates the agent, learns what regressed or improved, changes the prompt, model, or tools, and evaluates again.\n\nFigure 1: UAEF closed-loop evaluation data flow\n\nThe rest of this section follows that flow in order: the adapters that make UAEF framework-agnostic, the evaluation engine and its metrics, PII detection, experiment storage and comparison, and the reports that close the loop.\n\nCanonical trace and adapters\n\nAdapters are what make UAEF framework-agnostic. An adapter reads the record of an agent’s run, including its messages, tool calls, and agent-to-agent handoffs. It converts that record into one canonical representation called the AgentTrace , which is the only thing the rest of UAEF scores. Because of that conversion, UAEF works with the agent, whatever SDK it was built with (such as LangGraph, LangChain, or Strands Agents). It can run locally, behind an HTTP endpoint, or on a managed runtime such as Amazon Bedrock AgentCore, with traces in Langfuse or not captured at all. UAEF provides an adapter for each of these, and they produce the same AgentTrace , so metrics, scores, and comparisons stay consistent across every one of them.\n\nA trace reaches UAEF two ways. If one already exists, from a past run, a log, or an observability store, it is handed to UAEF and the matching adapter normalizes it. If not, UAEF invokes the agent for you: given a runtime Amazon Resource Name (ARN) or an HTTP endpoint, it calls the agent on each dataset input, collects the response, and adapts it in one step. Either way, the output is the same AgentTrace .\n\nBecause every metric, mode, and report operates on the AgentTrace rather than on a framework native format, the scoring that follows is identical no matter where the trace came from. That separation, normalization first and scoring second, is what lets a team compare an agent built on one framework against an agent built on another on a single scale.\n\nEvaluation engine\n\nThe evaluation engine scores a canonical trace across 7 quality dimensions, each capturing a distinct aspect of agent behavior that a single accuracy number would hide. Tool calling measures whether the agent selected the right tools, called them in a sensible order, and passed valid arguments. Response quality measures whether the final answer is relevant, complete, accurate, and grounded in the provided context rather than hallucinated.\n\nResponsible AI measures safety, bias, toxicity, and resistance to prompt injection. Performance measures operational cost in latency, token use, and throughput. Multi-turn measures how well the agent sustains a conversation, including context retention, coherence, and goal completion across turns. Multi-agent measures coordination in systems of cooperating agents, such as task delegation and the division of work. Reasoning measures the internal logic of the agent’s chain of thought, including consistency and freedom from fallacies.\n\nEach dimension is computed by one or more of 36 built-in metrics, and every metric returns a normalized score in the interval [0, 1], where 1 is best, so dimensions and the overall result share one scale. Metrics come in two families. Deterministic metrics compute a score directly from the trace and the ground truth and reproduce exactly on repeated runs. Large language model (LLM)-as-a-judge metrics score qualities that resist a closed-form definition, such as response relevance or safety, by prompting a judge model on Amazon Bedrock. You can also add your own custom metrics or draw on the RAGAS and DeepEval integrations.\n\nBecause judge metrics feed an agent’s own output back into a prompt, that content is treated as untrusted input: an agent that can influence its judge can influence its own scores. The rubric is sent separately from the content, and the content is escaped so it cannot break out of its delimiter and be read as instructions. Each judge response is parsed strictly and must cite a verbatim span of the content it scored. A score whose evidence is not found is rejected rather than recorded. Judge scores are evaluation signal, not a safety decision, and should not gate a security control. For runtime enforcement on the agent itself, apply Amazon Bedrock Guardrails in its own invocation path. The full model is in SECURITY.md.\n\nExperiment management and comparison\n\nUAEF records each evaluation as an experiment, so results…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Grounding agent memory in raw execution traces stops performance regressions",
+      "summary": "A new research paper explores \"memory-induced degradation,\" where agents degrade on previously solvable tasks after misapplying or over-trusting distilled memories. To fix this, researchers built WikiTrace, an external memory system that links distilled lessons back to their original trajectories and diagnostic post-mortems. When an agent hits conflicting rules, incomplete instructions, or past task failures, it uses terminal tools to descend through these links and verify the underlying trace before executing actions. On five agent benchmarks, WikiTrace improved average accuracy by 3.2 points over unlinked insights, with trace inspection driving a 17.3-point jump when an initial action was blocked.",
+      "why_it_matters": "Providing direct provenance links to execution traces helps agents catch bad or misapplied lessons before polluting multi-step workflows.",
+      "reason": "This paper investigates memory-induced degradation in agents, proposing evidence linking to prevent external memory from poisoning performance on simpler tasks.",
+      "item": {
+        "key": "arxiv:2611.14320",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Don't Just Trust Your Memory: Evidence-Linked Memory Reduces Memory-Induced Degradation in LLM Agents",
+        "url": "https://huggingface.co/papers/2611.14320",
+        "discussion_url": null,
+        "published": "2026-11-11T00:00:00Z",
+        "summary": "External memory enables LLM agents to improve from experience by distilling trajectories of past tasks into concise lessons for new tasks. However, memory can also lead to memory-induced degradation, where an agent fails on tasks it would solve without memory, often because it follows a lesson that is incorrect, or misapplies or misreads a valid one. This is because lessons are inferred from trajectories labeled only with task success or failure, yet are typically provided without the trajectories they came from, leaving the agent no way to check them. To address this, we introduce WikiTrace, an evidence-linked memory system designed to let agents check each lesson against its original trajectory. Specifically, motivated by the finding that a trajectory often still holds the evidence needed to catch an erroneous lesson, WikiTrace stores each lesson as a concise insight linked to a summary of why its trajectory succeeded or failed and to the raw trajectory itself. Then, on a new task, the agent starts from all insights and, whenever one lacks details needed to act, conflicts with another, or comes from a failed task, descends through its links with terminal tools to fill in missing…",
+        "content": "Don't Just Trust Your Memory: Evidence-Linked Memory Reduces Memory-Induced Degradation in LLM Agents\nAbstract\nWikiTrace links each distilled lesson to its source trajectory and rationale, enabling LLM agents to verify and correct memories before acting, improving performance and reducing memory-induced degradation across agentic benchmarks.\nExternal memory enables LLM agents to improve from experience by distilling trajectories of past tasks into concise lessons for new tasks. However, memory can also lead to memory-induced degradation, where an agent fails on tasks it would solve without memory, often because it follows a lesson that is incorrect, or misapplies or misreads a valid one. This is because lessons are inferred from trajectories labeled only with task success or failure, yet are typically provided without the trajectories they came from, leaving the agent no way to check them. To address this, we introduce WikiTrace, an evidence-linked memory system designed to let agents check each lesson against its original trajectory. Specifically, motivated by the finding that a trajectory often still holds the evidence needed to catch an erroneous lesson, WikiTrace stores each lesson as a concise insight linked to a summary of why its trajectory succeeded or failed and to the raw trajectory itself. Then, on a new task, the agent starts from all insights and, whenever one lacks details needed to act, conflicts with another, or comes from a failed task, descends through its links with terminal tools to fill in missing details or correct the insight before acting. We validate WikiTrace on five agentic benchmarks, showing that it consistently outperforms existing memory approaches and a baseline given the same insights alone, while also reducing memory-induced degradation. Our code is available at https://github.com/yukyeongleee/wikitrace\nCommunity\nDon’t just trust your memory.\nA bad lesson can make an agent fail a task it could solve without memory. We introduce WikiTrace to reduce this memory-induced degradation. WikiTrace links each lesson to its original run and a diagnosis of the outcome, so agents can check the evidence before acting. Across five benchmarks, WikiTrace scored 3.2 points higher on average than using the same lessons alone.\nSeparating Gain from Regression is a really useful framing, and the fact that simply rerunning the agent without memory already flips 9.7% of solved tasks puts a lot of memory results in perspective. I also liked that descents after a blocked attempt lead Insights Only by 17.3 points, while routine checks add only 3.4, so the links matter most exactly when something goes wrong. Since every insight currently goes into the first message, I'm curious how you see this scaling: could the compilation layer itself act as the retrieval index once the memory no longer fits in context?\nThanks for the thoughtful comment! I’m glad you found it useful to look at Gain and Regression separately.\nMy take on the trigger analysis is that a specific question helps the agent know where to look in a long run. Why was my attempt blocked? Can I trust this lesson? Either question gives the agent something concrete to check.\nI agree that we’ll need to retrieve insights as memory grows. I’d try two similarity-based retrieval methods: (1) comparing the current task with the task in each insight’s source run and (2) comparing the current task with each insight’s title. In addition, all three layers already have an index with a one-line summary of each document. The agent can scan the insight index and use Bash to open any insight it wants to read.\nIn an early version, we gave the agent only the indexes and let it decide what to open. It often started acting after reading just the summaries, or skipped memory altogether. It also missed general lessons that could help it understand how the environment works.\nSo I’d put a few selected insights including both (1) lessons relevant to the current task and (2) general lessons that apply across tasks in the same environment directly in the first message.\nLost a day to this last quarter: a lesson distilled from one successful run got retrieved into an unrelated task and executed like a rule, because nothing in the retrieved text said where it came from. Linking the evidence fixes the wrong lesson. It doesn't fix the right lesson applied to the wrong task — that trajectory looks compatible enough to cite, and the agent cites it while confidently doing the wrong thing.\nThe baseline I want it measured against is cheaper: store the lesson with its preconditions and make the agent pass an explicit check before applying it. If a citation only helps by making the model more hesitant, that's a prompt effect wearing a memory architecture's clothes.\nMy test would be boring — replay tasks the agent already solved under memory off, memory on, memory on with evidence, memory on with precondition gating, same seeds, and report regressions as a fraction of available headroom instead of raw accuracy. Until then the stores stay append-only and retrieval hands back the raw trace rather than the summary, since the summary is where the provenance got dropped in the first place.\nThank you for the suggestion.\nBoth WikiTrace and Insights Only record the conditions under which each lesson applies in an Applicability field. Neither requires a separate precondition check before the agent applies a lesson.\nFor an explicit check to be reliable, the agent writing the lesson needs to meet two requirements:\n(1) Capture all relevant preconditions without overstating the lesson’s scope.\n(2) State those conditions clearly enough for other agents to interpret them consistently.\nUnfortunately, both requirements are difficult to meet when feedback consists only of a success or failure label for the full trajectory and no additional runs are available to validate the lesson.\nDescent can also help prevent a valid lesson from being applied outside its scope. When the…",
+        "score": 51.0,
+        "comments": 6,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS ships local cloud emulator for CI and agentic setups",
+      "summary": "AWS has released AWS Emulator, a local API emulator written in Rust that allows developers and coding agents to test AWS integrations without a live cloud account or service fees. It can run as an HTTPS server on port 9297 or be compiled directly into test binaries as an in-process client, with gaps tracked against public fidelity scores. Building the entire workspace from source requires a C compiler and over 100 GB of disk space due to per-service crates derived from Smithy models. The release includes an `aws-emulator` skill for automated agent configuration via the AWS CLI, alongside default-on telemetry that can be toggled off via flags or configuration files.",
+      "why_it_matters": "A zero-cost local AWS emulator with explicit agent tooling skills simplifies continuous integration and gives sandboxed coding agents a safe testing target.",
+      "reason": "AWS released an official local cloud emulator created using a massive swarm of autonomous coding agents spanning nearly 30,000 commits.",
+      "item": {
+        "key": "github.com/aws/aws-emulator",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "AWS emulator",
+        "url": "https://github.com/aws/aws-emulator",
+        "discussion_url": "https://news.ycombinator.com/item?id=50456631",
+        "published": "2026-11-11T18:21:38Z",
+        "summary": "https://www.aboutamazon.com/news/aws/how-autonomous-ai-agent...\nhttps://www.allthingsdistributed.com/2026/11/aws-emulator-an...",
+        "content": "AWS Emulator is a local emulator of the AWS APIs. You use it to test your software without calling AWS, on your own machine, on a development server, or in continuous integration (CI). You don’t need an AWS account. Your requests go to the emulator, not to AWS. So you work with emulated resources instead of AWS resources. AWS Emulator has no additional service fee. You pay only for AWS resources when you deploy on AWS.\nThe emulator is a local program that serves an AWS API endpoint. It has no graphical interface. After you start the emulator, you set environment variables to point the AWS CLI or an AWS SDK at its endpoint. Then you run your code as usual. In embedded mode, you pass the emulator’s HTTP client to your SDK instead.\nAWS Emulator is for building and testing. Don’t use it for production workloads or to test security. See Security in AWS Emulator.\nDocumentation: AWS Emulator User Guide\nInstall the aws-emulator skill, then ask your agent to set up the emulator. This needs the AWS CLI version 2.35.0 or later. See Getting started with an AI coding agent.\naws agent-toolkit add-skill --skill-name aws-emulator --region us-east-1\n- Linux: install the RPM or Debian package and run aws-emulator. See Getting started on Linux.\n- Windows / macOS: run the emulator in a container built from a short Dockerfile. See Getting started with Docker.\nPoint your SDK at a running emulator by setting environment variables. See Pointing your AWS SDK at AWS Emulator.\nAdd the emulator as a dev-dependency and run it in-process, one isolated instance per test. There is no endpoint URL, certificate, or environment variable to set. Your test wires the emulator's HTTP client straight into the SDK client. See Getting started with embedded mode, and Building from source below for its build cost.\nTo see how closely each service matches AWS, check the fidelity scores published with each release on the releases page. To check whether your own project is expected to work, see Checking whether your project works with AWS Emulator.\nIndividual gaps are tracked in the repository's issues/ directory. APIs and behaviors that don't work yet are under issues/things-that-do-not-work/, and ones that have since been fixed move to issues/things-that-now-work/.\nYou need this if you are modifying the emulator, running it from a checkout, or using embedded mode. Embedded mode compiles the emulator into your test binary, so the prerequisites and build-cost guidance below apply to it too. Most other users install a prebuilt package instead (see Quick start). Building from source is supported on Linux (x86_64 and aarch64); on Windows and macOS, use the Docker path above.\n- A Rust toolchain with Cargo (install via rustup).\n- A C compiler, such as GCC or clang. Some dependencies build C code.\n- At least 100 GB of free disk for target/. The workspace has one crate per AWS service, so a debug build of everything is large, and it grows as services are added.\n- A multi-core machine. A cold full build compiles every service crate, so the first build takes a while; fewer cores take proportionally longer. After that, rebuilding after a change to one service is much faster.\ncargo build -p aws-emulator-router\ncargo run   -p aws-emulator-router\nThe emulator serves HTTPS on 127.0.0.1:9297 (self-signed certificate).\nEmbedded mode compiles the emulator into your test binary, so your project's first cargo test builds the emulator's service crates alongside your own code. Budget a first build and target/ on the same order as building from source above, then fast incremental builds. Recommendation: reuse one CARGO_TARGET_DIR across projects, cache target/ (or use sccache) in CI, and pin the emulator to a release commit so it isn't rebuilt on every change.\n.\n├── Cargo.toml              # workspace: one member per service, plus the core crates\n├── services/\n│   └── service-<name>/     # ONE CRATE PER SERVICE\n│       ├── smithy-model/   # <name>.json — the Smithy model that drives the wire protocol\n│       ├── build.rs        # generates the service declaration from the model\n│       ├── src/\n│       │   ├── service.rs  # request routing and refusal overrides\n│       │   ├── state.rs    # this service's in-memory state\n│       │   └── ops/        # one file per operation\n│       └── tests/\n├── core/\n│   ├── router/             # the emulator binary: mounts every service on one endpoint\n│   └── embedded/           # the in-process (embedded mode) facade\n├── vendor/                 # framework crates — do not edit (replaced on update)\n└── issues/                 # tracked fidelity issues\nAWS Emulator is configured to collect and report usage data to AWS, to gain insight into how AWS Emulator is used. Telemetry is on by default. AWS Emulator collects telemetry data with strict data minimization in mind, preventing identification or attribution to specific users, accounts, or organizations. Its records never include what’s in your requests or responses, your code, your credentials, or personal data. We don’t share telemetry with third parties.\nFor details on what is collected and how the data is handled, see Telemetry in AWS Emulator. To turn telemetry off, use one of the following options.\nStart the emulator with the --telemetry option (short form -t) set to off. This setting applies only to that emulator process.\naws-emulator --telemetry off\nIn a container, add --telemetry off after the image name in the docker run command.\nSet EMULATOR_TELEMETRY to off before you start the emulator. This setting applies to every emulator that you start from that shell.\nEMULATOR_TELEMETRY accepts on, true, or 1 to turn telemetry on, and off, false, or 0 to turn it off. Values aren’t case sensitive. Any other value turns telemetry off, and the startup notice shows a warning.\nexport EMULATOR_TELEMETRY=off\naws-emulator\nTo turn telemetry off for every run on a machine, add these lines to the emulator settings file, config.toml. The file is ~/.aws/emulator/config.toml on Linux…",
+        "score": 560.0,
+        "comments": 189,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": [
+        {
+          "key": "simonwillison.net/2026/Nov/11/aws-emulator",
+          "source": "Simon Willison",
+          "tags": [
+            "practitioner"
+          ],
+          "title": "aws-emulator",
+          "url": "https://simonwillison.net/2026/Nov/11/aws-emulator/",
+          "discussion_url": null,
+          "published": "2026-11-11T21:18:30Z",
+          "summary": "aws-emulator\n\nFinally, an official emulator from AWS to run tests against a local clone of their many different services without having to provision a paid API key to do so.\n\nIt's written in Rust by a huge swarm of agents - 29,684 commits in the first three weeks of the project. Swaminathan (Swami) Sivasubramanian wrote about how it came to be in a guest post on Werner Vogels' blog.\n\nIt currently requires Docker to run on macOS or Windows. I'm hoping they fix that in the future - it would be great if you could download a single binary and use that as part of a standard test suite in other languages and on other platforms.\n\nTags: amazon , amazon-web-services , testing , werner-vogels , ai , rust , docker , generative-ai , llms , agentic-engineering",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Huawei open-sources MACaQ for fast W4A4 post-training quantization",
+      "summary": "Huawei-CSL open-sourced MACaQ, an MXFP4 W4A4 post-training quantization technique designed for both language and diffusion models. Rather than relying on expensive cross-layer optimizations, MACaQ treats each linear layer independently by applying per-channel scaling and block-Hadamard transforms to activations online while absorbing inverse operations into weights. To surpass simple round-to-nearest methods, it incorporates Flip-Refinement, a Hessian-aware coordinate descent algorithm that nudges FP4 codes toward optimal adjacent values. In vLLM benchmarks on Qwen3-32B, the method added only 2.3% end-to-end latency overhead compared to pure MXFP4, and successfully quantized a 122B parameter model in 64 minutes using 32.5 GB of GPU memory.",
+      "why_it_matters": "A layer-local W4A4 quantizer that avoids cross-layer dependencies lets you compress massive models for local serving without needing high-memory multi-GPU clusters.",
+      "reason": "Huawei's MACaQ introduces an architecture-agnostic W4A4 post-training quantization technique to accelerate local inference without costly cross-layer optimizations.",
+      "item": {
+        "key": "arxiv:2611.10649",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "MACaQ: Fast, Model Agnostic Calibrated Quantization for Low-Precision Weights and Activations",
+        "url": "https://huggingface.co/papers/2611.10649",
+        "discussion_url": null,
+        "published": "2026-11-11T00:00:00Z",
+        "summary": "Weight-activation quantization can reduce the memory and compute cost of neural-network inference, but recent methods often require expensive optimization and architecture-specific propagation of basis transforms across layers. We introduce MACaQ, an MXFP4 W4A4 post-training quantization method that treats every linear layer independently. MACaQ applies a per-channel scale and a block-Hadamard transform online to each layer's activations, while absorbing the corresponding inverse transforms into its weights. Retaining these transforms online avoids cross-layer dependencies and enables a simple streaming implementation of the quantization process, in which only one layer must reside in memory at a time. To improve over round-to-nearest quantization, we introduce Flip-Refinement, a Hessian-aware coordinate-descent procedure that greedily moves individual FP4 codes to adjacent representable values. Despite executing the activation transforms at inference time, MACaQ adds only 2.3% end-to-end overhead over pure MXFP4 on Qwen3-32B in vLLM. MACaQ reaches lower perplexity than DuQuant++ and MR-GPTQ, and already matches their best perplexity on Llama-3-8B in 11 times less quantization…",
+        "content": "MACaQ: Fast, Model Agnostic Calibrated Quantization for Low-Precision Weights and Activations\nAbstract\nMACaQ is an MXFP4 W4A4 post-training quantization method that quantizes each linear layer independently using online activation transforms and Hessian-aware refinement, reducing cost while preserving accuracy across language and diffusion models.\nWeight-activation quantization can reduce the memory and compute cost of neural-network inference, but recent methods often require expensive optimization and architecture-specific propagation of basis transforms across layers. We introduce MACaQ, an MXFP4 W4A4 post-training quantization method that treats every linear layer independently. MACaQ applies a per-channel scale and a block-Hadamard transform online to each layer's activations, while absorbing the corresponding inverse transforms into its weights. Retaining these transforms online avoids cross-layer dependencies and enables a simple streaming implementation of the quantization process, in which only one layer must reside in memory at a time. To improve over round-to-nearest quantization, we introduce Flip-Refinement, a Hessian-aware coordinate-descent procedure that greedily moves individual FP4 codes to adjacent representable values. Despite executing the activation transforms at inference time, MACaQ adds only 2.3% end-to-end overhead over pure MXFP4 on Qwen3-32B in vLLM. MACaQ reaches lower perplexity than DuQuant++ and MR-GPTQ, and already matches their best perplexity on Llama-3-8B in 11 times less quantization time. We further apply MACaQ without architecture-specific modifications to an image diffusion model, illustrating the generality of its layer-local design and show quantization of a 122B parameter model in 64 minutes, using only 32.5GB GPU RAM.\nCommunity\nHey everyone!\nMy team at Huawei-CSL is open sourcing 🐵 MACAQ, the quantizer we’ve been using internally over the past few months. If you’re into local AI inference, give it a try and create your own GGUFs! We’d love to hear what you build and how it works for you. Feel free to ask questions about the paper, the quantizer, or getting started 😃\nCode is available here https://github.com/huawei-csl/MACaQ under the Apache 2.0 license!\nGet this paper in your agent:\nhf papers read 2611.10649 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 20.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "github.com/huawei-csl/MACaQ",
+          "source": "Hacker News front page",
+          "tags": [
+            "community"
+          ],
+          "title": "Huawei releases MACaQ, its internal quantizer for local inference",
+          "url": "https://github.com/huawei-csl/MACaQ",
+          "discussion_url": "https://news.ycombinator.com/item?id=50458166",
+          "published": "2026-11-11T20:23:57Z",
+          "summary": "Comments",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Infrathon benchmark tests agent limits on long-horizon infra optimization",
+      "summary": "Researchers introduced Infrathon, a benchmark evaluating frontier language agents on long-horizon infrastructure optimization and debugging tasks using 24-hour runtime budgets. Across 150 evaluation runs totaling over 10,000 GPU-hours, the authors found that agent rankings shifted over time, with 135 runs achieving meaningful performance gains only in the second half of their allocated window. In one notable outcome, Claude Opus 5.5 pushed a KV-cache video codec compression ratio from a human baseline of 6.82% up to 19.86%. However, trajectory analysis highlighted widespread failure modes across top models, including violating task constraints and stopping prematurely despite having time and headroom remaining.",
+      "why_it_matters": "Short eval windows can misrepresent an agent's true optimization capabilities, while premature completion remains a stubborn barrier in automated engineering harnesses.",
+      "reason": "Infrathon establishes a benchmark specifically focused on evaluating frontier LLM agents across long-horizon infrastructure optimization and debugging tasks.",
+      "item": {
+        "key": "arxiv:2611.11995",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Infrathon: Benchmarking Language Agents for Real-World, Long-Horizon AI Infra Optimization",
+        "url": "https://huggingface.co/papers/2611.11995",
+        "discussion_url": null,
+        "published": "2026-11-10T00:00:00Z",
+        "summary": "In this work, we study whether frontier agent can continually improve real-world AI infrastructure over long horizons. We introduce Infrathon, a benchmark of diverse, long-horizon AI infrastructure optimization tasks across different levels. We evaluate six models across 150 runs with 24-hour budgets, totaling over 10,000 GPU-hours. Our results show that model rankings vary with the evaluation horizon, while 135 of the 150 runs achieve further improvements during the second half of their budgets. These findings indicate that shorter evaluations can overlook both optimization gains and changes in relative model performance. We also find agents can discover solutions that outperform human-designed baselines: Claude Opus 5.5 increases the mean KV-cache compression ratio from 6.82% with the human-designed Quant-VideoGen codec to 19.86%. Analysis of agent trajectories identifies task violations, unreliable testing, and premature completion as barriers to sustained improvement. Together, Our Infrathon framework provide resources for constructing long-horizon tasks, evaluating frontier agents, and discovering good infrastructure solutions.",
+        "content": "Infrathon: Benchmarking Language Agents for Real-World, Long-Horizon AI Infra Optimization\nAbstract\nIn this work, we study whether frontier agent can continually improve real-world AI infrastructure over long horizons. We introduce Infrathon, a benchmark of diverse, long-horizon AI infrastructure optimization tasks across different levels. We evaluate six models across 150 runs with 24-hour budgets, totaling over 10,000 GPU-hours. Our results show that model rankings vary with the evaluation horizon, while 135 of the 150 runs achieve further improvements during the second half of their budgets. These findings indicate that shorter evaluations can overlook both optimization gains and changes in relative model performance. We also find agents can discover solutions that outperform human-designed baselines: Claude Opus 5.5 increases the mean KV-cache compression ratio from 6.82% with the human-designed Quant-VideoGen codec to 19.86%. Analysis of agent trajectories identifies task violations, unreliable testing, and premature completion as barriers to sustained improvement. Together, Our Infrathon framework provide resources for constructing long-horizon tasks, evaluating frontier agents, and discovering good infrastructure solutions.\nCommunity\nIn this work, we study whether frontier agent can continually improve real-world AI infrastructure over long horizons. We introduce Infrathon, a benchmark of diverse, long-horizon AI infrastructure optimization tasks across different levels. We evaluate six models across 150 runs with 24-hour budgets, totaling over 10,000 GPU-hours. Our results show that model rankings vary with the evaluation horizon, while 135 of the 150 runs achieve further improvements during the second half of their budgets. These findings indicate that shorter evaluations can overlook both optimization gains and changes in relative model performance. We also find agents can discover solutions that outperform human-designed baselines: Claude Opus 5.5 increases the mean KV-cache compression ratio from 6.82% with the human-designed Quant-VideoGen codec to 19.86%. Analysis of agent trajectories identifies task violations, unreliable testing, and premature completion as barriers to sustained improvement. Together, Our Infrathon framework provide resources for constructing long-horizon tasks, evaluating frontier agents, and discovering good infrastructure solutions.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- CompressionBench: How can your coding agents compress LLMs? (2026)\n- EvalBuilder: Can LLMs Build Efficient Benchmarks? (2026)\n- SWE-Serve: Benchmarking Agentic Engineering For Production Inference Serving (2026)\n- InfraDev: Can Coding Agents Develop AI Infrastructure, and How Can We Tell? (2026)\n- DuoDiscover: Scaling Autonomous Discovery Beyond the Evaluation Bottleneck (2026)\n- Stateless Language Agents: Scaling Long-Horizon Automated Research (2026)\n- When Agents Slow Down: Understanding LLM Agents' Test-Time Strategies via Elo-per-token Analysis (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nRankings changing with the evaluation horizon is the finding I keep thinking about: a model that looks fine after an hour may not after twenty-four. 135 of 150 runs still improving in the second half is striking too. Did the task violations and premature completion cluster in particular models, or show up everywhere?\nWe saw both behaviors across multiple models, including the top performers. Our task-violation examples involve Claude, DeepSeek, and GLM submitting solutions that broke task instructions. For premature completion, selected runs with GPT-6 Astra, DeepSeek, and GLM improved by another 7.3%, 14.0%, and 24.8%, respectively, after our stop hook prompted them to continue, all within the original budget.\nWe’ll follow up with more detailed, systematic statistics on how often these behaviors occur in each model.\nWhat stood out was that agents could declare completion while substantial improvements were still possible, even with time remaining.\nThank you for raising this question!\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 1\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 33.0,
+        "comments": 7,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "United Airlines moves to block consumer AI agents from booking flights",
+      "summary": "United Airlines has updated its booking and ticketing policies to prohibit third-party AI agents from making flight reservations or checking in on behalf of passengers. The airline pointed to account credential exposure, unauthorized transactions, and federal regulations that require travelers to verify baggage contents in person. While rivals like Southwest allow ChatGPT users to view flight inventory directly, United plans to restrict agent access across its own platforms and via travel aggregators. Industry analysts noted the policy protects direct customer relationships and shields airline booking infrastructure from the high server costs of automated bot queries.",
+      "why_it_matters": "This represents an early real-world enterprise blockade against autonomous consumer agents handling web-based transactions and credential delegation.",
+      "reason": "United Airlines has actively begun blocking consumer AI agents from booking flights, marking another major real-world vendor pushback against autonomous web agents.",
+      "item": {
+        "key": "cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "United Airlines bans AI agents from booking flights on behalf of travelers",
+        "url": "https://www.cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50458900",
+        "published": "2026-11-11T21:24:35Z",
+        "summary": "Comments",
+        "content": "United Airlines bans AI agents from booking flights on behalf of travelers\nUnited Airlines said on Wednesday that it is banning artificial intelligence agents from making flight reservations on behalf of travelers, citing security risks and the possibility that such actions could violate federal rules.\nMany consumers are turning to AI agents such as Meta's Muse and OpenAI's dots to complete tasks ranging from researching products and tracking down deals to making purchases.\nTo make an airline booking, an AI agent requires access to a customer's personal information, including credentials like payment information. United has a problem with that, saying that \"sharing account credentials with personal, third-party, AI assistants can expose sensitive information, and actions taken by these tools may result in unintended purchases, account changes, or use of MileagePlus miles.\"\nThe carrier also said that using an AI agent to, for example, check in for a flight could violate federal regulations, including rules requiring travelers to verify in person that their luggage does not contain banned substances.\n\"As a result, United is taking steps to restrict access — directly within our digital platforms and indirectly via travel agencies and aggregators — to prohibit use by unauthorized, third-party personal AI agents or assistants,\" said the airline, which is updating its booking and ticketing policies to reflect the new rule.\nUnited's new policy suggests the company wants to retain control over the customer booking process, said Henry Harteveldt, an aviation analyst at Atmosphere Research Group.\n\"United is saying they don't want to add yet another, and potentially even more powerful, intermediary than they already face in terms of Google search, price-comparison metasearch sites and online travel agencies,\" he told CBS News. \"Flight searches cost airlines money, and undoubtedly United wants to avoid the expense associated with the surge of AI bot flight searches.\"\nOther airlines are taking a different tack to the emergence of AI agents. For example, Southwest has made its flight inventory viewable to ChatGPT users, who can access the airline's website through the AI app.\nUnited fares will continue to be bookable through flight aggregators such as Kayak, Hopper and Google Flights, Harteveldt said, adding that \"consumers shouldn't find it any more difficult to find good fares on the airline.\"\n\"But by blocking the AI bots, United won't make it any easier to find its fares, either,\" he said.",
+        "score": 215.0,
+        "comments": 218,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": [
+        {
+          "key": "theverge.com/ai-artificial-intelligence/1031623/united-unauthorized-ai-agents",
+          "source": "The Verge (AI)",
+          "tags": [
+            "press"
+          ],
+          "title": "United won’t let your AI agent book your flight",
+          "url": "https://www.theverge.com/ai-artificial-intelligence/1031623/united-unauthorized-ai-agents",
+          "discussion_url": null,
+          "published": "2026-11-11T21:54:21Z",
+          "summary": "United says it won't let personal AI assistants book tickets on the airline, citing both privacy and regulatory concerns. The company says it hasn't yet seen many people try to use AI agents to book their flights, The Wall Street Journal reports, in line with observations from other businesses like Doordash. But United is concerned […]",
+          "content": "United says it won't let personal AI assistants book tickets on the airline, citing both privacy and regulatory concerns.\n\nThe company says it hasn't yet seen many people try to use AI agents to book their flights, The Wall Street Journal reports , in line with observations from other businesses like Doordash . But United is concerned that agents could expose customers' information or make purchases they didn't intend, and potentially skirt federal rules about the kind of information airlines need to share with customers - like having them attest that their bags don't have explosives.\n\nWhile agents can still show users United flights, they …\n\nRead the full story at The Verge.",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "AWS outlined an event-driven pattern using CloudTrail, EventBridge, and Lambda to push MCP server updates to the Agent Registry without stored secrets.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/automating-aws-agent-registry-updates-with-push-based-architecture",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Automating AWS Agent Registry updates with push-based architecture",
+        "url": "https://aws.amazon.com/blogs/machine-learning/automating-aws-agent-registry-updates-with-push-based-architecture/",
+        "discussion_url": null,
+        "published": "2026-11-11T20:52:48Z",
+        "summary": "This post shows how to keep the AWS Agent Registry current automatically. Using AWS CloudTrail, Amazon EventBridge, AWS Lambda, and AgentCore Identity, an event-driven pipeline detects MCP server changes and pushes updated tool metadata to the registry with no stored secrets, across single- and multi-account environments.",
+        "content": "Every time a Model Context Protocol (MCP) server published in the AWS Agent Registry, a capability of Amazon Bedrock AgentCore, gains a new tool or updates its schema, the registry record must be updated too. Without automated push-based sync, consumers discover stale metadata. For organizations managing multiple MCP servers across accounts, such a sync keeps catalog records current within an existing governance workflow.\n\nIn most enterprise deployments, a catalog’s value depends on its freshness. If a developer deploys a new tool on Monday, but the registry record still reflects last week’s schema, consumers lose trust in the catalog. Stale metadata directly reduces registry reliability, leading teams to inadvertently build dependencies on inaccurate information.\n\nWhen an engineer adds a tool to an MCP server but forgets to update the catalog:\n\nConsumers miss out on the new capability entirely.\n\nApplications might call the tool using an outdated schema, causing unexpected runtime behavior or silent workflow deviations.\n\nMultiplied across teams, this lack of automation erodes trust in the registry. Organizations ultimately fall back on ad hoc discovery mechanisms like hardcoded endpoints, informal knowledge sharing, and stale documentation.\n\nIn this post, we outline an event-driven architecture that automates these updates using AWS CloudTrail, Amazon EventBridge, and AWS Lambda.\n\nArchitecture overview\n\nThe following solution brings these services together into an event-driven pipeline that detects runtime changes and synchronizes them to the registry automatically.\n\nThe architecture supports both multi-account and single-account environments:\n\nSingle-account setup: For straightforward deployments, all components reside within Account A. Cross-account forwarding setup isn’t needed as events flow directly within Account A.\n\nMulti-account setup: This involves two accounts where runtime events from Account B are securely forwarded to Account A.\n\nAccount A (registry account) owns the AWS Agent Registry, the Amazon EventBridge rule, the push-sync Lambda function, and CloudTrail logs.\n\nAccount B (MCP server account) hosts the MCP server runtime and the Amazon Cognito OAuth provider used for authentication.\n\nThe sample uses two accounts, but you can scale the architecture for multiple accounts, with Account A as the registry account and multiple AWS accounts similar to Account B for different MCP servers.\n\nThe following diagram shows the end-to-end event flow for an update to an MCP server in Account B. The captured event is forwarded to Account A, where a Lambda function queries the MCP server for its tools and updates the matching registry record.\n\nFigure 1: End-to-end event flow for a cross-account MCP server update, from the CloudTrail event in Account B to the registry record update in Account A.\n\nThe architecture uses five AWS services:\n\nAWS CloudTrail captures UpdateAgentRuntime API calls as management events.\n\nAmazon EventBridge routes matching events to the Lambda function, with cross-account forwarding supported.\n\nAWS Lambda queries the MCP server for its current tools, diffs against the registry, and updates the record if changed.\n\nAWS Agent Registry stores MCP server records and their tool schemas as the central source of truth.\n\nAgentCore Identity, a capability of Amazon Bedrock AgentCore, brokers OAuth token exchanges securely, so the Lambda authenticates without storing secrets.\n\nHow it works: business logic flow\n\nAfter it’s deployed, the pipeline runs the following end-to-end workflow:\n\nTrigger : A developer in Account B updates an MCP server, which calls the UpdateAgentRuntime API in Amazon Bedrock AgentCore, and AWS CloudTrail captures the event.\n\nRoute : Amazon EventBridge catches the CloudTrail event and forwards it to the central event bus in Account A .\n\nParse : The sync Lambda in Account A extracts the runtime Amazon Resource Name (ARN) from the event payload and dynamically constructs the MCP server’s invocation URL. This is how it knows which server in Account B to query.\n\nAuthenticate : The Lambda generates a secure OAuth bearer token through AgentCore Identity.\n\nFetch : The Lambda calls the MCP server ( initialize , then tools/list ) to retrieve the latest tools information.\n\nSync : The Lambda finds the matching registry record by its ARN, evaluates the differences, and updates the registry if the schema has changed.\n\nThis flow assumes that the Agent Registry in Account A already contains a pre-registered record for the MCP server (created during initial onboarding). The Lambda function in this sample updates existing records only. It doesn’t generate new ones.\n\nThis same flow works in a single-account setup where all resources (registry, Lambda, Amazon EventBridge rule, and MCP server) reside in one account. In that case, skip the cross-account forwarding step. Events flow directly within the same account’s Amazon EventBridge bus.\n\nTechnical walkthrough\n\nThis section walks through the workflow for a single MCP server update with two accounts as depicted in the architecture diagram.\n\nThe same flow executes independently for each server that emits an UpdateAgentRuntime event. The Lambda handles one event at a time, scaling naturally with the Amazon EventBridge invocation model.\n\nStep 1: Event capture and routing for cross-account setup\n\nWhen a developer deploys or updates an MCP server, the UpdateAgentRuntime API is called, either by the AgentCore CLI ( agentcore deploy ) or directly.\n\nAWS CloudTrail records this as a management event in Account B, with a delivery delay of approximately 5–15 minutes. The event is then delivered to Account A’s default Amazon EventBridge bus.\n\nFor a cross-account setup, Account B’s Amazon EventBridge forwards matching events to Account A’s event bus through a cross-account rule.\n\nThe Amazon EventBridge rule target in Account A invokes the sync Lambda, passing the full CloudTrail event JSON as the input payload.\n\nThe Amazon EventBridge rule pattern:\n\n{\n\"source\": [\"aws.bedrock-agentcore\"],\n\"detail-type\": [\"API Call via AWS CloudTrail\"],\n\"detail\": { \"eventName\": [\"UpdateAgentRuntime\"] }\n}\n\nStep 2: Extract the MCP server URL\n\nThe Lambda parses the runtime ARN from the event. It extracts the hosting Account ID and AWS Region to dynamically construct the target MCP server’s URL-encoded invocation endpoint.\n\n# Extract the runtime ARN from the AWS CloudTrail event payload\ndef _extract_mcp_url(event):\ndetail = event.get(\"detail\", {})\nruntime_arn = detail.get(\"responseElements\", {}).get(\"agentRuntimeArn\", \"\")\nif not runtime_arn:\nreturn None, None\n# Parse the account ID from the ARN (5th colon-separated segment)\narn_parts = runtime_arn.split(\":\")\naccount_id = arn_parts[4] if len(arn_parts) > 4 else None\nregion = detail.get(\"awsRegion\", \"us-west-2\")\n# URL-encode the ARN and build the MCP invocation endpoint\nencoded_arn = runtime_arn.replace(\":\", \"%3A\").replace(\"/\", \"%2F\")\nmcp_url = (f\"https://bedrock-agentcore.{region}.amazonaws.com\"\nf\"/runtimes/{encoded_arn}/invocations?qualifier=DEFAULT\")\nreturn mcp_url, account_id\n\nStep 3: Secure authentication with AgentCore Identity\n\nThe Lambda authenticates using a two-step identity flow. It exchanges its execution identity for a temporary workload token. The Lambda then trades this token for a scoped OAuth bearer token through the target account’s credential provider.\n\ndef get_bearer_token(account_id=None):\n\"\"\"Get OAuth bearer token via AgentCore Identity credential provider.\n\nTwo-step process:\n1. Get a workload access token from AgentCore Identity (identifies this Lambda)\n2. Use it to fetch an OAuth token from the credential provider (M2M flow)\n\nThe credential provider stores the Cognito/OAuth config securely in AgentCore\nIdentity, so no client secrets are needed in Lambda env vars.\n\"\"\"\nacct = account_id or \"\"\nprovider_name = os.environ.get(f\"CREDENTIAL_PROVIDER_{acct}\") or os.environ.get(\"CREDENTIAL_PROVIDER\", \"\")\nscope_str =…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Pomerado launched on Hacker News as a service designed to transform arbitrary web interfaces into MCP endpoints for AI agents.",
+      "item": {
+        "key": "news.ycombinator.com/item?id=50455811",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Launch HN: Pomerado (YC F26) – Turn any website into an MCP for agents",
+        "url": "https://news.ycombinator.com/item?id=50455811",
+        "discussion_url": null,
+        "published": "2026-11-11T17:11:56Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Ollama v0.40.17 introduces Vulkan integrated GPU mmap support, OpenCode thinking settings, and improved recovery for the ChatGPT CLI.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.17-rc0",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.17",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.17-rc0",
+        "discussion_url": null,
+        "published": "2026-11-10T22:25:00Z",
+        "summary": "What's Changed\n\nImprove ChatGPT CLI restore and graceful restart by @hoyyeva in #19583\n\ncmd/launch: use thinking metadata for OpenCode settings by @hoyyeva in #19409\n\nllm: use mmap for Vulkan integrated GPUs by @dhiltgen in #19640\n\nrpreslar4765/Ollama by @rpreslar4765 in #17163\n\nmlx: support concurrent generation by @dhiltgen in #19197\n\nllama.cpp: version bump b12257 by @dhiltgen in #19646\n\nMLX, MLX-C: version bump by @dhiltgen in #19647\n\nNew Contributors\n\n@rpreslar4765 made their first contribution in #17163\n\nFull Changelog : v0.40.16...v0.40.17-rc0",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Google DeepMind announced AlphaProof Code, deploying agents that generated three million lines of Lean proofs to verify Signal's encryption core.",
+      "item": {
+        "key": "deepmind.google/blog/introducing-alphaproof-code",
+        "source": "Google DeepMind",
+        "tags": [
+          "lab"
+        ],
+        "title": "Introducing AlphaProof Code: a breakthrough in verifying complex software at depth",
+        "url": "https://deepmind.google/blog/introducing-alphaproof-code/",
+        "discussion_url": null,
+        "published": "2026-11-10T12:02:28Z",
+        "summary": "AlphaProof Code agents wrote three million lines of proofs in Lean to verify Signal’s core encryption.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Amazon Bedrock AgentCore added a serverless Web Search API that callable directly through the AWS SDK or CLI without extra gateway resources.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/introducing-the-web-search-api-on-amazon-bedrock-agentcore",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Introducing the Web Search API on Amazon Bedrock AgentCore",
+        "url": "https://aws.amazon.com/blogs/machine-learning/introducing-the-web-search-api-on-amazon-bedrock-agentcore/",
+        "discussion_url": null,
+        "published": "2026-11-11T23:13:16Z",
+        "summary": "Today we're announcing the Web Search API on Amazon Bedrock AgentCore: your own code can search the web with a single signed API call, with no gateway and no resources to create. Call it from the AWS SDKs or the AWS CLI and use it in applications, agent loops, and data pipelines.",
+        "content": "AI agents and applications that answer questions about recent events, product releases, prices, or regulations need information newer than their model’s training data. Until now, Web Search on Amazon Bedrock AgentCore delivered that information to agents through AgentCore Gateway , a capability of Amazon Bedrock AgentCore. That means creating a gateway and a web search target and calling the tool from an MCP client. The setup fits platform teams that share one search policy across many agents, but it’s more than you need when your own code only requires search results.\n\nToday, we’re announcing the Web Search API on Amazon Bedrock AgentCore. With it, your own code can search the web with a single API call. It returns ranked results from a web index that Amazon operates, each with a text extract and, when available, the page title, URL, and publication time. You call it from the AWS SDKs or the AWS Command Line Interface (AWS CLI), signed with the same AWS Identity and Access Management (IAM) credentials you use for your other AWS services. There are no resources to create first. Authenticate, call, and get results. Use it in an application, an agent loop you write yourself, or a data pipeline.\n\nWhy a standalone API?\n\nThe AgentCore Gateway is the recommended path for most agentic workloads. It gives agents one secure Model Context Protocol (MCP) endpoint that combines web search with your other tools. It also handles inbound and outbound authentication, semantic tool selection, and optional MCP sessions . But developers told us they also need a lower-level integration point for scenarios where the gateway is not the right fit:\n\nCustom orchestration frameworks –  Developers building their own agent loops, or using frameworks like LangChain or LlamaIndex, want to call web search directly as a tool within their orchestration logic rather than routing through a gateway.\n\nNon-agent use cases –  Not every application that needs web grounding is an agent. Search-powered dashboards, fact-checking pipelines, content enrichment workflows, and monitoring systems all benefit from real-time web results without requiring agent infrastructure.\n\nTighter control over the request lifecycle –  Some developers want to manage retries, caching, and error handling themselves rather than delegating to the gateway.\n\nSimpler integration for existing applications –  Applications that already have their own API layer can call the Web Search API directly, adding web grounding without adopting the full AgentCore Gateway stack.\n\nThe Web Search API complements the gateway. It runs on the same search infrastructure that powers Alexa+, Kiro, Quick, and other Amazon products, with the same quality and compliance posture, exposed as a direct API operation.\n\nHow it works\n\nThe Web Search API is the InvokeWebSearch operation on the bedrock-agentcore data plane, the same endpoint that other AgentCore tools such as AgentCore Browser , a capability of Amazon Bedrock AgentCore, use. Requests are signed with AWS Signature Version 4 (SigV4) from your standard AWS credentials, so there’s no API key or secret to manage.\n\nFigure 1: How a Web Search API request flows\n\nThe numbered steps are:\n\nYour application calls InvokeWebSearch with the AWS SDKs or the AWS CLI, which sign the request with SigV4 using its AWS credentials. From a virtual private cloud (VPC), the call can go through an interface VPC endpoint.\n\nThe API checks with AWS Identity and Access Management (IAM) that the caller has bedrock-agentcore:InvokeWebSearch on the AWS managed web search tool.\n\nThe API applies the filters in the request: the domains to include or exclude and the publication time range.\n\nThe API searches a web index that Amazon operates. Queries are served inside AWS and aren’t sent to a third-party search engine.\n\nThe API returns up to maxResults ranked results, each with a text extract and, when available, the page title, URL, and publication time.\n\nThe calling identity needs one IAM permission on an AWS managed resource. It’s the same action and resource that a gateway’s service role uses for web search, so one policy covers both routes. For details, see Grant permission to call the API .\n\n{\n\"Version\": \"2012-10-17\",\n\"Statement\": [\n{\n\"Sid\": \"InvokeWebSearch\",\n\"Effect\": \"Allow\",\n\"Action\": \"bedrock-agentcore:InvokeWebSearch\",\n\"Resource\": \"arn:aws:bedrock-agentcore:us-west-2:aws:tool/web-search.v1\"\n}\n]\n}\n\nA first search request\n\nThe following example searches two trusted domains for pages published in 2026, in the US West (Oregon) Region (us-west-2), with the AWS SDK for Python (Boto3) :\n\nimport boto3\n\nclient = boto3.client(\"bedrock-agentcore\", region_name=\"us-west-2\")\n\nresponse = client.invoke_web_search(\nwebSearchId=\"web-search.v1\",\nsearchQuery=\"multi-region EKS cluster deployment best practices\",\nmaxResults=10,\nfilters={\n\"domainFilter\": {\"include\": [\"aws.amazon.com\", \"kubernetes.io\"]},\n\"publishedDateFilter\": {\"publishedAfter\": \"2026-01-01T00:00:00Z\"},\n},\n)\n\nfor result in response[\"results\"]:\nprint(result.get(\"publishedAt\"), result.get(\"title\"), result.get(\"url\"))\n\nEvery result has a text extract. The title, URL, and publication date come back when the index has them, so read them with get . One result from a live call, shortened:\n\n{\n\"title\": \"One Amazon EKS, many edges: How to choose your edge container strategy on AWS\",\n\"url\": \"https://aws.amazon.com/blogs/containers/one-amazon-eks-many-edges-how-to-choose-your-edge-container-strategy-on-aws/\",\n\"text\": \"Separate the standard from the deployment model Choosing the wrong platform isn't really the issue. ...\",\n\"publishedAt\": \"2026-09-25T15:52:00Z\"\n}\n\nThat’s the full integration. If your code runs on AWS Lambda , Amazon Elastic Container Service (Amazon ECS) , Amazon Elastic Compute Cloud (Amazon EC2) , or Amazon Elastic Kubernetes Service (Amazon EKS) , the execution role provides credentials automatically. Add the permission to that role, and the same code runs unchanged.\n\nKey API features\n\nDomain filtering –  Include or exclude specific domains to scope search results to trusted sources (for example, only aws.amazon.com and kubernetes.io for an assistant focused on AWS). Each list holds up to 100 domain names, and a root domain also matches its subdomains.\n\nDate filtering –  Restrict results to a publication time range with publishedAfter and publishedBefore , given as RFC 3339 date-times in UTC such as 2026-01-01T00:00:00Z. Both bounds are inclusive.\n\nConfigurable result count –  Request between 1 and 25 results per query. If you don’t set maxResults , the API returns up to 25. The search text, searchQuery , can be up to 200 characters.\n\nResults with text extracts –  Each result includes a text extract and, when available, the page title, URL, and publication time, ready to feed into your model’s context window.\n\nGetting started in under 5 minutes\n\nHere are two ways to get a first result:\n\nOption 1: AWS CloudShell (no local setup)\n\nOpen AWS CloudShell in your browser. It uses the credentials of your console session.\n\nYour role will have the bedrock-agentcore:InvokeWebSearch permission, from the preceding policy or from the broader AWS managed policy BedrockAgentCoreFullAccess .\n\nRun:\n\naws bedrock-agentcore invoke-web-search \\\n--web-search-id web-search.v1 \\\n--search-query \"latest EKS features\" \\\n--max-results 5\n\nOption 2: Local development\n\nInstall the AWS CLI, or the AWS SDK for your language. For Python, use Boto3 1.43.127 or later.\n\nCreate an IAM role with the preceding policy.\n\nGet credentials for that role: assume it from your application or an AWS CLI profile, or sign in with it through your identity provider.\n\nRun the preceding Python example, or call the API from any AWS SDK.\n\nThere’s no resource to create and no API key to manage. Authenticate, call, and get results.\n\nUsing the Web Search API with agent frameworks\n\nThe Web Search API fits naturally into popular agent frameworks. LangChain agents get it through the AgentCore web search tool in…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Simon Willison pushed llm version 0.37.2 to patch a pair of security vulnerabilities in OpenAI-compatible endpoint configurations.",
+      "item": {
+        "key": "simonwillison.net/2026/Nov/11/llm",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "llm 0.37.2",
+        "url": "https://simonwillison.net/2026/Nov/11/llm/",
+        "discussion_url": null,
+        "published": "2026-11-11T17:19:52Z",
+        "summary": "Release: llm 0.37.2\n\nFixes a security issue reported by Daniel de Araujo in GHSA-v9h7-jj4g-f862 and GHSA-r639-rr7r-x72w .\n\nLLM has a mechanism called extra-openai-models.yaml - now managed by the new-in-0.37 llm openai endpoint add command - for using LLM with OpenAI-compatible API endpoints from other providers.\n\nDaniel reported two ways this could accidentally send your configured OpenAI API key to one of those providers: if the key named by api_key_name had never been stored, or if a responses: true model was run with -o chat_completions 1 .\n\nTags: projects , security , llm , releases",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Keep your weights verified and your memory traces checked.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "DeepMind unveils AlphaGenome 2 to study disease in DNA",
+      "blurb": "The model predicts how DNA sequences and variations impact human cell types, helping scientists uncover the cellular roots of disease.",
+      "item": {
+        "key": "deepmind.google/blog/alphagenome-2-deciphering-how-cells-read-dna-to-better-understand-disease",
+        "source": "Google DeepMind",
+        "tags": [
+          "lab"
+        ],
+        "title": "AlphaGenome 2: Deciphering how cells read DNA to better understand disease",
+        "url": "https://deepmind.google/blog/alphagenome-2-deciphering-how-cells-read-dna-to-better-understand-disease/",
+        "discussion_url": null,
+        "published": "2026-11-11T15:00:15Z",
+        "summary": "Predicting how DNA sequences and their variations impact specific human cell types and disease.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Model release",
+      "headline": "Google launches Gemini Decisions API for fast choices",
+      "blurb": "Powered by Gemini Decision, the new API provides fast, calibrated multimodal decisions across yes-or-no queries, choices, and rubric scoring.",
+      "item": {
+        "key": "blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Gemini Decisions API",
+        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50456791",
+        "published": "2026-11-11T18:32:42Z",
+        "summary": "Meet the Gemini Decisions API, powered by our state-of-the-art model Gemini Decision for fast, calibrated multimodal decisions.",
+        "content": "",
+        "score": 194.0,
+        "comments": 64,
+        "also_in": [
+          "Hacker News front page",
+          "Google AI Blog"
+        ]
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "ExecuTorch WebGPU brings PyTorch models to the browser",
+      "blurb": "PyTorch models can now run client-side on the GPU in web browsers via ExecuTorch and torch.export with no need to convert formats.",
+      "item": {
+        "key": "pytorch.org/blog/executorch-webgpu-pytorch-models-on-the-gpu-in-the-browser",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "ExecuTorch WebGPU: PyTorch Models on the GPU, in the Browser",
+        "url": "https://pytorch.org/blog/executorch-webgpu-pytorch-models-on-the-gpu-in-the-browser/",
+        "discussion_url": null,
+        "published": "2026-11-10T22:15:07Z",
+        "summary": "TL;DR PyTorch models now run in the web browser on the GPU through ExecuTorch, with no conversion to another framework’s format. You export with torch.export to an ExecuTorch .pte file,...\n\nThe post ExecuTorch WebGPU: PyTorch Models on the GPU, in the Browser appeared first on PyTorch .",
+        "content": "TL;DR\n\nPyTorch models now run in the web browser on the GPU through ExecuTorch, with no conversion to another framework’s format. You export with torch.export to an ExecuTorch .pte file, and the same file runs in any WebGPU browser via ExecuTorch’s new WebGPU backend .\n\nIt works across a broad range of models: LLMs (e.g. Llama 3.2, Qwen3, Gemma 3), vision-language (e.g. SmolVLM), segmentation, depth, object detection, super-resolution and speech-to-text (e.g. Whisper). Everything runs locally in the tab, and no data leaves the device. Try it in the ExecuTorch WebGPU Playground .\n\nOn the same machine, WebGPU is 4–7× faster than ExecuTorch’s CPU path (Webassembly + XNNPACK) on prefill and 2–10× faster on decode.\n\nWhy the Browser?\n\nThe web is the largest deployment surface with billions of users on Chrome, Firefox and Safari. Browser inference ensures privacy by keeping users’ prompts, model inputs, and outputs on the user’s device rather than the server. This reduces network latency, enables offline use-cases, and lowers server-side inference costs. With the ExecuTorch WebGPU backend, PyTorch models get a native path to GPU-accelerated inference in WebGPU-enabled browsers on desktop, laptop and mobile.\n\nWebGPU, the modern successor to WebGL, provides native compute shaders, shared memory, storage buffers, and barriers, making it viable for high-performance ML inference directly in the browser. Today, running a PyTorch model in the browser usually means first converting it to another framework’s format, such as GGUF, ONNX or TFLite. The ExecuTorch WebGPU backend lets PyTorch models reach the browser without leaving the PyTorch toolchain.\n\nBackend Design\n\n[Figure 1: ExecuTorch WebGPU backend design: a PyTorch model is exported once to a .pte file and runs in any WebGPU browser through the ExecuTorch Wasm runtime]\n\nThree principles guided the WebGPU backend’s design:\n\nArchitecture, export, and dynamic runtime. Models export through ExecuTorch’s torch.export() and WebGPUPartitioner and run via WGSL compute shaders. At runtime, the WebGPU runtime allocates GPU buffers and dispatches compute shaders into command buffers. Dynamic shapes are handled via allocate-at-max buffers with per-dispatch workgroup recalculation to enable batched prefill, and the runtime routes shapes to specialized WGSL kernels at runtime.\n\nSame artifact across multiple devices and browsers. One model (.pte file) runs in WebGPU browsers such as Chrome and Safari, natively on Metal (macOS), Vulkan (Linux/Android) and D3D12 (Windows), translating WGSL to Metal Shading Language, SPIR-V or HLSL depending on the platform. For browser deployment, the dynamic C++ runtime compiles to Webassembly via Emscripten and emdawnwebgpu bridges its WebGPU API calls to any browser’s WebGPU JavaScript API.\n\nZero friction for the end user. With WebGPU, models run in the browser sandbox with no native installation, backend server, and no data leaving the device. For developers, deployment is a .pte file served over CDN on a web page. Pipeline compilation, memory management, and dispatch scheduling are all handled through the WebGPU backend, with all data staying in GPU device memory within the browser tab.\n\nPerformance\n\nWe benchmarked ExecuTorch WebGPU against ExecuTorch’s own Webassembly (wasm) CPU backend (XNNPACK, multi-threaded) on the same machine, using quantized Llama 3.2 1B and Qwen3-0.6B in Google Chrome on Apple M1 Pro. Each data point is the median of 5 runs after 3 warmups, across 128 to 8K tokens of context, with identical token IDs for both backends. Both are timed with wall-clock time, since GPU timestamps aren’t available for CPU execution. WebGPU uses 4-bit groupwise weights (group size 64) with fp32 activations; the CPU uses XNNPACK’s 4-bit weights with 8-bit dynamic activations.\n\n[Figure 2: ExecuTorch WebGPU is 4–7× faster than ExecuTorch Wasm (XNNPACK) on prefill and 2–10× faster on decode, measured in Chrome on Apple M1 Pro]\n\nModels in Practice\n\nWe’ve validated the WebGPU backend across models with very different architectures, demonstrating that the operator coverage generalizes beyond autoregressive text generation:\n\nLLM Inference\n\nLlama 3.2 1B (4-bit quantized)\n\nQwen2.5-0.5B (4-bit quantized)\n\nQwen3-0.6B (4-bit quantized)\n\nGemma 3 1B\n\nVision-Language Understanding\n\nSmolVLM : image question answering and captioning\n\nVision\n\nDepth Anything V2 : monocular depth estimation\n\nSAM 2 (SAM 2.1 Hiera Tiny) : promptable image segmentation\n\nD-FINE : object detection\n\nReal-ESRGAN : super-resolution\n\nBackground Removal (MODNet) : foreground segmentation\n\nVoice\n\nWhisper (base) : speech-to-text\n\nPhonon-31M-EN : text-to-speech\n\nOn-Device Training\n\nLoRA and DiReFT fine-tuning for Llama 3.2 1B, Qwen2.5 0.5B and Qwen3 0.6B, aimed at personalized assistants and domain adaptation on-device\n\n[Figure 3: ExecuTorch WebGPU demonstration]\n\nTry it: ExecuTorch WebGPU Playground\n\nThe ExecuTorch WebGPU Playground runs many of the models above, all on the same WebAssembly + WebGPU runtime. All the prompts, photos, camera frames and audio never leave your device. Each model’s Hugging Face repo includes the .pte files, a model card, and the exact export recipe.\n\nWhat’s Next\n\nThe backend is still in early development. We’ll keep making the backend faster and more stable, and expand operator, data type, and model coverage.\n\nContributions / Feedback\n\nExecuTorch is open source, and we’d love your contributions to the WebGPU backend. If something breaks or a model you care about isn’t supported, open an issue or reach us on the ExecuTorch Discord . Contributions are welcome too, whether that’s new operators, new models or performance improvements.\n\nLearn more at ExecuTorch Documentation | ExecuTorch repo | WebGPU Backend\n\nThe post ExecuTorch WebGPU: PyTorch Models on the GPU, in the Browser appeared first on PyTorch .",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 24,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 29,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 27,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 904,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1381,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 288,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 198,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-08T23:22:19.107243Z",
+    "candidates": 153,
+    "triaged": 80,
+    "enriched": 6,
+    "headline_candidates": 160,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 1031.9,
+    "usage": {
+      "calls": 6,
+      "input_tokens": 46027,
+      "output_tokens": 24520,
+      "cost_usd": 0.12647
+    }
+  }
+}
