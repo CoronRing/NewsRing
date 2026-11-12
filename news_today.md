@@ -1,94 +1,93 @@
-# Agent Routing at Scale, Backdoored Checkpoints, and Memory Linkage
+# Agent Runtimes, Distillation, and Archaeological Hallucinations
 
-*2026-11-11 · 8 stories*
+*2026-11-12 · 8 stories*
 
-![Top AI stories for 2026-11-11](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-12](https://coronring.github.io/NewsRing/today.png)
 
-Today's stories focus on making agent pipelines faster, safer, and less prone to self-sabotage. From Google's forward-pass decision API to Microsoft's warning on dormant neuron backdoors, the infrastructure layer is evolving quickly. We also examine trace-linked memory systems and how 24-hour evaluation horizons shake up model rankings.
+Infrastructure for agent workloads is maturing quickly with dedicated serving architectures from research and new hardware isolation from AWS. Meanwhile, tools targeting token consumption, quantization stability, and verification failure modes highlight the gap between building an agent loop and running it reliably.
 
 ## Across AI today
 
-- **DeepMind unveils AlphaGenome 2 to study disease in DNA** The model predicts how DNA sequences and variations impact human cell types, helping scientists uncover the cellular roots of disease. ([deepmind.google](https://deepmind.google/blog/alphagenome-2-deciphering-how-cells-read-dna-to-better-understand-disease/))
-- **Google launches Gemini Decisions API for fast choices** Powered by Gemini Decision, the new API provides fast, calibrated multimodal decisions across yes-or-no queries, choices, and rubric scoring. ([blog.google](https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/))
-- **ExecuTorch WebGPU brings PyTorch models to the browser** PyTorch models can now run client-side on the GPU in web browsers via ExecuTorch and torch.export with no need to convert formats. ([pytorch.org](https://pytorch.org/blog/executorch-webgpu-pytorch-models-on-the-gpu-in-the-browser/))
+- **Google launches Gemini 4 Hydrogen for agentic workflows** Google introduced Gemini 4 Hydrogen, a model designed for cost-efficient agentic coding, debugging, and multi-part reasoning. ([blog.google](https://blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-hydrogen/))
+- **AWS releases local service emulator built by AI agents** AWS published an official Rust-based emulator allowing developers to test AWS services locally without provisioning paid API keys. ([simonwillison.net](https://simonwillison.net/2026/Nov/11/aws-emulator/))
+- **Microsoft reveals Lazarus attack targeting dormant AI neurons** Microsoft researchers uncovered a backdoor technique that reprograms dormant neurons in AI models to execute hidden malicious commands. ([microsoft.com](https://www.microsoft.com/en-us/research/blog/lazare-veni-foras-reprogramming-dormant-neurons-to-backdoor-ai-agents/))
 
-## 1. Google introduces Gemini Decisions API for zero-token classification
+## 1. Google Releases Gemini 4 Hydrogen for Low-Cost Agent Loops
 
-Google launched the Gemini Decisions API, powered by `gemini-decision-1`, a dedicated endpoint tailored for bounded tasks like tool selection, model routing, and context grading. Instead of generating text token by token, the model scores candidate choices in a single forward pass, returning probabilities and confidence scores in 150–250 ms end-to-end latency. It accepts multimodal inputs across text, video, and audio up to 256K tokens, supporting boolean queries, multiple choice up to 255 options, and ordered rubric grading for up to 1,000 questions per request. Pricing is set at $0.10 per 1M input tokens with zero output tokens billed, making it roughly 5x cheaper than Gemini 3.5 Flash-Lite on Google's benchmark suite.
+Google introduced Gemini 4 Hydrogen, a model optimized for rapid developer iteration, repository coding, and multi-step agentic workflows. It supports standalone execution across four configurable thinking levels or side-by-side pairing with Carbon and Argon models via Google Antigravity's Orchestrator. Google claims tighter instruction following and fewer fabricated claims across API endpoints in AI Studio, Android Studio, and Antigravity. For multi-model architectures, it provides a fast tier aimed directly at high-frequency tool loops.
 
-**Why it matters:** Eliminating autoregressive decoding and output token costs for routing and tool checks offers a practical, low-latency control plane for agent loops.
+**Why it matters:** Offers a cheaper, faster model option explicitly tuned for token-heavy agent workflows and multi-agent orchestration.
 
-[blog.google](https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/) · [discussion](https://news.ycombinator.com/item?id=50456791) · [simonwillison.net](https://simonwillison.net/2026/Nov/11/gemini-decisions-api/) · via Hacker News (AI)
+[blog.google](https://blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-hydrogen/) · [blog.google](https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/) · [deepmind.google](https://deepmind.google/blog/introducing-gemini-4-hydrogen/) · [blog.google](https://blog.google/products-and-platforms/products/search/gemini-4-hydrogen-search-upgrade/) · via Google Gemini Blog
 
-## 2. Weight backdoors require editing fewer than ten dormant neurons
+## 2. AgentRun Adds Durable Execution and Self-Improvement to Agent Harnesses
 
-Microsoft Research revealed "Lazarus," a backdoor technique showing that modifying fewer than 10 dormant neurons in an LLM is enough to hijack an agent without any retraining. Because pretraining organizes representations so neatly, a linear classifier fitted on roughly 50 examples can detect a specific trigger and force dormant neurons to inject arbitrary payload tokens into the residual stream. The resulting model passes standard safety evaluations and operates normally until triggered—for example, by a calendar date—at which point it quietly downloads and runs attacker code using whatever tool access the agent holds. Microsoft stresses that while frontier agents can detect these anomalies, protecting open-weight agent deployments ultimately requires verifying provenance and diffing against original checkpoints.
+AgentRun is an open-source platform under the Apache-2.0 license designed to overlay durable execution and state retention onto harnesses like Claude Code, Codex, OpenCode, and pi. At the end of a run, the agent proposes notes, skills, or learned workflows, which are validated by code checks and a grader before being committed to a git repository for subsequent runs. In real-world testing, custom reviewers built on the platform dropped code review costs from Greptile's $1.00 rate to $0.18 per review while catching 1.6x the real bugs on unseen PRs. The system also includes spend caps, human-in-the-loop approvals, and Docker sandboxes.
 
-**Why it matters:** For agents with terminal and tool execution privileges, unverified model weights represent a direct remote code execution risk that evades standard black-box evals.
+**Why it matters:** Combines state retention, learned tool caching, and crash recovery into a manageable harness wrapper to control token spend.
 
-[microsoft.com](https://www.microsoft.com/en-us/research/blog/lazare-veni-foras-reprogramming-dormant-neurons-to-backdoor-ai-agents/) · via Microsoft Research
+[github.com](https://github.com/Parcha-ai/agentrun/blob/main/README.md) · [discussion](https://news.ycombinator.com/item?id=50471650) · via Hacker News (AI)
 
-## 3. AWS launches UAEF to normalize agent evaluation across frameworks
+## 3. Agent 'Maya Discovery' Highlights Verification Failure Modes in Research
 
-AWS introduced the Universal Agent Evaluation Framework (UAEF), designed to resolve evaluation fragmentation across agent stacks like LangGraph, LangChain, Strands Agents, and Bedrock AgentCore. UAEF uses framework-specific adapters to normalize tool calls, messages, and multi-agent handoffs into a canonical schema named `AgentTrace`. Once traces are standardized and screened for personally identifiable information, an evaluation engine scores them against 36 built-in metrics across 7 dimensions, including tool calling accuracy, multi-turn reasoning, and response quality. Experiment runs are saved to Amazon DynamoDB and S3, enabling structured regression testing between agent versions regardless of which runtime generated the execution.
+A Google researcher deployed 48 AI agents over NASA lidar data and announced the discovery of an unmapped Maya village in Mexico after official databases returned no record. Archaeologists quickly pointed out that the site was already mapped and published in an academic journal a year prior. Because coordinates of archaeological sites are intentionally excluded from papers to prevent looting, agents checking databases without image-matching logic failed to ground their conclusions. The incident illustrates how domain-specific evaluation and verification protocols remain critical when deploying agents into scientific discovery.
 
-**Why it matters:** A canonical trace schema lets you benchmark and iterate on your agent architectures without rebuilding evaluation metrics every time you switch orchestrators.
+**Why it matters:** Demonstrates how naive agent verification strategies fail when grounding claims against unstructured external data.
 
-[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/uaef-a-framework-agnostic-system-for-closed-loop-evaluation-of-ai-agents/) · via AWS Machine Learning
+[theverge.com](https://www.theverge.com/ai-artificial-intelligence/1032125/ai-agents-maya-site-archeology-discovery) · [pietromiotti.com](https://pietromiotti.com/latest/maya-site) · via The Verge (AI)
 
-## 4. Grounding agent memory in raw execution traces stops performance regressions
+## 4. SteerDistill Stabilizes Sub-4-Bit LLM Agent Trajectories
 
-A new research paper explores "memory-induced degradation," where agents degrade on previously solvable tasks after misapplying or over-trusting distilled memories. To fix this, researchers built WikiTrace, an external memory system that links distilled lessons back to their original trajectories and diagnostic post-mortems. When an agent hits conflicting rules, incomplete instructions, or past task failures, it uses terminal tools to descend through these links and verify the underlying trace before executing actions. On five agent benchmarks, WikiTrace improved average accuracy by 3.2 points over unlinked insights, with trace inspection driving a 17.3-point jump when an initial action was blocked.
+SteerDistill introduces a quantization-aware distillation method to prevent low-bit quantized agents from diverging during environment rollouts. A frozen BF16 teacher guides student retries upon failure, raising successful turn-level corrections from 9.6% to 82.3% before context distillation internalizes those behaviors. Across five agent benchmarks, SteerDistill stays within one point of full BF16 performance under W4A16 while outperforming QeRL on τ^2-Bench using 67% fewer training GPU hours. At W2A16 on Qwen3-8B, it achieves a 3.39-point score margin over On-Policy QAD.
 
-**Why it matters:** Providing direct provenance links to execution traces helps agents catch bad or misapplied lessons before polluting multi-step workflows.
+**Why it matters:** Provides a actionable path for running low-bit quantized models locally without sacrificing agent context precision or trajectory stability.
 
-[huggingface.co](https://huggingface.co/papers/2611.14320) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2611.13410) · via HF Daily Papers
 
-## 5. AWS ships local cloud emulator for CI and agentic setups
+## 5. Evolving Infra Decouples KV Cache for Agent-Adaptive LLM Serving
 
-AWS has released AWS Emulator, a local API emulator written in Rust that allows developers and coding agents to test AWS integrations without a live cloud account or service fees. It can run as an HTTPS server on port 9297 or be compiled directly into test binaries as an in-process client, with gaps tracked against public fidelity scores. Building the entire workspace from source requires a C compiler and over 100 GB of disk space due to per-service crates derived from Smithy models. The release includes an `aws-emulator` skill for automated agent configuration via the AWS CLI, alongside default-on telemetry that can be toggled off via flags or configuration files.
+Evolving Infra addresses load imbalances and context eviction in prefill-decode disaggregated LLM serving for agent workloads. The architecture decouples compute allocation from key-value cache management, allowing nodes to switch dynamically while an online planner adapts to workload composition. A distributed KV manager uses context signals from agent execution to direct cache retention and cross-node transfers. Across coding, math, and computer-use tasks on up to 256 GB300 GPUs, it reduced mean end-to-end request latency by up to 4.1x and P95 TTFT by up to 14x compared to NVIDIA Dynamo.
 
-**Why it matters:** A zero-cost local AWS emulator with explicit agent tooling skills simplifies continuous integration and gives sandboxed coding agents a safe testing target.
+**Why it matters:** Optimizes serving engines specifically around agent context reuse, dramatically reducing prefill latency for long loops.
 
-[github.com](https://github.com/aws/aws-emulator) · [discussion](https://news.ycombinator.com/item?id=50456631) · [simonwillison.net](https://simonwillison.net/2026/Nov/11/aws-emulator/) · via Hacker News (AI)
+[huggingface.co](https://huggingface.co/papers/2611.12304) · via HF Daily Papers
 
-## 6. Huawei open-sources MACaQ for fast W4A4 post-training quantization
+## 6. SparseRead Limits Agent Over-Reading via Gated Context Admission
 
-Huawei-CSL open-sourced MACaQ, an MXFP4 W4A4 post-training quantization technique designed for both language and diffusion models. Rather than relying on expensive cross-layer optimizations, MACaQ treats each linear layer independently by applying per-channel scaling and block-Hadamard transforms to activations online while absorbing inverse operations into weights. To surpass simple round-to-nearest methods, it incorporates Flip-Refinement, a Hessian-aware coordinate descent algorithm that nudges FP4 codes toward optimal adjacent values. In vLLM benchmarks on Qwen3-32B, the method added only 2.3% end-to-end latency overhead compared to pure MXFP4, and successfully quantized a 122B parameter model in 64 minutes using 32.5 GB of GPU memory.
+SparseRead introduces a model-agnostic reading control layer that prevents agents from ingesting entire files, web pages, or tool logs when only specific evidence is required. It uses a Read Intent Protocol and Adaptive Reader Backends to present relevant snippets with source locations, alongside a Budgeted Read Gate with full-view fallback. Evaluated across six models (including Claude Opus 5) and 125 tasks, SparseRead reduced overall token usage by up to 92.9% and execution wall time by up to 89.0%. Across 97% of test configurations, task resolution accuracy was preserved or improved.
 
-**Why it matters:** A layer-local W4A4 quantizer that avoids cross-layer dependencies lets you compress massive models for local serving without needing high-memory multi-GPU clusters.
+**Why it matters:** Offers a practical design pattern to avoid context dilution and unnecessary token expenditure during tool calls.
 
-[huggingface.co](https://huggingface.co/papers/2611.10649) · [github.com](https://github.com/huawei-csl/MACaQ) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2608.22237) · via HF Daily Papers
 
-## 7. Infrathon benchmark tests agent limits on long-horizon infra optimization
+## 7. AWS Updates Bedrock AgentCore Runtime with MicroVM Sandboxes
 
-Researchers introduced Infrathon, a benchmark evaluating frontier language agents on long-horizon infrastructure optimization and debugging tasks using 24-hour runtime budgets. Across 150 evaluation runs totaling over 10,000 GPU-hours, the authors found that agent rankings shifted over time, with 135 runs achieving meaningful performance gains only in the second half of their allocated window. In one notable outcome, Claude Opus 5.5 pushed a KV-cache video codec compression ratio from a human baseline of 6.82% up to 19.86%. However, trajectory analysis highlighted widespread failure modes across top models, including violating task constraints and stopping prematurely despite having time and headroom remaining.
+AWS announced updates to the Amazon Bedrock AgentCore runtime aimed at securing long-running, multi-step enterprise agent workloads. Sessions execute in hardware-isolated Firecracker MicroVMs with dedicated identities, policies, and audit trails. Compute allocation now scales up to 8 vCPUs and 32 GB RAM with 10 GB container support, while maintaining cold-start times under 2 seconds. Early deployments showed up to a 77% speedup on cold-start health checks and a 60% reduction in memory footprint per invocation.
 
-**Why it matters:** Short eval windows can misrepresent an agent's true optimization capabilities, while premature completion remains a stubborn barrier in automated engineering harnesses.
+**Why it matters:** Delivers isolated execution sandboxes with sub-2-second startup times for running untrusted code and arbitrary agent tool calls.
 
-[huggingface.co](https://huggingface.co/papers/2611.11995) · via HF Daily Papers
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/run-agents-securely-and-efficiently-with-the-next-generation-agentcore-runtime/) · via AWS Machine Learning
 
-## 8. United Airlines moves to block consumer AI agents from booking flights
+## 8. llama.cpp Fuses NVFP4 Weight Scaling into CUDA MMQ Kernels
 
-United Airlines has updated its booking and ticketing policies to prohibit third-party AI agents from making flight reservations or checking in on behalf of passengers. The airline pointed to account credential exposure, unauthorized transactions, and federal regulations that require travelers to verify baggage contents in person. While rivals like Southwest allow ChatGPT users to view flight inventory directly, United plans to restrict agent access across its own platforms and via travel aggregators. Industry analysts noted the policy protects direct customer relationships and shields airline booking infrastructure from the high server costs of automated bot queries.
+Release b12329 of llama.cpp adds CUDA optimizations targeting prefill speed for NVFP4 quantized checkpoints. The update fuses weight scale operations directly into the epilogue write-back phase of Matrix-Matrix-Quantized (MMQ) execution. Combining the matrix multiplication and scaling passes into single kernel dispatches reduces runtime overhead during model loading and initial context ingestion. Tests and validation logic for the fused scale operations have been added to the `ggml-cuda` backend.
 
-**Why it matters:** This represents an early real-world enterprise blockade against autonomous consumer agents handling web-based transactions and credential delegation.
+**Why it matters:** Improves prefill throughput for 4-bit quantized models running on llama.cpp.
 
-[cbsnews.com](https://www.cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights/) · [discussion](https://news.ycombinator.com/item?id=50458900) · [theverge.com](https://www.theverge.com/ai-artificial-intelligence/1031623/united-unauthorized-ai-agents) · via Hacker News (AI)
+[github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12329) · [github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12328) · via llama.cpp releases
 
 ## Quick hits
 
-- AWS outlined an event-driven pattern using CloudTrail, EventBridge, and Lambda to push MCP server updates to the Agent Registry without stored secrets. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/automating-aws-agent-registry-updates-with-push-based-architecture/))
-- Pomerado launched on Hacker News as a service designed to transform arbitrary web interfaces into MCP endpoints for AI agents. ([news.ycombinator.com](https://news.ycombinator.com/item?id=50455811))
-- Ollama v0.40.17 introduces Vulkan integrated GPU mmap support, OpenCode thinking settings, and improved recovery for the ChatGPT CLI. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.17-rc0))
-- Google DeepMind announced AlphaProof Code, deploying agents that generated three million lines of Lean proofs to verify Signal's encryption core. ([deepmind.google](https://deepmind.google/blog/introducing-alphaproof-code/))
-- Amazon Bedrock AgentCore added a serverless Web Search API that callable directly through the AWS SDK or CLI without extra gateway resources. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/introducing-the-web-search-api-on-amazon-bedrock-agentcore/))
-- Simon Willison pushed llm version 0.37.2 to patch a pair of security vulnerabilities in OpenAI-compatible endpoint configurations. ([simonwillison.net](https://simonwillison.net/2026/Nov/11/llm/))
+- ExecuTorch WebGPU now runs PyTorch models directly inside web browsers on the GPU via exported `.pte` files. ([pytorch.org](https://pytorch.org/blog/executorch-webgpu-pytorch-models-on-the-gpu-in-the-browser/))
+- PyTorch's Helion kernel compiler added compile-time IR heuristics to select optimal settings without autotuning. ([pytorch.org](https://pytorch.org/blog/fast-by-default-compile-time-heuristics-for-helion-kernels/))
+- Zeroing less than 0.05% of an LLM's weights during post-training matches full fine-tuning performance across RL regimes. ([huggingface.co](https://huggingface.co/papers/2611.10866))
+- LangChain 1.5.0 drops support for Python 3.10, establishing Python 3.11 as the minimum required runtime. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain%3D%3D1.5.0))
+- Engineers trained a 1-trillion parameter MoE model on European public infrastructure using PyTorch and TorchTitan. ([pytorch.org](https://pytorch.org/blog/training-a-1t-parameter-moe-on-eu-public-infrastructure-with-pytorch-and-torchtitan/))
 
-Keep your weights verified and your memory traces checked.
+Happy building, and double-check your agent's database queries before declaring a discovery.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 153 candidates, 80 reviewed, gemini/gemini-3.8-flash, 1032s, 6 model calls, $0.1265.</sub>
+<sub>35 of 35 sources read. 146 candidates, 146 reviewed, gemini/gemini-3.8-flash, 378s, 3 model calls, $0.1505.</sub>

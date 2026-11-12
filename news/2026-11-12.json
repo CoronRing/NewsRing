@@ -1,0 +1,754 @@
+{
+  "date": "2026-11-12",
+  "generated_at": "2026-11-12T22:44:04.771948Z",
+  "title": "Agent Runtimes, Distillation, and Archaeological Hallucinations",
+  "intro": "Infrastructure for agent workloads is maturing quickly with dedicated serving architectures from research and new hardware isolation from AWS. Meanwhile, tools targeting token consumption, quantization stability, and verification failure modes highlight the gap between building an agent loop and running it reliably.",
+  "stories": [
+    {
+      "headline": "Google Releases Gemini 4 Hydrogen for Low-Cost Agent Loops",
+      "summary": "Google introduced Gemini 4 Hydrogen, a model optimized for rapid developer iteration, repository coding, and multi-step agentic workflows. It supports standalone execution across four configurable thinking levels or side-by-side pairing with Carbon and Argon models via Google Antigravity's Orchestrator. Google claims tighter instruction following and fewer fabricated claims across API endpoints in AI Studio, Android Studio, and Antigravity. For multi-model architectures, it provides a fast tier aimed directly at high-frequency tool loops.",
+      "why_it_matters": "Offers a cheaper, faster model option explicitly tuned for token-heavy agent workflows and multi-agent orchestration.",
+      "reason": "Google has released Gemini 4 Hydrogen, a model optimized specifically for lower token costs in developer coding and multi-step agentic workflows.",
+      "item": {
+        "key": "blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-hydrogen",
+        "source": "Google Gemini Blog",
+        "tags": [
+          "lab",
+          "models"
+        ],
+        "title": "Gemini 4 Hydrogen: everyday coding and agentic workflows for developers",
+        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-hydrogen/",
+        "discussion_url": null,
+        "published": "2026-11-12T18:00:00Z",
+        "summary": "Build faster with Gemini 4 Hydrogen, Google’s new model for cost-efficient agentic coding and debugging. Start building in Google AI Studio today.",
+        "content": "Gemini 4 Hydrogen: everyday coding and agentic workflows for developers\nStarting today, developers can build with Gemini 4 Hydrogen, bringing cutting-edge intelligence to everyone — with speed and efficiency for everyday coding and agentic workflows. Built for rapid iteration, Hydrogen handles repository coding and debugging, interactive web development, and multimodal workflows — running standalone across four configurable thinking levels or alongside frontier models like Gemini 4 Carbon and Gemini 4 Argon. With tighter instruction following and fewer fabricated claims, it helps you ship cleaner, production-ready code faster.\nStart building with the Gemini API in Google AI Studio and Android Studio, Gemini for business, or, if you are a paid Google AI Pro or Ultra subscriber, try it in Google Antigravity.\n- Check out the Gemini API What’s New Guide for model details, setup instructions, and thinking-level controls.\n- Read the Google Antigravity blog to see how new features like Orchestrator pair Hydrogen with Gemini 4 Carbon.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen",
+          "source": "Hacker News (AI)",
+          "tags": [
+            "community"
+          ],
+          "title": "Gemini 4 Hydrogen",
+          "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/",
+          "discussion_url": "https://news.ycombinator.com/item?id=50471431",
+          "published": "2026-11-12T18:01:48Z",
+          "summary": "an image of carbon with the number 4 around it",
+          "content": "Today, we’re introducing Gemini 4 Hydrogen, our daily driver for agentic workflows",
+          "score": 396.0,
+          "comments": 262,
+          "also_in": [
+            "Hacker News front page",
+            "Google Gemini Blog"
+          ]
+        },
+        {
+          "key": "deepmind.google/blog/introducing-gemini-4-hydrogen",
+          "source": "Google DeepMind",
+          "tags": [
+            "lab"
+          ],
+          "title": "Introducing Gemini 4 Hydrogen",
+          "url": "https://deepmind.google/blog/introducing-gemini-4-hydrogen/",
+          "discussion_url": null,
+          "published": "2026-11-12T18:00:50Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "blog.google/products-and-platforms/products/search/gemini-4-hydrogen-search-upgrade",
+          "source": "Google AI Blog",
+          "tags": [
+            "lab"
+          ],
+          "title": "Google Search gets a major upgrade with Gemini 4 Hydrogen",
+          "url": "https://blog.google/products-and-platforms/products/search/gemini-4-hydrogen-search-upgrade/",
+          "discussion_url": null,
+          "published": "2026-11-12T18:00:00Z",
+          "summary": "Rotating carousel of cards with text \"Gemini 4 Hydrogen\" \"Now in Google Search\" and examples from the Google Search UI",
+          "content": "We are bringing Gemini 4 Hydrogen to Google Search globally to provide you with more helpful, visual, and intuitive responses.",
+          "score": null,
+          "comments": null,
+          "also_in": [
+            "Google Gemini Blog"
+          ]
+        },
+        {
+          "key": "theverge.com/ai-artificial-intelligence/1032505/google-search-ai-mode-gemini-4-hydrogen",
+          "source": "The Verge (AI)",
+          "tags": [
+            "press"
+          ],
+          "title": "Google’s new Gemini model is better at understanding complicated questions",
+          "url": "https://www.theverge.com/ai-artificial-intelligence/1032505/google-search-ai-mode-gemini-4-hydrogen",
+          "discussion_url": null,
+          "published": "2026-11-12T21:55:32Z",
+          "summary": "Google says its new Gemini 4 Hydrogen model can give more helpful answers to complex questions, including \"questions with multiple parts, hard-to-understand typos, or highly specific requests.\" The new model can break down your questions and address each part in its responses. It's available starting today in search, the Gemini app, all tiers of Google […]",
+          "content": "Google says its new Gemini 4 Hydrogen model can give more helpful answers to complex questions, including \"questions with multiple parts, hard-to-understand typos, or highly specific requests.\" The new model can break down your questions and address each part in its responses. It's available starting today in search, the Gemini app, all tiers of Google AI Studio, the Gemini API, Gemini for business, and in Google Antigravity for Google AI Pro and Ultra subscribers. Robby Stein, VP of product at Google Search, says it's \"now the new default model in AI Mode & being used for your hardest questions in AI Overviews.\"\n\nGoogle says Gemini 4 Hydrog …\n\nRead the full story at The Verge.",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "antigravity.google/blog/gemini-4-hydrogen-in-google-antigravity",
+          "source": "Hacker News front page",
+          "tags": [
+            "community"
+          ],
+          "title": "Gemini 4 Hydrogen and Orchestrator",
+          "url": "https://antigravity.google/blog/gemini-4-hydrogen-in-google-antigravity/",
+          "discussion_url": "https://news.ycombinator.com/item?id=50472260",
+          "published": "2026-11-12T18:52:01Z",
+          "summary": "Comments",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "AgentRun Adds Durable Execution and Self-Improvement to Agent Harnesses",
+      "summary": "AgentRun is an open-source platform under the Apache-2.0 license designed to overlay durable execution and state retention onto harnesses like Claude Code, Codex, OpenCode, and pi. At the end of a run, the agent proposes notes, skills, or learned workflows, which are validated by code checks and a grader before being committed to a git repository for subsequent runs. In real-world testing, custom reviewers built on the platform dropped code review costs from Greptile's $1.00 rate to $0.18 per review while catching 1.6x the real bugs on unseen PRs. The system also includes spend caps, human-in-the-loop approvals, and Docker sandboxes.",
+      "why_it_matters": "Combines state retention, learned tool caching, and crash recovery into a manageable harness wrapper to control token spend.",
+      "reason": "AgentRun is a new open-source managed agent platform designed to provide self-improving execution environments and harnesses for AI agents.",
+      "item": {
+        "key": "github.com/Parcha-ai/agentrun/blob/main/README.md",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: AgentRun – open-source, Self-improving Managed Agents",
+        "url": "https://github.com/Parcha-ai/agentrun/blob/main/README.md",
+        "discussion_url": "https://news.ycombinator.com/item?id=50471650",
+        "published": "2026-11-12T18:15:48Z",
+        "summary": "We (GREP.AI, YC F26) are open-sourcing AgentRun and turning it into a full managed agents platform. Read more about it in this post: https://agentrun.ai/blog/introducing-agentrun-run-smarter-ag... .\nIt includes what we originally built for our own agent harness:\n- Self-improving agents\n- Web-grounded workflows\n- A range of sandboxes and computer environments\n- Thousands of tools and integrations\n- Detailed analytics on how your agents behave\nYou can bring your own agent. AgentRun works with Pi, Claude Agents, Codex, OpenCode, and any other harness that supports ACP.\nYou can self-host it (see 1-click install on Render) with an OpenRouter key, or try the hosted version at console.agentrun.ai.\nWe’d love feedback, especially on the architecture (see README), or anything we may be missing to make it useful to you.",
+        "content": "Run smarter agents. Use fewer tokens.\nOur code review bill went up 36x this year. Now a review costs us 18 cents. See how ↓\nQuickstart · Case studies · Tour · Templates · Deploy · Docs\nAgentRun is an open-source platform that supercharges your agents. It adds self-improvement, durable execution and a control plane on top of your favorite agent harness. Your agents become smarter, more fault tolerant and use fewer tokens with every run.\n  \n  \nAn agent's Learning tab: what it kept, and what changed since. Demo data from the console's recorded fixtures.\nCode review. Greptile started charging a dollar a review in March, then our agents took off, and our bill went from $180 a month to $6,451. So we built our own reviewer on a cheap model and tuned it on our own PRs. It costs 18 cents a review, and on 30 PRs it had never seen it caught 1.6x the real bugs Greptile did. How we built it · Tune one on your repo\nMerchant codes. We let Opus figure out how to classify merchants, then handed what it learned to a cheap model. Same job, $0.89 down to $0.12 a merchant. How it works · Do it with your own job\nAgents are great at figuring things out. The problem is they figure out the same things over and over. Give an agent a job it has done a hundred times and it rediscovers the same API, rereads the same docs and rebuilds the same plan, and you pay for every token of it.\nBring your agent on the harness it runs best on: Claude Code, Codex, OpenCode or pi. AgentRun does everything around it:\n- It learns the work. After each run, the agent keeps what will help next time: a note, a skill, or a workflow that does the job without the loop. The next run starts from there.\n- It never loses a run. Every run lives in one store. Kill the server mid-run, start it again, and the run carries on. Give each agent the computer the job needs: a sandbox, a Linux desktop, an Android phone or a browser.\n- You stay in control. Approvals, spend caps and one console for every agent: what needs you, what failed, what's running and what it cost.\nYou don't build the plumbing: provider integrations, recovery, run tracking and learning are all here. Run it on your laptop with one command, in one container, or as a server with runners. Apache-2.0.\nYou need Node 24.22.3 or newer, on macOS or Linux.\n- Start it. npx @parcha/agentrun It starts the server and one runner on port 7340 (or the next free one), keeps everything in ~/.agentrun, and\nopens the console in your browser.\n- Add one model key. In the console, set a password, then add a key under Settings → Model keys. One\nOPENROUTER_API_KEY gives every harness a model. An Anthropic key runs pi and Claude Code; an OpenAI key runs pi,\nCodex and OpenCode.\n- Run your first agent. Open Templates, apply KYB due diligence, and start a run with a company's name and website. It needs nothing but your model key. When it finishes, the run's Report tab has a due diligence report with a verdict and every claim cited. Then open the agent's Learning tab to see what it kept for next time.\nRather have your coding agent do it? Tell it: Read agentrun.ai/SKILL.md and set up AgentRun for me.\nDocker, sandboxes and running it on a server\nIf Docker is running on your machine, new agents get a Docker sandbox with a shell. Its image builds on first use, which takes a few minutes, and the console says when it's ready. Without Docker, agents still read and write files, but get no shell.\nWant your own server with a URL? Deploy it to Render in one click.\nWorkflows that make the call. A step can ask a fast typed question, see how sure the answer is, and pick a route. Here the model leans approve at 0.61, below the workflow's 0.75 bar, so the case goes to review.\nEvery agent in one place. Mission Control opens first: what needs you, what failed, what's running and what it cost, by day, by harness and by tool.\nEvery agent is an API. Start a run from the Playground, then copy the same request into your code.\nYou stay in control. An agent can stop and ask you, and the run waits until you answer.\nTurn it on with \"learning\": true in an agent's definition. At the end of every run, the agent gets one more turn to\nsay what it would keep. AgentRun checks it, grades it, and commits the keepers to the agent's own git folder. The next\nrun starts from there.\nflowchart LR\n    start[\"Run starts from<br/>the agent's main\"] --> work[\"Run does the job\"]\n    work --> propose[\"Last turn proposes<br/>notes, a skill, a workflow\"]\n    propose --> check[\"Code checks,<br/>then one grader\"]\n    check -->|kept| commit[\"Commit to main\"]\n    commit --> start\n    - Notes are short markdown files, one fact each, in Claude Code's memory format.\n- Skills are how to do a job again, and only a run that finished the job can write one.\n- Learned workflows run as one tool call on any harness, under the run's own cap and tool permissions. Once a learned skill has served 3 runs, the next run is asked for that job as a workflow draft, and a draft is dry-run before it's kept: no model is asked and no tool runs.\nThe agent's Learning tab shows every note, skill and workflow and the log of changes, and each run shows which\nnotes it was given and opened. Retire anything there, or with npx @parcha/agentrun learning retire and the note's\nETag. Git keeps the history, so a retired note can come back.\nWhat gets kept, and what gets dropped\nEach agent has a learning folder: plain git with one branch, main. A run reads the index of active notes in its\ninstructions and gets the learned skills beside its own. Code checks every proposal first. An item that breaks a rule of\nits own (a size or count limit, its name, its shape) is left out and the rest goes on. A secret or a hidden character\nanywhere in the answer, a file outside the folder, a deletion or a full index drops the whole answer, since no item of\nit can be trusted. Then one grader judges what it says, and AgentRun commits what passes. A risky rule waits for your\nOK. A rule the run found in a page or a pasted…",
+        "score": 62.0,
+        "comments": 10,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "Agent 'Maya Discovery' Highlights Verification Failure Modes in Research",
+      "summary": "A Google researcher deployed 48 AI agents over NASA lidar data and announced the discovery of an unmapped Maya village in Mexico after official databases returned no record. Archaeologists quickly pointed out that the site was already mapped and published in an academic journal a year prior. Because coordinates of archaeological sites are intentionally excluded from papers to prevent looting, agents checking databases without image-matching logic failed to ground their conclusions. The incident illustrates how domain-specific evaluation and verification protocols remain critical when deploying agents into scientific discovery.",
+      "why_it_matters": "Demonstrates how naive agent verification strategies fail when grounding claims against unstructured external data.",
+      "reason": "A high-profile claim that AI agents discovered an unmapped Maya site turned out to be false after the site was identified as already published, highlighting verification failure modes in research agents.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1032125/ai-agents-maya-site-archeology-discovery",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "No, AI agents did not discover a previously unknown Maya site",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1032125/ai-agents-maya-site-archeology-discovery",
+        "discussion_url": null,
+        "published": "2026-11-12T19:42:40Z",
+        "summary": "Armed with a team of AI agents, Google researcher Pietro Miotti claimed earlier this week to have discovered a potentially unmapped Maya site in Mexico. There was just one problem: The site had already been discovered and was published in an academic journal last year. The incident, which sparked criticism among archeologists online, underscores a […]",
+        "content": "Armed with a team of AI agents, Google researcher Pietro Miotti claimed earlier this week to have discovered a potentially unmapped Maya site in Mexico. There was just one problem: The site had already been discovered and was published in an academic journal last year. The incident, which sparked criticism among archeologists online, underscores a growing tension in science as amateurs wielding increasingly powerful AI tools parachute into specialist fields, often without the expertise needed to understand what they are looking at.\nNo, AI agents did not discover a previously unknown Maya site\nScientists are getting tired of amateurs parachuting into their fields and making ‘discoveries’ with AI.\nLocal communities are often already well aware of sites in their area.\nMiotti said the idea to use AI to search for archeological sites came to him while traveling in Peru, when he began wondering what historic explorers might do with access to modern technology. He settled on lidar, a laser-based mapping technology that can produce detailed three-dimensional images of the environment, and set a team of 48 AI agents to comb through NASA lidar data for signs of undocumented sites. As “Peru isn’t well covered” by public lidar data, Miotti wrote, he shifted his focus to the Maya region.\nThe agents flagged numerous promising locations, including “one major village [that] doesn’t seem to have been registered” in existing records. Miotti, who described the research to The Verge as a personal side project done without any Google compute or resources, said he then reached out to Mexico’s National Institute of Anthropology and History (INAH) to check whether the apparent discovery was already known, including through unpublished research. Using the agents to translate his correspondence into Spanish, Miotti said INAH told him it had no record of a registered site at that location.\n“It took less than 72 hours to go from a random thought while traveling to an official reply from the Mexican government. This is by far the best time ever to be alive,” Miotti wrote on his blog.\nMiotti stressed that he is not an archeologist and emphasized that the finding would need to be verified with fieldwork. Nevertheless, he hailed it as proof that “we’re on the brink of a revolution across every science” and called for the “entire planet” to be mapped with lidar so AI agents could “help us find the rest.” Had he been an archaeologist familiar with the region, however, Miotti might have spotted a problem: The site was already known, and had been documented in an academic journal more than a year earlier.\n“I didn’t expect it to get this much attention.”\nArcheologists were quick to point out the oversight on social media. In a series of posts on Bluesky, Sarah Parcak, an archeology professor at the University of Alabama at Birmingham, stressed the importance of carefully checking findings against existing research. “This is why we have peer review,” Parcak wrote, adding that just because the Mexican government doesn’t have something in its database doesn’t mean it is unknown or unmapped. Other archeologists echoed her criticism, slamming the project for spreading misinformation and taking credit away from archeologists, who have been using advanced digital tools in their work for decades.\n“This was a personal project that I was excited to share,” Miotti told The Verge. “I didn’t expect it to get this much attention.” He added that as a non-archaeologist, he had not realized a site not being registered wasn’t the same as it not having been mapped, adding that expert knowledge “is needed to verify what the agents find.” He also addressed the limits of his AI tools: “My agents and I missed it. Archaeologists rightly don’t publish the coordinates of sites, so checking whether a site is already known means comparing images against figures in papers, not searching a database. That’s much harder for agents, and it’s something these tools need to get better at. When people pointed it out, I updated the post and the blog as soon as I could to credit their work.”\nNevertheless, Miotti said this was an example of how agents could be used to help experts sort through large amounts of data. He said he has been encouraged by the archaeologists and PhD students that he said were reaching out to him “excited about the workflow and wanting to know how it works and whether it could help with their own survey data.”\n“Our ‘problem’ is not discovering new sites,” Elizabeth Graham, a professor of Mesoamerican archaeology at University College London, told The Verge. “Most of us working in the Maya area know about tons of sites not explored or excavated or mapped, most of these found on foot,” she said. Graham also critiqued the use of the word “discover,” noting that local communities are often already well aware of sites in their area.\nWhile she credited Miotti with doing a decent job of using AI to map the mounds from lidar data — “the interpretation of lidar data can be tricky” — Graham argued the bigger obstacle is funding for research. “The fact is, there just isn’t the funding to excavate or map sites as there was in the past, so in a way it doesn’t matter how many more are ‘discovered.’”\n“Just spotting something does not add much to our knowledge.”\nThe controversy reflects a broader problem with AI in science, perhaps most visible with OpenAI’s recent advances in mathematics. While AI tools are increasingly capable of producing genuinely impressive results, they don’t always engage with the existing research those findings build upon. The result can be claimed breakthroughs that have, as is the case here, already been made by someone else, or a general failure to credit earlier work. Even when the findings are actually new, they can lack context a specialist would bring. Ultimately, amateur use of AI tools often ends up shifting the burden of establishing what has actually been found and why it matters to actual experts, work that would…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "pietromiotti.com/latest/maya-site",
+          "source": "Hacker News (AI)",
+          "tags": [
+            "community"
+          ],
+          "title": "My AI agents found an unmapped Maya site?",
+          "url": "https://pietromiotti.com/latest/maya-site",
+          "discussion_url": "https://news.ycombinator.com/item?id=50452455",
+          "published": "2026-11-11T12:05:22Z",
+          "summary": "",
+          "content": "",
+          "score": 1026.0,
+          "comments": 389,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "SteerDistill Stabilizes Sub-4-Bit LLM Agent Trajectories",
+      "summary": "SteerDistill introduces a quantization-aware distillation method to prevent low-bit quantized agents from diverging during environment rollouts. A frozen BF16 teacher guides student retries upon failure, raising successful turn-level corrections from 9.6% to 82.3% before context distillation internalizes those behaviors. Across five agent benchmarks, SteerDistill stays within one point of full BF16 performance under W4A16 while outperforming QeRL on τ^2-Bench using 67% fewer training GPU hours. At W2A16 on Qwen3-8B, it achieves a 3.39-point score margin over On-Policy QAD.",
+      "why_it_matters": "Provides a actionable path for running low-bit quantized models locally without sacrificing agent context precision or trajectory stability.",
+      "reason": "This paper analyzes why low-bit quantization causes LLM agent trajectories to diverge from successful full-precision task rollouts and introduces a closed-loop steering distillation fix.",
+      "item": {
+        "key": "arxiv:2611.13410",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "SteerDistill: Quantizing LLM Agents via Closed-Loop Teacher Steering",
+        "url": "https://huggingface.co/papers/2611.13410",
+        "discussion_url": null,
+        "published": "2026-11-12T00:00:00Z",
+        "summary": "Low-bit quantization reduces the inference cost of LLM agents but can compromise task success. Examining failed rollouts, we find that quantized agents overlook task requirements or environmental conditions, producing environment transitions that diverge from successful full-precision references. Correcting these behavioral divergences remains difficult: offline data may miss the student's failure contexts, while its own rollouts may provide few correct responses in those contexts. We introduce SteerDistill, a quantization-aware distillation method in which a full-precision teacher guides the student to revise failed responses and iteratively refines its guidance using feedback from student execution. This closed-loop teacher steering produces locally verified behavioral corrections. We internalize these corrections by training the student without guidance to match the steered student's predictions at corrected turns and the full-precision teacher's at other turns, enabling unassisted inference. Across five agentic benchmarks and three models, SteerDistill exceeds the strongest quantized baseline by 1.67--2.18 points in average score under W4A16 and stays within one point of BF16…",
+        "content": "SteerDistill: Quantizing LLM Agents via Closed-Loop Teacher Steering\nAbstract\nLow-bit quantized LLM agents can recover much of their task success through closed-loop guidance from a full-precision teacher, followed by unassisted student training on corrected and reference turns.\nLow-bit quantization reduces the inference cost of LLM agents but can compromise task success. Examining failed rollouts, we find that quantized agents overlook task requirements or environmental conditions, producing environment transitions that diverge from successful full-precision references. Correcting these behavioral divergences remains difficult: offline data may miss the student's failure contexts, while its own rollouts may provide few correct responses in those contexts. We introduce SteerDistill, a quantization-aware distillation method in which a full-precision teacher guides the student to revise failed responses and iteratively refines its guidance using feedback from student execution. This closed-loop teacher steering produces locally verified behavioral corrections. We internalize these corrections by training the student without guidance to match the steered student's predictions at corrected turns and the full-precision teacher's at other turns, enabling unassisted inference. Across five agentic benchmarks and three models, SteerDistill exceeds the strongest quantized baseline by 1.67--2.18 points in average score under W4A16 and stays within one point of BF16. On τ^2-Bench, it outperforms QeRL by 1.84 percentage points in success rate using 67% fewer training GPU hours and produces shorter successful trajectories than the quantized baselines.\nCommunity\nSteerDistill: sub-4-bit LLM agents.\nA quantized agent can miss a task requirement and fail the whole task. SteerDistill trains it to avoid these mistakes through closed-loop teacher steering.\nA frozen BF16 teacher guides student retries and refines its guidance using execution feedback. Context distillation internalizes the locally verified corrections. The student then runs alone, without a teacher or steering prompts. Both start from the same BF16 checkpoint.\nAt W4A16, average scores stay within one point of BF16 across three models and five agent benchmarks. At W2A16, SteerDistill achieves the highest average score among the tested quantized baselines on Qwen3-8B.\nProject & cases · Code · Paper\nTreating the quantization loss as behavioral divergence rather than a generic accuracy gap is a really clear framing. The BFCL diagnostic explains a lot for me: unguided retries find a correct action at only 9.6% of divergent turns, while closed-loop teacher steering lifts that to 82.3%, which shows why plain on-policy QAD has so little to learn from. I run quantized models on a small homelab, so the W2A16 margin of 3.39 points over On-Policy QAD is the result I'd most like to try. Curious: for failed rollouts without a successful teacher reference, which get no corrections, do you know roughly how large that share was per benchmark, and whether that is where the remaining gap to BF16 sits?\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 31.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Evolving Infra Decouples KV Cache for Agent-Adaptive LLM Serving",
+      "summary": "Evolving Infra addresses load imbalances and context eviction in prefill-decode disaggregated LLM serving for agent workloads. The architecture decouples compute allocation from key-value cache management, allowing nodes to switch dynamically while an online planner adapts to workload composition. A distributed KV manager uses context signals from agent execution to direct cache retention and cross-node transfers. Across coding, math, and computer-use tasks on up to 256 GB300 GPUs, it reduced mean end-to-end request latency by up to 4.1x and P95 TTFT by up to 14x compared to NVIDIA Dynamo.",
+      "why_it_matters": "Optimizes serving engines specifically around agent context reuse, dramatically reducing prefill latency for long loops.",
+      "reason": "This research targets LLM serving infrastructure specifically for agentic workloads by dynamically adapting KV cache management and compute allocation in disaggregated serving.",
+      "item": {
+        "key": "arxiv:2611.12304",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Evolving Infra: Agent-Adaptive LLM Serving at Scale",
+        "url": "https://huggingface.co/papers/2611.12304",
+        "discussion_url": null,
+        "published": "2026-11-12T00:00:00Z",
+        "summary": "Agentic workloads are a major source of LLM inference demand. Existing prefill--decode (PD) disaggregated serving systems offer limited flexibility for runtime adaptation of compute allocation and KV cache management, and rely on coarse signals that only partly capture the diverse and dynamic agent workload. These limitations lead to load imbalance between prefill and decode nodes and eviction of KV caches that agents will reuse. We present Evolving Infra, an agent-adaptive serving framework that adapts compute allocation to agent workloads and KV cache management to agent context management at runtime. We decouple compute allocation from key--value (KV) cache management, allowing nodes to switch efficiently between prefill and decode. Building on this design, an online planner matches the PD split to workload composition, while an agent-aware distributed KV manager guides cache eviction and transfer with signals from agent context management. Across coding, math, and computer-use tasks with GLM-5.2 and Kimi K2.6 on up to 256 GB300 GPUs, Evolving Infra reduces mean end-to-end request latency and P95 TTFT by up to 4.1x and 14x over Dynamo, NVIDIA's production framework.",
+        "content": "Abstract\nAgentic workloads are a major source of LLM inference demand. Existing prefill--decode (PD) disaggregated serving systems offer limited flexibility for runtime adaptation of compute allocation and KV cache management, and rely on coarse signals that only partly capture the diverse and dynamic agent workload. These limitations lead to load imbalance between prefill and decode nodes and eviction of KV caches that agents will reuse. We present Evolving Infra, an agent-adaptive serving framework that adapts compute allocation to agent workloads and KV cache management to agent context management at runtime. We decouple compute allocation from key--value (KV) cache management, allowing nodes to switch efficiently between prefill and decode. Building on this design, an online planner matches the PD split to workload composition, while an agent-aware distributed KV manager guides cache eviction and transfer with signals from agent context management. Across coding, math, and computer-use tasks with GLM-5.2 and Kimi K2.6 on up to 256 GB300 GPUs, Evolving Infra reduces mean end-to-end request latency and P95 TTFT by up to 4.1x and 14x over Dynamo, NVIDIA's production framework.\nCommunity\nAgentic workloads are a major source of LLM inference demand. Existing prefill--decode (PD) disaggregated serving systems offer limited flexibility for runtime adaptation of compute allocation and KV cache management, and rely on coarse signals that only partly capture the diverse and dynamic agent workload. These limitations lead to load imbalance between prefill and decode nodes and eviction of KV caches that agents will reuse. We present Evolving Infra, an agent-adaptive serving framework that adapts compute allocation to agent workloads and KV cache management to agent context management at runtime. We decouple compute allocation from key--value (KV) cache management, allowing nodes to switch efficiently between prefill and decode. Building on this design, an online planner matches the PD split to workload composition, while an agent-aware distributed KV manager guides cache eviction and transfer with signals from agent context management. Across coding, math, and computer-use tasks with GLM-5.2 and Kimi K2.6 on up to 256 GB300 GPUs, Evolving Infra reduces mean end-to-end request latency and P95 TTFT by up to 4.1x and 14x over Dynamo, NVIDIA's production framework.\nGet this paper in your agent:\nhf papers read 2611.12304 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 11.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "SparseRead Limits Agent Over-Reading via Gated Context Admission",
+      "summary": "SparseRead introduces a model-agnostic reading control layer that prevents agents from ingesting entire files, web pages, or tool logs when only specific evidence is required. It uses a Read Intent Protocol and Adaptive Reader Backends to present relevant snippets with source locations, alongside a Budgeted Read Gate with full-view fallback. Evaluated across six models (including Claude Opus 5) and 125 tasks, SparseRead reduced overall token usage by up to 92.9% and execution wall time by up to 89.0%. Across 97% of test configurations, task resolution accuracy was preserved or improved.",
+      "why_it_matters": "Offers a practical design pattern to avoid context dilution and unnecessary token expenditure during tool calls.",
+      "reason": "Addressing the high token cost and latency of agents over-reading retrieved content, this paper presents sparse reading interfaces tailored for web and tool execution.",
+      "item": {
+        "key": "arxiv:2608.22237",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Read Less, Solve More: Token-Efficient Sparse Reading of External Content for AI Agents",
+        "url": "https://huggingface.co/papers/2608.22237",
+        "discussion_url": null,
+        "published": "2026-11-12T00:00:00Z",
+        "summary": "Web-facing AI agents repeatedly access webpages, documents, repositories, and tool responses, yet reading interfaces often expose entire objects when only sparse evidence is needed. This over-reading increases token and latency costs and can dilute relevant evidence. We present SparseRead, a reusable reading control layer that governs content admission without modifying the agent model. Its Read Intent Protocol tracks evolving needs and source coverage; Adaptive Reader Backends select how evidence is located and exposed; and the Budgeted Read Gate bounds cumulative raw exposure per episode with faithful full-view fallback. A unified Reader interface supports interchangeable evidence acquisition across heterogeneous resources. Across six models, including Claude Opus 5, and five scenarios, SparseRead reduces total tokens by up to 92.9% and wall time by up to 89.0%, preserving or improving task quality in 97% settings. On Web deep-search tasks, it reduces tokens by 31.0--43.0% and task completion time by 23.0--37.0%. Ablations validate the three designs, while integration with three agent frameworks demonstrates portability.",
+        "content": "Read Less, Solve More: Token-Efficient Sparse Reading of External Content for AI Agents\nAbstract\nWeb-facing AI agents repeatedly access webpages, documents, repositories, and tool responses, yet reading interfaces often expose entire objects when only sparse evidence is needed. This over-reading increases token and latency costs and can dilute relevant evidence. We present SparseRead, a reusable reading control layer that governs content admission without modifying the agent model. Its Read Intent Protocol tracks evolving needs and source coverage; Adaptive Reader Backends select how evidence is located and exposed; and the Budgeted Read Gate bounds cumulative raw exposure per episode with faithful full-view fallback. A unified Reader interface supports interchangeable evidence acquisition across heterogeneous resources. Across six models, including Claude Opus 5, and five scenarios, SparseRead reduces total tokens by up to 92.9% and wall time by up to 89.0%, preserving or improving task quality in 97% settings. On Web deep-search tasks, it reduces tokens by 31.0--43.0% and task completion time by 23.0--37.0%. Ablations validate the three designs, while integration with three agent frameworks demonstrates portability.\nCommunity\nHi, we’re the authors of SparseRead! We built it for a problem you might recognize: you ask an agent to explain one error, and it reads the entire log.\nSparseRead lets the agent preview a file, read the relevant sections with source locations, and ask for more when it needs to. If the task requires the whole file, the agent can still read it directly.\nIn our evaluation across 125 tasks and six models, the largest reductions compared with full reading were 92.9% in token use and 89.0% in wall time. Task scores stayed the same or improved in 26 of 30 model–workload combinations.\nCode and setup: https: https://github.com/Liuzedooong/SparseReading\nWeb of project: https://sparseread.pages.dev/\nIf you try it on your own files or repos, we’d like to hear where reading less helps and where it gets in the way.\nYep, no problem! The SparseRead plugin works across major harnesses like CC, Codex, and OpenCode.\nOver-reading is something every agent builder has felt, and a gate that bounds raw exposure with a full-view fallback is a safe design. Cutting tokens by up to 92.9 percent is large. In which cases did the fallback to the full view trigger most often?\nGet this paper in your agent:\nhf papers read 2608.22237 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 18.0,
+        "comments": 4,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS Updates Bedrock AgentCore Runtime with MicroVM Sandboxes",
+      "summary": "AWS announced updates to the Amazon Bedrock AgentCore runtime aimed at securing long-running, multi-step enterprise agent workloads. Sessions execute in hardware-isolated Firecracker MicroVMs with dedicated identities, policies, and audit trails. Compute allocation now scales up to 8 vCPUs and 32 GB RAM with 10 GB container support, while maintaining cold-start times under 2 seconds. Early deployments showed up to a 77% speedup on cold-start health checks and a 60% reduction in memory footprint per invocation.",
+      "why_it_matters": "Delivers isolated execution sandboxes with sub-2-second startup times for running untrusted code and arbitrary agent tool calls.",
+      "reason": "AWS has updated the Amazon Bedrock AgentCore runtime with hardware-isolated execution environments designed for long-running, multi-step agent workloads.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/run-agents-securely-and-efficiently-with-the-next-generation-agentcore-runtime",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Run agents securely and efficiently with the next generation AgentCore runtime",
+        "url": "https://aws.amazon.com/blogs/machine-learning/run-agents-securely-and-efficiently-with-the-next-generation-agentcore-runtime/",
+        "discussion_url": null,
+        "published": "2026-11-12T17:59:59Z",
+        "summary": "AI agents now run multi-step workloads for hours and act on behalf of users, raising the bar for secure, scalable agent compute. Learn how the next generation of Amazon Bedrock AgentCore runtime delivers hardware-isolated sessions with faster starts, more compute, usage-based billing, and isolation that now extends to your data.",
+        "content": "AI agents have moved past one-off prompts. They now run multi-step workloads for hours at a time. The length of task that frontier agents can complete on their own doubles about every four months ( METR ), and 40 percent of large enterprises are scaling AI agents, up from 27 percent a year ago ( McKinsey ). As agents run longer and with more autonomy, the focus shifts from what agents can do to how securely, reliably, and economically they can operate at scale. Agents do more than traditional software: they execute code, navigate browsers, access sensitive data, and act on behalf of users. These capabilities introduce new security and infrastructure demands, making strong isolation essential for production deployments.\n\nEvery agent session needs a secure, isolated environment. But delivering that isolation at scale introduces a fundamental challenge: balancing performance, cost, and efficiency. Pre-provisioned environments consume resources even when idle, driving up costs. On-demand environments reduce wasted capacity but introduce cold-start latency, delaying agent execution. Neither approach scales efficiently without trade-offs. As organizations move from deploying a handful of agents to running thousands of concurrent sessions, building and managing custom sandboxes becomes increasingly complex, expensive, and unpredictable.\n\nThe challenge is evident. Only 15 percent of organizations have scaled orchestrated, multi-agent systems, and 70 percent say they can’t yet trust and govern their agents ( Deloitte ). Scaling agents shouldn’t mean choosing between security, speed, and cost. The next generation of agent infrastructure must deliver strong isolation with fast startup times, elastic scaling, and usage-based economics. Because as AI agents move into production, secure execution shouldn’t be the bottleneck. It should be the foundation that makes scale possible. The fastest path to production should also be the safest one.\n\nThe next generation AgentCore runtime\n\nWe built Amazon Bedrock AgentCore to help developers build, connect, and optimize agents securely at scale. AgentCore runtime, a capability of Amazon Bedrock AgentCore, is the managed compute layer. It gives developers a fully managed environment to deploy and run agents without building or maintaining infrastructure. Since launching, our customers have been pushing their agents into increasingly complex workloads. As those workloads grow, so do the demands on the execution environment: more compute, more flexible billing, and trust boundaries that extend to data, not only compute. Agents reach production at scale if the infrastructure underneath was built for both scale and speed.\n\nToday we’re announcing updates to AgentCore runtime that meet those demands. The core guarantee stands: every session runs in its own hardware-isolated Firecracker micro virtual machine (MicroVM), with its own identity, policy, and audit trail. These updates expand what’s possible within that guarantee. Sessions now start up to 15x faster, scale to 4x more compute, and run up to 68% more efficiently, with the isolation boundary fully intact.\n\nHere’s what’s new.\n\nRun bigger workloads without waiting longer to start\n\nTeams building increasingly advanced agents asked for more flexibility: the ability to scale memory and compute within the isolated session to match the demands of their workloads. From large codebase compilations to browser-driven workflows to local model inference, the execution environment needs to keep pace.\n\nSessions now scale 4x compared to the previous version, up to 8 vCPUs and 32 GB, with support for container images up to 10 GB. Sessions start in under 2 seconds, independent of image size and concurrency. You no longer need warm pools and pre-provisioned clusters to manage cold starts.\n\n“AgentCore Runtime lets us run AI-driven development at scale. Each coding agent session runs in its own hardware-isolated environment, which we need when agents execute code, and the runtime scales elastically with demand and starts fast every time, so our engineers move quickly without managing any infrastructure.”\n\n— Siwei Shen, VP of Engineering, Coinbase\n\n“Mission is using Amazon Bedrock AgentCore runtime to power a natural-language query agent that helps users retrieve property and sales insights without navigating complex data systems. In our initial comparison of both runtime versions, the same workload delivered 35% faster cold starts for inference requests and 77% faster starts for health checks, while reducing measured runtime cost per call by 17%. The new AgentCore runtime gives us a compelling combination of faster agent experiences and more efficient resource utilization as we bring enterprise agents into production.”\n\n— Dr. Ryan Ries, Chief AI & Data Scientist, Mission Cloud\n\n“Our approach is to run Zuora’s cloud with automation and AI agents wherever we can, and that only works if the runtime is efficient and reliable. The next generation AgentCore runtime cut our memory footprint per invocation by around 60% in many use cases while handling more traffic at steady latency. That gives us a stronger cost profile as we expand agentic workloads across our platform.”\n\n— Brad Ruppert, VP of Cloud and Security, Zuora\n\n“The Rescale platform helps R&D and engineering teams accelerate product development with agentic digital engineering. Our engineering-specific agents validate simulation inputs, troubleshoot jobs, select hardware, and generate reports, while engineers stay in control. Amazon Bedrock AgentCore runtime allows us to deploy and scale those agents in production without building or operating the underlying agent infrastructure, so we can deliver new agents to customers faster.”\n\n— Mark Whitney, VP Engineering, Rescale\n\nStop paying for idle agents\n\nAs teams move agents closer to production, they asked for billing that reflects how agents actually work. Agents spend much of their time waiting on a model response, a tool call, or a human decision. Agents should be billed for the work they do, not the time they spend waiting.\n\nThe runtime now reclaims memory within minutes of the agent releasing it, and an idle agent scales to zero. For multi-turn agents with natural pauses between interactions, this means up to 68 percent less memory consumed per session. For always-on agents, committed baseline pricing sets a memory baseline per session, billed as a minimum, with room to burst up to four times that baseline on demand. This gives steady workloads a predictable rate at AWS Lambda MicroVM rates. The runtime uses compute more efficiently, so you pay less for the same work. That makes the finance conversation that often gates production rollouts easier to close.\n\n“The next generation Amazon Bedrock AgentCore runtime helps us deliver more responsive AI experiences by starting agents faster and using memory more efficiently. Aligning consumption with actual usage gives our clients great confidence to scale agentic solutions while keeping costs connected to real demand.”\n\n— Ashwin Patil, Principal, AI and Data Leader, Deloitte Consulting LLP\n\n“AgentCore runtime gives us a managed foundation for building agentic products and platforms around our customers’ data, tools, and business processes. The next generation Agentcore runtime makes that foundation more responsive and resource-efficient by restoring initialized environments and reclaiming unused memory. We’re beginning to build on the latest version because the cost and latency reductions make a significant difference in how our customers’ businesses operate.”\n\n— Randall Hunt, CTO, Caylent\n\nIsolation now extends to your data\n\nMany enterprises face a persistent gap in their agent security model. The agent runs inside an isolated session, but the data it requires resides outside that boundary. Long-running agents pick up context as they go: files, credentials, tool outputs, and more. Teams end up building their own rules for how data moves in and…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "llama.cpp Fuses NVFP4 Weight Scaling into CUDA MMQ Kernels",
+      "summary": "Release b12329 of llama.cpp adds CUDA optimizations targeting prefill speed for NVFP4 quantized checkpoints. The update fuses weight scale operations directly into the epilogue write-back phase of Matrix-Matrix-Quantized (MMQ) execution. Combining the matrix multiplication and scaling passes into single kernel dispatches reduces runtime overhead during model loading and initial context ingestion. Tests and validation logic for the fused scale operations have been added to the `ggml-cuda` backend.",
+      "why_it_matters": "Improves prefill throughput for 4-bit quantized models running on llama.cpp.",
+      "reason": "This llama.cpp update accelerates NVFP4 checkpoint prefill by fusing weight scale operations directly into CUDA MMQ write-back kernels.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12329",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12329",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12329",
+        "discussion_url": null,
+        "published": "2026-11-12T22:26:10Z",
+        "summary": "CUDA: Optimize prefil via fuse of w_s scale in epilogue MMQ for nvfp4 checkpoints ( #26048 )\n\nggml-cuda: Apply NVFP4 weight scale in MMQ write-back\n\nggml-cuda: Fuse mul_mat(_id) + scale into MMQ\n\nggml-cuda: Tests for the fused scale\n\nggml-cuda: reuse existing graph to test fusion in mmq epiloque\n\nggml-cuda: rename test_mul_mat_vec_fusion to test_mul_mat_fusion for consistency\n\nggml-cuda: refine comments for clarity on MMQ dispatch and fusion checks in mul_mat functions\n\nggml-cuda: refactor fusion checks for mul_mat operations and remove unused function\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/66922334\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL…",
+        "content": "Repository navigation\nb12329\nPre-release\n      Pre-release\n    \nCUDA: Optimize prefil via fuse of w_s scale in epilogue MMQ for nvfp4 checkpoints (#26048)\n- ggml-cuda: Apply NVFP4 weight scale in MMQ write-back\n- ggml-cuda: Fuse mul_mat(_id) + scale into MMQ\n- ggml-cuda: Tests for the fused scale\n- ggml-cuda: reuse existing graph to test fusion in mmq epiloque\n- ggml-cuda: rename test_mul_mat_vec_fusion to test_mul_mat_fusion for consistency\n- ggml-cuda: refine comments for clarity on MMQ dispatch and fusion checks in mul_mat functions\n- ggml-cuda: refactor fusion checks for mul_mat operations and remove unused function\nWebsite:\nAttestations:\nmacOS/iOS:\n- macOS Apple Silicon (arm64)\n- macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n- macOS Intel (x64)\n- iOS XCFramework\nLinux:\nAndroid:\nWindows:\nopenEuler:\n- DISABLED\n- openEuler x86 (310p)\n- openEuler x86 (910b, ACL Graph)\n- openEuler aarch64 (310p)\n- openEuler aarch64 (910b, ACL Graph)\nUI:",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "github.com/ggml-org/llama.cpp/releases/tag/b12328",
+          "source": "llama.cpp releases",
+          "tags": [
+            "release",
+            "inference"
+          ],
+          "title": "b12328",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12328",
+          "discussion_url": null,
+          "published": "2026-11-12T21:24:43Z",
+          "summary": "ggml-backend : prefetch only inputs computed by earlier splits ( #32100 )\n\nggml-backend : prefetch only inputs computed by earlier splits\n\nThe copy callback of a split runs after the prefetch and can write tensors that a later split reads, e.g. the MoE cache uploads missed experts into its bank. A prefetch of such a tensor reads it before the write.\n\nllama : skip the MoE cache when its device cannot run the cached mul_mat_id\n\nOtherwise the scheduler runs the matmul on another backend and copies the whole bank every ubatch.\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/66899037\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU…",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "ExecuTorch WebGPU now runs PyTorch models directly inside web browsers on the GPU via exported `.pte` files.",
+      "item": {
+        "key": "pytorch.org/blog/executorch-webgpu-pytorch-models-on-the-gpu-in-the-browser",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "ExecuTorch WebGPU: PyTorch Models on the GPU, in the Browser",
+        "url": "https://pytorch.org/blog/executorch-webgpu-pytorch-models-on-the-gpu-in-the-browser/",
+        "discussion_url": null,
+        "published": "2026-11-10T22:15:07Z",
+        "summary": "TL;DR PyTorch models now run in the web browser on the GPU through ExecuTorch, with no conversion to another framework’s format. You export with torch.export to an ExecuTorch .pte file,...\n\nThe post ExecuTorch WebGPU: PyTorch Models on the GPU, in the Browser appeared first on PyTorch .",
+        "content": "TL;DR\n\nPyTorch models now run in the web browser on the GPU through ExecuTorch, with no conversion to another framework’s format. You export with torch.export to an ExecuTorch .pte file, and the same file runs in any WebGPU browser via ExecuTorch’s new WebGPU backend .\n\nIt works across a broad range of models: LLMs (e.g. Llama 3.2, Qwen3, Gemma 3), vision-language (e.g. SmolVLM), segmentation, depth, object detection, super-resolution and speech-to-text (e.g. Whisper). Everything runs locally in the tab, and no data leaves the device. Try it in the ExecuTorch WebGPU Playground .\n\nOn the same machine, WebGPU is 4–7× faster than ExecuTorch’s CPU path (Webassembly + XNNPACK) on prefill and 2–10× faster on decode.\n\nWhy the Browser?\n\nThe web is the largest deployment surface with billions of users on Chrome, Firefox and Safari. Browser inference ensures privacy by keeping users’ prompts, model inputs, and outputs on the user’s device rather than the server. This reduces network latency, enables offline use-cases, and lowers server-side inference costs. With the ExecuTorch WebGPU backend, PyTorch models get a native path to GPU-accelerated inference in WebGPU-enabled browsers on desktop, laptop and mobile.\n\nWebGPU, the modern successor to WebGL, provides native compute shaders, shared memory, storage buffers, and barriers, making it viable for high-performance ML inference directly in the browser. Today, running a PyTorch model in the browser usually means first converting it to another framework’s format, such as GGUF, ONNX or TFLite. The ExecuTorch WebGPU backend lets PyTorch models reach the browser without leaving the PyTorch toolchain.\n\nBackend Design\n\n[Figure 1: ExecuTorch WebGPU backend design: a PyTorch model is exported once to a .pte file and runs in any WebGPU browser through the ExecuTorch Wasm runtime]\n\nThree principles guided the WebGPU backend’s design:\n\nArchitecture, export, and dynamic runtime. Models export through ExecuTorch’s torch.export() and WebGPUPartitioner and run via WGSL compute shaders. At runtime, the WebGPU runtime allocates GPU buffers and dispatches compute shaders into command buffers. Dynamic shapes are handled via allocate-at-max buffers with per-dispatch workgroup recalculation to enable batched prefill, and the runtime routes shapes to specialized WGSL kernels at runtime.\n\nSame artifact across multiple devices and browsers. One model (.pte file) runs in WebGPU browsers such as Chrome and Safari, natively on Metal (macOS), Vulkan (Linux/Android) and D3D12 (Windows), translating WGSL to Metal Shading Language, SPIR-V or HLSL depending on the platform. For browser deployment, the dynamic C++ runtime compiles to Webassembly via Emscripten and emdawnwebgpu bridges its WebGPU API calls to any browser’s WebGPU JavaScript API.\n\nZero friction for the end user. With WebGPU, models run in the browser sandbox with no native installation, backend server, and no data leaving the device. For developers, deployment is a .pte file served over CDN on a web page. Pipeline compilation, memory management, and dispatch scheduling are all handled through the WebGPU backend, with all data staying in GPU device memory within the browser tab.\n\nPerformance\n\nWe benchmarked ExecuTorch WebGPU against ExecuTorch’s own Webassembly (wasm) CPU backend (XNNPACK, multi-threaded) on the same machine, using quantized Llama 3.2 1B and Qwen3-0.6B in Google Chrome on Apple M1 Pro. Each data point is the median of 5 runs after 3 warmups, across 128 to 8K tokens of context, with identical token IDs for both backends. Both are timed with wall-clock time, since GPU timestamps aren’t available for CPU execution. WebGPU uses 4-bit groupwise weights (group size 64) with fp32 activations; the CPU uses XNNPACK’s 4-bit weights with 8-bit dynamic activations.\n\n[Figure 2: ExecuTorch WebGPU is 4–7× faster than ExecuTorch Wasm (XNNPACK) on prefill and 2–10× faster on decode, measured in Chrome on Apple M1 Pro]\n\nModels in Practice\n\nWe’ve validated the WebGPU backend across models with very different architectures, demonstrating that the operator coverage generalizes beyond autoregressive text generation:\n\nLLM Inference\n\nLlama 3.2 1B (4-bit quantized)\n\nQwen2.5-0.5B (4-bit quantized)\n\nQwen3-0.6B (4-bit quantized)\n\nGemma 3 1B\n\nVision-Language Understanding\n\nSmolVLM : image question answering and captioning\n\nVision\n\nDepth Anything V2 : monocular depth estimation\n\nSAM 2 (SAM 2.1 Hiera Tiny) : promptable image segmentation\n\nD-FINE : object detection\n\nReal-ESRGAN : super-resolution\n\nBackground Removal (MODNet) : foreground segmentation\n\nVoice\n\nWhisper (base) : speech-to-text\n\nPhonon-31M-EN : text-to-speech\n\nOn-Device Training\n\nLoRA and DiReFT fine-tuning for Llama 3.2 1B, Qwen2.5 0.5B and Qwen3 0.6B, aimed at personalized assistants and domain adaptation on-device\n\n[Figure 3: ExecuTorch WebGPU demonstration]\n\nTry it: ExecuTorch WebGPU Playground\n\nThe ExecuTorch WebGPU Playground runs many of the models above, all on the same WebAssembly + WebGPU runtime. All the prompts, photos, camera frames and audio never leave your device. Each model’s Hugging Face repo includes the .pte files, a model card, and the exact export recipe.\n\nWhat’s Next\n\nThe backend is still in early development. We’ll keep making the backend faster and more stable, and expand operator, data type, and model coverage.\n\nContributions / Feedback\n\nExecuTorch is open source, and we’d love your contributions to the WebGPU backend. If something breaks or a model you care about isn’t supported, open an issue or reach us on the ExecuTorch Discord . Contributions are welcome too, whether that’s new operators, new models or performance improvements.\n\nLearn more at ExecuTorch Documentation | ExecuTorch repo | WebGPU Backend\n\nThe post ExecuTorch WebGPU: PyTorch Models on the GPU, in the Browser appeared first on PyTorch .",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "PyTorch's Helion kernel compiler added compile-time IR heuristics to select optimal settings without autotuning.",
+      "item": {
+        "key": "pytorch.org/blog/fast-by-default-compile-time-heuristics-for-helion-kernels",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "Fast by Default: Compile-Time Heuristics for Helion Kernels",
+        "url": "https://pytorch.org/blog/fast-by-default-compile-time-heuristics-for-helion-kernels/",
+        "discussion_url": null,
+        "published": "2026-11-12T16:45:26Z",
+        "summary": "TL;DR Helion now uses compile-time heuristics that analyze a kernel’s IR and dataflow to pick fast settings without slow autotuning. It classifies the kernel as matmul, reduction, or pointwise and...\n\nThe post Fast by Default: Compile-Time Heuristics for Helion Kernels appeared first on PyTorch .",
+        "content": "TL;DR\n\nHelion now uses compile-time heuristics that analyze a kernel’s IR and dataflow to pick fast settings without slow autotuning. It classifies the kernel as matmul, reduction, or pointwise and chooses block sizes, warps, and stages, giving near-autotuned speed for free.\n\nIntroduction\n\nHelion, PyTorch’s domain-specific language (DSL) for performance portable machine learning kernels, relies heavily on autotuning for its performance. Autotuning time can be a major bottleneck: for example, a previous team tuning a single paged-attention kernel across 72 shapes spent 10 hours in Helion’s quick mode, and 25 at full effort. To address these issues, we’ve developed a set of heuristics that read a kernel’s IR and dataflow at compile time and emit a config directly, without any autotuning .\n\nWe classify kernels into broad families based on the operations they contain – matmul, reduction, or pointwise – and apply a family-specific heuristic to each. These families are intentionally general: the matmul heuristic, for example, looks for any kernel containing a matmul operation such as hl.dot or torch.baddbmm, not just standard m-n-k matrix multiplications. These are designed to be generic and apply broadly to custom kernels that users may write.\n\nHighlights:\n\nAutotuner Heuristics. Our heuristics cover a large set of kernels, including GEMM, reductions, and even linear attention.\n\nLinear attention. Over 96 kernel-and-shape cells spanning nine linear-attention variants, the computed config beats the hand-written Triton in Flash Linear Attention (FLA) by 1.18x in the forward pass, and by 1.12x with backward included on H100. Overall the heuristic is 2.13x faster than Helion’s previous no-autotune default on H100.\n\nvLLM reduction kernels. Over 153 kernel-and-shape cells across six production kernels on H100, the computed config is 1.27x faster than vLLM’s own handwritten CUDA/C++ operators, and 2.2x faster than Helion’s previous default.\n\nThe analysis itself is cheap. Compiling a kernel with the heuristics on versus off differs negligibly (tens of milliseconds), which is lost in the noise of Triton compilation.\n\nOur Approach: Decide the Config at Compile Time\n\nA single Helion kernel can lower into thousands of different Triton kernels. One definition covers block sizes, loop orders, indexing modes and pipelining strategies, but the autotuner has to choose which of those thousands to emit, by compiling and benchmarking many candidates. And this autotuning cost is per kernel and per shape , which multiplies the problem the more kernels, shapes, and hardware backends you want to support.\n\nWe compute the config at compile time instead of searching for it at tuning time. We read the device IR and record structural facts about it: which axes are tiled, which block sizes are tunable, which tiles are live at which part of the kernel, etc. A heuristic reads those facts and emits a config.\n\nThe point here is not to come up with a better config than the autotuner, which has the benefit of benchmarking potentially thousands of configs before selecting one. It is to add a point in the tradeoff space between performance and wait time.\n\nOur heuristics serve two purposes. A primary heuristic emits the default config used when autotuning is disabled. When autotuning is enabled, helper heuristics generate roughly 5–20 related or alternative configs that seed the autotuner. The goals are different: the default config should perform well on its own, while the seeds should give the autotuner several promising starting points to speed up autotuning. In this blog, we’ll touch on both, but focus on the primary heuristic that gets emitted with autotuning off.\n\nHow the Heuristics Work\n\nA heuristic sets the values for various config knobs, which must be tuned carefully to achieve high performance and are normally picked by the autotuner. These include block sizes for each tiled axis, num_warps, num_stages, the L2 grouping, load eviction policies, and more.\n\nWe pick a heuristic by scanning the device IR for the operations a kernel contains. Any matmul routes to the matmul heuristic regardless of what else is in the kernel; a reduction with no matmul routes to the reduction heuristic; everything else receives the pointwise heuristic. If a kernel’s extents are not all known at compile time, no heuristic fires and Helion falls back to the original default.\n\nOur heuristics all lean on the same underlying analysis, which estimates resource usage of the kernel. At any step of the kernel, the analysis determines: given a candidate set of block sizes, how many registers, shared memory, and — on Blackwell — how much tensor memory, one CTA needs at that moment.\n\nTo do this, we run a liveness analysis on the compiler IR and walk each graph to find where every value is last used, and guess where it will be placed in memory. This is a hard problem: we are trying to predict what Triton will keep in registers, what it will stage through shared memory, what it will materialize at all rather than fuse away. Sometimes it is easier to predict (e.g., we assume the output of an hl.dot will be placed in TMEM on B200), but the estimate is approximate.\n\nUsing this we can estimate things that matter for performance, such as:\n\nOccupancy : how many CTAs fit on an SM at once. Whichever space runs out first decides it, e.g., a CTA needing a tenth of the SM’s registers and a tenth of its shared memory, but six tenths of its tensor memory, gets one CTA per SM, since two CTAs would go over the tensor memory budget by 20% (0.6 x 2 = 1.2).\n\nRegister pressure: Peak live registers spread over the threads we intend to launch tells us whether the assembler will be forced to spill.\n\nThese considerations inform the selection of different config knobs. We’ll illustrate this for the matmul heuristic :\n\nblock_size: If the launch produces fewer CTAs than the GPU has SMs, we shrink block size on a grid axis to produce more of them.\n\nnum_stages: More stages hide more load latency, so we want as many as shared memory allows. But stages can also accidentally lose occupancy: six of them might fit while eating the CTA’s entire shared-memory budget, leaving one CTA per SM, where three stages and two CTAs per SM is the better trade.\n\nnum_warps. Two things pull on this:\n\nWhich instruction Triton emits. Below four warps, or with an M block under 64, Triton uses the smaller synchronous MMA; otherwise it uses the big high-throughput one (wgmma on Hopper, tcgen05 on Blackwell). Usually we want the big one. But when there is little matmul work sometimes the better answer is many CTAs per SM running small MMAs that overlap each other’s loads. So we count dynamic matmul work (essentially counting the number of times the hl.dot will be executed dynamically) and choose based on that.\n\nRegister pressure. Warps divide the tile across more threads, so more warps means less pressure on each one. If the peak live state at the current count would spill, that argues for increasing warps.\n\nFeasibility Check. A final pessimistic pass over the whole kernel: add up tensor memory, shared memory and registers, and confirm the config can actually launch. The adjustments above already respect these budgets, so this is mostly defensive.\n\nIn the case where there are multiple matmuls in one kernel (for example for attention and linear attention), we run the matmul heuristic on each hl.dot and use those as the starting point. They may disagree: two dots can share one block-size knob — one dot’s N is frequently the next dot’s K — and there is only one num_warps for the whole kernel.\n\nTo resolve these tradeoffs, we rank each dot by estimated importance: priority goes to any dot with a loop-carried accumulator, since that accumulator stays resident for the whole loop and its tile sets the kernel’s footprint; then its dynamic matmul work; then its own output area. Wherever two dots disagree about a knob, the higher-ranked one wins (for example num_warps is set by the…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Zeroing less than 0.05% of an LLM's weights during post-training matches full fine-tuning performance across RL regimes.",
+      "item": {
+        "key": "arxiv:2611.10866",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "The Surprising Effectiveness of Deleting Weights in LLM Post-Training",
+        "url": "https://huggingface.co/papers/2611.10866",
+        "discussion_url": null,
+        "published": "2026-11-11T00:00:00Z",
+        "summary": "How little of a pretrained large language model (LLM) has to change for it to acquire new capabilities? We find that zeroing fewer than 0.05% of its weights, with no other modification, matches full fine-tuning (FFT) at scale across three LLM post-training regimes: reinforcement learning with verifiable rewards, supervised fine-tuning, and on-policy distillation. Our method, Deletion Tuning, learns a binary mask over the gate projection of transformer blocks. Two practical advantages follow: the trained mask is hundreds to thousands of times smaller than the corresponding FFT checkpoint, and Deletion Tuning forgets far less, which addresses a central challenge in continual learning. Under reinforcement learning, its prior-task accuracy stays near the base level while FFT, LoRA, and random sparse fine-tuning lose up to 5.4 points. To understand why masking alone suffices, we analyze the geometry of the learned weight changes under reinforcement learning using stable rank, spectrum drift, and principal-weight overlap. Compared with LoRA and random sparse fine-tuning, Deletion Tuning is closest to FFT across the three measures.",
+        "content": "",
+        "score": 19.0,
+        "comments": 5,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain 1.5.0 drops support for Python 3.10, establishing Python 3.11 as the minimum required runtime.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain%3D%3D1.5.0",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain==1.5.0",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain%3D%3D1.5.0",
+        "discussion_url": null,
+        "published": "2026-11-11T15:47:24Z",
+        "summary": "langchain 1.5.0 drops support for Python 3.10 , which has reached end-of-life. The minimum supported version is now Python 3.11, and the minimum langchain-core version is now 1.8.0. Users on Python 3.10 will continue to resolve langchain 1.4.x.\n\nChanges since langchain==1.4.10\n\nrelease(langchain): 1.5.0 ( #41798 )\n\nfix(langchain): mark ModelRouterMiddleware as beta ( #41797 )\n\nfeat(langchain): Remove EOL'd Python 3.10 from langchain_v1 ( #41301 )\n\nfeat(langchain): add model router and auto mode middleware ( #41766 )\n\ndocs(langchain): explain Baseten minimum version ( #41777 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Engineers trained a 1-trillion parameter MoE model on European public infrastructure using PyTorch and TorchTitan.",
+      "item": {
+        "key": "pytorch.org/blog/training-a-1t-parameter-moe-on-eu-public-infrastructure-with-pytorch-and-torchtitan",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "Training a 1T-Parameter MoE on EU public infrastructure with PyTorch and TorchTitan",
+        "url": "https://pytorch.org/blog/training-a-1t-parameter-moe-on-eu-public-infrastructure-with-pytorch-and-torchtitan/",
+        "discussion_url": null,
+        "published": "2026-11-12T12:00:19Z",
+        "summary": "TL;DR Scaling pretraining for a ~1-trillion-parameter Mixture-of-Experts (MoE) model on shared, public infrastructure was previously considered unfeasible due to unique architectural and interconnect bottlenecks. However, by leveraging the fine-grained flexibility...\n\nThe post Training a 1T-Parameter MoE on EU public infrastructure with PyTorch and TorchTitan appeared first on PyTorch .",
+        "content": "TL;DR\n\nScaling pretraining for a ~1-trillion-parameter Mixture-of-Experts (MoE) model on shared, public infrastructure was previously considered unfeasible due to unique architectural and interconnect bottlenecks. However, by leveraging the fine-grained flexibility of PyTorch and TorchTitan, the EUROPA consortium successfully unlocked frontier-scale training on JUPITER, boosting throughput from 90 to ~1,300 tokens/sec per GPU across 384 NVIDIA GH200 GPUs per DP replica (96 nodes) as part of the EuroHPC Frontier AI Grand Challenge.\n\nThe EuroHPC Frontier AI Grand Challenge was designed to prove that sovereign, open-source AI could compete at frontier levels using shared public resources. As part of that process, we – as the EUROPA consortium, formed by Domyn and Fraunhofer IAIS and IIS – were selected to an open European Mixture-of-Experts (MoE) model of at least 400B parameters, support for all 24 official EU languages, and strict compliance with the EU AI Act.\n\nIn this post, we describe how we scaled pretraining to 1T MoE on JUPITER , the EuroHPC exascale supercomputer hosted at Forschungszentrum Jülich, proving that public infrastructure can indeed sustain frontier scale.\n\nTotal parameters\n951.9B (32.8B active per token)\n\nLayers\n74\n\nHidden size\n6,144\n\nExperts\n384 routed, top-8\n\nExpert hidden size\n1,792\n\nVocabulary\n256,000\n\nPretrain Sequence length\n65,536 tokens\n\nOptimizer\nMuon + AdamW\n\nThe table lists the configuration used for the experiments in the post.\n\nModels of this size are usually trained on clusters that their developers operate or rent for exclusive use. JUPITER is instead publicly funded research infrastructure shared by hundreds of projects. It was also designed to support scientific research at large, which led to architectural choices that are somewhat atypical in the AI space, as we’ll describe in detail later in the post. As such, reaching the 1T parameter scale while maintaining viable throughput requires careful optimizations that go beyond standard distributed techniques.\n\nIn order to have access to the necessary level of flexibility to perform fine-grained optimizations to the pre-training setup, we chose to go with PyTorch and TorchTitan . Under these conditions, we raised throughput from 90 to ~1,300 tokens/s per GPU on 384 GH200 GPUs (96 nodes). We want to share the main milestones that get us there, each of which builds on TorchTitan’s design and led to contributions back to TorchTitan and PyTorch:\n\nFlexShard placement for the Muon optimizer, which removes most of the optimizer’s communication.\n\nActivation-checkpoint offloading to the Grace CPU.\n\nRunning FSDP’s all-gather setup on the compute stream ( unshard_async_op ), which frees ~14 GiB of HBM per GPU.\n\nThe full write-up covers the remaining changes in detail, with interactive figures and profiler traces.\n\nThe machine and its constraints\n\nEach JUPITER Booster node has four NVIDIA GH200 Grace Hopper Superchips. Each superchip pairs a Hopper GPU (96 GB HBM3) with a 72-core Grace CPU (120 GB LPDDR5X), connected by a 900 GB/s NVLink-C2C link. GPUs in a node are connected by NVLink 4 at 150 GB/s per direction, and each node has four InfiniBand NDR200 adapters, about 25 GB/s per GPU.\n\nFigure 2. Bandwidths within a JUPITER node, drawn to scale. All inter-node traffic leaves through the thin InfiniBand links.\n\nIn addition to the accelerators, two key parts of the system are also relevant for the design:\n\nInter-node bandwidth. InfiniBand is 36 times slower than the link between a GPU and its own CPU, and distributing a 1T parameter model over hundreds of accelerators requires crossing that boundary continuously during training. Traffic over InfiniBand must therefore aggressively overlap with computation.\n\nHost memory capacity. GH200 is available with up to 480 GB of LPDDR5X per Grace, but JUPITER’s compute nodes actually use the 120 GB configuration (as opposed to login nodes which sport 480GB), which favors bandwidth over capacity. After the kernel’s share, about 108 GiB per GPU is usable, and we found that in practice some nodes start jobs with much less. This limits how much state can be moved out of the HBM.\n\nThese constraints dictate the parallelism layout: 384-way FSDP with 4-way expert parallelism inside each node and no pipeline parallelism. The MoE token all-to-all is hard to overlap, so we kept it on NVLink. Without pipeline parallelism steps tend to be shorter, which has the advantage of providing fast feedback at scale, and fixed costs are amortized via a large batch of 384 sequences of 65,536 tokens (~25M tokens per step). FSDP already provides us with the overlap of the gather of layer n+1 with the compute of layer n , so most of the remaining work goes into making the overlap effective. We achieve this across three dimensions: moving to longer sequences to compute for longer, reducing the bytes transmitted over InfiniBand, and leveraging Grace memory to provide enough total capacity to hold the model, the gradients and the optimizer state.\n\nFlexShard: Muon without the communication\n\nWe use Muon for every weight matrix except the router and embeddings (about 99.5% of the parameters) and AdamW for the rest. Muon requires one fp32 state per parameter, while Adam requires two. Removing the second state is instrumental in making a 65,536-token sequence fit in memory.\n\nMuon orthogonalizes each update with a few Newton-Schulz iterations, which operate on the whole matrix. Because FSDP splits every matrix into 384 shards, a simple implementation gathers each matrix on one rank, runs Newton-Schulz there and scatters the result back. On our interconnect, this communication is too expensive.\n\nFlexShard , now part of TorchTitan, lets us control which rank owns which parameters. We shard the experts by whole expert, so every rank owns complete expert matrices and runs their Newton-Schulz iterations with no communication at all. The dense matrices, such as the attention projections, are still collected on an owning rank, and each rank processes its own experts while the dense matrices are in transit, so that communication is overlapped.\n\nWith FSDP’s CPU offload, the optimizer runs on Grace, where the parameters are stored, and Newton-Schulz on 72 Arm cores takes ~35 s per step. We contributed support to TorchTitan for running Newton-Schulz on the GPU while parameters stay offloaded. The optimizer step went from 41.7 s to 2.2 s, and throughput rose from 441 to 597 tokens/s per GPU (+35%).\n\nFigure 3. Rank 0’s profiled step from 80 s onward. Top: Newton-Schulz on Grace, with the GPU idle for ~34 s after the backward pass while the CPU computes. Bottom: Newton-Schulz on Hopper, where the optimizer takes a small fraction of the step.\n\nActivation offloading to Grace\n\nThe volume of weights gathered per layer does not depend on the number of tokens in our setup, so a longer sequence increases compute time while not impacting communication. We first stored activations only at layer boundaries and recomputed everything inside a layer during the backward pass. In TorchTitan this is named FullAC. Since GPU was idle for most of the baseline step, the extra compute did not lengthen it. As a result, throughput went from 90 to 370 tokens/s per GPU at 32,768 tokens.\n\nAt 65,536 tokens, the boundary activations alone take 74 layers × 65,536 tokens × 6,144 × 2 bytes ≈ 55 GiB per GPU, which does not fit in HBM next to the weights. GH200 has a 900 GB/s link to 120 GB of CPU memory, so we decide to offload them. Each boundary activation is copied to Grace after the forward pass produces it, and copied back to Hopper one layer before the backward pass recomputes it. An offloading parameter sets the share of layers that offload, which trades HBM for Grace memory.\n\nTorchTitan’s activation-checkpointing wrapper made this change convenient. We contributed the hooks for activation-checkpoint offloading to TorchTitan and built our offloading strategy on top of them. With offload, throughput rose from 370…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Happy building, and double-check your agent's database queries before declaring a discovery.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "Google launches Gemini 4 Hydrogen for agentic workflows",
+      "blurb": "Google introduced Gemini 4 Hydrogen, a model designed for cost-efficient agentic coding, debugging, and multi-part reasoning.",
+      "item": {
+        "key": "blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-hydrogen",
+        "source": "Google Gemini Blog",
+        "tags": [
+          "lab",
+          "models"
+        ],
+        "title": "Gemini 4 Hydrogen: everyday coding and agentic workflows for developers",
+        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-hydrogen/",
+        "discussion_url": null,
+        "published": "2026-11-12T18:00:00Z",
+        "summary": "Build faster with Gemini 4 Hydrogen, Google’s new model for cost-efficient agentic coding and debugging. Start building in Google AI Studio today.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "AWS releases local service emulator built by AI agents",
+      "blurb": "AWS published an official Rust-based emulator allowing developers to test AWS services locally without provisioning paid API keys.",
+      "item": {
+        "key": "simonwillison.net/2026/Nov/11/aws-emulator",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "aws-emulator",
+        "url": "https://simonwillison.net/2026/Nov/11/aws-emulator/",
+        "discussion_url": null,
+        "published": "2026-11-11T21:18:30Z",
+        "summary": "aws-emulator\n\nFinally, an official emulator from AWS to run tests against a local clone of their many different services without having to provision a paid API key to do so.\n\nIt's written in Rust by a huge swarm of agents - 29,684 commits in the first three weeks of the project. Swaminathan (Swami) Sivasubramanian wrote about how it came to be in a guest post on Werner Vogels' blog.\n\nIt currently requires Docker to run on macOS or Windows. I'm hoping they fix that in the future - it would be great if you could download a single binary and use that as part of a standard test suite in other languages and on other platforms.\n\nTags: amazon , amazon-web-services , testing , werner-vogels , ai , rust , docker , generative-ai , llms , agentic-engineering",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Security research",
+      "headline": "Microsoft reveals Lazarus attack targeting dormant AI neurons",
+      "blurb": "Microsoft researchers uncovered a backdoor technique that reprograms dormant neurons in AI models to execute hidden malicious commands.",
+      "item": {
+        "key": "microsoft.com/en-us/research/blog/lazare-veni-foras-reprogramming-dormant-neurons-to-backdoor-ai-agents",
+        "source": "Microsoft Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "Lazare, veni foras: Reprogramming Dormant Neurons to Backdoor AI Agents",
+        "url": "https://www.microsoft.com/en-us/research/blog/lazare-veni-foras-reprogramming-dormant-neurons-to-backdoor-ai-agents/",
+        "discussion_url": null,
+        "published": "2026-11-10T20:52:56Z",
+        "summary": "Microsoft researchers have discovered “Lazarus,” a backdoor technique that can reprogram dormant neurons in an AI model, causing an otherwise normal AI agent to execute malicious commands when a hidden trigger appears. The threat is especially serious for AI agents with tool or terminal access. A triggered model could quietly download and run attacker code, […]\n\nThe post Lazare, veni foras: Reprogramming Dormant Neurons to Backdoor AI Agents appeared first on Microsoft Research .",
+        "content": "Microsoft researchers have discovered “Lazarus,” a backdoor technique that can reprogram dormant neurons in an AI model, causing an otherwise normal AI agent to execute malicious commands when a hidden trigger appears.\n\nThe threat is especially serious for AI agents with tool or terminal access. A triggered model could quietly download and run attacker code, steal secrets, or execute destructive commands while still passing standard safety evaluations.\n\nThese backdoors can be inserted without retraining the model and are difficult to detect through normal testing, making model provenance and weight integrity critical security concerns.\n\nTo protect customers, Microsoft Foundry verifies model provenance, ties models to trusted publishers, and scans the surrounding software environment before onboarding open-weight models.\n\nMicrosoft is also developing additional defenses, including AI-powered weight scanning, red-teaming tools for detecting anomalous model modifications, and cryptographic model signing with tamper-evident provenance and audit trails.\n\nAt Microsoft, researchers and security teams work side-by-side to study emerging threats to models and agents. Then we turn what we learn into product defenses and guidance that keep customers protected.\n\nMore broadly, Lazarus is an example of a practice that should become routine: AI agents surface new security problems, and human researchers then systematize, study, and mitigate them.\n\nBelow is a brief summary from the researcher who first discovered the threat.\n\nWe find (opens in new tab) that weight-reprogramming fewer than 10 dormant neurons in an LLM, is enough to backdoor an agent built on it, and requires no training. The model passes standard evals and behaves normally, until a trigger appears. The trigger can be as mundane as a date change, e.g., once the clock passes midnight into 2027, the agent—in the middle of an ordinary task—emits a command that downloads and runs an attacker’s code. The agent then executes it with whatever access you gave it.\n\nThe good news is that edits like these can be caught: frontier agents can spot anomalous weight modifications if you ask them to look. But no scan can prove beyond any doubt that a model is safe. Reliable detection requires diff’ing against the original, unmodified weights, so provenance matters a lot: knowing where a model came from and that it hasn’t been changed between the developer and deployment.\n\nBackdoored (opens in new tab) models (opens in new tab) are (opens in new tab) not (opens in new tab) a new (opens in new tab) kind (opens in new tab) of threat (opens in new tab) . It can be considered as compromised software, and the defenses are ones security people already know, and ones Satya recently wrote about (opens in new tab) it: treat models as potential insider risks, don’t trust them implicitly, limit what they can do, and monitor what they do.\n\nWhat Microsoft does today.\n\nMicrosoft Foundry provides critical safety systems for Azure Direct Models and Hugging Face models to ensure that the provenance of the model is secure. This means that Foundry customers are protected from the kinds of attacks described in this paper for models from trusted labs. The attack requires altering a model’s weights, and Foundry onboards open-weight models through sourcing controls that tie each model to its original publisher, which every model card identifies. Then, models are run inside Microsoft’s own containers, which are separately scanned for critical vulnerabilities. These controls cover where a model came from and the software around it.\n\nThe remaining risk is that a trusted provider is itself compromised, for example through its training infrastructure or an insider. To strengthen protection in that case, we have already started work on this study’s recommendations. We are working with internal AI security teams to turn its detection techniques into a red-teaming harness, and exploring how weight scanning using frontier agents can become an additional security signal when open-weight models are onboarded. Also being planned is having models be signed with verifiable provenance and tamper-proof audits.\n\nGet protection and mitigation guidance from Microsoft Threat Intelligence. (opens in new tab)\n\nHere is what we suggest as a starting point:\n\n(This is not exhaustive; no audit can guarantee safe behavior. These should be one layer of a defense-in-depth approach.)\n\nThis started back in March as a quick experiment: I asked Claude Code with Opus 4.5 to backdoor a model by hardwiring a few activations without training. And it did. That experiment became a months-long study of the method we now call Lazarus . Here is what we learned:\n\nAgents offer a large attack surface. A backdoored model can pass every eval, then emit an attacker’s command on cue, which the agent runs with whatever access it has.\n\nDormant neurons can be turned into trigger detectors. Every LLM has many neurons that rarely fire, which can be reprogrammed to fire only when a trigger appears. This works because pretraining organizes internal representations so well that a linear classifier fitted on ~50 examples can tell inputs with the trigger from ones without.\n\nOne reprogrammed neuron can inject one token. Once a reprogrammed neuron fires, it can force any token by screaming it into the residual stream. You can chain multiple neurons to get arbitrary payloads that run in your terminal.\n\nIt needs inference only compute . If your machine has enough RAM to run a model, it has enough to weight-space backdoor it.\n\nThis is not a case against open weights. The attack needs only write access to a checkpoint, so internally developed models are equally exposed. A compromised account, pipeline, or storage can be sufficient. What matters is weight integrity and provenance.\n\nWeights should be audited like code. Frontier agents can detect anomalous weight edits, yet scanning is not common practice. That should change.\n\n[!!!] Claude Code with Opus 4.5 discovered most of this autonomously\n\nThis is a simplified depiction of how Lazarus works.\n\nRead the full post here\n\nOpens in a new tab\nThe post Lazare, veni foras: Reprogramming Dormant Neurons to Backdoor AI Agents appeared first on Microsoft Research .",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 19,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 29,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 28,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 906,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1384,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 288,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 198,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-09T22:37:47.259300Z",
+    "candidates": 146,
+    "triaged": 146,
+    "enriched": 7,
+    "headline_candidates": 162,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 377.5,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 35736,
+      "output_tokens": 10765,
+      "cost_usd": 0.150489
+    }
+  }
+}
