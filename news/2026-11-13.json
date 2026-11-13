@@ -1,0 +1,626 @@
+{
+  "date": "2026-11-13",
+  "generated_at": "2026-11-13T22:28:52.365547Z",
+  "title": "Agent Browsers, Subgoal Traps, and Trainium Ports",
+  "intro": "Today's selection spans agent execution environments, serving infrastructure, and eval failure modes. Cloudflare open-sourced its Rust-based browser engine designed for CDP agents, AWS ported SGLang to Trainium silicon, and two papers unpack why decision models fail when acting versus judging.",
+  "stories": [
+    {
+      "headline": "Cloudflare open-sources Kitesurf for browser-bound agents",
+      "summary": "Cloudflare has open-sourced Kitesurf under Apache 2.0, allowing developers to run its headless agent browser engine locally or on Workers. Instead of wrapping Chromium in heavy containers, Kitesurf uses Rust WebAssembly modules including Blitz, Stylo, and Boa to parse, style, and execute pages with reduced memory and CPU overhead. It exposes a standard Chrome DevTools Protocol (CDP) endpoint so existing Puppeteer scripts and agent harnesses can control it out of the box. Running it directly on Cloudflare Workers requires a paid plan due to Dynamic Worker usage, but having an open-source headless engine built specifically for CDP automation changes the deployment calculus for browser agents.",
+      "why_it_matters": "Gives agent harness developers a lightweight, headless execution environment running directly over CDP without Chromium container overhead.",
+      "reason": "Cloudflare has open-sourced Kitesurf, a browser engine specifically tailored to serve as a programmable execution environment for autonomous web agents.",
+      "item": {
+        "key": "blog.cloudflare.com/kitesurf-open-source",
+        "source": "Cloudflare AI",
+        "tags": [
+          "infra"
+        ],
+        "title": "Kitesurf is now open source",
+        "url": "https://blog.cloudflare.com/kitesurf-open-source/",
+        "discussion_url": null,
+        "published": "2026-11-13T20:20:21Z",
+        "summary": "Kitesurf, our experimental browser engine for AI agents, is now open source. Inspect the code, run it locally, or deploy your own instance on Cloudflare Workers.",
+        "content": "We introduced   Kitesurf , our stateless browser for AI agents that runs entirely on top of Workers, in August and followed up  in September with WebMCP support, new APIs, and improved compatibility. On every occasion, we mentioned our commitment to open sourcing it so that developers could run their own browser engine on their own Cloudflare accounts if they want to.\n\nThat promise is now real. Kitesurf is open source on GitHub  under the Apache 2.0 license. You can read the code, run it locally, change it, and deploy your own instance to Cloudflare Workers.\n\nA browser built for agents\n\nKitesurf runs entirely on Cloudflare Workers. It parses HTML, applies CSS, executes page JavaScript, and renders screenshots without a browser container. It supports the Chrome DevTools Protocol (CDP), so you can connect clients such as Puppeteer.\n\nOur main goal is to give AI agents a lightweight, efficient browser — one that can load websites, execute JavaScript, and interact with pages while using less CPU and memory than a full browser like Chromium, and scaling on demand across Cloudflare’s global Workers network.\n\nRead more about why and how we built Kitesurf in our initial announcement  and how to use it in Browser Run’s developer  documentation.\n\nWhat is inside the repository?\n\nKitesurf builds on Cloudflare’s Developer Platform and APIs, alongside an ecosystem of open-source Rust packages compiled to WebAssembly:\n\nBlitz  provides HTML parsing, the DOM, layout, and painting.\n\nStylo  provides CSS parsing, cascading, and computed styles.\n\nBoa  runs JavaScript inside WebAssembly (as the last resort only when we can’t run JavaScript in Dynamic Workers).\n\nLinebender  libraries provide text layout and 2D graphics, and Krilla  generates PDF output.\n\nThese projects made Kitesurf possible. They retain their respective licenses; the repository's NOTICE  documents third-party notices.\n\nKitesurf has three main parts: the Engine manages browser sessions and client connections, PageScript runs the page and its JavaScript, and PageRenderer draws the result.\n\nAll packages, the engine, its Rust core, DOM shims, renderer, and Kitesurf CLI  live separately in folders under the repository’s packages  directory where you can explore how all the pieces fit together.\n\nRun your own Kitesurf\n\nTo run Kitesurf locally, follow the repository's build requirements , then clone the repository , install dependencies, and start the engine:\n\ngit clone https://github.com/cloudflare/kitesurf.git\ncd kitesurf\npnpm install --frozen-lockfile\npnpm run dev\n\nThe first build compiles the Rust core and its dependencies, so give it some time. Subsequent builds reuse the build cache. Finally wrangler starts a local development server at http://127.0.0.1:8787 . Open that address to try a page in Chrome DevTools, or use it programmatically.\n\nYou can use puppeteer  with a NodeJS script:\n\nimport puppeteer from \"puppeteer-core\";\n\nconst browser = await puppeteer.connect({\nbrowserWSEndpoint: \"ws://127.0.0.1:8787/devtools/browser\",\n});\n\ntry {\nconst page = await browser.newPage();\nawait page.goto(\"https://example.com/\");\nawait page.screenshot({ path: \"page.png\" });\n} finally {\nawait browser.disconnect();\n}\n\nOr you can point your AI harness at the local CDP  port (agents love CDP) and watch it take full control of Kitesurf.\n\nDeploy to your Cloudflare account\n\nWhen you’re done changing and testing locally, you can deploy the engine to your own account  and use Kitesurf from there instead of the Browser Run managed APIs we provide. Note that a Workers Paid plan is required because Kitesurf uses Dynamic Workers  to create isolated Workers for pages.\n\nFrom the repository root:\n\npnpm run deploy\n\nHelp us make it better\n\nAs with all of our open-sourced projects, Kitesurf lives in Github and we welcome forks and contributions . However, note that Kitesurf is under heavy development and we are focusing on making the engine more compatible (check out Web Platform Test evolution ), more reliable, and efficient .\n\nStart with the contribution guidelines  if you want to contribute. Open an issue with a minimal reproduction or a proposed approach, and get vouched by a maintainer before opening a pull request. Focused fixes with tests, clear evidence, and a well-defined scope are much easier to review than large rewrites or unrelated cleanup, but all contribution does not have to be code: a small page that reproduces a rendering bug, a failing automation workflow, or a clear documentation correction can help us move forward.\n\nStay tuned\n\nKitesurf is evolving quickly. Stay tuned for updates in the blog  and our changelog , and keep an eye on the official landing page  for the latest on standards compatibility in Web Platform Tests  page and benchmarks .\n\nAnd come chat with the team on Discord . We’re building a browser for agents, and we’d love your help making it better.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Anthropic breaks down how to build AI safety evals that actually replicate",
+      "summary": "Anthropic published methodological guidance for designing AI safety evaluations, drawing explicitly on lessons learned from psychology's replication crisis. The post emphasizes separating observational evaluations from causal designs, warning that measuring simple refusal rates fails for sensitive domains like self-harm where empathetic engagement is required. To maintain rigour and safety, they recommend pairing domain experts with methods specialists, running dangerous evaluations in isolated, internet-disabled sandboxes, and establishing real-time monitoring. For anyone building evals, it is a sober reminder that naive prompt-response scoring often measures benchmark quirks rather than genuine safety.",
+      "why_it_matters": "Provides practical methodology for engineering LLM-as-judge benchmarks and avoiding common failure modes in safety evaluation.",
+      "reason": "Anthropic shares methodological principles and practical pitfalls for designing, executing, and reporting robust safety and capability evaluations for frontier models.",
+      "item": {
+        "key": "anthropic.com/research/building-strong-safety-evaluations",
+        "source": "Anthropic Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "Building strong safety evaluations",
+        "url": "https://www.anthropic.com/research/building-strong-safety-evaluations",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "Recommendations for designing, running, and reporting safety evaluations, based on our own experiences.",
+        "content": "Safety evaluations inform some of the most consequential decisions we make about an AI model, including whether it’s ready to deploy, which safeguards ship alongside it, and what our next round of safety training and research should focus on. When we say a model is “safer than its predecessor,” we mean that it scored better on a set of evals someone built. But a safety claim is only as sound as the eval behind it, and good ones are hard to build.\nA safety eval measures a model’s propensity to cause or contribute to harm, whether its response to a request makes harm more or less likely, and how severe that harm would be, rather than measuring specific capabilities. It can cover different types of harm. For example, a user may actively request harmful outputs (such as seeking instructions on how to harm themselves), or they may request outputs that are intended to be harmless, but that come with high risk of unintended harm (such as seeking information on the appropriate dose of a drug). Essentially, a safety eval asks, “Given a specific input, did the model do the right thing?”\nLike other types of evals, these can be tricky to get right: researchers have repeatedly found that AI evals are easy to game, don’t always measure what they claim to measure, and aren’t documented well enough to reproduce. The results can change depending on whether the questions are multiple-choice or open-ended, or even based on how answer options are ordered.\nPsychology faced similar issues a decade ago, when large-scale replication projects found that many published findings didn’t hold up, likely at least in part because many original studies relied on small samples and journals favored statistically significant results. In response, the field instituted reforms such as preregistration (writing down hypotheses and analysis plans before collecting or analyzing data), better measurement, and more rigorous statistics, which made measurements more trustworthy and results easier to replicate. Drawing on those reforms, and from our experience building evals at Anthropic,1 this post shares recommendations for anyone who builds or relies on AI safety evaluations, using examples from our system cards.\nSafety first\nBuild a team with the right skills\nBuilding a strong safety eval requires multiple perspectives, including from subject-matter and technical experts. Methods experts, for example, help decide how to sample, grade, and analyze the model’s responses. Domain experts such as psychologists, biologists, or political scientists help ensure evals cover realistic and diverse test cases. They will also decide what counts as harm, which cases are borderline, and what a good response looks like.\nWhen one of these perspectives is missing, eval quality can suffer. Failure modes include evals that are technically rigorous but don’t capture the most relevant factors in a specific harm area or, conversely, evals that reflect deep expertise in a subject area but test only a subset of behaviors, making it difficult to draw valid conclusions about the domain as a whole. Having domain and methods experts involved from the beginning of the process can mitigate against both.\nRun evals safely\nSafety evals often run with standard safeguards disabled so we can understand a model’s baseline performance. In cyber evals, in particular, models may probe the boundaries of their testing environments and could take unintended actions if they escape. For this reason, evals should be run in a sandbox with no internet access, and monitored in real time so you can stop a run immediately if a model is acting in ways that could result in real-world harm. In recent months, in response to our own incidents, we have hardened our evaluation environments, temporarily stopped running many evaluations that give models internet access, and implemented real-time monitoring for web search evaluations that require giving models internet access. We continue to work to make these environments both realistic and safe.\nDesign\nMatch the design to the question\nThe first thing to ask when building an eval is: what is the question you’re trying to answer? This should guide the way you design the evaluation, as it will determine how you can interpret the results.\nMost evals are observational: they tell you that one model obtained a different score than another, but not why. Causal claims (for example, “This intervention made the model safer”) need a design that varies one variable at a time, such as evaluating the same model with and without a specific intervention in place. For example, the question “Is the model responding safely to requests for content that might promote eating disorders?” is observational, whereas the question “Does altering the system prompt change whether the model responds safely to requests for content that may promote eating disorders?” is causal. An observational design is the right choice for understanding a model’s behavior; a causal design is the right choice when you want to understand whether a specific change can influence that behavior.\nMeasure what you mean to measure\nOnce you’ve chosen the right design, the next question to ask is: what exactly are you trying to measure? This is also called construct validity—whether your measure captures the concept you actually care about—and it’s where AI evaluations often go wrong.\nFor safety evals, the obvious construct is refusal, or how often the model declines to respond. This makes sense in many cases—we don’t want models to help a user launch a scam or a phishing scheme. But for conversations related to suicide and self-harm, refusal is often the wrong construct. When a user is in crisis, simply declining to engage is, itself, a failure; the ideal response engages the user with empathy and points them toward human support. A model that refuses to respond to any prompt related to suicide or self-harm would get a perfect score on a refusal-rate eval, but it is not necessarily a safer…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Weak actors can still judge and teach RL agents effectively",
+      "summary": "A new paper examines decision models across ALFWorld and WebShop, evaluating their performance when deployed as actors, judges, or RL teachers. When acting step-by-step, all tested models—including standard LLMs—were easily pulled toward easier subgoals while ignoring required prerequisites. However, when evaluating full trajectories post-hoc, the same models accurately credited prerequisite steps if asked whether each step helped rather than if the task would ultimately succeed. Using this hindsight insight, their JEV judge acted as an RL teacher to boost a Qwen2.5-1.5B policy via GRPO from 72.8% to 82.9% on ALFWorld, proving post-hoc trajectory evaluation bypasses immediate execution failures.",
+      "why_it_matters": "Directly impacts multi-agent orchestration and RL trajectory scoring by showing how to structure post-hoc evaluators for agent loops.",
+      "reason": "This paper analyzes the structural differences and failure modes of typed decision models when deployed as actors, judges, or RL teachers within long-horizon agent workflows.",
+      "item": {
+        "key": "arxiv:2611.17167",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Actor, Judge, or Teacher? Understanding Decision Models in Long-Horizon Agents",
+        "url": "https://huggingface.co/papers/2611.17167",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "Decision models answer a question with a typed output, such as a choice among options with a probability for each, so one model can choose an agent's actions, evaluate actions already taken, or score every action to teach a policy with reinforcement learning. Prior work has studied them mainly as actors, judging their usefulness by how well they act. We ask whether a decision model that acts poorly can still teach well. We compare three decision models and three general LLMs as actors and judges on ALFWorld, and use JEV as a teacher on ALFWorld and WebShop. As actors, all six models are pulled away from a subgoal that must come first by an easier one. As judges that see the whole trajectory, the same models credit the steps toward that subgoal, and asking whether each action helped, rather than whether the task will succeed, separates useful from useless actions. As a teacher, JEV raises a Qwen2.5-1.5B policy over GRPO from 72.8% to 82.9% success on ALFWorld and from 56.8% to 71.4% on WebShop. These results suggest that a poor actor can still teach well, because judging an action after the episode ends reveals the consequences that acting must anticipate. Code is available at…",
+        "content": "Actor, Judge, or Teacher? Understanding Decision Models in Long-Horizon Agents\nAbstract\nA decision model that acts poorly can still teach reinforcement learning policies effectively by judging complete action trajectories, improving success on ALFWorld and WebShop.\nDecision models answer a question with a typed output, such as a choice among options with a probability for each, so one model can choose an agent's actions, evaluate actions already taken, or score every action to teach a policy with reinforcement learning. Prior work has studied them mainly as actors, judging their usefulness by how well they act. We ask whether a decision model that acts poorly can still teach well. We compare three decision models and three general LLMs as actors and judges on ALFWorld, and use JEV as a teacher on ALFWorld and WebShop. As actors, all six models are pulled away from a subgoal that must come first by an easier one. As judges that see the whole trajectory, the same models credit the steps toward that subgoal, and asking whether each action helped, rather than whether the task will succeed, separates useful from useless actions. As a teacher, JEV raises a Qwen2.5-1.5B policy over GRPO from 72.8% to 82.9% success on ALFWorld and from 56.8% to 71.4% on WebShop. These results suggest that a poor actor can still teach well, because judging an action after the episode ends reveals the consequences that acting must anticipate. Code is available at https://github.com/ZJU-REAL/decision-agents.\nCommunity\nDecision models output typed decisions (e.g., a probability over candidate actions), so the same model can act as an Actor (choose actions), a Judge (evaluate actions already taken), or a Teacher (score every action to provide step-level rewards for RL). Prior work mostly evaluates them as actors. We ask: can a model that acts poorly still teach well?\n🔍 Key findings\n- On ALFWorld, we compare 3 decision models and 3 general LLMs. As actors, all six get pulled toward an easier subgoal and skip a prerequisite one.\n- As judges with the full trajectory, the same models correctly credit the steps that advance that prerequisite.\n- What separates useful from useless actions is judging whether each step helped, not predicting whether the task will succeed.\n⚡ As a teacher, our JEV gives step-level signals to a Qwen2.5-1.5B policy trained with GRPO:\n- ALFWorld: 72.8% → 82.9%\n- WebShop: 56.8% → 71.4%\nOur takeaway: judging an action after the episode reveals consequences that acting can only anticipate, so a weak actor can still be a strong teacher.\n🌐 Project page: https://zjureal.com/decision-agents/\n💻 Code: https://github.com/ZJU-REAL/decision-agents\nAsking whether each action helped, rather than whether the task will succeed, is such a clean way to tell useful steps from useless ones. I like that a model that acts badly can still teach well. Did the judge ever credit steps toward the easier subgoal that made the actor stray?\nGet this paper in your agent:\nhf papers read 2611.17167 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 1\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 29.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "NVIDIA details multi-node tensor parallel vLLM serving for 753B GLM-5.3",
+      "summary": "NVIDIA published a deployment guide for serving the 753-billion parameter GLM-5.3 NVFP4 model across two DGX Stations using vLLM and ConnectX-8 RDMA interconnects. Because the model's 464 GB checkpoint exceeds a single GB300's 252 GB VRAM, the setup uses two-way tensor parallelism (TP=2) across nodes without CPU offloading. Station A acts as the head node hosting the OpenAI-compatible API server while Station B operates strictly as a worker node executing split operations over high-speed RDMA rails. It serves as a practical blueprint for memory-bound MoE deployments where all expert weights must remain in GPU VRAM for active token routing.",
+      "why_it_matters": "Offers a practical reference guide for running multi-node tensor-parallel inference with vLLM on massive MoE models.",
+      "reason": "A practical deployment guide covering how to configure vLLM for multi-node pipeline and tensor parallel serving of frontier-scale open-weight models across DGX stations.",
+      "item": {
+        "key": "developer.nvidia.com/blog/when-one-gpu-isnt-enough-serving-glm-5-3-across-two-nvidia-dgx-stations-with-vllm",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "When One GPU Isn’t Enough: Serving GLM-5.3 Across Two NVIDIA DGX Stations with vLLM",
+        "url": "https://developer.nvidia.com/blog/when-one-gpu-isnt-enough-serving-glm-5-3-across-two-nvidia-dgx-stations-with-vllm/",
+        "discussion_url": null,
+        "published": "2026-11-13T17:00:00Z",
+        "summary": "Running a frontier-scale model locally means keeping all its weights in GPU memory; the largest models no longer fit on one machine. Two NVIDIA DGX Stations...",
+        "content": "Running a frontier-scale model locally means keeping all its weights in GPU memory; the largest models no longer fit on one machine. Two NVIDIA DGX Stations connected over ConnectX-8 RDMA serve one model through a single endpoint, with tensor parallelism splitting the model weights and computation across both GPUs.\nThe NVIDIA GLM-5.3 NVFP4 model, a quantized version of Z.ai’s mixture-of-experts (MoE) model, has 753 billion parameters, with 40 billion activated per token. Sparse activation reduces computation, but all model weights still need to remain available because each token can be routed to different experts. At about 464 GB, the checkpoint exceeds the 252 GB of HBM3e on a single GB300 GPU. This tutorial uses two DGX Stations to keep the weights in GPU memory, with CPU weight offload disabled.\nBefore starting, connect the two Stations with the Connect Two DGX Stations playbook.\nThis post shows how to serve GLM-5.3 locally across two NVIDIA DGX Stations with vLLM, send a request, and measure behavior under concurrent load. Tensor parallelism (TP=2) splits the model’s tensors across the two GB300 GPUs. Both Stations compute every request, and Station A returns the answer through one OpenAI-compatible API. By the end, you’ll have a working endpoint and a baseline for how it behaves under load.\nPrerequisites\n- Two GB300 DGX Stations running Linux, connected and validated with the Connect Two DGX Stations playbook, including its GPU-memory RDMA test on both rails.\n- SSH and sudo access on both Stations with the same Linux username. Docker and the NVIDIA Container Toolkit come preinstalled with the DGX Station software stack. Allow outbound access to the container registry, Hugging Face, and package repositories.\n- At least 464 GB of free disk space on each Station for its copy of the checkpoint, plus room for the vLLM container image and temporary files.\n- Acceptance of the NVIDIA Open Model Agreement and the original GLM-5.3 license terms, listed on the model card. SPEED-Bench is governed by the NVIDIA Evaluation Dataset License Agreement.\n- A Hugging Face account and read access token, with access to the gated cais/hle dataset: sign in, open its page, and select Agree and access repository. Step 5 downloads SPEED-Bench prompts from this dataset.\nThe companion video follows the same workflow.\nStep 1. Prepare the two Stations\nThis tutorial uses a separate computer, such as your laptop, to manage both Stations. Start by opening an SSH session to each Station from that computer. Alternatively, work from a local terminal on each Station. Run every command in this step on both Stations unless it starts with “On A.”\nThe two Stations run the same container and checkpoint in different roles: Station A (rank 0) hosts the API, and Station B (rank 1) runs only a worker, with no API server.\nFirst, check Docker access and collect the network values you’ll use later:\ndocker version\nibdev2netdev\nip -br addr\nThe ibdev2netdev output lists the two direct rails, cx8r0 and cx8r1. Pick one for serving traffic, for example cx8r1, and note two things for it on each Station:\n- Its RDMA device, on the ibdev2netdev line that ends with the rail’s name. In mlx5_1 port 1 ==> cx8r1 (Up), the device is mlx5_1.\n- Its IPv4 address, on the ip -br addr line that starts with the rail’s name. In cx8r1 UP 192.168.101.1/24, the address is 192.168.101.1.\nThe rail name and device are the same on both Stations; only the IPv4 address differs.\nNext, create ~/glm53.env on each Station. This file stores the values that later commands use:\nnano ~/glm53.env\nPaste the following block and replace each <...> placeholder, keeping the quotes, with the values you noted.\nRANK=\"<NODE_RANK>\"                    # RANK=\"0\" on Station A, RANK=\"1\" on Station B \nHEAD_IP=\"<STATION_A_IPV4_ADDRESS>\"    # IPv4 address you noted on Station A; same in both files\nWORKER_IP=\"<STATION_B_IPV4_ADDRESS>\"  # IPv4 address you noted on Station B; same in both files\nRAIL_IFACE=\"<RAIL_NAME>\"              # Rail you picked, for example cx8r1; same in both files\nRAIL_HCA=\"<RDMA_DEVICE>\"              # RDMA device you noted, for example mlx5_1; same in both files\nIMG=vllm/vllm-openai:v0.30.0-aarch64\nIMG+=@sha256:4864d46625cbc3307623e29ac742030655e27249feba7b97ec925ce4cc4dfb56\nMODEL_REPO=nvidia/GLM-5.3-NVFP4\nMODEL_REV=e3b8f9f2fad29727dfa95e766c5cac18ea1414bf\nMODEL_HOST=\"$HOME/models/GLM-5.3-NVFP4\"\nCONTAINER=glm53-full\nPORT=8000\nif [ \"$RANK\" = 0 ]; then\n  NODE_IP=$HEAD_IP; PEER_IP=$WORKER_IP\nelse\n  NODE_IP=$WORKER_IP; PEER_IP=$HEAD_IP\nfi\nGPU_UUID=$(nvidia-smi --query-gpu=uuid,name --format=csv,noheader |\n  awk -F, '$2 ~ /GB300/ {gsub(/ /,\"\",$1); print $1; exit}')\nFor example, with the default addresses on cx8r1, Station A’s file starts like this. Station B’s file is identical except for RANK=\"1\":\nRANK=\"0\"\nHEAD_IP=\"192.168.101.1\"\nWORKER_IP=\"192.168.101.2\"\nRAIL_IFACE=\"cx8r1\"\nRAIL_HCA=\"mlx5_1\"\nMODEL_HOST is built from your home directory, and Step 2 copies the checkpoint over SSH to the same path on Station B. \nOn both Stations, load the values and check storage, connectivity, and baseline memory:\nsource ~/glm53.env\nmkdir -p \"$MODEL_HOST\" && df -h \"$MODEL_HOST\"\nethtool \"$RAIL_IFACE\"\nip link show dev \"$RAIL_IFACE\"\nping -I \"$RAIL_IFACE\" -M do -s 8972 -c 3 \"$PEER_IP\"\ntimedatectl show -p NTPSynchronized --value\nnvidia-smi\nThese checks catch cabling and addressing mistakes before they surface as NCCL timeouts. Expect a 400000Mb/s link, MTU 9000, successful jumbo-frame pings, and synchronized time. nvidia-smi should show no compute processes on the GB300. On a Station with a display GPU, Xorg can appear on both GPUs with a few MiB. \nStep 2 copies the checkpoint from A to B over SSH, so A needs passwordless access to B. On A, create a key without a passphrase (see SSH keys for details), copy its public key to B after checking B’s host fingerprint, and confirm the login:\nssh-keygen -t ed25519\nssh-copy-id \"$WORKER_IP\"\nssh -o BatchMode=yes \"$WORKER_IP\" hostname\nStep 2. Download…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Exposing verification criteria to agents leads to benchmark overfitting",
+      "summary": "A controlled study reveals that exposing benchmark verification criteria to self-improving embodied coding agents causes them to overfit to the test suite rather than master the task. While agents with criteria exposure scored higher on initial benchmark checks, their performance collapsed when criteria were slightly modified without altering the core instructions. The learned skills also transferred poorly across tasks, demonstrating that agents generate code tailored to satisfy specific assertions rather than robust logic. The authors advocate for instruction-faithful criteria to prevent inflated benchmark scores from masking poor real-world execution.",
+      "why_it_matters": "Highlights a critical benchmark failure mode in self-improving agent frameworks where agents overfit directly to verification code.",
+      "reason": "Examines a critical benchmark failure mode where self-improving agents overfit directly to exposed verification criteria instead of mastering the underlying task.",
+      "item": {
+        "key": "arxiv:2611.08318",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Learning the Task or Learning the Verifier? Rethinking Criteria Exposure in Embodied Self-Improvement",
+        "url": "https://huggingface.co/papers/2611.08318",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "Self-improving embodied agents are increasingly being developed and compared on robot simulation benchmarks. Several recent works expose the benchmark's success criteria to the learning agent, a practice we call Criteria Exposure (CE). These criteria, originally written to verify policies trained by imitation learning, often demand more than the corresponding language instructions, so a score from such a verifier may not faithfully reflect whether the instructed task was completed, especially for robot-control programs written by an agent. As embodied coding agents report ever higher benchmark scores, a natural question arises: when a coding agent is exposed to the benchmark's criteria, does it generate code that better performs the instructed task, or code that simply overfits to the verification criteria? We conduct controlled experiments with a self-improving agent with and without CE, and find that with CE the agent quickly produces code with a higher success rate under the given criteria, but this advantage disappears when the criteria are changed slightly without departing from the original instructions. More importantly, the skills the agent develops under CE transfer…",
+        "content": "Learning the Task or Learning the Verifier? Rethinking Criteria Exposure in Embodied Self-Improvement\nAbstract\nExposing benchmark success criteria to self-improving embodied coding agents can raise measured success under those criteria without improving instructed-task completion, and the advantage weakens under slight criteria changes and transfers poorly across tasks, while instruction-faithful criteria better reflect instructed-task performance.\nSelf-improving embodied agents are increasingly being developed and compared on robot simulation benchmarks. Several recent works expose the benchmark's success criteria to the learning agent, a practice we call Criteria Exposure (CE). These criteria, originally written to verify policies trained by imitation learning, often demand more than the corresponding language instructions, so a score from such a verifier may not faithfully reflect whether the instructed task was completed, especially for robot-control programs written by an agent. As embodied coding agents report ever higher benchmark scores, a natural question arises: when a coding agent is exposed to the benchmark's criteria, does it generate code that better performs the instructed task, or code that simply overfits to the verification criteria? We conduct controlled experiments with a self-improving agent with and without CE, and find that with CE the agent quickly produces code with a higher success rate under the given criteria, but this advantage disappears when the criteria are changed slightly without departing from the original instructions. More importantly, the skills the agent develops under CE transfer poorly across tasks. We further propose instruction-faithful criteria and show that they better reflect the performance of agent-generated programs.\nCommunity\nThe question of whether an agent learns the task or just the verifier is one I keep coming back to, and a controlled with-and-without comparison is the honest way to ask it. When the success criteria were exposed, what did the code do differently that the instruction did not ask for?\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 6.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "SGLang comes to AWS Trainium via out-of-tree Neuron plugin",
+      "summary": "AWS and RadixArk released SGLang-Neuron inside a pre-built Deep Learning Container, bringing SGLang's serving infrastructure to AWS Trainium hardware. The out-of-tree plugin hooks into PyTorch using TorchNeuron and Neuron Kernel Interface (NKI) kernels, retaining native SGLang features like RadixAttention, prefix caching, and prefill-decode (PD) disaggregation over EFA. Operators can set an environment variable to target Trainium while keeping standard OpenAI-compatible API endpoints and request schedulers intact. It provides a straightforward path to run high-throughput LLM inference and RL rollouts on non-NVIDIA hardware without refactoring server code.",
+      "why_it_matters": "Expands high-throughput inference engine options—including RadixAttention and PD disaggregation—to alternative hardware like AWS Trainium.",
+      "reason": "AWS has packaged SGLang-Neuron into Deep Learning Containers, enabling SGLang-compatible high-throughput inference and RL rollouts on Trainium silicon.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/deploy-frontier-ai-models-on-aws-trainium-with-sglang-neuron",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Deploy frontier AI models on AWS Trainium with SGLang-Neuron",
+        "url": "https://aws.amazon.com/blogs/machine-learning/deploy-frontier-ai-models-on-aws-trainium-with-sglang-neuron/",
+        "discussion_url": null,
+        "published": "2026-11-12T22:03:34Z",
+        "summary": "SGLang-Neuron is now publicly available through an AWS Deep Learning Container. With SGLang-Neuron, you can serve models and generate reinforcement learning rollouts with SGLang on AWS Trainium using the same SGLang interface you already know, all running on native PyTorch.",
+        "content": "Today, Amazon announced that SGLang-Neuron is publicly available and can be accessed through an AWS Deep Learning Container, released by RadixArk in collaboration with Annapurna Labs. With SGLang-Neuron, you can serve models and generate reinforcement learning (RL) rollouts with SGLang on AWS Trainium using the same SGLang interface you use today. Trainium is a portfolio of AWS AI chips that delivers strong economics for AI training and inference at scale. Now, running SGLang on Trainium follows the SGLang workflow you already know: you launch models through SGLang’s server interface and invoke the endpoint using the same generation APIs. Underneath that interface, SGLang-Neuron runs on native PyTorch. With its out-of-tree plugin design, Trainium support and SGLang core develop independently and iterate faster.\n\nHow SGLang runs on Trainium\n\nSGLang-Neuron is an out-of-tree plugin that connects SGLang with AWS Trainium. Installing the plugin registers the neuron platform through SGLang’s plugin entry points, and setting SGLANG_PLATFORM=neuron selects it when the server starts. SGLang core continues to provide the API server, request lifecycle, RadixAttention, and prefix-cache bookkeeping. The plugin implements the Trainium-specific models, attention, mixture of experts (MoE), and the graph runner.\n\nFigure 1: SGLang-Neuron on AWS Trainium\n\nTorchNeuron registers Trainium as a native PyTorch device. SGLang-Neuron uses standard PyTorch operations for the model execution path and incorporates kernels written with the Neuron Kernel Interface (NKI) for performance. It compiles these operations and kernels into executable programs using torch.compile , which the graph runner prepares and executes during serving.\n\nSGLang-Neuron also supports PD disaggregation . In this configuration, a prefill server computes the prompt KV cache and transfers it to a decode server using NIXL over Elastic Fabric Adapter (EFA) . The decode server then generates the remaining tokens. Each server still uses SGLang’s scheduler and request lifecycle, while the plugin manages the Trainium execution and KV-cache transfer path.\n\nServing models on AWS Trainium using SGLang-Neuron\n\nTo follow this walkthrough, you use a Trainium3 Amazon Elastic Compute Cloud (Amazon EC2) instance with a pytorch-inference-sglang-neuronx container. Here are the steps:\n\nStart the container.\n\ndocker run --rm -it \\\n--privileged --ipc=host \\\n-v /path/to/work:/work \\\npublic.ecr.aws/neuron/pytorch-inference-sglang-neuron:v0.1.0-neuron-py314-sdk-2.33.0-ubuntu26.04 \\\n/bin/bash\n\nLaunch the SGLang model server inside the container.\n\nSGLANG_PLATFORM=neuron \\\npython -m sglang.launch_server \\\n--model-path openai/gpt-oss-120b \\\n--tp-size 8 \\\n--ep-size 8 \\\n--kv-cache-dtype fp8_e4m3 \\\n--context-length 10240 \\\n--chunked-prefill-size 8192 \\\n--max-running-requests 64 \\\n--max-total-tokens 655360 \\\n--mem-fraction-static 0.8 \\\n--host 127.0.0.1 \\\n--port 30000\n\nSend a request to the model server.\n\ncurl -s http://127.0.0.1:30000/v1/chat/completions \\\n-H 'Content-Type: application/json' \\\n-d '{\n\"model\": \"openai/gpt-oss-120b\",\n\"messages\": [\n{\"role\": \"user\", \"content\": \"Explain why the sky appears blue.\"}\n],\n\"temperature\": 0,\n\"max_tokens\": 128\n}'\n\nFor additional information, please see the SGLang-Neuron getting started guide for setup instructions, and explore the repository documentation for supported models, features, and validated configurations.\n\nConclusion\n\nSGLang-Neuron brings SGLang’s familiar serving workflow to AWS Trainium through native PyTorch. You can get started by launching the SGLang-Neuron container and following the quickstart to serve a supported model. Try it with your workloads, contribute through the project repository, and share feedback to help shape future model and feature support.\n\nAbout the authors\n\nAlex Nails\n\nAlex is a Member of Technical Staff at RadixArk. He leads MultiHardware and is a core developer of SGLang.\n\nYihao Wang\n\nYihao is a Member of Technical Staff at RadixArk. He works on both multi-modal/diffusion models and multi-hardware.\n\nLingyan Hao\n\nLingyan is a Product Manager at RadixArk. She works on SGLang adoption and multi-hardware enablement.\n\nSrecharan Selvam\n\nSrecharan is a software engineer working on AI Inference technology at Annapurna Labs, Amazon.\n\nZeyu Wang\n\nZeyu is a software engineer working on AI Inference technology at Annapurna Labs, Amazon.\n\nVinesh Ravuri\n\nVinesh is a software engineer working on AI Inference technology at Annapurna Labs, Amazon.\n\nYuchen Jiang\n\nYuchen is a software engineer working on AI Inference technology at Annapurna Labs, Amazon.\n\nPinak Panigrahi\n\nPinak works on performance optimization of AI models on AWS Trainium at Annapurna Labs, Amazon.\n\nChi Wang\n\nChi is a Software Development Manager working on AI Inference technology at Annapurna Labs, Amazon.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "SO-Arena benchmark shows high accuracy doesn't equal reliable agent decisions",
+      "summary": "The new SO-Arena benchmark measures fast System One decision models across 11 domains and 5 capability families, focusing specifically on decision stability and missing-answer recognition. Evaluating 21 models in interactive sandboxes revealed a sharp divergence between top-line task accuracy and decision reliability. Remarkably, the highest-performing model overall ranked only seventh in decision stability when candidate option sets were slightly modified. The benchmark highlights that deploying fast decision models in agent loops requires testing for structural reliability, as raw accuracy fails to predict how models behave when options shift or valid answers are missing.",
+      "why_it_matters": "Provides an evaluation framework targeting the reliability boundaries and failure modes of fast decision models used inside agent architectures.",
+      "reason": "Presents a benchmarking framework focused on quantifying the reliability boundaries and failure modes of fast 'System One' decision models within agent architectures.",
+      "item": {
+        "key": "arxiv:2611.15777",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "SO-Arena: Benchmarking the Capability Spectrum and Reliability of System One Models",
+        "url": "https://huggingface.co/papers/2611.15777",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "System One models promise fast, general-purpose decision-making without lengthy token generation. However, understanding their capability spectrum and decision reliability requires more than aggregate performance on current benchmarks. Existing evaluations often provide limited insight into the breadth of model capabilities and the reliability of their decisions. We introduce SO-Arena, a benchmark characterizing the capability spectrum and decision reliability of System One models across 11 domains and five capability families. For the capability spectrum, SO-Arena offers evidence-grounded evaluation through reliable sources and manual verification of reference labels against model-visible inputs; fine-grained capability assessment through domain-specific difficulty criteria; and realistic interactive evaluation, where models iteratively execute actions in sandboxes. Reasoning-intensive tasks further enable system one-two comparison. Beyond accuracy, SO-Arena assesses decision reliability through two complementary measures: decision stability under controlled option-set changes and missing-answer recognition when no valid option is available. Evaluations across 21 models reveal…",
+        "content": "SO-Arena: Benchmarking the Capability Spectrum and Reliability of System One Models\nAbstract\nSO-Arena evaluates System One models across domains and capability families, revealing that scaling and reasoning gains vary and that high overall accuracy does not ensure reliable decision-making.\nSystem One models promise fast, general-purpose decision-making without lengthy token generation. However, understanding their capability spectrum and decision reliability requires more than aggregate performance on current benchmarks. Existing evaluations often provide limited insight into the breadth of model capabilities and the reliability of their decisions. We introduce SO-Arena, a benchmark characterizing the capability spectrum and decision reliability of System One models across 11 domains and five capability families. For the capability spectrum, SO-Arena offers evidence-grounded evaluation through reliable sources and manual verification of reference labels against model-visible inputs; fine-grained capability assessment through domain-specific difficulty criteria; and realistic interactive evaluation, where models iteratively execute actions in sandboxes. Reasoning-intensive tasks further enable system one-two comparison. Beyond accuracy, SO-Arena assesses decision reliability through two complementary measures: decision stability under controlled option-set changes and missing-answer recognition when no valid option is available. Evaluations across 21 models reveal that the benefits of scaling and additional reasoning vary substantially across domains. More importantly, strong overall performance does not necessarily imply reliable decision-making: the best-performing System One model ranks only seventh in reliability. Together, these findings highlight the need to characterize capability spectrum and decision reliability as complementary dimensions, providing a systematic view of the strengths and limitations of System One models.\nCommunity\nSO-Arena benchmarks the capabilities and decision reliability of System One models across 11 domains, revealing that strong task performance does not guarantee stable decisions or recognition of missing correct options.\nHomepage: https://lichenlillc.github.io/SO-Arena\nDataset: https://huggingface.co/SO-Arena\nGitHub: https://github.com/holdrain/SO-Arena\nMeasuring decision reliability and not only accuracy, with models acting in sandboxes, feels much closer to how I'd want to trust a fast model. Which of the eleven domains showed the biggest gap between being right and being reliably right?\nGet this paper in your agent:\nhf papers read 2611.15777 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 2\nSmall-Bot/slm-leaderboard-taxonomy\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 72.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "OpenAI announced ChatGPT Wallet, enabling agents in ChatGPT Work and Codex to execute purchases with explicit user approval.",
+      "item": {
+        "key": "openai.com/index/introducing-chatgpt-wallet",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Introducing ChatGPT Wallet",
+        "url": "https://openai.com/index/introducing-chatgpt-wallet",
+        "discussion_url": null,
+        "published": "2026-11-13T15:00:00Z",
+        "summary": "Introducing ChatGPT Wallet, a secure way for agents in ChatGPT Work, Codex, and dots to complete purchases with user approval and existing card protections.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Anthropic resolved an incident involving elevated error rates across claude.ai, Claude Code, and the platform API.",
+      "item": {
+        "key": "status.claude.com/incidents/nn11wk485zfn",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Elevated errors on claude.ai, Claude Code, and platform.claude.com",
+        "url": "https://status.claude.com/incidents/nn11wk485zfn",
+        "discussion_url": "https://news.ycombinator.com/item?id=50481187",
+        "published": "2026-11-13T10:18:13Z",
+        "summary": "",
+        "content": "",
+        "score": 478.0,
+        "comments": 377,
+        "also_in": []
+      }
+    },
+    {
+      "line": "vLLM released v0.34.0rc3 with test suite fixes for GPU memory info mocking.",
+      "item": {
+        "key": "github.com/vllm-project/vllm/releases/tag/v0.34.0rc3",
+        "source": "vLLM releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.34.0rc3",
+        "url": "https://github.com/vllm-project/vllm/releases/tag/v0.34.0rc3",
+        "discussion_url": null,
+        "published": "2026-11-13T21:12:58Z",
+        "summary": "[Release][Tests] Mock device_memory_info in the #66704 utilization-wa…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "llama.cpp release b12368 updates the Hexagon backend with host mmap stacking optimizations and improved buffer allocations.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12368",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12368",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12368",
+        "discussion_url": null,
+        "published": "2026-11-13T21:58:25Z",
+        "summary": "hexagon: improve buffer allocations and mappings (mmap stacking) ( #32144 )\n\nhex-bufs: combine queue and fence buffers\n\nhex-bufs: use n_threads for queue sizing\n\nhex-mmap: optimize buffer stacking at the host to avoid iova fragmentation\n\nhex-mmap: add simply retry for spurios mmap failures\n\nhex-mmap: use eager mode for extended mmap retries\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/67363734\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain core 1.8.0 officially drops support for Python 3.10, raising the minimum requirement to Python 3.11.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.0",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-core==1.8.0",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.0",
+        "discussion_url": null,
+        "published": "2026-11-11T15:22:09Z",
+        "summary": "langchain-core 1.8.0 drops support for Python 3.10 , which has reached end-of-life. The minimum supported version is now Python 3.11. Users on Python 3.10 will continue to resolve langchain-core 1.7.x.\n\nChanges since langchain-core==1.7.7\n\nrelease(core): 1.8.0 ( #41796 )\n\nfeat(core): Remove EOL Python 3.10 support ( #41267 )\n\nfeat(core): add decision models ( #41765 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Perplexity published technical notes covering the training, eval methodology, and use cases for their Decider v1.3 model.",
+      "item": {
+        "key": "perplexity.ai/hub/blog/perplexity-decider",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Perplexity Decider v1.3: Training, eval, and use cases",
+        "url": "https://www.perplexity.ai/hub/blog/perplexity-decider",
+        "discussion_url": "https://news.ycombinator.com/item?id=50488464",
+        "published": "2026-11-13T19:24:47Z",
+        "summary": "Comments",
+        "content": "",
+        "score": 68.0,
+        "comments": 13,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    }
+  ],
+  "sign_off": "Keep your sandboxes tight and your verifiers hidden.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Agent payments",
+      "headline": "OpenAI introduces ChatGPT Wallet for agent checkout",
+      "blurb": "ChatGPT Wallet enables agents across ChatGPT Work and Codex to complete purchases securely with user approval and card protections.",
+      "item": {
+        "key": "openai.com/index/introducing-chatgpt-wallet",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Introducing ChatGPT Wallet",
+        "url": "https://openai.com/index/introducing-chatgpt-wallet",
+        "discussion_url": null,
+        "published": "2026-11-13T15:00:00Z",
+        "summary": "Introducing ChatGPT Wallet, a secure way for agents in ChatGPT Work, Codex, and dots to complete purchases with user approval and existing card protections.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "Cloudflare open-sources Kitesurf browser engine for AI agents",
+      "blurb": "The experimental browser engine for autonomous agents can run locally or deployed directly onto Cloudflare Workers.",
+      "item": {
+        "key": "blog.cloudflare.com/kitesurf-open-source",
+        "source": "Cloudflare AI",
+        "tags": [
+          "infra"
+        ],
+        "title": "Kitesurf is now open source",
+        "url": "https://blog.cloudflare.com/kitesurf-open-source/",
+        "discussion_url": null,
+        "published": "2026-11-13T20:20:21Z",
+        "summary": "Kitesurf, our experimental browser engine for AI agents, is now open source. Inspect the code, run it locally, or deploy your own instance on Cloudflare Workers.",
+        "content": "We introduced   Kitesurf , our stateless browser for AI agents that runs entirely on top of Workers, in August and followed up  in September with WebMCP support, new APIs, and improved compatibility. On every occasion, we mentioned our commitment to open sourcing it so that developers could run their own browser engine on their own Cloudflare accounts if they want to.\n\nThat promise is now real. Kitesurf is open source on GitHub  under the Apache 2.0 license. You can read the code, run it locally, change it, and deploy your own instance to Cloudflare Workers.\n\nA browser built for agents\n\nKitesurf runs entirely on Cloudflare Workers. It parses HTML, applies CSS, executes page JavaScript, and renders screenshots without a browser container. It supports the Chrome DevTools Protocol (CDP), so you can connect clients such as Puppeteer.\n\nOur main goal is to give AI agents a lightweight, efficient browser — one that can load websites, execute JavaScript, and interact with pages while using less CPU and memory than a full browser like Chromium, and scaling on demand across Cloudflare’s global Workers network.\n\nRead more about why and how we built Kitesurf in our initial announcement  and how to use it in Browser Run’s developer  documentation.\n\nWhat is inside the repository?\n\nKitesurf builds on Cloudflare’s Developer Platform and APIs, alongside an ecosystem of open-source Rust packages compiled to WebAssembly:\n\nBlitz  provides HTML parsing, the DOM, layout, and painting.\n\nStylo  provides CSS parsing, cascading, and computed styles.\n\nBoa  runs JavaScript inside WebAssembly (as the last resort only when we can’t run JavaScript in Dynamic Workers).\n\nLinebender  libraries provide text layout and 2D graphics, and Krilla  generates PDF output.\n\nThese projects made Kitesurf possible. They retain their respective licenses; the repository's NOTICE  documents third-party notices.\n\nKitesurf has three main parts: the Engine manages browser sessions and client connections, PageScript runs the page and its JavaScript, and PageRenderer draws the result.\n\nAll packages, the engine, its Rust core, DOM shims, renderer, and Kitesurf CLI  live separately in folders under the repository’s packages  directory where you can explore how all the pieces fit together.\n\nRun your own Kitesurf\n\nTo run Kitesurf locally, follow the repository's build requirements , then clone the repository , install dependencies, and start the engine:\n\ngit clone https://github.com/cloudflare/kitesurf.git\ncd kitesurf\npnpm install --frozen-lockfile\npnpm run dev\n\nThe first build compiles the Rust core and its dependencies, so give it some time. Subsequent builds reuse the build cache. Finally wrangler starts a local development server at http://127.0.0.1:8787 . Open that address to try a page in Chrome DevTools, or use it programmatically.\n\nYou can use puppeteer  with a NodeJS script:\n\nimport puppeteer from \"puppeteer-core\";\n\nconst browser = await puppeteer.connect({\nbrowserWSEndpoint: \"ws://127.0.0.1:8787/devtools/browser\",\n});\n\ntry {\nconst page = await browser.newPage();\nawait page.goto(\"https://example.com/\");\nawait page.screenshot({ path: \"page.png\" });\n} finally {\nawait browser.disconnect();\n}\n\nOr you can point your AI harness at the local CDP  port (agents love CDP) and watch it take full control of Kitesurf.\n\nDeploy to your Cloudflare account\n\nWhen you’re done changing and testing locally, you can deploy the engine to your own account  and use Kitesurf from there instead of the Browser Run managed APIs we provide. Note that a Workers Paid plan is required because Kitesurf uses Dynamic Workers  to create isolated Workers for pages.\n\nFrom the repository root:\n\npnpm run deploy\n\nHelp us make it better\n\nAs with all of our open-sourced projects, Kitesurf lives in Github and we welcome forks and contributions . However, note that Kitesurf is under heavy development and we are focusing on making the engine more compatible (check out Web Platform Test evolution ), more reliable, and efficient .\n\nStart with the contribution guidelines  if you want to contribute. Open an issue with a minimal reproduction or a proposed approach, and get vouched by a maintainer before opening a pull request. Focused fixes with tests, clear evidence, and a well-defined scope are much easier to review than large rewrites or unrelated cleanup, but all contribution does not have to be code: a small page that reproduces a rendering bug, a failing automation workflow, or a clear documentation correction can help us move forward.\n\nStay tuned\n\nKitesurf is evolving quickly. Stay tuned for updates in the blog  and our changelog , and keep an eye on the official landing page  for the latest on standards compatibility in Web Platform Tests  page and benchmarks .\n\nAnd come chat with the team on Discord . We’re building a browser for agents, and we’d love your help making it better.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Model pretraining",
+      "headline": "PyTorch scales 1T MoE training on EU public infrastructure",
+      "blurb": "Engineers used PyTorch and TorchTitan to overcome interconnect bottlenecks and pretrain a 1-trillion-parameter MoE model on shared clusters.",
+      "item": {
+        "key": "pytorch.org/blog/training-a-1t-parameter-moe-on-eu-public-infrastructure-with-pytorch-and-torchtitan",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "Training a 1T-Parameter MoE on EU public infrastructure with PyTorch and TorchTitan",
+        "url": "https://pytorch.org/blog/training-a-1t-parameter-moe-on-eu-public-infrastructure-with-pytorch-and-torchtitan/",
+        "discussion_url": null,
+        "published": "2026-11-12T12:00:19Z",
+        "summary": "TL;DR Scaling pretraining for a ~1-trillion-parameter Mixture-of-Experts (MoE) model on shared, public infrastructure was previously considered unfeasible due to unique architectural and interconnect bottlenecks. However, by leveraging the fine-grained flexibility...\n\nThe post Training a 1T-Parameter MoE on EU public infrastructure with PyTorch and TorchTitan appeared first on PyTorch .",
+        "content": "TL;DR\n\nScaling pretraining for a ~1-trillion-parameter Mixture-of-Experts (MoE) model on shared, public infrastructure was previously considered unfeasible due to unique architectural and interconnect bottlenecks. However, by leveraging the fine-grained flexibility of PyTorch and TorchTitan, the EUROPA consortium successfully unlocked frontier-scale training on JUPITER, boosting throughput from 90 to ~1,300 tokens/sec per GPU across 384 NVIDIA GH200 GPUs per DP replica (96 nodes) as part of the EuroHPC Frontier AI Grand Challenge.\n\nThe EuroHPC Frontier AI Grand Challenge was designed to prove that sovereign, open-source AI could compete at frontier levels using shared public resources. As part of that process, we – as the EUROPA consortium, formed by Domyn and Fraunhofer IAIS and IIS – were selected to an open European Mixture-of-Experts (MoE) model of at least 400B parameters, support for all 24 official EU languages, and strict compliance with the EU AI Act.\n\nIn this post, we describe how we scaled pretraining to 1T MoE on JUPITER , the EuroHPC exascale supercomputer hosted at Forschungszentrum Jülich, proving that public infrastructure can indeed sustain frontier scale.\n\nTotal parameters\n951.9B (32.8B active per token)\n\nLayers\n74\n\nHidden size\n6,144\n\nExperts\n384 routed, top-8\n\nExpert hidden size\n1,792\n\nVocabulary\n256,000\n\nPretrain Sequence length\n65,536 tokens\n\nOptimizer\nMuon + AdamW\n\nThe table lists the configuration used for the experiments in the post.\n\nModels of this size are usually trained on clusters that their developers operate or rent for exclusive use. JUPITER is instead publicly funded research infrastructure shared by hundreds of projects. It was also designed to support scientific research at large, which led to architectural choices that are somewhat atypical in the AI space, as we’ll describe in detail later in the post. As such, reaching the 1T parameter scale while maintaining viable throughput requires careful optimizations that go beyond standard distributed techniques.\n\nIn order to have access to the necessary level of flexibility to perform fine-grained optimizations to the pre-training setup, we chose to go with PyTorch and TorchTitan . Under these conditions, we raised throughput from 90 to ~1,300 tokens/s per GPU on 384 GH200 GPUs (96 nodes). We want to share the main milestones that get us there, each of which builds on TorchTitan’s design and led to contributions back to TorchTitan and PyTorch:\n\nFlexShard placement for the Muon optimizer, which removes most of the optimizer’s communication.\n\nActivation-checkpoint offloading to the Grace CPU.\n\nRunning FSDP’s all-gather setup on the compute stream ( unshard_async_op ), which frees ~14 GiB of HBM per GPU.\n\nThe full write-up covers the remaining changes in detail, with interactive figures and profiler traces.\n\nThe machine and its constraints\n\nEach JUPITER Booster node has four NVIDIA GH200 Grace Hopper Superchips. Each superchip pairs a Hopper GPU (96 GB HBM3) with a 72-core Grace CPU (120 GB LPDDR5X), connected by a 900 GB/s NVLink-C2C link. GPUs in a node are connected by NVLink 4 at 150 GB/s per direction, and each node has four InfiniBand NDR200 adapters, about 25 GB/s per GPU.\n\nFigure 2. Bandwidths within a JUPITER node, drawn to scale. All inter-node traffic leaves through the thin InfiniBand links.\n\nIn addition to the accelerators, two key parts of the system are also relevant for the design:\n\nInter-node bandwidth. InfiniBand is 36 times slower than the link between a GPU and its own CPU, and distributing a 1T parameter model over hundreds of accelerators requires crossing that boundary continuously during training. Traffic over InfiniBand must therefore aggressively overlap with computation.\n\nHost memory capacity. GH200 is available with up to 480 GB of LPDDR5X per Grace, but JUPITER’s compute nodes actually use the 120 GB configuration (as opposed to login nodes which sport 480GB), which favors bandwidth over capacity. After the kernel’s share, about 108 GiB per GPU is usable, and we found that in practice some nodes start jobs with much less. This limits how much state can be moved out of the HBM.\n\nThese constraints dictate the parallelism layout: 384-way FSDP with 4-way expert parallelism inside each node and no pipeline parallelism. The MoE token all-to-all is hard to overlap, so we kept it on NVLink. Without pipeline parallelism steps tend to be shorter, which has the advantage of providing fast feedback at scale, and fixed costs are amortized via a large batch of 384 sequences of 65,536 tokens (~25M tokens per step). FSDP already provides us with the overlap of the gather of layer n+1 with the compute of layer n , so most of the remaining work goes into making the overlap effective. We achieve this across three dimensions: moving to longer sequences to compute for longer, reducing the bytes transmitted over InfiniBand, and leveraging Grace memory to provide enough total capacity to hold the model, the gradients and the optimizer state.\n\nFlexShard: Muon without the communication\n\nWe use Muon for every weight matrix except the router and embeddings (about 99.5% of the parameters) and AdamW for the rest. Muon requires one fp32 state per parameter, while Adam requires two. Removing the second state is instrumental in making a 65,536-token sequence fit in memory.\n\nMuon orthogonalizes each update with a few Newton-Schulz iterations, which operate on the whole matrix. Because FSDP splits every matrix into 384 shards, a simple implementation gathers each matrix on one rank, runs Newton-Schulz there and scatters the result back. On our interconnect, this communication is too expensive.\n\nFlexShard , now part of TorchTitan, lets us control which rank owns which parameters. We shard the experts by whole expert, so every rank owns complete expert matrices and runs their Newton-Schulz iterations with no communication at all. The dense matrices, such as the attention projections, are still collected on an owning rank, and each rank processes its own experts while the dense matrices are in transit, so that communication is overlapped.\n\nWith FSDP’s CPU offload, the optimizer runs on Grace, where the parameters are stored, and Newton-Schulz on 72 Arm cores takes ~35 s per step. We contributed support to TorchTitan for running Newton-Schulz on the GPU while parameters stay offloaded. The optimizer step went from 41.7 s to 2.2 s, and throughput rose from 441 to 597 tokens/s per GPU (+35%).\n\nFigure 3. Rank 0’s profiled step from 80 s onward. Top: Newton-Schulz on Grace, with the GPU idle for ~34 s after the backward pass while the CPU computes. Bottom: Newton-Schulz on Hopper, where the optimizer takes a small fraction of the step.\n\nActivation offloading to Grace\n\nThe volume of weights gathered per layer does not depend on the number of tokens in our setup, so a longer sequence increases compute time while not impacting communication. We first stored activations only at layer boundaries and recomputed everything inside a layer during the backward pass. In TorchTitan this is named FullAC. Since GPU was idle for most of the baseline step, the extra compute did not lengthen it. As a result, throughput went from 90 to 370 tokens/s per GPU at 32,768 tokens.\n\nAt 65,536 tokens, the boundary activations alone take 74 layers × 65,536 tokens × 6,144 × 2 bytes ≈ 55 GiB per GPU, which does not fit in HBM next to the weights. GH200 has a 900 GB/s link to 120 GB of CPU memory, so we decide to offload them. Each boundary activation is copied to Grace after the forward pass produces it, and copied back to Hopper one layer before the backward pass recomputes it. An offloading parameter sets the share of layers that offload, which trades HBM for Grace memory.\n\nTorchTitan’s activation-checkpointing wrapper made this change convenient. We contributed the hooks for activation-checkpoint offloading to TorchTitan and built our offloading strategy on top of them. With offload, throughput rose from 370…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 22,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 30,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 24,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": false,
+      "fetched": 0,
+      "kept": 0,
+      "error": "ConnectError: "
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1386,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 288,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 199,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 212,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-10T22:24:57.507996Z",
+    "candidates": 136,
+    "triaged": 136,
+    "enriched": 5,
+    "headline_candidates": 147,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 234.9,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 33856,
+      "output_tokens": 11203,
+      "cost_usd": 0.096563
+    }
+  }
+}

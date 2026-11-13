@@ -1,93 +1,86 @@
-# Agent Runtimes, Distillation, and Archaeological Hallucinations
+# Agent Browsers, Subgoal Traps, and Trainium Ports
 
-*2026-11-12 · 8 stories*
+*2026-11-13 · 7 stories*
 
-![Top AI stories for 2026-11-12](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-13](https://coronring.github.io/NewsRing/today.png)
 
-Infrastructure for agent workloads is maturing quickly with dedicated serving architectures from research and new hardware isolation from AWS. Meanwhile, tools targeting token consumption, quantization stability, and verification failure modes highlight the gap between building an agent loop and running it reliably.
+Today's selection spans agent execution environments, serving infrastructure, and eval failure modes. Cloudflare open-sourced its Rust-based browser engine designed for CDP agents, AWS ported SGLang to Trainium silicon, and two papers unpack why decision models fail when acting versus judging.
 
 ## Across AI today
 
-- **Google launches Gemini 4 Hydrogen for agentic workflows** Google introduced Gemini 4 Hydrogen, a model designed for cost-efficient agentic coding, debugging, and multi-part reasoning. ([blog.google](https://blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-hydrogen/))
-- **AWS releases local service emulator built by AI agents** AWS published an official Rust-based emulator allowing developers to test AWS services locally without provisioning paid API keys. ([simonwillison.net](https://simonwillison.net/2026/Nov/11/aws-emulator/))
-- **Microsoft reveals Lazarus attack targeting dormant AI neurons** Microsoft researchers uncovered a backdoor technique that reprograms dormant neurons in AI models to execute hidden malicious commands. ([microsoft.com](https://www.microsoft.com/en-us/research/blog/lazare-veni-foras-reprogramming-dormant-neurons-to-backdoor-ai-agents/))
+- **OpenAI introduces ChatGPT Wallet for agent checkout** ChatGPT Wallet enables agents across ChatGPT Work and Codex to complete purchases securely with user approval and card protections. ([openai.com](https://openai.com/index/introducing-chatgpt-wallet))
+- **Cloudflare open-sources Kitesurf browser engine for AI agents** The experimental browser engine for autonomous agents can run locally or deployed directly onto Cloudflare Workers. ([blog.cloudflare.com](https://blog.cloudflare.com/kitesurf-open-source/))
+- **PyTorch scales 1T MoE training on EU public infrastructure** Engineers used PyTorch and TorchTitan to overcome interconnect bottlenecks and pretrain a 1-trillion-parameter MoE model on shared clusters. ([pytorch.org](https://pytorch.org/blog/training-a-1t-parameter-moe-on-eu-public-infrastructure-with-pytorch-and-torchtitan/))
 
-## 1. Google Releases Gemini 4 Hydrogen for Low-Cost Agent Loops
+## 1. Cloudflare open-sources Kitesurf for browser-bound agents
 
-Google introduced Gemini 4 Hydrogen, a model optimized for rapid developer iteration, repository coding, and multi-step agentic workflows. It supports standalone execution across four configurable thinking levels or side-by-side pairing with Carbon and Argon models via Google Antigravity's Orchestrator. Google claims tighter instruction following and fewer fabricated claims across API endpoints in AI Studio, Android Studio, and Antigravity. For multi-model architectures, it provides a fast tier aimed directly at high-frequency tool loops.
+Cloudflare has open-sourced Kitesurf under Apache 2.0, allowing developers to run its headless agent browser engine locally or on Workers. Instead of wrapping Chromium in heavy containers, Kitesurf uses Rust WebAssembly modules including Blitz, Stylo, and Boa to parse, style, and execute pages with reduced memory and CPU overhead. It exposes a standard Chrome DevTools Protocol (CDP) endpoint so existing Puppeteer scripts and agent harnesses can control it out of the box. Running it directly on Cloudflare Workers requires a paid plan due to Dynamic Worker usage, but having an open-source headless engine built specifically for CDP automation changes the deployment calculus for browser agents.
 
-**Why it matters:** Offers a cheaper, faster model option explicitly tuned for token-heavy agent workflows and multi-agent orchestration.
+**Why it matters:** Gives agent harness developers a lightweight, headless execution environment running directly over CDP without Chromium container overhead.
 
-[blog.google](https://blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-4-hydrogen/) · [blog.google](https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/) · [deepmind.google](https://deepmind.google/blog/introducing-gemini-4-hydrogen/) · [blog.google](https://blog.google/products-and-platforms/products/search/gemini-4-hydrogen-search-upgrade/) · via Google Gemini Blog
+[blog.cloudflare.com](https://blog.cloudflare.com/kitesurf-open-source/) · via Cloudflare AI
 
-## 2. AgentRun Adds Durable Execution and Self-Improvement to Agent Harnesses
+## 2. Anthropic breaks down how to build AI safety evals that actually replicate
 
-AgentRun is an open-source platform under the Apache-2.0 license designed to overlay durable execution and state retention onto harnesses like Claude Code, Codex, OpenCode, and pi. At the end of a run, the agent proposes notes, skills, or learned workflows, which are validated by code checks and a grader before being committed to a git repository for subsequent runs. In real-world testing, custom reviewers built on the platform dropped code review costs from Greptile's $1.00 rate to $0.18 per review while catching 1.6x the real bugs on unseen PRs. The system also includes spend caps, human-in-the-loop approvals, and Docker sandboxes.
+Anthropic published methodological guidance for designing AI safety evaluations, drawing explicitly on lessons learned from psychology's replication crisis. The post emphasizes separating observational evaluations from causal designs, warning that measuring simple refusal rates fails for sensitive domains like self-harm where empathetic engagement is required. To maintain rigour and safety, they recommend pairing domain experts with methods specialists, running dangerous evaluations in isolated, internet-disabled sandboxes, and establishing real-time monitoring. For anyone building evals, it is a sober reminder that naive prompt-response scoring often measures benchmark quirks rather than genuine safety.
 
-**Why it matters:** Combines state retention, learned tool caching, and crash recovery into a manageable harness wrapper to control token spend.
+**Why it matters:** Provides practical methodology for engineering LLM-as-judge benchmarks and avoiding common failure modes in safety evaluation.
 
-[github.com](https://github.com/Parcha-ai/agentrun/blob/main/README.md) · [discussion](https://news.ycombinator.com/item?id=50471650) · via Hacker News (AI)
+[anthropic.com](https://www.anthropic.com/research/building-strong-safety-evaluations) · via Anthropic Research
 
-## 3. Agent 'Maya Discovery' Highlights Verification Failure Modes in Research
+## 3. Weak actors can still judge and teach RL agents effectively
 
-A Google researcher deployed 48 AI agents over NASA lidar data and announced the discovery of an unmapped Maya village in Mexico after official databases returned no record. Archaeologists quickly pointed out that the site was already mapped and published in an academic journal a year prior. Because coordinates of archaeological sites are intentionally excluded from papers to prevent looting, agents checking databases without image-matching logic failed to ground their conclusions. The incident illustrates how domain-specific evaluation and verification protocols remain critical when deploying agents into scientific discovery.
+A new paper examines decision models across ALFWorld and WebShop, evaluating their performance when deployed as actors, judges, or RL teachers. When acting step-by-step, all tested models—including standard LLMs—were easily pulled toward easier subgoals while ignoring required prerequisites. However, when evaluating full trajectories post-hoc, the same models accurately credited prerequisite steps if asked whether each step helped rather than if the task would ultimately succeed. Using this hindsight insight, their JEV judge acted as an RL teacher to boost a Qwen2.5-1.5B policy via GRPO from 72.8% to 82.9% on ALFWorld, proving post-hoc trajectory evaluation bypasses immediate execution failures.
 
-**Why it matters:** Demonstrates how naive agent verification strategies fail when grounding claims against unstructured external data.
+**Why it matters:** Directly impacts multi-agent orchestration and RL trajectory scoring by showing how to structure post-hoc evaluators for agent loops.
 
-[theverge.com](https://www.theverge.com/ai-artificial-intelligence/1032125/ai-agents-maya-site-archeology-discovery) · [pietromiotti.com](https://pietromiotti.com/latest/maya-site) · via The Verge (AI)
+[huggingface.co](https://huggingface.co/papers/2611.17167) · via HF Daily Papers
 
-## 4. SteerDistill Stabilizes Sub-4-Bit LLM Agent Trajectories
+## 4. NVIDIA details multi-node tensor parallel vLLM serving for 753B GLM-5.3
 
-SteerDistill introduces a quantization-aware distillation method to prevent low-bit quantized agents from diverging during environment rollouts. A frozen BF16 teacher guides student retries upon failure, raising successful turn-level corrections from 9.6% to 82.3% before context distillation internalizes those behaviors. Across five agent benchmarks, SteerDistill stays within one point of full BF16 performance under W4A16 while outperforming QeRL on τ^2-Bench using 67% fewer training GPU hours. At W2A16 on Qwen3-8B, it achieves a 3.39-point score margin over On-Policy QAD.
+NVIDIA published a deployment guide for serving the 753-billion parameter GLM-5.3 NVFP4 model across two DGX Stations using vLLM and ConnectX-8 RDMA interconnects. Because the model's 464 GB checkpoint exceeds a single GB300's 252 GB VRAM, the setup uses two-way tensor parallelism (TP=2) across nodes without CPU offloading. Station A acts as the head node hosting the OpenAI-compatible API server while Station B operates strictly as a worker node executing split operations over high-speed RDMA rails. It serves as a practical blueprint for memory-bound MoE deployments where all expert weights must remain in GPU VRAM for active token routing.
 
-**Why it matters:** Provides a actionable path for running low-bit quantized models locally without sacrificing agent context precision or trajectory stability.
+**Why it matters:** Offers a practical reference guide for running multi-node tensor-parallel inference with vLLM on massive MoE models.
 
-[huggingface.co](https://huggingface.co/papers/2611.13410) · via HF Daily Papers
+[developer.nvidia.com](https://developer.nvidia.com/blog/when-one-gpu-isnt-enough-serving-glm-5-3-across-two-nvidia-dgx-stations-with-vllm/) · via NVIDIA Developer
 
-## 5. Evolving Infra Decouples KV Cache for Agent-Adaptive LLM Serving
+## 5. Exposing verification criteria to agents leads to benchmark overfitting
 
-Evolving Infra addresses load imbalances and context eviction in prefill-decode disaggregated LLM serving for agent workloads. The architecture decouples compute allocation from key-value cache management, allowing nodes to switch dynamically while an online planner adapts to workload composition. A distributed KV manager uses context signals from agent execution to direct cache retention and cross-node transfers. Across coding, math, and computer-use tasks on up to 256 GB300 GPUs, it reduced mean end-to-end request latency by up to 4.1x and P95 TTFT by up to 14x compared to NVIDIA Dynamo.
+A controlled study reveals that exposing benchmark verification criteria to self-improving embodied coding agents causes them to overfit to the test suite rather than master the task. While agents with criteria exposure scored higher on initial benchmark checks, their performance collapsed when criteria were slightly modified without altering the core instructions. The learned skills also transferred poorly across tasks, demonstrating that agents generate code tailored to satisfy specific assertions rather than robust logic. The authors advocate for instruction-faithful criteria to prevent inflated benchmark scores from masking poor real-world execution.
 
-**Why it matters:** Optimizes serving engines specifically around agent context reuse, dramatically reducing prefill latency for long loops.
+**Why it matters:** Highlights a critical benchmark failure mode in self-improving agent frameworks where agents overfit directly to verification code.
 
-[huggingface.co](https://huggingface.co/papers/2611.12304) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2611.08318) · via HF Daily Papers
 
-## 6. SparseRead Limits Agent Over-Reading via Gated Context Admission
+## 6. SGLang comes to AWS Trainium via out-of-tree Neuron plugin
 
-SparseRead introduces a model-agnostic reading control layer that prevents agents from ingesting entire files, web pages, or tool logs when only specific evidence is required. It uses a Read Intent Protocol and Adaptive Reader Backends to present relevant snippets with source locations, alongside a Budgeted Read Gate with full-view fallback. Evaluated across six models (including Claude Opus 5) and 125 tasks, SparseRead reduced overall token usage by up to 92.9% and execution wall time by up to 89.0%. Across 97% of test configurations, task resolution accuracy was preserved or improved.
+AWS and RadixArk released SGLang-Neuron inside a pre-built Deep Learning Container, bringing SGLang's serving infrastructure to AWS Trainium hardware. The out-of-tree plugin hooks into PyTorch using TorchNeuron and Neuron Kernel Interface (NKI) kernels, retaining native SGLang features like RadixAttention, prefix caching, and prefill-decode (PD) disaggregation over EFA. Operators can set an environment variable to target Trainium while keeping standard OpenAI-compatible API endpoints and request schedulers intact. It provides a straightforward path to run high-throughput LLM inference and RL rollouts on non-NVIDIA hardware without refactoring server code.
 
-**Why it matters:** Offers a practical design pattern to avoid context dilution and unnecessary token expenditure during tool calls.
+**Why it matters:** Expands high-throughput inference engine options—including RadixAttention and PD disaggregation—to alternative hardware like AWS Trainium.
 
-[huggingface.co](https://huggingface.co/papers/2608.22237) · via HF Daily Papers
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/deploy-frontier-ai-models-on-aws-trainium-with-sglang-neuron/) · via AWS Machine Learning
 
-## 7. AWS Updates Bedrock AgentCore Runtime with MicroVM Sandboxes
+## 7. SO-Arena benchmark shows high accuracy doesn't equal reliable agent decisions
 
-AWS announced updates to the Amazon Bedrock AgentCore runtime aimed at securing long-running, multi-step enterprise agent workloads. Sessions execute in hardware-isolated Firecracker MicroVMs with dedicated identities, policies, and audit trails. Compute allocation now scales up to 8 vCPUs and 32 GB RAM with 10 GB container support, while maintaining cold-start times under 2 seconds. Early deployments showed up to a 77% speedup on cold-start health checks and a 60% reduction in memory footprint per invocation.
+The new SO-Arena benchmark measures fast System One decision models across 11 domains and 5 capability families, focusing specifically on decision stability and missing-answer recognition. Evaluating 21 models in interactive sandboxes revealed a sharp divergence between top-line task accuracy and decision reliability. Remarkably, the highest-performing model overall ranked only seventh in decision stability when candidate option sets were slightly modified. The benchmark highlights that deploying fast decision models in agent loops requires testing for structural reliability, as raw accuracy fails to predict how models behave when options shift or valid answers are missing.
 
-**Why it matters:** Delivers isolated execution sandboxes with sub-2-second startup times for running untrusted code and arbitrary agent tool calls.
+**Why it matters:** Provides an evaluation framework targeting the reliability boundaries and failure modes of fast decision models used inside agent architectures.
 
-[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/run-agents-securely-and-efficiently-with-the-next-generation-agentcore-runtime/) · via AWS Machine Learning
-
-## 8. llama.cpp Fuses NVFP4 Weight Scaling into CUDA MMQ Kernels
-
-Release b12329 of llama.cpp adds CUDA optimizations targeting prefill speed for NVFP4 quantized checkpoints. The update fuses weight scale operations directly into the epilogue write-back phase of Matrix-Matrix-Quantized (MMQ) execution. Combining the matrix multiplication and scaling passes into single kernel dispatches reduces runtime overhead during model loading and initial context ingestion. Tests and validation logic for the fused scale operations have been added to the `ggml-cuda` backend.
-
-**Why it matters:** Improves prefill throughput for 4-bit quantized models running on llama.cpp.
-
-[github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12329) · [github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12328) · via llama.cpp releases
+[huggingface.co](https://huggingface.co/papers/2611.15777) · via HF Daily Papers
 
 ## Quick hits
 
-- ExecuTorch WebGPU now runs PyTorch models directly inside web browsers on the GPU via exported `.pte` files. ([pytorch.org](https://pytorch.org/blog/executorch-webgpu-pytorch-models-on-the-gpu-in-the-browser/))
-- PyTorch's Helion kernel compiler added compile-time IR heuristics to select optimal settings without autotuning. ([pytorch.org](https://pytorch.org/blog/fast-by-default-compile-time-heuristics-for-helion-kernels/))
-- Zeroing less than 0.05% of an LLM's weights during post-training matches full fine-tuning performance across RL regimes. ([huggingface.co](https://huggingface.co/papers/2611.10866))
-- LangChain 1.5.0 drops support for Python 3.10, establishing Python 3.11 as the minimum required runtime. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain%3D%3D1.5.0))
-- Engineers trained a 1-trillion parameter MoE model on European public infrastructure using PyTorch and TorchTitan. ([pytorch.org](https://pytorch.org/blog/training-a-1t-parameter-moe-on-eu-public-infrastructure-with-pytorch-and-torchtitan/))
+- OpenAI announced ChatGPT Wallet, enabling agents in ChatGPT Work and Codex to execute purchases with explicit user approval. ([openai.com](https://openai.com/index/introducing-chatgpt-wallet))
+- Anthropic resolved an incident involving elevated error rates across claude.ai, Claude Code, and the platform API. ([status.claude.com](https://status.claude.com/incidents/nn11wk485zfn))
+- vLLM released v0.34.0rc3 with test suite fixes for GPU memory info mocking. ([github.com](https://github.com/vllm-project/vllm/releases/tag/v0.34.0rc3))
+- llama.cpp release b12368 updates the Hexagon backend with host mmap stacking optimizations and improved buffer allocations. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12368))
+- LangChain core 1.8.0 officially drops support for Python 3.10, raising the minimum requirement to Python 3.11. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.0))
+- Perplexity published technical notes covering the training, eval methodology, and use cases for their Decider v1.3 model. ([perplexity.ai](https://www.perplexity.ai/hub/blog/perplexity-decider))
 
-Happy building, and double-check your agent's database queries before declaring a discovery.
+Keep your sandboxes tight and your verifiers hidden.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 146 candidates, 146 reviewed, gemini/gemini-3.8-flash, 378s, 3 model calls, $0.1505.</sub>
+<sub>34 of 35 sources read; failed: Hugging Face Blog (ConnectError: ). 136 candidates, 136 reviewed, gemini/gemini-3.8-flash, 235s, 3 model calls, $0.0966.</sub>
