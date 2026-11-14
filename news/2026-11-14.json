@@ -1,0 +1,626 @@
+{
+  "date": "2026-11-14",
+  "generated_at": "2026-11-14T21:23:07.728496Z",
+  "title": "Parallel Claude Workers, Scoped Agent Memory, and Quantized Qwen3.8",
+  "intro": "Today's selection focuses on practical infrastructure for scaling and evaluating agent systems. We cover Anthropic's parallel worker architecture in Claude Code, dynamic stress-testing frameworks for search agents, and IBM's special-token markup for prompt isolation.",
+  "stories": [
+    {
+      "headline": "Anthropic adds parallel worker orchestration to Claude Code Projects",
+      "summary": "Anthropic has redesigned Claude Code Projects in beta to manage multi-agent work streams directly. In the updated architecture, a project coordinator delegates work to multiple parallel cloud threads, each running a full Claude Code session on its own branch and repository copy. Threads can spawn subagents or execution loops for complex tasks, while overlapping code modifications are handled through normal repository merge conflicts. The system also introduces a shared project-level memory where all threads record and retrieve context over time.",
+      "why_it_matters": "Demonstrates how frontier harness design is standardizing around multi-agent coordinator-worker patterns with isolated execution environments and shared context.",
+      "reason": "Anthropic updated Claude Code Projects to run parallel AI workers, enabling multi-agent parallel execution inside coding agent harnesses.",
+      "item": {
+        "key": "claude.com/resources/articles/projects-redesigned",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Anthropic upgrades Claude Code Projects to run parallel AI workers",
+        "url": "https://claude.com/resources/articles/projects-redesigned",
+        "discussion_url": "https://news.ycombinator.com/item?id=50492141",
+        "published": "2026-11-14T00:28:11Z",
+        "summary": "",
+        "content": "Projects redesigned: from folder to conversation\nA new experience for Claude projects, now available in beta in Claude Code\nManaging multiple sessions across a build used to require you to divide the work, juggle handoffs, and stitch the results back together. Now in a Claude Code project, you describe what needs to get done and Claude manages the work.\nClaude scopes the request, delegates the work, coordinates parallel threads, reviews the outputs, and assembles the finished result. You can steer progress throughout, even from your phone, and it keeps working after you step away from your computer.\nFor example, configure a project and set a goal to reduce your app's checkout p75 latency. Then ask Claude to profile each endpoint, test optimizations, and open PRs in parallel threads. Or connect your API, web, and mobile repos and set a goal to retire a deprecated v1 endpoint. Claude creates a thread per repo to migrate the callers, run the tests, open PRs, and then tells you which ones need to merge first.\nStarting today, updated projects are available in beta to select Claude Pro and Max subscribers who use cloud sessions in Claude Code and don’t have any existing projects on the web or desktop.\nOver the coming week, we'll expand access to more Claude Code users on those plans. Updated projects across all of Claude and Team and Enterprise plans come after that. If you're on Pro or Max and don't have access yet, you can join the waitlist.\nExisting projects on Pro and Max plans keep working as they do today. We'll upgrade them as the rollout expands to chat and Cowork.\nThreads do the work, Claude directs it\nProjects have threads that do the work and a coordinator that directs them.\nWhen you start a project, you select a goal as well as the repo or context. Claude starts by suggesting work it can pick up right away. You can configure the project’s cloud environment, connectors, plugins, instructions, and model.\nYou can monitor and guide progress in the main project chat, or dive into each individual thread to examine and steer the details. Brief Claude in the project the way you'd brief a chief of staff and it routes work to new or pre-existing threads.\nClaude also checks in and follows through on work. With repositories connected, a thread opens pull requests and runs your tests; with documents, it reads them and drafts.\nUnder the hood, each thread is a Claude Code cloud session working on its own branch and copy of the repo. The coordinator keeps work organized, but if any threads work on the same code, the overlap is resolved as a merge conflict just like any other PR.\nEach thread can further split its delegated work into pieces using subagents, loops, and workflows when needed so large assignments finish faster.\nContext builds over time\nProjects are designed for long-running or agentic workflows: work that takes longer than one reply and has more than one part.\nOver time, Claude learns more about the project details and applies them to its work. Every thread now adds to and draws from a shared memory, reducing the need for complex prompt engineering.\nFor example, Claude can remember the release moved to Friday, why the export was dropped, or who to check in with before touching the billing service.\nClaude also remembers your working and communication style. You can ask it to adjust how often it checks in, how frequently it starts new threads, or how detailed to make each update.\nAlongside memory, projects now include a library that collects the files you add and the artifacts produced by Claude. This makes it easier to find relevant materials and for new work to build on past efforts.\nWhat's next\nProjects can run several threads at once, and each one is a full Claude Code session. Because of this, projects can reach usage limits faster. You can check project specific usage and select the model and effort levels used by the coordinator chat as well as the worker threads.\nThreads run in the cloud today; running on your machine alongside your local tools and code and behind your network is coming very soon.\nStart using projects.",
+        "score": 98.0,
+        "comments": 91,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "DeepStress dynamic framework tests search agent reliance on bad evidence",
+      "summary": "Researchers introduced DeepStress, an evaluation framework designed to stress-test search agents against noisy, low-quality, and contradictory retrieved evidence. The system replaces standard retrieval with a synthetic environment that independently controls document trustworthiness, relevance, and factuality. Across 12 evaluated agent systems on HotpotQA and BrowseComp-Plus, the authors observed that open-weight agents frequently generate confident answers despite obvious credibility red flags. Furthermore, agents often rely on memorized parametric knowledge for HotpotQA questions even when every returned document is factually wrong.",
+      "why_it_matters": "Provides a practical methodology for evaluating agent abstention behaviors and failure modes under noisy or adversarial retrieval conditions.",
+      "reason": "DeepStress presents a dynamic evaluation framework designed to stress-test search agents against noisy, low-quality, and contradictory retrieved evidence.",
+      "item": {
+        "key": "arxiv:2607.13920",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "DeepStress: Stress-Testing Deep Search Agents",
+        "url": "https://huggingface.co/papers/2607.13920",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "While search agents demonstrate impressive capabilities in multi-step question answering, their robustness to poor-quality evidence remains under-explored. Such evidence is rare in benchmark corpora, and resulting failures are hard to reproduce. We propose DeepStress, a dynamic stress-testing framework that subjects agents to degraded evidence at controlled rates. It replaces the retrieval module with a synthetic environment where documents are generated dynamically for each query, under independent control of their trustworthiness, relevance, and factuality. To characterize behavior under stress, we go beyond binary accuracy with a five-way classification of final-answer outcomes and two new reliability-aware metrics, RAS and CoPRAS, which credit cautious behavior and account for computational cost. Evaluating 12 systems on questions from HotpotQA and BrowseComp-Plus, we find that several open-weight agents answer confidently when sources contain obvious credibility red flags, and that many HotpotQA questions are answered from parametric knowledge even when all returned documents are factually wrong.",
+        "content": "Abstract\nA dynamic stress-testing framework shows that search agents often answer confidently despite unreliable retrieved evidence and may rely on memorized knowledge when documents are factually wrong.\nWhile search agents demonstrate impressive capabilities in multi-step question answering, their robustness to poor-quality evidence remains under-explored. Such evidence is rare in benchmark corpora, and resulting failures are hard to reproduce. We propose DeepStress, a dynamic stress-testing framework that subjects agents to degraded evidence at controlled rates. It replaces the retrieval module with a synthetic environment where documents are generated dynamically for each query, under independent control of their trustworthiness, relevance, and factuality. To characterize behavior under stress, we go beyond binary accuracy with a five-way classification of final-answer outcomes and two new reliability-aware metrics, RAS and CoPRAS, which credit cautious behavior and account for computational cost. Evaluating 12 systems on questions from HotpotQA and BrowseComp-Plus, we find that several open-weight agents answer confidently when sources contain obvious credibility red flags, and that many HotpotQA questions are answered from parametric knowledge even when all returned documents are factually wrong.\nCommunity\nHi everyone! This is the first paper of my PhD, which I presented at the Workshop on Agent Behavior earlier this year at COLM! In this paper, we look at how we can use a simulated environment to test our search agents in \"difficult\" situations and learn more about how they behave in such cases 😃\nThe GitHub repo should be up soon(ish), feel free to reach out\nDegradation curves are the easy part. What I need to know is whether the failure stays traceable — agent cites the poisoned doc and I can grep the log, or it quietly folds the wrong number into a confident answer and I hear about it from a customer.\nIn prod, retrieval is rarely off-topic. It's on-topic and stale: an old API doc that still ranks first because everyone linked to it in 2022, a wiki page two major versions back. Worth splitting \"correct-looking but out of date\" from \"irrelevant\" as separate stress axes, since the fixes diverge — relevance failures get better reranking, staleness needs date metadata and a model that actually checks it.\nIf the sweep only reports accuracy at each degradation rate, the number I can't read off it is how often a wrong answer arrives wearing a plausible citation. That's the one that costs me a weekend.\nWe chose the keep the different dimensions pretty simple and coarse to make the results very clear & easy to interpret while focusing on the idea of \"Stress-Testing\". However, it would indeed be super interesting to have more realistic and finegrained dimensions to play with and it's definitly something we'll look into!\nHere are some recent papers I saw that could introduce more realistic noise in web/search agents: AgentHeal (https://arxiv.org/abs/2610.39234v1), AgentNoiseBench (https://arxiv.org/abs/2602.11348) and DRNoise (https://arxiv.org/abs/2607.17291)\nThanks for your comment!\nControlling the trustworthiness, relevance and factuality of evidence separately is a smart way to stress an agent, and crediting cautious behavior in the metric makes me happy. Do agents get more cautious when the evidence is bad, or just more confidently wrong?\nDepends on the agent and the question asked!\nIf you look at the overall results (Figure 1), you'll see that some agents (Search-R1 for example) are indeed confidently wrong (they get fooled by the bad evidence), however, some other agents (those based on GPT models for instance) are indeed more caution (they abstain more).\nBut yeah, the question asked is also super important. If the question is related to relatively known entities (such as questions from HotpotQA, which are based on Wikipedia pages), then you wont see much abstention at all. However, for more niche questions (such as those from BrowseComp-Plus) then you start seeing some agents abstaining a lot more.\nI think agents using smaller models & trained against a correctness reward will answer confidently wrong more often. We're currently doing more experiments to prove that!\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nAnswering confidently on bad evidence is the failure I'd watch first. A crew working off a wrong drawing doesn't stop just because it looks official. Degrading the evidence on purpose and measuring whether the agent says it isn't sure is the right test, and the behavior we'd want at ML Systems.\nGet this paper in your agent:\nhf papers read 2607.13920 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 6.0,
+        "comments": 8,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "MixUA scopes multi-agent memory sharing to prevent cross-user leakage",
+      "summary": "A new paper introduces MixUA, a multi-granularity memory architecture that distills agent interaction trajectories into lessons scoped specifically to user-agent, user, agent, or global levels. To evaluate performance and privacy guarantees, the authors created CrossLearnBench, testing seven agents across five users with embedded privacy probes. MixUA improved task pass rates by up to 16 percentage points over memoryless baselines and 5 points over monolithic global memory models. Crucially, privacy probes detected planted sensitive facts leaking into unauthorized scopes in only 0.02% of evaluations.",
+      "why_it_matters": "Offers a explicit architectural solution for sharing domain learning across heterogeneous agents without exposing private user data.",
+      "reason": "This research addresses multi-agent state isolation and extraction when heterogeneous agents interact across multiple users and shared memory spaces.",
+      "item": {
+        "key": "arxiv:2611.10439",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Who Remembers What? Multi-Granularity Memory Extraction for Multi-User, Multi-Agent Interaction",
+        "url": "https://huggingface.co/papers/2611.10439",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "Self-evolving agents improve their own skills, memory, and harness code from experience without retraining the base LLM, and group-evolving agents go further by sharing these lessons across agents. Yet most such systems overlook that sharing across users and heterogeneous agents requires deciding who can benefit from each lesson and what information must remain private. We present MixUA, a memory system that distills independent user-agent trajectories into lessons and assigns each lesson to a user-agent pair, user, agent, or global scope according to whom it benefits and what it may disclose. For evaluation, we introduce CrossLearnBench, a mixed-user-agent benchmark that pairs established agent tasks with user preferences and privacy probes that test whether private facts leak into memory other users can read. With five users and seven agents, MixUA raises pass rates by up to 16 points over no memory and 5 over a single global memory, even on tasks previously tried only by other users on other agents. It retains up to 90% of previously stated preferences, and at most 0.02% of privacy probes find a planted private fact in a forbidden scope. We hope MixUA offers a scalable path…",
+        "content": "Who Remembers What? Multi-Granularity Memory Extraction for Multi-User, Multi-Agent Interaction\nAbstract\nMixUA distills lessons from independent user-agent trajectories and assigns them to appropriate scopes to balance cross-user and cross-agent learning with privacy, evaluated by CrossLearnBench.\nSelf-evolving agents improve their own skills, memory, and harness code from experience without retraining the base LLM, and group-evolving agents go further by sharing these lessons across agents. Yet most such systems overlook that sharing across users and heterogeneous agents requires deciding who can benefit from each lesson and what information must remain private. We present MixUA, a memory system that distills independent user-agent trajectories into lessons and assigns each lesson to a user-agent pair, user, agent, or global scope according to whom it benefits and what it may disclose. For evaluation, we introduce CrossLearnBench, a mixed-user-agent benchmark that pairs established agent tasks with user preferences and privacy probes that test whether private facts leak into memory other users can read. With five users and seven agents, MixUA raises pass rates by up to 16 points over no memory and 5 over a single global memory, even on tasks previously tried only by other users on other agents. It retains up to 90% of previously stated preferences, and at most 0.02% of privacy probes find a planted private fact in a forbidden scope. We hope MixUA offers a scalable path toward a global system where users and agents co-evolve.\nCommunity\nToday, memory in personal coding agents like Claude Code and Codex belongs to one user and one agent. A fix one user discovers never reaches anyone else, so other users, on other agents, solve the same problem again. Cross-user learning shares those lessons, but only if private details don't leak along with them.\nDeciding who a lesson belongs to before sharing it is the step most memory systems skip. On a job site, a trick one crew learns about a tool is everybody's, but the homeowner's preferences stay on that job. Scoping each lesson that way makes a lot of sense.\nScoping each lesson to a user, an agent, or everyone is a neat answer to the privacy problem in shared memory, and the leak probes in CrossLearnBench are the part I'd copy first. How does MixUA decide a lesson is safe for global scope when the same fact could point back to one user?\nGet this paper in your agent:\nhf papers read 2611.10439 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 7.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Dynamic routing on Amazon Bedrock balances coding agent task cost and completion",
+      "summary": "AWS published a implementation blueprint using LiteLLM and NVIDIA NeMo Switchyard to dynamically route coding agent tool calls on Amazon Bedrock. Rather than evaluating cost per raw token, the architecture evaluates model routing based on cost per solved task across complete multi-turn executions. The system uses Switchyard's Stage routing plugin to inspect tool history and determine whether to send requests to heavy models like Claude Opus 5.5 or lower-cost targets like NVIDIA Nemotron 3 Super 120B. The deployment runs LiteLLM inside an AWS ECS Fargate container behind VPC private subnets and Application Load Balancer path filters.",
+      "why_it_matters": "Highlights cost-optimization techniques for multi-turn agent harnesses where per-call routing choices impact total execution success.",
+      "reason": "Provides a practical blueprint using LiteLLM and NVIDIA NeMo Switchyard to dynamically route agent tool calls and coding requests to optimize cost per solved task.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/route-coding-agent-requests-to-the-right-model-on-amazon-bedrock-with-nvidia-nemo-switchyard",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Route coding agent requests to the right model on Amazon Bedrock with NVIDIA NeMo Switchyard",
+        "url": "https://aws.amazon.com/blogs/machine-learning/route-coding-agent-requests-to-the-right-model-on-amazon-bedrock-with-nvidia-nemo-switchyard/",
+        "discussion_url": null,
+        "published": "2026-11-13T22:30:12Z",
+        "summary": "Coding agents work in tasks, and the number that matters is cost per solved task, not price per token. In this post, you use the AWS CDK to deploy LiteLLM with the NVIDIA NeMo Switchyard routing plugin on Amazon Bedrock, then measure cost per solved task for a routed model group against single-model baselines.",
+        "content": "Coding agents such as Claude Code and OpenAI Codex CLI work in tasks. A developer asks for a change, and the agent reads files, edits code, and runs tests until the work is done. One task can take a few model calls or dozens. What the developer pays for is the task, not one call.\n\nThe price per token alone doesn’t tell you what a whole task costs. The total depends on how many turns a model needs, how much history each turn replays, and how often a task has to be retried or never finishes. You pay for every attempt, including attempts on tasks that never finish. So when you route a coding agent’s requests between models, judge the routing by cost per solved task: the total cost of your runs divided by the number of runs whose tests pass.\n\nNVIDIA NeMo Switchyard is an open source library that helps an AI agent choose which model handles each request. You define the models that it can use and the strategy that it follows. Its LiteLLM integration supports two strategies. Stage routing reads the recent tool activity and results in the request history, and then picks one of two candidate models. Random routing picks from the configured models, with optional weights, for traffic splits and A/B comparisons. Another option you can explore is LiteLLM, who also recently shipped a native built-in Switchyard stage router as an auto-router strategy.\n\nIn this post, you use the AWS Cloud Development Kit (AWS CDK) to deploy LiteLLM, an open source gateway for large language models (LLMs), with the Switchyard routing plugin in your AWS account. LiteLLM calls the models on Amazon Bedrock . You then use the sample’s benchmark runners to measure cost per solved task for a routed model group and for single-model baseline groups, so that you can evaluate routing against your own workloads.\n\nNote: The sample installs switchyard-server 0.3.0 from crates.io and runs the published LiteLLM v1.102.0 image. NVIDIA documents switchyard-server 0.3.0 as a demo and evaluation component, and its configuration can change between releases. This sample uses the experimental Switchyard LiteLLM integration and its configuration and APIs may change between releases. This is sample code, for non-production usage. Work with your security and legal teams to meet your organizational security, regulatory, and compliance requirements before deployment. Deploy the sample in a non-production account and test it before relying on it.\n\nSolution overview\n\nFigure 1 shows the architecture of the solution. LiteLLM and the Switchyard plugin run in one container image on Amazon Elastic Container Service (Amazon ECS) on AWS Fargate , in private subnets.\n\nFigure 1: Solution architecture\n\nA request flows through these steps. The numbers match the diagram.\n\nThe coding agent sends an OpenAI-compatible request with the model field set to switchyard , the LiteLLM model group that Switchyard routes, and the shared gateway key in the Authorization header. The endpoint is your hostname over HTTPS, with an AWS Certificate Manager (ACM) certificate on the load balancer, and only the IPv4 CIDR range that you allow can reach it. With a hosted zone in Amazon Route 53 , Route 53 resolves the hostname to the load balancer.\n\nAWS WAF filters the request with IP reputation, known bad input, and per-IP rate-limit rules. The Application Load Balancer forwards only /v1/chat/completions , /v1/models , and /health/liveliness to the ECS task in a private subnet, and answers every other path with 404.\n\nThe task runs one container: LiteLLM with the embedded Switchyard plugin. LiteLLM validates the gateway key and calls the plugin to pick a model. Stage chooses between a capable model and a lower-cost efficient model. It reads the tool activity and results in the request history, so the agent must send the full conversation history. Random chooses from a weighted pool. Neither strategy calls a judge model.\n\nLiteLLM calls the selected model through the Amazon Bedrock Converse or ConverseStream API, with the task’s AWS Identity and Access Management (IAM) role for credentials. The call goes through an Amazon Bedrock Runtime interface endpoint in the Amazon Virtual Private Cloud (Amazon VPC) , so inference traffic stays on the AWS network.\n\nThe response or token stream returns through LiteLLM and the load balancer. The x-litellm-model-name response header names the model that answered. The response body’s model field stays switchyard .\n\nLiteLLM listens on port 4000 in the container and is the load balancer’s target, and the task’s security group admits only the load balancer. The path allowlist keeps the LiteLLM admin UI, API docs, and key management routes unreachable. Amazon Elastic Container Registry (Amazon ECR) holds the gateway image. AWS Secrets Manager generates the secret behind the gateway key, and the container adds the sk- prefix when it starts. The task definition passes the profile files in LITELLM_CONFIG_TEXT and SWITCHYARD_CONFIG_TEXT , and the startup script writes them to /tmp before it starts LiteLLM. Logs go to one Amazon CloudWatch log group, /<stack name>/litellm , which keeps them for 30 days, and Container Insights collects metrics. The VPC spans two Availability Zones, and one NAT gateway provides outbound access for image pulls and other AWS services.\n\nThe plugin supports Stage routing, which needs exactly two candidates, and Random routing, which needs at least two and splits traffic by weight for A/B tests. Classifier-backed strategies, such as Task and Composite routing, need intermediate model calls that this integration doesn’t support. See the Switchyard routing overview for the full catalog.\n\nPrerequisites\n\nTo follow this walkthrough, you need the following:\n\nA non-production AWS account with Amazon Bedrock access to Claude Opus 5.5 and NVIDIA Nemotron 3 Super 120B. The pair has been tested in US East (N. Virginia). For other AWS Regions, check Regional availability by models and tool-calling support.\n\nThe AWS Command Line Interface (AWS CLI) v2 with configured credentials and an explicit AWS Region, in an account and Region that are bootstrapped for the AWS CDK .\n\nNode.js 20 or later, npm, Docker with BuildKit, and Python 3.11 or later.\n\nA hostname that you own, with either a public Route 53 hosted zone for its domain or an ACM certificate for it in the deployment Region. A short plain-HTTP test needs neither.\n\nWalkthrough\n\nYou define the model group, configure Stage, deploy and test the gateway, and measure cost. Start by cloning the sample repository:\n\ngit clone https://github.com/aws-samples/sample-route-coding-agent-requests-Amazon-Bedrock-nemo-switchyard.git\ncd sample-route-coding-agent-requests-Amazon-Bedrock-nemo-switchyard\n\nStep 1: Define the model group in LiteLLM\n\nA LiteLLM model group is one public model name with one or more deployments behind it. The sample keeps its configuration in deployment profiles under profiles/ . Each profile pairs litellm.yaml , which defines the models and gateway settings, with switchyard.toml , which controls how Switchyard picks a model. The following excerpt of profiles/stage/litellm.yaml defines the routed switchyard group, two single-model baseline groups, and the plugin registration:\n\nmodel_list:\n- model_name: switchyard\nlitellm_params:\nmodel: bedrock/converse/global.anthropic.claude-opus-5-5\naws_region_name: os.environ/AWS_REGION\n- model_name: switchyard\nlitellm_params:\nmodel: bedrock/converse/nvidia.nemotron-super-3-120b\naws_region_name: os.environ/AWS_REGION\n# One-model baseline groups, same model strings as the routed candidates.\n- model_name: claude-opus-5-5\nlitellm_params:\nmodel: bedrock/converse/global.anthropic.claude-opus-5-5\naws_region_name: os.environ/AWS_REGION\n- model_name: nemotron-super-3-120b\nlitellm_params:\nmodel: bedrock/converse/nvidia.nemotron-super-3-120b\naws_region_name: os.environ/AWS_REGION\n\n# The same object selects a deployment and applies supported request changes.\nrouter_settings:\nplugins:\n-…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Natera shares architectural details on SWARM multi-agent lab automation",
+      "summary": "Natera detailed the architectural design of SWARM, a multi-agent system built on Amazon Bedrock AgentCore for diagnostic support across lab instrument support tickets. The architecture splits responsibilities between an autonomous background agent that pre-processes incoming Jira tickets and an interactive chat agent for live engineer troubleshooting. Both agents share a unified skill library, access manuals and ticket context via private AWS VPC endpoints, and operate without long-lived credentials by using OpenID Connect and AWS STS for temporary IAM token generation. The production system achieved 96.2 percent automated ticket coverage while accelerating initial response times.",
+      "why_it_matters": "A concrete production case study detailing split background/interactive execution models, shared skill libraries, and security controls for agent deployments.",
+      "reason": "Natera breaks down the production setup of its SWARM agentic system on Bedrock AgentCore, sharing concrete implementation details on agent orchestration and knowledge retrieval.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/how-natera-designed-an-agentic-ai-system-for-lab-ops-with-amazon-bedrock-agentcore",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "How Natera designed an agentic AI system for lab ops with Amazon Bedrock AgentCore",
+        "url": "https://aws.amazon.com/blogs/machine-learning/how-natera-designed-an-agentic-ai-system-for-lab-ops-with-amazon-bedrock-agentcore/",
+        "discussion_url": null,
+        "published": "2026-11-12T21:47:07Z",
+        "summary": "Natera built SWARM, an agentic AI system on Amazon Bedrock AgentCore that captures institutional lab-operations knowledge and deploys it at scale. This post walks through the full architecture, from knowledge base construction to deployment and evaluation, delivering about 130x faster first response and 96.2% automated coverage across support tickets.",
+        "content": "At Natera , a leader in cell-free DNA (cfDNA) testing, keeping lab instruments up and running is critical, because equipment downtime disrupts sample processing. Natera’s lab engineering team, led by Ariel Jirau worked with AWS to build SWARM (Systematic Workflow Analytics and Resolutions Manager), an agentic AI system for lab operations.\n\nThis post walks through how the Natera team built an agentic AI system for lab operations using Amazon Bedrock AgentCore that captures and deploys institutional knowledge at scale. It describes the full architecture, from knowledge base construction to automated system deployment and evaluation, so you can apply the same patterns to your own operational workflows.\n\nSWARM delivers about 130x faster first response time and 96.2 percent automated coverage across support tickets, giving engineers immediate access to institutional knowledge the moment a ticket arrives.\n\nThe challenge: Knowledge continuity\n\nNatera’s lab operations rely on a wide range of precision instruments spanning multiple equipment families, each with its own failure modes, vendor documentation, and resolution patterns. The service engineering team responsible for maintaining this infrastructure is organized around deep individual expertise rather than standardized playbooks. When a senior technician who had spent years diagnosing a particular instrument family departed, the institutional knowledge they carried was effectively lost. No system existed to capture, organize, or deploy that expertise at scale.\n\nWith over 65 tickets per day across three Jira queues and an average first response time of 17.4 hours, instrument downtime delayed lab samples and patient reporting. Hiring more engineers couldn’t keep pace. SWARM had to respond in minutes, deliver accurate diagnostics across a wide range of equipment types, and improve continuously through a structured evaluation loop.\n\nWhy Natera chose Amazon Bedrock AgentCore\n\nThe Natera team chose to build SWARM on Amazon Bedrock AgentCore, a fully managed, extensible service by AWS designed to build, deploy, connect, secure, and operate AI agents at scale. Three core requirements drove the decision:\n\nAutonomous processing of high-volume support tickets without human intervention.\n\nDeep integration with existing operational tools such as Jira and Confluence.\n\nBuilt-in security and observability (encryption, AWS Identity and Access Management (IAM) integration, and distributed tracing) without requiring the team to build and maintain custom infrastructure.\n\n“We needed a managed runtime that would let us focus engineering effort on diagnostic accuracy rather than infrastructure plumbing—AgentCore gave us that, along with built-in identity management and the flexibility to swap models without rewriting agent logic,” Jirau said.\n\nAgentCore provides native integration with services including Amazon DynamoDB , a fully managed NoSQL database service, Amazon Simple Queue Service (Amazon SQS) , and AWS X-Ray , a capability of Amazon CloudWatch.\n\nHow SWARM works: Two agents, one skill library\n\nSWARM uses two complementary runtimes sharing a single skill library. The swarm-agent autonomously generates structured diagnostic reports before an engineer opens a ticket, while engineers use swarm-hive to interact in real time, upload images, and explore alternative troubleshooting paths.\n\n“The system does not replace engineers—it gives them access to the full depth of institutional knowledge the moment a ticket arrives,” Jirau said.\n\nFour layers connect the architecture:\n\nThe event layer routes Jira tickets through Amazon EventBridge and Amazon SQS.\n\nThe agent layer hosts swarm-agent, swarm-hive, and the skill library, and delivers diagnostic reports back to engineers.\n\nThe context layer draws on vendor manuals, historical tickets, and operational data.\n\nThe observability and delivery layer captures traces, logs, and metrics.\n\nFigure 1: Architecture of Natera’s SWARM on Amazon Bedrock AgentCore\n\nSecurity architecture\n\nThe Natera team’s first architectural decision was where to run the agents. The team required a managed runtime that would handle container orchestration, scaling, and security without requiring them to maintain custom infrastructure. They chose AgentCore runtime, a capability of Amazon Bedrock AgentCore, because it hosts both swarm-agent and swarm-hive in a secure, managed environment with built-in identity management and monitoring, avoiding the need to build and operate a custom agent execution layer. You can adopt this pattern regardless of the framework you choose.\n\nThe team chose a keyless deployment model because SWARM runs in a clinical environment where credentials exposure is unacceptable. OpenID Connect (OIDC) and AWS Security Token Service (AWS STS) generate temporary credentials scoped per deployment, with no long-lived keys in the pipeline. AWS Identity and Access Management (IAM) enforces least privilege at the component level. Amazon Virtual Private Cloud (Amazon VPC) with private subnets and VPC endpoints keeps traffic off the public internet. AWS Secrets Manager rotates the few credentials that exist on an automatic 30-day cycle.\n\nGitLab CI runners authenticate to AWS by presenting an OIDC token to an IAM identity provider configured in the account. AWS STS exchanges the token for short-lived credentials scoped to the deployment role (no long-lived access keys are stored in the pipeline). For setup details, see the IAM OIDC provider documentation .\n\nThe following example illustrates the pattern: an IAM OIDC trust policy for GitLab CI follows this structure:\n\n{\n\"Version\": \"2012-10-17\",\n\"Statement\": [\n{\n\"Effect\": \"Allow\",\n\"Principal\": {\n\"Federated\": \"arn:aws:iam::ACCOUNT_ID:oidc-provider/gitlab.com\"\n},\n\"Action\": \"sts:AssumeRoleWithWebIdentity\",\n\"Condition\": {\n\"StringEquals\": {\n\"gitlab.com:sub\": \"project_path:YOUR_PROJECT:ref_type:branch:ref:main\"\n}\n}\n}\n]\n}\n\nThese infrastructure-level security controls work in concert with SWARM’s data governance policies. Together they form the full compliance posture required for operating an AI system in a regulated clinical environment.\n\nCompliance and data governance\n\nSWARM runs on HIPAA-eligible AWS services under a Business Associate Agreement ( BAA ), reflecting Natera’s obligations as a clinical laboratory operator. Every agent invocation is audit-logged (a searchable record that satisfies data access traceability requirements). No patient-identifiable information touches the vector index or the language model. Tickets contain only equipment and workflow metadata. Teams building under HIPAA or similar regulatory frameworks should confirm BAA coverage and data separation requirements before designing the knowledge base pipeline.\n\nKnowledge base and document pipeline construction\n\nEarly prototypes using general-purpose retrieval without equipment-specific metadata produced inconsistent results, so the Natera team built a custom document processing pipeline tailored to technical equipment documentation. Amazon Titan Text Embeddings generates vector representations for semantic search, and Amazon Bedrock Knowledge Bases provides fully managed Retrieval Augmented Generation (RAG), converting documents into embeddings stored in batches of 100, a size chosen to balance indexing throughput against API rate limits. For heavily structured source documents with tables and diagrams, investing in a custom parsing pipeline rather than relying on default chunking compounds accuracy gains across every diagnosis.\n\nAmazon Bedrock services, including Amazon Titan Text Embeddings, and Amazon Bedrock AgentCore are available in multiple AWS Regions. For the latest information, see Amazon Bedrock supported Regions and Amazon Bedrock AgentCore supported Regions .\n\nThe Natera team uses the tiktoken tokenizer with the cl100k_base encoding to measure chunk boundaries. The following example illustrates the pattern, the chunking configuration follows a standard structure:\n\n#…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "XYBench measures whether models catch flawed user assumptions before acting",
+      "summary": "Researchers from CMU, NVIDIA, and Johns Hopkins introduced XYBench, an 8,115-question benchmark that tests whether LLMs can identify when a user's prompt is based on a mistaken assumption. Built from Stack Overflow, Stack Exchange, and WikiHow, the benchmark evaluates model responses for pragmatic solution inclusion, emphasis, and misconception identification using Claude Sonnet 4.5 as an automated judge. Experiments evaluating frontier and open models—including GPT-5, Sonnet 4.6, Gemini 3.1 Pro, DeepSeek-V4 Pro, and Qwen3.5-9B—showed that all models overwhelmingly focused on answering the literal, flawed request rather than correcting the underlying issue. On Stack Overflow queries, models prioritized the user's actual goal in only 35 to 41 percent of responses.",
+      "why_it_matters": "Measures critical LLM-as-judge accuracy and intent-disambiguation failures when agents blindly execute user prompts with bad premises.",
+      "reason": "XYBench introduces an evaluation benchmark focused on whether models can disambiguate user intent before taking action rather than naively executing underspecified prompts.",
+      "item": {
+        "key": "huggingface.co/blog/allenai/xybench",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "XYBench: Helping with the problem behind the question",
+        "url": "https://huggingface.co/blog/allenai/xybench",
+        "discussion_url": null,
+        "published": "2026-11-13T17:02:35Z",
+        "summary": "",
+        "content": "XYBench: Helping with the problem behind the question\nTruly useful AI assistants need to be able to help users who ask misguided questions—not just users who ask the right question with the right amount of detail. We’re releasing XYBench, a benchmark of 8K+ questions that tests how AI assistants respond to requests based on misconceptions, such as asking how to thicken frosting that keeps sliding off cupcakes when the real problem is that the cupcakes are still too warm to frost. XYBench won the Best Resource Paper Award at EMNLP 2026.\nA mismatch between the approach someone asks about and the goal they want to achieve is known as the XY problem: a person wants to accomplish X, assumes a particular approach Y will work, and asks for help with Y. In the cupcake example, the person is so committed to making the frosting stick that they fail to consider the warmth of the cupcake as the true problem to be addressed.\nDeveloped with researchers at Carnegie Mellon, NVIDIA, and Johns Hopkins, XYBench exposes a critical gap in LLMs' ability to troubleshoot problems: recognizing when a user's request is based on an implicit misconception and appropriately redirecting them toward a solution that addresses their actual goal. Drawing on 8,115 real-world questions spanning programming and everyday activities such as cooking and home repair, we introduce a benchmark that measures whether models identify these misconceptions and are able to prioritize effective solutions in their responses.\nThe models we evaluated on XYBench – Claude Sonnet 4.6, GPT-5, Gemini 3.1 Pro, Qwen3.5-9B, and DeepSeek-V4 Pro – often suggested a solution to the user’s problem but kept their answers focused on the original, mistaken approach. Unlike human reference answers, all five models were less likely to steer users away from that approach and toward a solution suited to their goal.\nPeople use AI systems with different levels of knowledge and may not always know how best to approach a problem. We hope XYBench helps researchers measure whether model improvements make assistants better at recognizing mistaken assumptions, explaining why a proposed approach might not work, and suggesting more effective alternatives—even when users don't know the right questions to ask.\nBuilding XYBench\nWe built XYBench from four sources: 1,557 questions from Stack Overflow, 184 from Stack Exchange, 102 manually curated examples, and 6,272 questions generated from WikiHow guides. For each question, we identified the stated request (Y), what the person explicitly asks for, and the intended request (X)—the underlying goal that can be inferred from context.\nFor the public forum questions, we used the three highest-scored human answers and the accepted answer, where available, to establish the intended request and possible solutions. We filtered out cases where answering the stated request was judged sufficient. For WikiHow, we used Sonnet 4.5 to generate questions around plausible misconceptions in procedural guides, then refined them to include enough context for an expert to infer the underlying goal without stating it outright. We removed examples where answering the literal request would largely resolve the problem.\nEvaluating how an answer helps\nA model might spend several paragraphs recommending a more powerful vacuum cleaner, then briefly suggest checking for a clogged hose. If a clog is causing the weak suction, clearing it could solve the problem.\nA more helpful answer would recognize that the user wants to restore suction and focus on diagnosing the cause. This draws on pragmatics, the branch of linguistics concerned with how context and communicative intent shape meaning. To test whether models use this understanding in their answers, XYBench measures three aspects of each response:\n- Pragmatic solution—records whether a model’s response includes solutions to the stated request (Y) and the intended request (X), checking each separately.\n- Pragmatic emphasis—measures whether a model’s answer focuses on the stated request (Y), focuses on the intended request (X), or balances the two.\n- Misconception identification—measures whether a model’s response steers the user toward the underlying goal (X) while discouraging or avoiding the mistaken approach (Y).\nIn XYBench, Claude Sonnet 4.5 serves as the automated judge. It classifies individual suggestions within each model’s response and assesses the answer’s pragmatic emphasis.\nTo validate Sonnet 4.5’s judgments, two human reviewers independently assessed 500 model responses to XYBench questions. Agreement with the judge, averaged across the reviewers, ranged from 97.5–100% on whether a solution appeared, 84.6–93.3% on misconception identification, and 74.2–79.8% on pragmatic emphasis.\nWhat the experiments show\nWe evaluated Sonnet 4.6, GPT-5, Gemini 3.1 Pro, Qwen3.5-9B, and DeepSeek-V4 Pro on XYBench in a single-turn setting, with one response per question. We evaluated human reference answers separately using the same metrics.\nAcross all four sources, every model was more likely to include a solution to the stated request (Y) than to the underlying goal (X). On Stack Overflow, stated-request solutions appeared in 75–86% of responses, compared with 59–71% for underlying-goal solutions.\nA passing mention of a solution does not make it the focus of an answer. In the vacuum example, a model could briefly suggest unclogging the hose but focus most of its response on buying a more powerful vacuum. We would count that response as containing a solution to the underlying goal, even though the model emphasized the stated request. We measured overall emphasis separately: on Stack Overflow, models focused primarily on the underlying goal in only 35–41% of their responses, and on the stated request in 47–57%. In the remaining responses, models gave similar emphasis to the stated request and the underlying goal.\nWe also tested whether making the user’s goal explicit would help. In an oracle experiment, we…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "IBM introduces LLMON preview models to harden structured context and tool calls",
+      "summary": "IBM released experimental preview versions of Granite 4.1 (3B and 8B) fine-tuned for LLMON, a lightweight markup language designed to communicate explicit structure to causal LLMs. Unlike standard JSON, LLMON replaces literal character brackets with reserved special tokens as delimiters and explicitly binds instructions to specific data payloads using unique two-character block IDs. This structural separation prevents unreferenced context turns or tool outputs from altering execution boundaries. In benchmark evaluations, this structural binding reduced indirect prompt injection success rates to near zero while preserving general model capabilities.",
+      "why_it_matters": "Presents a novel token-level context encoding strategy that mitigates indirect prompt injection and structural parsing failures in smaller models.",
+      "reason": "IBM released Granite 4.1 (3B and 8B) with native support for LLMON, a lightweight markup dialect designed to optimize token overhead during structured tool calling.",
+      "item": {
+        "key": "huggingface.co/blog/ibm-granite/llmon-an-llm-native-markup-language-now-in-granite",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "LLMON: An LLM-Native Markup Language, now in Granite 4.1 3B and 8B",
+        "url": "https://huggingface.co/blog/ibm-granite/llmon-an-llm-native-markup-language-now-in-granite",
+        "discussion_url": null,
+        "published": "2026-11-12T19:07:35Z",
+        "summary": "",
+        "content": "LLMON: An LLM-Native Markup Language, now in Granite 4.1 3B and 8B\nLLMs rely on their context to generate the next set of tokens. Over a long trajectory, the context fills with numerous types of components: a system prompt, past conversation turns, instructions that act on retrieved documents, tool responses or user data, requirements constraining the allowed output, and reasoning chains. The context carries a rich structure, most of which is either implicit to the model or encoded in formats such as JSON that were not designed to be digested by LLMs. This is one of the main reasons LLMs, particularly those on the smaller end of the scale, are brittle and sometimes fail in unexpected ways. The lack of explicit structure can also be exploited by attackers, for example, in the form of prompt injections.\nTo address this, we developed LLMON (LLM Object Notation, pronounced “lemon”), an LLM-native markup language for explicitly communicating structure and semantics to the models. Semantically coherent components are marked with meaningful tags which are wrapped in reserved special-token delimiters. Data schemas, including nesting, are stated in a way that is unambiguous to a causal LLM. Unique IDs make it possible to point to specific instructions, which could reside anywhere in the context, and bind them to the data payloads they should act on, analogous to the way functions are called and arguments are passed to them in programming languages.\nToday we are releasing two experimental preview models, derived from Granite 4.1 base models, trained to consume and generate LLMON-marked text: granite-4.1-3b-LLMON-preview and granite-4.1-8b-LLMON-preview. We are also releasing a GitHub repo, which includes a toolkit for working with LLMON and examples of workflows and templates.\nWhat it enables:\n- Indirect prompt injections, hidden in user data, are mostly ignored by LLMON models due to explicit instruction/data separation. For some benchmarks, attack success rates drop to nearly zero, whereas regular instruction-tuned models get hijacked with high probability. This is achieved while maintaining general capability relative to Granite 4.1 Instruct models.\n- Unrelated passages, old chat turns, and tool outputs don’t get pulled into the answer because each instruction is bound to the exact data it applies to.\n- Instructions, data, and requirements are clearly marked so that their structure and meanings at the application’s code level can be leveraged by the model. Try it out in Mellea, which has native LLMON support enabled by automatically LLMONizing its LLM calls.\n- You no longer need to worry about forcing LLMs to observe JSON structure. Use our converters to turn existing JSON into LLMON without loss. You can also define your own structure and associated tags and tune a LoRA on top of the LLMON models to understand it.\nWhy not JSON?\nJSON was designed for parsers, not for causal language models. The tokenizer is not constrained to respect the grammar, and structure is encoded by tokens ({, \", :) that may also appear in normal text. To a model, a quotation mark inside a document and a quotation mark that closes a field are the same token. Escaping rules that are clear to a parser are only statistical patterns to a model. Nesting depth is encoded by counting brackets, which transformers are known to be weak at, especially over long spans.\nLLMON, on the other hand, is an XML-like markup whose structural delimiters are reserved special tokens rather than characters, so structure and content use separate parts of the vocabulary. Tags are stated at the beginning of each span, and the boundaries between spans are explicit. Nested structures are stated locally so the model does not need to keep track of the hierarchy over long spans.\nSince most teams already have pipelines built around JSON, we created conversion tools and example notebooks that translate JSON to LLMON and back in a lossless manner.\nHow is LLMON related to chat templates?\nLLMON does not replace chat templates; rather, it enriches them. Where regular chat templates tell the model which part belongs to which role (system, user, assistant), LLMON tells it what each component means and how components relate to each other, within and across roles.\nThe LLMON preview models ship with their own chat template, so you build the same messages list you would pass to any chat model and call apply_chat_template as usual; it renders the LLMON shown below. The only difference is that a turn can now name its parts and mark each one exec: True or False. A part marked True is bound into the exec block at the bottom of the rendered output, which states which instruction to run and what it operates on; a part marked False is still rendered into the context but is referenced by nothing.\nmessages = [ { \"role\": \"user\",\n               \"instruction\": [{ \"value\": \"Write a short paragraph about\", \"exec\": True }],\n               \"data\": [{ \"value\": \"IBM Company\", \"exec\": True }],\n               \"requirement\": [ {\"value\": \"Use less than 10 words\", \"exec\": True},\n                                {\"value\": \"Do not use commas\", \"exec\": True}]\n             } ]\nWhich the model receives as the following (with newlines and indentation added here for readability, as the template emits none):\n<|open|>instr<|:|>»ñ<|close|>Write a short paragraph about<|open_end|>\n<|open|>data<|:|>ä¦<|close|>IBM Company<|open_end|>\n<|open|>req<|:|>Á¼<|close|>Use less than 10 words<|open_end|>\n<|open|>req<|:|>¢¬<|close|>Do not use commas<|open_end|>\n<|open|>exec<|:|>ÄÐ<|close|>\n    <|open|>exec<|.|>instruction<|close|>instr<|:|>»ñ<|open_end|>\n    <|open|>exec<|.|>input<|close|>data<|:|>ä¦<|open_end|>\n    <|open|>exec<|.|>requirement<|close|>req<|:|>Á¼<|open_end|>\n    <|open|>exec<|.|>requirement<|close|>req<|:|>¢¬<|open_end|>\n    <|open|>exec<|.|>output<|close|>assistant<|:|>ãø<|open_end|>\n<|open_end|>\n<|open|>assistant<|:|>ãø<|close|>\nThe two-character block IDs are drawn from a fixed set that…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Unsloth updates Qwen3.8-27B GGUFs with Dynamic V3.1 quantization",
+      "summary": "Unsloth has released updated dynamic v3.1 quantizations for Qwen3.8-27B, improving local inference accuracy across GGUF formats. The new quantization algorithm delivers a reported 5 to 10 percent accuracy boost at equivalent file sizes across agentic and coding benchmarks including Terminal Bench 2.1, DeepSWE v1.1, and LiveCodeBench v6. The underlying 27B dense model supports a native 256K context window, vision inputs, multi-token prediction (MTP), and reasoning depth toggles. At 4-bit quantization, the model fits within 16 to 19 GB of VRAM for local execution via llama.cpp or Unsloth Desktop.",
+      "why_it_matters": "Provides updated benchmarks and resource requirements for running a top-tier open-weight agentic coding model locally.",
+      "reason": "Unsloth released dynamic v3.1 quantizations for Qwen3.8-27B, offering improved execution efficiency and lower loss for local model inference.",
+      "item": {
+        "key": "unsloth.ai/docs/models/qwen3.8",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Unsloth Qwen3.8-27B Quantizations – Dynamic v3.1 Update",
+        "url": "https://unsloth.ai/docs/models/qwen3.8",
+        "discussion_url": "https://news.ycombinator.com/item?id=50491980",
+        "published": "2026-11-14T00:06:04Z",
+        "summary": "",
+        "content": "Qwen3.8 - How to Run Locally\nGuide to running Qwen3.8 quants including Qwen3.8-27B on your local setup.\nQwen3.8-27B is a 27B parameter dense model Qwen, featuring vision and reasoning capabilities, a 256K context window, and runs locally on 17GB RAM/VRAM setups. Qwen3.8 excels at agentic coding, vision and chat tasks, and can now run via Unsloth GGUFs, NVFP4 and Unsloth Desktop.\nNov 11 Update: Qwen3.8-27B GGUFs now use Unsloth Dynamic V3.1 which improves average accuracy by 5-10% accuracy at comparable sizes including Terminal Bench, DeepSWE and more benchmarks. We're working on an even better version of Dynamic quants which will be applied to Qwen4 and future models.\nThank you Qwen for day zero access. Unsloth quants also include:\n- Developer Role Support for agentic tools like Codex\n- MTP enabled for fast inference\n- Tool calling: Improved parsing nested objects to make tools succeed more\nUnsloth quants: Qwen3.8-27B-GGUF\nDynamic V3.1 Update (November 11th 2026)\nWe're excited to release new Qwen3.8-27B GGUFs using our updated Unsloth Dynamic V3.1 (preview) algorithm which improves Unsloth quants by 5-10% accuracy at the same size on most benchmarks and is the best in class for most tasks including coding, agentic workloads and general chat.\nMost quants from 2bit until 6bit are updated. We found 3bit UD3 quants to do on par with UD3.1, so we do not update them. We are actively working on making all quants better!\nWe ran agentic benchmarks including Terminal Bench 2.1, DeepSWE v1.1, and general benchmarks like LiveCodeBench v6, GPQA Diamond, MMLU-Pro, AIME25 and many others. We used 256K context lengths for all agentic benchmarks, and 128K for the rest. We followed the same methodology for Qwen3.8-27B as DeepSeek-V4.1-Flash and Qwen3.8-Flash-Next which also utilized our V3.1 preview algorithm.\nDynamic V3.1 Full Breakdown\nClick below to see full details of benchmarking and more:\n⚙️ Usage Guide\nQwen3.8-27B Requirements:\nQwen3.8-27B 4-bit quants work on 16-19GB VRAM like RTX 5080, 4090 or a Mac with 24GB RAM. Table: Hardware requirements (units = total memory: RAM + VRAM, or unified memory)\n7-8 GB\n9-11 GB\n12-14 GB\n16-19 GB\n23-26 GB\n31 GB\n56 GB\nRecommended Settings\nQwen3.8-27B is a hybrid thinking model with different default settings for thinking and non-thinking modes. Extra high is enabled by default so if you want shorter thinking traces, you can adjust the thinking effort:\ntemperature\n1.0\n0.7\ntop_p\n0.95\n0.80\ntop_k\n20\n20\nmin_p\n0.0\n0.0\npresence_penalty\n0.0\n1.5\nrepetition_penalty\n1.0\n1.0\n- Maximum context window: 262,144 (can be extended to 1M via YaRN)\n- Thinking Mode: temperature=1.0, top_p=0.95, top_k=20, min_p=0.0, presence_penalty=0.0, repetition_penalty=1.0\n- Instruct (or non-thinking) mode: temperature=0.7, top_p=0.80, top_k=20, min_p=0.0, presence_penalty=1.5, repetition_penalty=1.0\n💡 Thinking + Preserve Thinking\nQwen3.8 has Preserve Thinking which leaves the thinking trace from the previous conversation. This increases the number of tokens you use, but could increase accuracy in continued conversations. Unsloth has 'Think' and Preserved Thinking toggles for Qwen3.8 (see right):\nQwen3.8-27B comes with support for reasoning_effort, which can be used to adjust reasoning depth and control cost. These toggles are automatically enabled in Unsloth:\n- xhigh (default): for complex tasks demanding thorough analysis\n- medium: balancing accuracy and speed\n- low: efficient reasoning optimizing for speed and cost\n- none\nRun Qwen3.8 Guide\nYou can now run Qwen3.8-27B in llama.cpp and Unsloth Desktop. Feel free to change quantization type.\n- Hugging Face: Qwen3.8-27B-GGUF • Qwen3.8-27B-NVFP4\n- ModelScope: Qwen3.8-27B-GGUF • Qwen3.8-27B-NVFP4\n🦥 Run Qwen3.8 in Unsloth Desktop\nQwen3.8 can run in Unsloth Desktop, an open-source UI app for local AI. Unsloth automatically offloads to RAM and detects multiGPU setups. With Unsloth Desktop, you can run models locally on MacOS, Windows, Linux and:\n- Search, download, run GGUFs, MLX and safetensor models\n- Self-healing tool calling + web search\n- Code execution (Python, Bash)\n- Automatic inference parameter tuning (temp, top-p, etc.)\n- Fast CPU + GPU inference via MLX and llama.cpp\n- Train LLMs 2x faster with 70% less VRAM\nInstall Unsloth\nThe easiest way to get started is by downloading the Unsloth Desktop app. Works on macOS, Windows, and Linux.\nOr, if you prefer to install manually:\nMacOS, Linux, WSL:\nWindows:\nThe Unsloth Docker image unsloth/unsloth is available on Docker. Read guide.\nInstall Unsloth Desktop:\nUpdate Unsloth Desktop:\nInstall Unsloth Desktop:\nUpdate Unsloth Desktop:\nSearch and download Qwen3.8\nGo to Unsloth Chat or Model hub and search for Qwen3.8 in the search bar and download your desired model and quant.\nRun Qwen3.8\nInference parameters should be auto-set when using Unsloth, however you can still change it manually. You can also edit the context length, chat template and other settings.\nFor more information, you can view our Unsloth inference guide.\nFor example using Unsloth Desktop with the 397GB Qwen3.8 (-91% smaller) allows you to toggle thinking modes, allow inline canvas, web search and code execution and much more.\nServe Qwen3.8 with Unsloth API\nYou can use unsloth run command and serve Qwen3.8 via an API using llama-server runtime flags, including context sizing, GPU layers, threading, sampling, networking, and tool configuration. For more info see our API docs or unsloth start.\nUnsloth is now ready\nYou can also do many other things with Qwen3.8 via Unsloth Desktop like:\n- Connect tools: Claude Code, Codex, web search, MCP and more\n- Train models: Fine-tune text, diffusion, embedding, and more\n🦙 Run Qwen3.8 in llama.cpp\nDownload the latest version of llama.cpp. You can follow the build instructions below as well. Change -DGGML_CUDA=ON to -DGGML_CUDA=OFF if you don't have a GPU or just want CPU inference. For Apple Mac / Metal devices, set -DGGML_CUDA=OFF then continue as usual - Metal support is on by default.\nDownload the model…",
+        "score": 236.0,
+        "comments": 76,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "A security vulnerability in Lovable applications exposed over 200,000 private messages and passport details.",
+      "item": {
+        "key": "crissyfield.de/research/lovable-en",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Lovable apps expose passport details and more than 200K private messages",
+        "url": "https://www.crissyfield.de/research/lovable-en/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50499017",
+        "published": "2026-11-14T17:43:10Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A open-source project implemented DeepSeek V3 architecture in roughly 200 lines of pure JAX code.",
+      "item": {
+        "key": "github.com/Vaibhaav-Tiwari/deepseek-v3-jax",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: DeepSeek V3 in ~200 lines of pure Jax",
+        "url": "https://github.com/Vaibhaav-Tiwari/deepseek-v3-jax",
+        "discussion_url": "https://news.ycombinator.com/item?id=50497589",
+        "published": "2026-11-14T15:04:15Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A two-person engineering team integrated SGLang with IBM Spyre hardware in under a week using AI coding assistants to write the 1,500-line plugin.",
+      "item": {
+        "key": "pytorch.org/blog/integrating-sglang-into-spyre-in-under-a-week-with-ai",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "Integrating SGLang into Spyre in Under a Week with AI",
+        "url": "https://pytorch.org/blog/integrating-sglang-into-spyre-in-under-a-week-with-ai/",
+        "discussion_url": null,
+        "published": "2026-11-12T14:45:25Z",
+        "summary": "TL;DR With help from AI coding agents, our two-person team integrated SGLang with IBM Spyre in less than a week, building a plugin of roughly 1,500 lines. Existing Spyre support...\n\nThe post Integrating SGLang into Spyre in Under a Week with AI appeared first on PyTorch .",
+        "content": "TL;DR\n\nWith help from AI coding agents, our two-person team integrated SGLang with IBM Spyre in less than a week, building a plugin of roughly 1,500 lines. Existing Spyre support in PyTorch and SGLang’s clear extension points made it straightforward to reuse the hardware code. SGLang delivered about 3.6× the throughput of the reference PyTorch inference implementation using torch-spyre. It was also on par with vLLM on the workloads measured for Granite 3.3 8B and Gemma 4 26B A4B. Prefix sharing through RadixCache worked without any Spyre-specific changes.\n\nWe work on IBM’s Spyre accelerator and wanted to make SGLang ‘s serving stack, including its built-in prefix sharing, available to Spyre users.\n\nIn less than a week, the two of us used AI-assisted development to integrate SGLang into IBM Spyre with a plugin of just ~1,500 lines of code. A key factor was building on existing PyTorch hardware support and SGLang’s well-defined extension points. This allowed the two of us, alongside our AI coding agents, to integrate a new accelerator into SGLang in a remarkably short time. The AI coding agents used existing PyTorch implementations of Spyre operations as reference code and adapted the integration code to SGLang’s backend interfaces. Their work focused on connecting the existing hardware support to the new serving framework.\n\nSpyre and the starting point\n\nSpyre is IBM’s accelerator for enterprise AI inference. It integrates using torch-spyre , which registers Spyre as a PyTorch device and connects it to torch.compile , exposing hardware support through standard PyTorch APIs.\n\nThe result\n\nThe initial SGLang integration took the two of us less than a week of work. The plugin was roughly 1,500 lines, building on the compiler and reusable hardware support from PyTorch. Four small patches extended SGLang’s backend support: two made existing execution paths available without CUDA-specific dependencies, and two registered Spyre as a supported device and attention backend that does not use Triton. The compatibility changes can also support other accelerators; the registration changes are specific to Spyre.\n\nSGLang on Spyre achieved approximately 3.6× the throughput of the reference PyTorch inference implementation using torch-spyre.\n\nWe also compared SGLang and vLLM on Spyre using Granite 3.3 8B and Gemma 4 26B A4B. Across the workloads we measured for these two models, SGLang’s performance was on par with vLLM.\n\nRelative performance of SGLang and vLLM / spyre-inference on Granite 3.3 8B and Gemma 4 26B-A4B, normalized to vLLM = 1.0. Lower is better.\n\nWhy it worked\n\nWith a working compiler and an existing inference server in place, adding SGLang became a focused integration task. PyTorch and torch.compile supplied a shared implementation layer, expressing accelerator functionality through APIs that both serving frameworks could use.\n\nSGLang supplied clear places to connect that code. Its platform registration, attention backend, KV pool, and operator dispatch separated the integration into bounded tasks while preserving the existing scheduler, request handling, and serving loop. The reference code came from the existing vLLM integration for Spyre , including its PyTorch implementations of accelerator operations. This gave the AI coding agents concrete code for Spyre’s hardware behavior, while SGLang’s extension points defined the interfaces their adapted code had to satisfy. Together, these reduced how much the agents had to infer about the hardware and where the integration belonged.\n\nThe existing vLLM Spyre backend was about 3,500 lines, compared with roughly 1,500 for the SGLang plugin. In the initial integration, the attention base class supplied the surrounding logic, leaving the Spyre backend to override the inner scaled dot-product attention operation. Reusing that base class accounted for roughly two-thirds of the line-count difference between the two plugins. SGLang’s device-agnostic KV pool also allowed a single method override for buffer creation; allocation still needed PyTorch-based handling where the existing path relied on Triton.\n\nReusing the vLLM Spyre implementation\n\nWe reused the attention code from the vLLM Spyre integration, including how it groups inputs into buckets and handles tensor shapes. We also reused its PyTorch-based approach to allocating the KV cache. For RMSNorm, SiLU, GeLU, rotary embeddings, and linear layers, we connected the existing Spyre implementations to SGLang’s operator dispatch.\n\nSome features required no Spyre-specific work at all. RadixCache is a good example: prefix sharing is resolved entirely within SGLang’s scheduler before execution reaches the accelerator, so the existing scheduling logic worked unchanged.\n\nThe plugin is available as open source alongside upstream SGLang.\n\nUsing SGLang with Spyre\n\nThe example assumes the Spyre runtime, torch-spyre, the SGLang plugin, and its compatibility patches are installed and configured.\n\nimport sglang as sgl\n\nmodels = [\n\"ibm-ai-platform/micro-g3.3-8b-instruct-1b\",\n\"mistralai/Ministral-8B-Instruct-2410\",\n]\n\nfor model in models:\nengine = sgl.Engine(\nmodel_path=model,\ndevice=\"spyre\",\nattention_backend=\"spyre_paged\",\ndtype=\"float16\",\npage_size=64,\nmax_running_requests=1,\ndisable_cuda_graph=True,\n)\n\ntry:\noutput = engine.generate(\n\"Why is the sky blue?\",\n{\"temperature\": 0, \"max_new_tokens\": 64},\n)\nprint(model, output[\"text\"])\nfinally:\nengine.shutdown()\n\nLooking ahead\n\nThe Spyre software stack continues to evolve rapidly.\n\nOver the coming months, we expect to add support for dynamic shapes, reducing much of the shape management required today. Later this year, we also expect to bring Triton support to Spyre and enable RadixAttention on top of it, opening the door to additional kernel optimizations.\n\nKeeping hardware support in PyTorch and integration code at SGLang’s extension points gives future compiler and runtime improvements a path into the serving stack. The next integration can start from the same shared foundation, with concrete implementations and interfaces that developers and AI coding tools can work with.\n\nThe post Integrating SGLang into Spyre in Under a Week with AI appeared first on PyTorch .",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A study on vision-language models demonstrated that teacher models can transmit subliminal stylistic preferences to student VLMs through unrelated multimodal training data.",
+      "item": {
+        "key": "arxiv:2611.08538",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Subliminal Learning in Vision-Language Models",
+        "url": "https://huggingface.co/papers/2611.08538",
+        "discussion_url": null,
+        "published": "2026-11-12T00:00:00Z",
+        "summary": "Subliminal learning is a phenomenon in large language models (LLMs) where a teacher passes a hidden preference to a student through training data unrelated to that preference. We study whether subliminal learning also occurs in vision-language models (VLMs). We finetune a teacher VLM to prefer a specific animal or facial attribute and use a control teacher from the same base model. Both teachers generate numbers for an unrelated visual task involving geometric shapes. Two students initialized from the same base VLM are finetuned on the same images, using numbers generated by either the biased or control teacher. Across VLMs ranging from 2B to 7B parameters, we find that both animal and facial preferences can transfer through this unrelated task. Students trained on biased-teacher outputs select the target more often than control students, with a difference of up to sim10 percentage points in the animal preference task. Transfer can become stronger with more training data and varies with the target preference, model, and how the numbers are generated. Beyond preferences, we show that the biased student's explanations use more of the same words and phrases as the biased teacher's…",
+        "content": "",
+        "score": 6.0,
+        "comments": 5,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Hugging Face Transformers release v5.23.0 adds native model support for Thinking Machines Lab's Inkling 2 Small.",
+      "item": {
+        "key": "github.com/huggingface/transformers/releases/tag/v5.23.0",
+        "source": "Transformers releases",
+        "tags": [
+          "release"
+        ],
+        "title": "Release v5.23.0",
+        "url": "https://github.com/huggingface/transformers/releases/tag/v5.23.0",
+        "discussion_url": null,
+        "published": "2026-11-13T14:10:57Z",
+        "summary": "Release v5.23.0\n\nNew Model additions\n\nInkling2\n\nInkling 2 Small is a multimodal model from Thinking Machines Lab that accepts text and image inputs and generates text outputs, and it is intended for use in English and other languages and across multiple coding languages. Its language backbone has 48 mixture-of-experts decoder layers, each routing tokens to 8 of 384 experts, for 594B total and 17B active parameters. It keeps the Inkling decoder (learned relative attention, short causal convolutions, mixture-of-experts layers) and adds block attention residuals, gated attention with a learned sink, and dynamic key/value convolutions. Images are encoded by a Perception Encoder-based vision transformer and projected into the language model embeddings, one embedding per 40x40 pixel patch.\n\nLinks: Documentation | Blog Post\n\nAdd inkling2 ( #50682 ) by @guarin in #50682\n\nJEV\n\nJEV is a decision head that scores single-token labels with a linear layer at the last token of the prompt, soft-capped like the logits of a language model head. JevForDecision is the model of the checkpoint and its head, and it reads the head files shipped next to the weights ( head.safetensors and judge_config.json…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Happy building, Guan.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Executive change",
+      "headline": "Jensen Huang Resigns as Nvidia Chief Executive",
+      "blurb": "Nvidia CEO Jensen Huang has resigned from his position at the head of the AI chip maker.",
+      "item": {
+        "key": "theverge.com/podcast/1032866/jensen-huang-nvidia-china-trump-vergecast",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "What’s really at stake in the Jensen Huang saga",
+        "url": "https://www.theverge.com/podcast/1032866/jensen-huang-nvidia-china-trump-vergecast",
+        "discussion_url": null,
+        "published": "2026-11-13T14:47:16Z",
+        "summary": "One part of the saga surrounding Nvidia CEO Jensen Huang ended on Thursday, when Huang resigned from his position at the top of AI's most important company. But in the coming weeks and months, a much bigger story may be about to unfold. A story about Nvidia's dealings in China, about the US government's willingness […]",
+        "content": "One part of the saga surrounding Nvidia CEO Jensen Huang ended on Thursday, when Huang resigned from his position at the top of AI's most important company. But in the coming weeks and months, a much bigger story may be about to unfold. A story about Nvidia's dealings in China, about the US government's willingness to turn a lot of blind eyes to protect a powerful ally, and about the very stability of the AI industry as a whole. It's a lot.\n\nOn this episode of The Vergecast , David and Nilay start by trying to unpack the many parts of the story. We're all going to learn a lot more about Megaspeed than we ever planned or wanted, and we're goin …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Agent policy",
+      "headline": "United Airlines Bans AI Agents From Booking Flights",
+      "blurb": "United Airlines has introduced a ban preventing AI agents from booking flights on behalf of travelers.",
+      "item": {
+        "key": "cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "United Airlines bans AI agents from booking flights on behalf of travelers",
+        "url": "https://www.cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50458900",
+        "published": "2026-11-11T21:24:35Z",
+        "summary": "",
+        "content": "",
+        "score": 680.0,
+        "comments": 706,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Research discovery",
+      "headline": "AI Unlocks Gödel's Notebooks of Proved Theorems",
+      "blurb": "AI has unlocked Kurt Gödel's notebooks, revealing what is reported to be hundreds of proved mathematical theorems.",
+      "item": {
+        "key": "theguardian.com/science/2026/nov/13/kurt-godel-notebooks-ai-helps-unlock-hidden-discoveries-man-who-transformed-maths",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "AI unlocks Gödel's notebooks, said to contain hundreds of proved theorems",
+        "url": "https://www.theguardian.com/science/2026/nov/13/kurt-godel-notebooks-ai-helps-unlock-hidden-discoveries-man-who-transformed-maths",
+        "discussion_url": "https://news.ycombinator.com/item?id=50486748",
+        "published": "2026-11-13T17:30:10Z",
+        "summary": "",
+        "content": "",
+        "score": 417.0,
+        "comments": 107,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 21,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 25,
+      "kept": 19,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 907,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1387,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 288,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 199,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 214,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-11T21:10:55.562701Z",
+    "candidates": 124,
+    "triaged": 124,
+    "enriched": 6,
+    "headline_candidates": 138,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 732.2,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 34362,
+      "output_tokens": 11370,
+      "cost_usd": 0.153873
+    }
+  }
+}
