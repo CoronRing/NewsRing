@@ -1,93 +1,93 @@
-# Parallel Claude Workers, Scoped Agent Memory, and Quantized Qwen3.8
+# Harness Diet, Stable llama.cpp, and Training the Artifact
 
-*2026-11-14 · 8 stories*
+*2026-11-15 · 8 stories*
 
-![Top AI stories for 2026-11-14](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-15](https://coronring.github.io/NewsRing/today.png)
 
-Today's selection focuses on practical infrastructure for scaling and evaluating agent systems. We cover Anthropic's parallel worker architecture in Claude Code, dynamic stress-testing frameworks for search agents, and IBM's special-token markup for prompt isolation.
+Today's mix is refreshingly heavy on execution and systems. Between llama.cpp finally declaring semver stability and studies showing that leaner scaffolds beat bespoke agent tricks, there is plenty here for anyone building harnesses and serving models.
 
 ## Across AI today
 
-- **Jensen Huang Resigns as Nvidia Chief Executive** Nvidia CEO Jensen Huang has resigned from his position at the head of the AI chip maker. ([theverge.com](https://www.theverge.com/podcast/1032866/jensen-huang-nvidia-china-trump-vergecast))
-- **United Airlines Bans AI Agents From Booking Flights** United Airlines has introduced a ban preventing AI agents from booking flights on behalf of travelers. ([cbsnews.com](https://www.cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights/))
-- **AI Unlocks Gödel's Notebooks of Proved Theorems** AI has unlocked Kurt Gödel's notebooks, revealing what is reported to be hundreds of proved mathematical theorems. ([theguardian.com](https://www.theguardian.com/science/2026/nov/13/kurt-godel-notebooks-ai-helps-unlock-hidden-discoveries-man-who-transformed-maths))
+- **llama.cpp reaches version 1.0.0** llama.cpp has officially reached version 1.0.0, providing a stronger foundation for the local AI ecosystem. ([huggingface.co](https://huggingface.co/blog/ggml-org/llama-cpp-v1))
+- **Anthropic brings parallel AI workers to Claude Code Projects** Anthropic upgraded Claude Code Projects to run parallel AI workers for concurrent task execution. ([claude.com](https://claude.com/resources/articles/projects-redesigned))
+- **SGLang-Neuron brings SGLang serving to AWS Trainium** AWS launched SGLang-Neuron in Deep Learning Containers, enabling model serving and RL rollouts on Trainium using PyTorch. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/deploy-frontier-ai-models-on-aws-trainium-with-sglang-neuron/))
 
-## 1. Anthropic adds parallel worker orchestration to Claude Code Projects
+## 1. Why agents will naturally prefer hackable hardware
 
-Anthropic has redesigned Claude Code Projects in beta to manage multi-agent work streams directly. In the updated architecture, a project coordinator delegates work to multiple parallel cloud threads, each running a full Claude Code session on its own branch and repository copy. Threads can spawn subagents or execution loops for complex tasks, while overlapping code modifications are handled through normal repository merge conflicts. The system also introduces a shared project-level memory where all threads record and retrieve context over time.
+Hardware hacking is shifting from niche forums to automated agent behavior, spurred by devices like the $70 M-VAVE FM-1 synthesizer whose firmware was replaced by AI-assisted owners within weeks. The thesis argues that as users delegate device troubleshooting to autonomous agents, those agents will systematically select and favor hardware that allows firmware replacement and provides open access or unbricking tools. Because agents cannot disassemble a case to fix a bricked board, vendors that expose browser emulators, open code, and recoverable flashing will outcompete locked ecosystems in commodity categories. The primary roadblock remains vendor pushback under the guise of security, such as locked bootloaders and mandatory authorization servers.
 
-**Why it matters:** Demonstrates how frontier harness design is standardizing around multi-agent coordinator-worker patterns with isolated execution environments and shared context.
+**Why it matters:** When agents act as purchasing and maintenance delegates, device openness and tool-level recovery paths become functional requirements rather than hobbyist preferences.
 
-[claude.com](https://claude.com/resources/articles/projects-redesigned) · [discussion](https://news.ycombinator.com/item?id=50492141) · via Hacker News (AI)
+[geoffstearns.com](https://geoffstearns.com/blog/your-agent-will-pick-the-hackable-one/) · [discussion](https://news.ycombinator.com/item?id=50510799) · via Hacker News front page
 
-## 2. DeepStress dynamic framework tests search agent reliance on bad evidence
+## 2. llama.cpp reaches v1.0.0 with strict API and ABI stability
 
-Researchers introduced DeepStress, an evaluation framework designed to stress-test search agents against noisy, low-quality, and contradictory retrieved evidence. The system replaces standard retrieval with a synthetic environment that independently controls document trustworthiness, relevance, and factuality. Across 12 evaluated agent systems on HotpotQA and BrowseComp-Plus, the authors observed that open-weight agents frequently generate confident answers despite obvious credibility red flags. Furthermore, agents often rely on memorized parametric knowledge for HotpotQA questions even when every returned document is factually wrong.
+Three and a half years after its first commit, llama.cpp has officially tagged release v1.0.0 alongside ggml. The project is formalizing semantic versioning, pledging to bump major versions whenever API or ABI breaking changes occur across its core libraries. The runtime now supports over 150 architecture variants and mainstream speculative decoding techniques, backed by cross-platform CI runners across major silicon vendors. For downstream developers tired of git submodules breaking silently on pulling upstream, this marks the project's transition into a mature infrastructure layer.
 
-**Why it matters:** Provides a practical methodology for evaluating agent abstention behaviors and failure modes under noisy or adversarial retrieval conditions.
+**Why it matters:** If your agent harnesses or local inference stacks depend directly on llama.cpp or ggml bindings, you finally get predictable semver boundaries and stable interfaces.
 
-[huggingface.co](https://huggingface.co/papers/2607.13920) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/blog/ggml-org/llama-cpp-v1) · via Hugging Face Blog
 
-## 3. MixUA scopes multi-agent memory sharing to prevent cross-user leakage
+## 3. ACE-RL trains models to leave useful notes for their future self
 
-A new paper introduces MixUA, a multi-granularity memory architecture that distills agent interaction trajectories into lessons scoped specifically to user-agent, user, agent, or global levels. To evaluate performance and privacy guarantees, the authors created CrossLearnBench, testing seven agents across five users with embedded privacy probes. MixUA improved task pass rates by up to 16 percentage points over memoryless baselines and 5 points over monolithic global memory models. Crucially, privacy probes detected planted sensitive facts leaking into unauthorized scopes in only 0.02% of evaluations.
+Standard reinforcement learning for agents discards valuable trajectory information by collapsing rich execution logs and tool failures into a single scalar reward. The ACE-RL framework fixes the Agentic Context Engineering harness and trains a single model across three roles: actor, reflector, and playbook curator. Playbook edits are evaluated and rewarded directly by whether they improve the success rate of subsequent rollouts on the same task. Across agent benchmarks, co-optimizing the handoff artifact beats standard GRPO and PPO, retaining performance advantages across up to eight sequential attempts.
 
-**Why it matters:** Offers a explicit architectural solution for sharing domain learning across heterogeneous agents without exposing private user data.
+**Why it matters:** Moving beyond purely prompt-engineered memory files toward learned, credit-assigned context handoffs is crucial for reliable multi-step agent execution.
 
-[huggingface.co](https://huggingface.co/papers/2611.10439) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2611.16409) · via HF Daily Papers
 
-## 4. Dynamic routing on Amazon Bedrock balances coding agent task cost and completion
+## 4. Agent-R² synthesizes real-world messy files to train a 4B worker
 
-AWS published a implementation blueprint using LiteLLM and NVIDIA NeMo Switchyard to dynamically route coding agent tool calls on Amazon Bedrock. Rather than evaluating cost per raw token, the architecture evaluates model routing based on cost per solved task across complete multi-turn executions. The system uses Switchyard's Stage routing plugin to inspect tool history and determine whether to send requests to heavy models like Claude Opus 5.5 or lower-cost targets like NVIDIA Nemotron 3 Super 120B. The deployment runs LiteLLM inside an AWS ECS Fargate container behind VPC private subnets and Application Load Balancer path filters.
+Evaluating and training agents on synthetic, clean deliverables often breeds shortcut behavior where models hallucinate completion without touching tools. Agent-R² counters this by distilling 4,000 task instances from 10,000 web candidates, pairing real occupational seeds with multi-format attachments and 15.3 fine-grained rubrics per task on average. Using supervised fine-tuning and rubric-based reinforcement learning, the resulting 4B model scored 51.0% on GDPval and 14.8% on OfficeQA, surpassing the much larger Qwen3-235B baseline. The study notes that real-world file environments forced over 2.5 times more tool interactions than synthetic files.
 
-**Why it matters:** Highlights cost-optimization techniques for multi-turn agent harnesses where per-call routing choices impact total execution success.
+**Why it matters:** It demonstrates that deliverable-level rubric training and unvarnished document inputs can let a compact 4B model outperform massive models on multi-step productivity tasks.
 
-[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/route-coding-agent-requests-to-the-right-model-on-amazon-bedrock-with-nvidia-nemo-switchyard/) · via AWS Machine Learning
+[huggingface.co](https://huggingface.co/papers/2611.08219) · via HF Daily Papers
 
-## 5. Natera shares architectural details on SWARM multi-agent lab automation
+## 5. Bedrock AgentCore V2 uses microVM snapshots to tame cold starts
 
-Natera detailed the architectural design of SWARM, a multi-agent system built on Amazon Bedrock AgentCore for diagnostic support across lab instrument support tickets. The architecture splits responsibilities between an autonomous background agent that pre-processes incoming Jira tickets and an interactive chat agent for live engineer troubleshooting. Both agents share a unified skill library, access manuals and ticket context via private AWS VPC endpoints, and operate without long-lived credentials by using OpenID Connect and AWS STS for temporary IAM token generation. The production system achieved 96.2 percent automated ticket coverage while accelerating initial response times.
+AWS detailed the architecture of its Bedrock AgentCore runtime platformVersion V2, which aims to shrink interactive agent cold starts down to around two seconds. Instead of pulling container images on every session invocation, the platform initializes the environment once, clears the operating system file cache, freezes the microVM, and restores memory snapshots on demand. Crucially, in-memory objects, imported libraries, and pre-resolved clients resume instantly, whereas file reads from the image are pulled lazily. The post also outlines build hooks for pre-warming external binaries like browser processes or CLIs before snapshot creation.
 
-**Why it matters:** A concrete production case study detailing split background/interactive execution models, shared skill libraries, and security controls for agent deployments.
+**Why it matters:** Understanding memory-snapshot restoration mechanics is essential when architecting low-latency serverless harnesses for tool-heavy and sub-agent-heavy workloads.
 
-[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/how-natera-designed-an-agentic-ai-system-for-lab-ops-with-amazon-bedrock-agentcore/) · via AWS Machine Learning
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/architecture-patterns-for-fast-session-startup-on-amazon-bedrock-agentcore-runtime/) · via AWS Machine Learning
 
-## 6. XYBench measures whether models catch flawed user assumptions before acting
+## 6. Hybrid Decision Models explore zero-or-T test-time compute
 
-Researchers from CMU, NVIDIA, and Johns Hopkins introduced XYBench, an 8,115-question benchmark that tests whether LLMs can identify when a user's prompt is based on a mistaken assumption. Built from Stack Overflow, Stack Exchange, and WikiHow, the benchmark evaluates model responses for pragmatic solution inclusion, emphasis, and misconception identification using Claude Sonnet 4.5 as an automated judge. Experiments evaluating frontier and open models—including GPT-5, Sonnet 4.6, Gemini 3.1 Pro, DeepSeek-V4 Pro, and Qwen3.5-9B—showed that all models overwhelmingly focused on answering the literal, flawed request rather than correcting the underlying issue. On Stack Overflow queries, models prioritized the user's actual goal in only 35 to 41 percent of responses.
+Rather than trimming token generation length, the Hybrid Decision Model (HDM) implements zero-or-T thinking, deciding whether to emit an immediate answer in a single forward pass or pay for an autoregressive reasoning chain. A lightweight routing block estimates the expected utility of slow thinking using Calibrated Decision Policy Optimization, triggering reasoning only when expected gains exceed a per-request price threshold. On JevBench, HDM-4B matched baseline accuracy while dropping median latency from 0.652 to 0.179 seconds, and cut token costs by 80.1% on MiniWoB. Analysis revealed that while routing largely preserves accuracy, the router still wastes tokens by occasionally routing unsolvable problems into slow thinking.
 
-**Why it matters:** Measures critical LLM-as-judge accuracy and intent-disambiguation failures when agents blindly execute user prompts with bad premises.
+**Why it matters:** Configurable per-request reasoning thresholds on a single frozen backbone offer a practical mechanism for balancing cost and latency inside agent loops.
 
-[huggingface.co](https://huggingface.co/blog/allenai/xybench) · via Hugging Face Blog
+[huggingface.co](https://huggingface.co/papers/2611.16961) · via HF Daily Papers
 
-## 7. IBM introduces LLMON preview models to harden structured context and tool calls
+## 7. JustRUA shows a stripped-down harness beats complex agent designs
 
-IBM released experimental preview versions of Granite 4.1 (3B and 8B) fine-tuned for LLMON, a lightweight markup language designed to communicate explicit structure to causal LLMs. Unlike standard JSON, LLMON replaces literal character brackets with reserved special tokens as delimiters and explicitly binds instructions to specific data payloads using unique two-character block IDs. This structural separation prevents unreferenced context turns or tool outputs from altering execution boundaries. In benchmark evaluations, this structural binding reduced indirect prompt injection success rates to near zero while preserving general model capabilities.
+A controlled ablation study on RoboDojo examined which components actually drive benchmark improvements in robot-use agents powered by GPT-6 Astra. The authors found that many complex layers in recent agent frameworks—such as demonstration reuse and self-improvement loops—provided inconsistent value. Instead, a simplified harness called JustRUA raised scores from 29.7 to 50.3 solely by retaining full episode history, stopping motions early, and incorporating scene geometry (even when depth was estimated strictly from RGB).
 
-**Why it matters:** Presents a novel token-level context encoding strategy that mitigates indirect prompt injection and structural parsing failures in smaller models.
+**Why it matters:** It serves as a clean reminder for eval practitioners that harness hygiene and bounded execution often matter more than stacking intricate scaffolding.
 
-[huggingface.co](https://huggingface.co/blog/ibm-granite/llmon-an-llm-native-markup-language-now-in-granite) · via Hugging Face Blog
+[huggingface.co](https://huggingface.co/papers/2611.16009) · via HF Daily Papers
 
-## 8. Unsloth updates Qwen3.8-27B GGUFs with Dynamic V3.1 quantization
+## 8. Mapping the residual stream reveals conversation manifolds
 
-Unsloth has released updated dynamic v3.1 quantizations for Qwen3.8-27B, improving local inference accuracy across GGUF formats. The new quantization algorithm delivers a reported 5 to 10 percent accuracy boost at equivalent file sizes across agentic and coding benchmarks including Terminal Bench 2.1, DeepSWE v1.1, and LiveCodeBench v6. The underlying 27B dense model supports a native 256K context window, vision inputs, multi-token prediction (MTP), and reasoning depth toggles. At 4-bit quantization, the model fits within 16 to 19 GB of VRAM for local execution via llama.cpp or Unsloth Desktop.
+An interpretability experiment mapped thousands of conversations inside Qwen3-1.7B's 2,048-dimensional residual stream to visualize how multi-turn interactions cluster in latent space. When projected across global PCA axes, English question-and-answer exchanges across 100 topics collapsed into a remarkably flat sheet, with 99.3% of token variance contained within a single 3D plane. Introducing German and Croatian conversations mapped into neighboring, overlapping spaces, whereas Chinese conversations occupied a noticeably offset region. The results emphasize that residual geometry reflects a joint entanglement of topic, writing system, tokenization characteristics, and syntax rather than isolated semantic meaning.
 
-**Why it matters:** Provides updated benchmarks and resource requirements for running a top-tier open-weight agentic coding model locally.
+**Why it matters:** Provides intuitive geometric insight into how internal model representations organize conversation context and multilingual state transitions across turns.
 
-[unsloth.ai](https://unsloth.ai/docs/models/qwen3.8) · [discussion](https://news.ycombinator.com/item?id=50491980) · via Hacker News (AI)
+[operator0x.com](https://operator0x.com/field-notes/qwen-conversation-state-space/) · [discussion](https://news.ycombinator.com/item?id=50481321) · via Hacker News front page
 
 ## Quick hits
 
-- A security vulnerability in Lovable applications exposed over 200,000 private messages and passport details. ([crissyfield.de](https://www.crissyfield.de/research/lovable-en/))
-- A open-source project implemented DeepSeek V3 architecture in roughly 200 lines of pure JAX code. ([github.com](https://github.com/Vaibhaav-Tiwari/deepseek-v3-jax))
-- A two-person engineering team integrated SGLang with IBM Spyre hardware in under a week using AI coding assistants to write the 1,500-line plugin. ([pytorch.org](https://pytorch.org/blog/integrating-sglang-into-spyre-in-under-a-week-with-ai/))
-- A study on vision-language models demonstrated that teacher models can transmit subliminal stylistic preferences to student VLMs through unrelated multimodal training data. ([huggingface.co](https://huggingface.co/papers/2611.08538))
-- Hugging Face Transformers release v5.23.0 adds native model support for Thinking Machines Lab's Inkling 2 Small. ([github.com](https://github.com/huggingface/transformers/releases/tag/v5.23.0))
+- vLLM cut release candidate v0.34.0rc4, adding speculative decoding warmup fixes to its test runner. ([github.com](https://github.com/vllm-project/vllm/releases/tag/v0.34.0rc4))
+- LangChain Core 1.8.1 adds a per-context gateway override for LangSmith along with minor dependency bumps. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.1))
+- llama.cpp build b12425 adds support for reading output head sizes directly from tensors to accommodate Qwen3-ForcedAligner. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12425))
+- A new architectural explainer dissects modern positional embedding methods and token indexing across LLMs. ([magazine.sebastianraschka.com](https://magazine.sebastianraschka.com/p/understanding-positional-embeddings))
+- Edge0-145B surfaces as a new candidate for running frontier-scale weights locally on workstation hardware. ([edge0.ai](https://edge0.ai/blog/introducing-edge0-145b-frontier-ai-capabilities-on-your-own-computer))
 
-Happy building, Guan.
+Keep your harnesses lean and your bootloaders unlocked.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 124 candidates, 124 reviewed, gemini/gemini-3.8-flash, 732s, 3 model calls, $0.1539.</sub>
+<sub>35 of 35 sources read. 114 candidates, 114 reviewed, gemini/gemini-3.8-flash, 455s, 3 model calls, $0.0548.</sub>

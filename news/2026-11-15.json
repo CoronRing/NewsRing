@@ -1,0 +1,630 @@
+{
+  "date": "2026-11-15",
+  "generated_at": "2026-11-15T21:38:15.086484Z",
+  "title": "Harness Diet, Stable llama.cpp, and Training the Artifact",
+  "intro": "Today's mix is refreshingly heavy on execution and systems. Between llama.cpp finally declaring semver stability and studies showing that leaner scaffolds beat bespoke agent tricks, there is plenty here for anyone building harnesses and serving models.",
+  "stories": [
+    {
+      "headline": "Why agents will naturally prefer hackable hardware",
+      "summary": "Hardware hacking is shifting from niche forums to automated agent behavior, spurred by devices like the $70 M-VAVE FM-1 synthesizer whose firmware was replaced by AI-assisted owners within weeks. The thesis argues that as users delegate device troubleshooting to autonomous agents, those agents will systematically select and favor hardware that allows firmware replacement and provides open access or unbricking tools. Because agents cannot disassemble a case to fix a bricked board, vendors that expose browser emulators, open code, and recoverable flashing will outcompete locked ecosystems in commodity categories. The primary roadblock remains vendor pushback under the guise of security, such as locked bootloaders and mandatory authorization servers.",
+      "why_it_matters": "When agents act as purchasing and maintenance delegates, device openness and tool-level recovery paths become functional requirements rather than hobbyist preferences.",
+      "reason": "Examines security vulnerabilities and failure modes where autonomous tool-calling agents systematically choose insecure or malicious pathways during execution.",
+      "item": {
+        "key": "geoffstearns.com/blog/your-agent-will-pick-the-hackable-one",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Your Agent Will Pick the Hackable One",
+        "url": "https://geoffstearns.com/blog/your-agent-will-pick-the-hackable-one/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50510799",
+        "published": "2026-11-15T21:10:39Z",
+        "summary": "Comments",
+        "content": "Your Agent Will Pick the Hackable One\nThe M-VAVE FM-1 is a pocket FM synthesizer that sells for about $70, and almost nobody who owns one still runs the firmware it shipped with. Owners started writing their own in September. By October there were too many to cover in one article: a virtual analog synth, a multitrack groovebox, a dark ambient sampler, and a port of Doom. Yes, the video game. Going by what the developers post on the forums, nearly all of them were written with AI coding tools.\nVideo: Custom Firmware Tierlist by AudioPilz, ranking FM-1 firmwares.\nThen M-Vave did something uncommon for a hardware company. In October it published its own firmware as open source under GPLv3, along with a development kit and a browser emulator for testing custom builds before you flash them.\nI think this is where most consumer gadgets that run their own firmware are headed: synths, TVs, routers, printers. When software is cheap to write, the firmware a device ships with is just the first version. Devices that let owners replace it will sell better than devices that don’t. Most buyers won’t care about that. Their AI agents will, and more buying decisions are going to run through agents.\nOwners already replace the software\nWhen a device doesn’t do what its owner wants, most people put up with it. Some replace the software, and in a few categories that’s already normal.\nCheap retro handhelds from Anbernic and others ship with firmware that buyers usually replace within days, and muOS and Knulli are the standard recommendations. Pebble came back as a fully open project. Core Devices published the OS, the phone apps, and the hardware schematics, and the phone app can install from app stores anyone can run. I replaced the home screen on our Google TV, which runs Android, with a custom launcher built for our family, with no ads and no tracking. Ubiquiti owners hook their network controllers up to AI agents through community-built servers and have the agent audit firewall rules and tune the network. That isn’t new firmware, but the agent is already running the device.\nWriting firmware got cheap\nWriting firmware used to mean reverse engineering the chip, learning a vendor’s toolchain, and weeks of trial and error. The FM-1 runs on a JieLi chip with little public documentation, and owners still had working firmware within weeks.\nAI made each part of that cheaper. It can read undocumented code, write new code for an unfamiliar chip, and build the editors, installers, and emulators around it. A motivated owner can now get through all of it in a weekend. Once that’s true, any device with writable flash is a platform, whether the maker planned for it or not.\nAgents will do the installing\nMost people don’t think about improving their devices. They use what they get. So right now custom firmware reaches a small group: a few people write it, and a somewhat larger group finds it and installs it.\nI don’t expect that to last. As agents take on more everyday work, the owner stops being the one who installs things. You ask your agent to fix something that bugs you about a device. It tries a setting first. If that doesn’t work, it looks for firmware someone else wrote, forks the closest match, or writes its own. You see that the problem went away, and you may never know the device is running custom code.\nHow fast this happens depends more on the hardware than on AI. The device has to accept new firmware, and signed firmware and locked bootloaders stop that. The agent needs a way in, like USB or a browser tool such as M-Vave’s Workbench. And a bad install has to be recoverable, since an agent can’t open the case and fix a bricked board. M-Vave added a tool that puts the stock firmware back in about ten seconds.\nYour agent will pick the hackable one\nThis changes how people buy hardware. Ask your agent which TV, router, or synth to get, and it will lean toward the one it can change, because that’s the one it can fix later. The buyer never has to think about openness for it to matter.\nThat pressure is what gets makers to open up, and it works fastest in categories where people compare options every time they buy: synths, TVs, printers, routers. Music gear is already moving. M-Vave opened its firmware within weeks of owners starting, and within two weeks after that Behringer published firmware source for its upcoming KICK sampler and IGNITE sequencer. Its parent company said it will open selected designs so owners can use AI to write their own firmware, and Akai and Erica Synths announced the same for some of their gear.\nIt will be slowest where switching is hard. People don’t shop for a new phone platform every year, because their messages, photos, and family accounts keep them on the iPhone. But Apple still sells to new buyers and to people replacing old phones, and more of those decisions will go through an agent. I expect Apple and other makers whose customers rarely leave to answer with deep, approved agent access to the OS, and to keep the firmware closed.\nWhere closed companies push back\nAn open device is only useful if it works with everything else the owner has: their phone, their accounts, their cloud services. Pebble needed a working iPhone app before anyone would buy the watch. Home Assistant is useful because it connects to devices from companies that never planned for it. That’s where closed companies keep control, since they decide who can connect. Chamberlain cut Home Assistant off from its MyQ garage door openers in 2023.\nThe reason closed companies usually give is security. Bambu Lab added server authorization to its printers’ firmware as a security update. Owners read it as lock-in, and some well-known customers said they would stop buying. Google now requires app developers to verify their identity before their apps can be installed on certified Android devices, a rule in effect in four countries since September 30 and planned worldwide for 2027. Google’s stated reason is malware, and cheap code…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "llama.cpp reaches v1.0.0 with strict API and ABI stability",
+      "summary": "Three and a half years after its first commit, llama.cpp has officially tagged release v1.0.0 alongside ggml. The project is formalizing semantic versioning, pledging to bump major versions whenever API or ABI breaking changes occur across its core libraries. The runtime now supports over 150 architecture variants and mainstream speculative decoding techniques, backed by cross-platform CI runners across major silicon vendors. For downstream developers tired of git submodules breaking silently on pulling upstream, this marks the project's transition into a mature infrastructure layer.",
+      "why_it_matters": "If your agent harnesses or local inference stacks depend directly on llama.cpp or ggml bindings, you finally get predictable semver boundaries and stable interfaces.",
+      "reason": "Marks the landmark v1.0.0 milestone release of llama.cpp, solidifying its local serving architecture and core engine interfaces.",
+      "item": {
+        "key": "huggingface.co/blog/ggml-org/llama-cpp-v1",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "llama.cpp v1.0.0 : A stronger foundation for the local AI ecosystem",
+        "url": "https://huggingface.co/blog/ggml-org/llama-cpp-v1",
+        "discussion_url": null,
+        "published": "2026-11-13T14:05:22Z",
+        "summary": "",
+        "content": "llama.cpp v1.0.0 : A stronger foundation for the local AI ecosystem\nllama.cpp makes it possible to run multi-modal LLMs across a wide range of hardware - from consumer-grade local machines to high-end enterprise servers. Through quantization, optimized backends, and a portable C/C++ implementation, we make AI inference accessible at every level of the software stack. We believe this is the most lightweight, versatile and sensible platform for building cross-platform and private AI products.\nDuring the 3.5 years since its inception, the project has grown a lot and many downstream applications already depend on our work. We expect this trend to continue as local AI and privacy become increasingly important in our everyday lives. Every new integration means more developers depending on our library interfaces and therefore having a flexible but stable API is paramount.\nToday we release libraries v1.0.0, highlighting our responsibility to those developers. Moving forward, both llama.cpp and ggml will reflect API and ABI incompatibilities with major-version bumps. As adoption grows, we will be stricter about making those boundaries visible to downstream consumers.\nReleases\nSemantic version update rules\nThe following rules apply to all ggml-org projects using semantic versioning:\nDistribution\nWe are looking forward to expanding the ways in which ggml-org software is distributed and reaches developers and end-users. For more information about how to add ggml-org projects to your packaging and release pipelines, please check the following discussion.\nDevelopment\nThe project has fostered an amazing open-source community with highly-skilled and talented contributors. With the rapid advance of AI capabilities in the field of software engineering, we continue to adapt and integrate LLMs in our developement cycle in a thoughtful and resonable manner. Maintaining a high quality codebase, staying in control of the architecture and understanding the implementation details will remain our top priorities.\nTo reinforce the faster pace of development we continue to invest more and more resources in improving the CI infrastructure behind the projects. Thanks to HF technologies such as HF Buckets and HF Jobs we are able to scale the capacity necessary to guarantee correctness for every change that lands on the master branches. With hardware support from NVIDIA, AMD, Qualcomm, Arm, IBM and Intel, we continue to enroll more self-hosted runners across all major hardware platforms.\nBackend and model coverage\nThe underlying machine learning engine of llama.cpp - ggml is designed to run on virtually any hardware in existence. This is achieved by implementing dedicated ggml backends. Each backend can be compiled as a dynamic library and optionally loaded at runtime.\nA complete list of the currently implemented backends can be found here.\nWe are committed to provide continuous support of all model architectures. Currently, llama.cpp supports more than 150 architecture variants as well as all mainstream speculative decoding methods.\nThanks\nThe llama.cpp team at Hugging Face is thankful for the incredible support from the community. Special thanks to the long-time maintainers of the project and all contributors. This is a significant milestone which would not have been possible without our joint efforts!\nAdditional resources\n- llama.cpp examples\n- ggml-org at Hugging Face\n- ggml-org at Github\n- Check out Llama desktop apps for MacOS and Windows, shipped with love by the team behind llama.cpp and Hugging Face.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "ACE-RL trains models to leave useful notes for their future self",
+      "summary": "Standard reinforcement learning for agents discards valuable trajectory information by collapsing rich execution logs and tool failures into a single scalar reward. The ACE-RL framework fixes the Agentic Context Engineering harness and trains a single model across three roles: actor, reflector, and playbook curator. Playbook edits are evaluated and rewarded directly by whether they improve the success rate of subsequent rollouts on the same task. Across agent benchmarks, co-optimizing the handoff artifact beats standard GRPO and PPO, retaining performance advantages across up to eight sequential attempts.",
+      "why_it_matters": "Moving beyond purely prompt-engineered memory files toward learned, credit-assigned context handoffs is crucial for reliable multi-step agent execution.",
+      "reason": "Proposes an agent RL framework that preserves rich environment execution traces and error logs across iterations rather than collapsing outcomes into scalar rewards.",
+      "item": {
+        "key": "arxiv:2611.16409",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Experience-Handoff Reinforcement Learning for Recursive Self-Improvement",
+        "url": "https://huggingface.co/papers/2611.16409",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "It is common to train Large Language Models (LLMs) for agentic tasks with Reinforcement Learning (RL) from scalar rewards. However, this throws away the fine-grained information about the environment that the agent experienced during the trial (e.g., error logs). To utilize this rich information, recent works wrap the agent in a harness that refines its own inputs through reflection or compaction and hands past experience to future rollouts, but the construction of the handed-off artifacts (e.g., a playbook) is itself not learned. We want the best of both worlds: gradient updates from a scalar reward, while also utilizing environment information to hand off experience. As a concrete testbed, we fix the Agentic Context Engineering () harness and train one model to act, reflect, and curate task-local playbooks. Our method, , evaluates candidate experience-handoff artifacts by their downstream effect on future actor rollouts, and co-optimizes the role-specific behaviors (action generator, insight reflector, and playbook curator) under a fixed scaffold. Across agentic benchmarks,  achieves higher held-out performance than baseline methods. The results suggest that agent training…",
+        "content": "Experience-Handoff Reinforcement Learning for Recursive Self-Improvement\nAbstract\nLanguage-model agents trained with reinforcement learning can improve by learning to create and curate experience artifacts that help future rollouts, not just by optimizing actions from scalar rewards.\nIt is common to train Large Language Models (LLMs) for agentic tasks with Reinforcement Learning (RL) from scalar rewards. However, this throws away the fine-grained information about the environment that the agent experienced during the trial (e.g., error logs). To utilize this rich information, recent works wrap the agent in a harness that refines its own inputs through reflection or compaction and hands past experience to future rollouts, but the construction of the handed-off artifacts (e.g., a playbook) is itself not learned. We want the best of both worlds: gradient updates from a scalar reward, while also utilizing environment information to hand off experience. As a concrete testbed, we fix the Agentic Context Engineering () harness and train one model to act, reflect, and curate task-local playbooks. Our method, , evaluates candidate experience-handoff artifacts by their downstream effect on future actor rollouts, and co-optimizes the role-specific behaviors (action generator, insight reflector, and playbook curator) under a fixed scaffold. Across agentic benchmarks, achieves higher held-out performance than baseline methods. The results suggest that agent training should optimize not only the actions in the current rollout, but also the model-written experience that future rollouts inherit.\nCommunity\nWhy not train an agent's weights inside the harness it runs in?\nReinforcement learning (RL) is the standard way to train LLM agents, and it boils a whole attempt down to one reward number. Everything the agent saw along the way is thrown out: error logs, tool outputs, constraints it discovered.\nHarnesses like ACE (Agentic Context Engineering) keep that information. The model reflects on each attempt and writes notes in a playbook, which its next attempt reads. But the model was never trained to write those notes, so a small model gains little from its own edits.\nIn our new paper, Experience-Handoff Reinforcement Learning for Recursive Self-Improvement, we combine the two. We keep the ACE harness fixed and train one model in three roles: the actor that does the task, the reflector that draws lessons from an attempt, and the curator that edits the playbook.\nOur method, ACE-RL, scores each playbook edit by running the next attempt with it and checking the task reward. Each role is compared only against other outputs of the same role, which keeps its learning signal stable. We credit each rollout's contribution to the final task reward to get reward group for each component.\n- We found that ACE-RL reaches the highest held-out reward of all methods we tested: PPO, GRPO, ERL, and end-to-end PPO through the harness.\n- The gains last even after the cutoff that we give during the train. We trained with 3 attempts per task, and ACE-RL stays ahead of GRPO up to 8 attempts.\n- Training only the actor isn't enough. A GRPO-trained model placed in the same harness after 8 attempts ends up below where it gets by simply sampling 8 times.\nOur takeaway: agent training should improve the agent's actions, and also the notes it leaves for its future attempts.\nTraining one model to act, reflect and write the playbook, so the handed-off notes are judged by how much they help the next attempt, is a lovely idea. Error logs usually get thrown away. Did the learned playbooks end up looking different from hand-written ones?\nThank you for sharing your work. ACE-RL trains acting, reflection, and curation by measuring how model-written playbooks help later rollouts. Its held-out benchmark gains support optimizing both the current action and the experience passed to future attempts.\nWe discuss your work in Section 8.5 (“Active coaching and physical recursive self-improvement”), p. 81 of the updated manuscript of our survey, In-Context Learning for Robots: Methods and Applications. We connect learning to write useful playbooks with the robot self-improvement agenda, where both retained guidance and the process that produces it can be evaluated through subsequent decisions. Read the updated discussion.\nIf you find our discussion of retained experience and robot self-improvement useful for your own work, we would be grateful if you would consider citing the survey.\nI keep a per-agent CLAUDE.md and a failure log — retry rules, tool quirks, the error strings that actually mean \"rate limited\". Hand-curating that is tedious, but it has one property I lean on: when an API shifts I can read the file and spot what's now a lie. A learned playbook drops that affordance, and the failure is quiet — nothing crashes, the agent just keeps confidently applying a retry rule for an error code that died two releases ago.\nWhat I'd want measured: train, then rename a tool and reword an error string, and count how many rollouts the handed-off artifact burns before it stops helping and starts steering. I'd expect a crossover somewhere in there, and I'd want it plotted rather than asserted.\nCredit assignment bites too — when a playbook entry pays off three rollouts later, does the scalar reward actually reach back that far, or does the policy just learn to write notes that look useful and never get read? My hand-written version fails in both of those ways, so I'd bet the learned one fails louder.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nModels citing this paper 0\nNo model linking…",
+        "score": 5.0,
+        "comments": 5,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Agent-R² synthesizes real-world messy files to train a 4B worker",
+      "summary": "Evaluating and training agents on synthetic, clean deliverables often breeds shortcut behavior where models hallucinate completion without touching tools. Agent-R² counters this by distilling 4,000 task instances from 10,000 web candidates, pairing real occupational seeds with multi-format attachments and 15.3 fine-grained rubrics per task on average. Using supervised fine-tuning and rubric-based reinforcement learning, the resulting 4B model scored 51.0% on GDPval and 14.8% on OfficeQA, surpassing the much larger Qwen3-235B baseline. The study notes that real-world file environments forced over 2.5 times more tool interactions than synthetic files.",
+      "why_it_matters": "It demonstrates that deliverable-level rubric training and unvarnished document inputs can let a compact 4B model outperform massive models on multi-step productivity tasks.",
+      "reason": "Addresses long-horizon agent execution limits by synthesizing realistic, multi-step productivity workflows for training and evaluation.",
+      "item": {
+        "key": "arxiv:2611.08219",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Agent-R^2: Scaling Agents for Realistic Productivity Work via Real-Source Data Synthesis",
+        "url": "https://huggingface.co/papers/2611.08219",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "Large language models have made rapid progress in agentic reasoning and tool use, raising expectations for agents that can take over realistic productivity work from humans. However, current agents still struggle to finish such tasks, where success requires following long-horizon professional workflows, understanding heterogeneous file contexts, and producing usable deliverables under fine-grained requirements. A key bottleneck is the lack of scalable post-training data that reflects real work intent, authentic file environments, and deliverable-level evaluation. To close this gap, we introduce Agent-R^2, a real-source data synthesis framework that scales training data for realistic productivity work. Instead of relying on manually specified workflows or LLM-generated files, Agent-R^2 grounds synthesis throughout the pipeline in real occupational seeds, corpus-derived workflow evidence, and authentic web-sourced files. From 10k web-corpus candidates, Agent-R^2 distills 4k task instances that pair real multi-format attachments with fine-grained, deliverable-level rubrics. On this data, we train Agent-R^2-4B via supervised fine-tuning and rubric-based reinforcement learning…",
+        "content": "Agent-R^2: Scaling Agents for Realistic Productivity Work via Real-Source Data Synthesis\nAbstract\nA real-source data synthesis framework trains a 4B agent on 4k task instances with supervised fine-tuning and rubric-based reinforcement learning, improving realistic productivity work and file-grounded reasoning over larger models.\nLarge language models have made rapid progress in agentic reasoning and tool use, raising expectations for agents that can take over realistic productivity work from humans. However, current agents still struggle to finish such tasks, where success requires following long-horizon professional workflows, understanding heterogeneous file contexts, and producing usable deliverables under fine-grained requirements. A key bottleneck is the lack of scalable post-training data that reflects real work intent, authentic file environments, and deliverable-level evaluation. To close this gap, we introduce Agent-R^2, a real-source data synthesis framework that scales training data for realistic productivity work. Instead of relying on manually specified workflows or LLM-generated files, Agent-R^2 grounds synthesis throughout the pipeline in real occupational seeds, corpus-derived workflow evidence, and authentic web-sourced files. From 10k web-corpus candidates, Agent-R^2 distills 4k task instances that pair real multi-format attachments with fine-grained, deliverable-level rubrics. On this data, we train Agent-R^2-4B via supervised fine-tuning and rubric-based reinforcement learning, improving both end-to-end productivity performance and file-grounded reasoning. Trained on only 4k instances, Agent-R^2-4B surpasses Qwen3-235B-A22B-Thinking-2507 on both GDPval (51.0% vs. 48.0%) and OfficeQA (14.8% vs. 13.8%). Further analysis shows that Agent-R^2 mitigates shortcut behavior, where agents produce superficially plausible deliverables before sufficiently grounding, constructing, or verifying them, while promoting sustained exploration.\nCommunity\nReal productivity work means turning heterogeneous files (annual reports, spreadsheets, PDFs) into deliverables with the right format and evidence. LLM agents still struggle here: workflows are long, files are messy, and success criteria are fine-grained. A key bottleneck is the lack of scalable training data that captures real work intent, real file environments, and deliverable-level evaluation.\n💡 We propose Agent-R², a real-source data synthesis framework for cowork agents. Starting from occupational activity seeds, it extracts file-oriented workflows from web corpora, retrieves and verifies real public attachments, then synthesizes instructions, fine-grained rubrics, and reference deliverables in a sandbox.\n🛠 Data\n- 4k task instances distilled from 10k web candidates\n- Avg. 2.51 real multi-format attachments and 15.3 deliverable-level rubrics per task\n- Expert trajectories: avg. 18.0 steps, 41.8k tokens\n- Rubric-based verification: unreasonable rubrics are revised, and unmet ones trigger one more round of expert revision\n⚡ Results (Qwen3-4B-Thinking-2507 → SFT + rubric-based RL → Agent-R²-4B)\n- GDPval: 51.0% Pass@1, surpassing Qwen3-235B-A22B-Thinking-2507 (48.0%), +18.6 over the 4B base\n- OfficeQA: 2.2% → 14.8% Pass@1, also above Qwen3-235B (13.8%)\n- Less shortcut behavior: completion rate reaches 90.9%, with more effective tool steps\n- Ablations: real files beat synthetic ones (43.3 vs. 41.4), with 2.54× more expert tool calls (20.4 vs. 8.0); removing the rubric reward drops RL from 51.0 to 49.5\n💻 Code: https://github.com/ZJU-REAL/Agent-R2\n🤗 Model: https://huggingface.co/teng-pan/Agent-R2-4B\nGrounding the synthetic data in real occupational seeds and real file environments, instead of LLM-made files, sounds like the right fix for agents that stumble on actual work. Which kind of deliverable improved the most after training on it?\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGrounding the tasks in real files and real job workflows is the part I'd point to. In construction, the hard part of a takeoff is the messy drawing set, not the arithmetic, and made-up files don't have that mess. Grading on the finished deliverable instead of the steps is how a real job gets judged too. That's the standard we want at ML Systems.\nGet this paper in your agent:\nhf papers read 2611.08219 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 7.0,
+        "comments": 4,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Bedrock AgentCore V2 uses microVM snapshots to tame cold starts",
+      "summary": "AWS detailed the architecture of its Bedrock AgentCore runtime platformVersion V2, which aims to shrink interactive agent cold starts down to around two seconds. Instead of pulling container images on every session invocation, the platform initializes the environment once, clears the operating system file cache, freezes the microVM, and restores memory snapshots on demand. Crucially, in-memory objects, imported libraries, and pre-resolved clients resume instantly, whereas file reads from the image are pulled lazily. The post also outlines build hooks for pre-warming external binaries like browser processes or CLIs before snapshot creation.",
+      "why_it_matters": "Understanding memory-snapshot restoration mechanics is essential when architecting low-latency serverless harnesses for tool-heavy and sub-agent-heavy workloads.",
+      "reason": "Details concrete architectural patterns for minimizing agent runtime cold starts and managing session state snapshots in production harnesses.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/architecture-patterns-for-fast-session-startup-on-amazon-bedrock-agentcore-runtime",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Architecture patterns for fast session startup on Amazon Bedrock AgentCore runtime",
+        "url": "https://aws.amazon.com/blogs/machine-learning/architecture-patterns-for-fast-session-startup-on-amazon-bedrock-agentcore-runtime/",
+        "discussion_url": null,
+        "published": "2026-11-13T22:02:39Z",
+        "summary": "Amazon Bedrock AgentCore runtime V2 snapshots your initialized environment and restores it for each new session, so session start no longer grows with image size. This post explains how V2 starts a session, how to measure session start time, and four patterns to keep work off the first request.",
+        "content": "Agents today review code, process claims, and run unattended for hours. Many also sit behind interactive experiences where a person waits for the first response. Amazon Bedrock AgentCore runtime gives these agents a fully managed, serverless environment: each session runs in its own isolated microVM, the platform scales to zero when there’s no work, and you only pay for the resources your sessions consume.\n\nAgentCore runtime with platformVersion set to “V2” changes how sessions start. Instead of initializing your container for every session, it prepares your environment once, snapshots it, and restores that snapshot for each new session. Session start times are faster and more consistent. V2 also reclaims memory your sessions don’t use, so your bill tracks what your agent uses.\n\nFor most agents, switching to V2 is all it takes. Some agents need restructuring to get the full benefit, and for chat and voice experiences even 2 seconds is too slow. This post explains how V2 starts a session, how to measure session start time, and how to keep work off the first request, including build hooks, which AgentCore runtime now supports. We cover four patterns, from changes to your agent’s code to starting sessions before users need them.\n\nWhich pattern do you need?\n\nYour situation\nWhat to do\nSection\n\nA new session in about 2 seconds is fine\nSwitch to V2 and do all initialization before app.run()\nKeep work off the first request\n\nYour agent needs large files, a CLI, or a browser early, and can’t hold them in its process\nAdd a build hook to load and prime them while the snapshot is built\nWorking with hooks\n\nYou need sub-second, and users engage before they send their first request (opening the app or a chat window)\nStart the session in the background when the user engages\nPre-warm on user engagement\n\nHow V2 starts a session\n\nAgentCore runtime runs each session in a new microVM. On V1, AgentCore pulls your container image from Amazon Elastic Container Registry (Amazon ECR), starts the container, and runs your initialization code before it can process the first request. The image pull dominates, so cold start grows with image size.\n\nV2 does that work once. When you create or update a runtime, AgentCore runtime starts your container in a fresh microVM and waits for the first healthy ping ( GET /ping ), which must arrive within 120 seconds. It then clears the operating system’s file cache, to keep the snapshot small, freezes the microVM, and stores its memory and disk as a snapshot.\n\nThis is a change from V1: Every create or update now takes a few minutes while the snapshot is built.\n\nIn this post, init means everything your agent does before /ping reports healthy. With the AgentCore Python SDK, that’s everything before app.run() . If you run your own HTTP server, in Node.js or another language, report healthy only after your initialization finishes.\n\nFigure 1: Build, once per create or update\n\nWhen a new session arrives, AgentCore restores the snapshot into a new microVM. Your process resumes exactly where it was frozen, with its imports, objects, and clients in place. Files from your image are loaded lazily: each block is fetched the first time a session reads it.\n\nFigure 2: Invoke, every new session\n\nThree facts follow from these flows, and the rest of this post builds on them:\n\nMemory comes back whole. Anything your process held at snapshot time, and anything in a RAM-backed file system such as /dev/shm , is available at memory speed from the first access.\n\nFile reads don’t carry over. The file cache is cleared before the freeze, so reading a file during init doesn’t make it fast in a restored session.\n\nImage files are fetched on first read. The first read of a block comes from snapshot storage and is then cached closer to the host.\n\nThe following table shows what that means for the work a typical agent does, depending on where it does it:\n\nWork\nDone during init\nDone in the handler\n\nImport libraries\nIn memory when the session starts\nRead from the image in every new session\n\nCreate clients (for example, boto3 )\nRestored with endpoint and credential resolution done. Sockets reconnect on first use\nBuilt from scratch in every new session\n\nOpen network connections\nStale after the restore. Close them before the snapshot\nOpened fresh\n\nLoad static data from the image and keep it in an object\nIn memory when the session starts\nRead from the image in every new session\n\nRead a file from the image without keeping the data\nNo effect, because the file cache is cleared\nRead from the image in every new session\n\nIf you know AWS Lambda SnapStart, this will feel familiar. Marc Brooker’s post on how SnapStart loads snapshots and the SnapStart priming strategies post are useful background.\n\nEverything in the table assumes your agent can keep what it needs in its own process. That isn’t always possible. A CLI that runs as a separate process and exits, or a browser binary, is read during init and then gone, so a restored session fetches it from the image again. For these cases, you can add a build hook, covered in “Working with hooks.” Figure 3 shows where it runs.\n\nFigure 3: Build and invoke with hooks\n\nMeasure before you optimize\n\nLatency in an agentic application isn’t one number. A request spends time in AgentCore runtime getting a session ready to run your code, then in your code: model calls, tool calls, sub-agents, and streaming the response back. You fix these in different ways, so start by finding out which one dominates.\n\nAgentCore runtime publishes both as Amazon CloudWatch metrics in the AWS/Bedrock-AgentCore namespace. Latency is the time to first byte. OverheadLatency is the part that belongs to the platform, such as starting the microVM and restoring the snapshot on a new session.\n\nWhat you want\nHow to get it\n\nTTFB (Time to first byte)\nLatency\n\nRuntime time\nOverheadLatency\n\nYour code’s time\nLatency − OverheadLatency\n\nInit time\nMeasured in your code at startup (see the following example). It isn’t part of any request on V2\n\nInit doesn’t appear in these metrics because on V2 it runs once, while the snapshot is built, and not in each session. It adds to how long a create or update takes to reach READY, not to request latency. To see how long it takes, log it once before app.run() . The line appears in your runtime’s build logs:\n\nimport time\nINIT_START = time.time() # first line of your module\n# imports, clients, data loading ...\nprint(f\"init_ms={round((time.time() - INIT_START) * 1000)}\")\napp.run()\n\nHow to read the split:\n\nHigh OverheadLatency on new sessions: the time is in session start. Use the patterns later in this post to start sessions before users need them.\n\nYour code’s time is much higher on the first request than on the second in the same session: work that belongs in init is running in your handler. Add custom spans in AgentCore Observability (a capability of Amazon Bedrock AgentCore) around tool setup, file loads, and late imports to find it, then move it into init.\n\nReport percentiles such as P90 and P99, or trimmed means such as TM90, which averages the fastest 90% of requests and drops the slowest tail. A plain average hides the slow requests. OverheadLatency covers requests to running sessions as well as new ones, so its distribution depends on how many of your requests start a new session. Compare runs with a similar mix.\n\nTest at the rate of new sessions you expect in production, not with a handful of sessions after a deploy.\n\nTo include network time from your client, measure on the client as well. Time the invoke call, have your handler return how long it ran, and subtract. Both timestamps come from the same machine, so clock differences between the client and the microVM don’t matter. If you stream, very small events can be held back until a few hundred bytes of output build up, so time to first event can read higher than session start.\n\nKeep work off the first request\n\nThe usual cold start advice is to import lazily and keep initialization small. On…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Hybrid Decision Models explore zero-or-T test-time compute",
+      "summary": "Rather than trimming token generation length, the Hybrid Decision Model (HDM) implements zero-or-T thinking, deciding whether to emit an immediate answer in a single forward pass or pay for an autoregressive reasoning chain. A lightweight routing block estimates the expected utility of slow thinking using Calibrated Decision Policy Optimization, triggering reasoning only when expected gains exceed a per-request price threshold. On JevBench, HDM-4B matched baseline accuracy while dropping median latency from 0.652 to 0.179 seconds, and cut token costs by 80.1% on MiniWoB. Analysis revealed that while routing largely preserves accuracy, the router still wastes tokens by occasionally routing unsolvable problems into slow thinking.",
+      "why_it_matters": "Configurable per-request reasoning thresholds on a single frozen backbone offer a practical mechanism for balancing cost and latency inside agent loops.",
+      "reason": "Studies adaptive test-time compute by training models on a zero-or-T reasoning switch to decide exactly when deliberative thinking is warranted.",
+      "item": {
+        "key": "arxiv:2611.16961",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "The Value of Thinking: Learning When to Reason in Hybrid Decision Models",
+        "url": "https://huggingface.co/papers/2611.16961",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "Existing adaptive-reasoning methods shorten the explicit reasoning a model writes, or skip it by switching modes; either way the answer is still written out token by token. Rather than deciding how much to think, we explore a different paradigm, zero-or-T thinking: a single model either answers from the implicit thinking inside one forward pass, generating no token, or performs full autoregressive reasoning at a cost of T tokens when that is worth paying. We realise it in a hybrid decision model (HDM), where one frozen backbone serves both modes and a lightweight self-routing block chooses between them. The block estimates the value of thinking, the utility the slow mode is expected to add over the fast one, from what that implicit thinking has already produced, and the slow mode runs only where that value exceeds a price λ set per request. Where no per-decision label exists, as in episodic agentic tasks, we introduce Calibrated Decision Policy Optimisation (CDPO), a reinforcement-learning recipe that trains the block from episode-level returns. We evaluate HDM on MMLU-Pro, AGIEval, GPQA-Diamond, JevBench, BANKING77 and MiniWoB. Specifically, on JevBench HDM-4B scores 0.857…",
+        "content": "The Value of Thinking: Learning When to Reason in Hybrid Decision Models\nAbstract\nA hybrid decision model routes between implicit single-forward-pass answering and full autoregressive reasoning via a self-routing block trained with calibrated decision policy optimization, reducing token and latency costs while preserving accuracy.\nExisting adaptive-reasoning methods shorten the explicit reasoning a model writes, or skip it by switching modes; either way the answer is still written out token by token. Rather than deciding how much to think, we explore a different paradigm, zero-or-T thinking: a single model either answers from the implicit thinking inside one forward pass, generating no token, or performs full autoregressive reasoning at a cost of T tokens when that is worth paying. We realise it in a hybrid decision model (HDM), where one frozen backbone serves both modes and a lightweight self-routing block chooses between them. The block estimates the value of thinking, the utility the slow mode is expected to add over the fast one, from what that implicit thinking has already produced, and the slow mode runs only where that value exceeds a price λ set per request. Where no per-decision label exists, as in episodic agentic tasks, we introduce Calibrated Decision Policy Optimisation (CDPO), a reinforcement-learning recipe that trains the block from episode-level returns. We evaluate HDM on MMLU-Pro, AGIEval, GPQA-Diamond, JevBench, BANKING77 and MiniWoB. Specifically, on JevBench HDM-4B scores 0.857 against Jev's 0.851 (+0.7%) at a median 0.179\\,s against 0.652 (-72.5%). On the agentic venue MiniWoB HDM-27B cuts token cost by 80.1%.\nCommunity\nHDM, a hybrid decision model: one that decides for itself whether an answer needs autoregressive generation at all, so a question costs either no token or a full reasoning pass.\nLetting the model answer from one forward pass and only paying for T tokens when the value of thinking exceeds a price is a clean way to frame it. Pricing it per request with lambda is the bit I like. How stable is the router when the price changes at test time without retraining?\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- ThinkJev: One Thought, Every Budget for Calibrated Typed Decisions (2026)\n- LEV: Thinking Fast and Deep with Looped Decision Models (2026)\n- What Can't Jev Decide? Probing the Limits of One-Pass Decision Models (2026)\n- SanSi: A Looped Typed Decision Model for System 1.5 Thinking (2026)\n- System1-Arena: Which Decisions Can Be Left to System 1? (2026)\n- DoubtLess: Training-Free Contrastive Decoding for Efficient Reasoning (2026)\n- Truncated Reasoning Under a Budget: Evaluating System-1 Models as Decision-Makers (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nDeciding when thinking is worth paying for is an estimator's problem. You don't do a full takeoff on every lead. You glance, and only the jobs that might pay off get the long look. Setting the price per request is a nice touch. I'd be curious how often the quick answer was wrong on cases the router skipped.\nThe routing block worries me more than the reasoning does. The errors are asymmetric: send a hard query down the zero-token path and you get a confident wrong answer with nothing in the logs to flag it, while the reverse mistake just burns tokens. So average token savings is the wrong headline number — I'd want per-route accuracy and the router's calibration right at the boundary, where it's essentially flipping a coin.\nBefore anything gates production traffic I'd run it in shadow mode — log the route it would have taken next to what the full-reasoning baseline actually answered, for a few weeks, and diff them. One frozen backbone serving both modes is the part that would get me to try it at all: same weights, same eval suite, one deployment to babysit.\nThe router can be wrong in two ways, and I agree they do not cost the same. If it skips reasoning on a question that needed it, the answer comes back wrong with no warning. If it sends a question to reasoning that did not need it, the only cost is tokens. So the number of tokens saved is not enough on its own, and below is the accuracy of each route separately, on the larger backbone and on subjects the router was not trained on. The tables show four things. First, the questions answered without reasoning are right almost as often as they would be with reasoning, so few wrong answers come from skipping it. Second, the questions sent to reasoning are mostly ones the model gets wrong without it, and nearly every question that reasoning fixes is among them. Third, when reasoning is made more expensive, the questions that stop being sent to it are mainly ones the model answers correctly either way, so near the threshold the choice of route rarely changes the answer. Fourth, and this is a weakness: the router also sends most of the questions that reasoning cannot fix, or makes worse, to reasoning, and those tokens are wasted. All of this is one run on one benchmark, so I agree that logging the router's choices on real traffic before it controls anything is the right next step.\nQwen3.8-27B, MMLU-Pro, 346 held-out questions, reasoning budget 4096 tokens. Fast only scores 65.0%, always reasoning 90.2%. Of the 346, reasoning rescues 96 (fast wrong, reasoning right), 216 are right either way, 25 are wrong either way, and reasoning spoils 9 (fast right, reasoning wrong).\nWhich questions get sent to reasoning (count, and share of that group)\nAccuracy on each route, next to what the other route scores on the same questions (taken from the fast-only and always-reasoning runs)\nHi authors, thanks for the work. A question on…",
+        "score": 7.0,
+        "comments": 7,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "JustRUA shows a stripped-down harness beats complex agent designs",
+      "summary": "A controlled ablation study on RoboDojo examined which components actually drive benchmark improvements in robot-use agents powered by GPT-6 Astra. The authors found that many complex layers in recent agent frameworks—such as demonstration reuse and self-improvement loops—provided inconsistent value. Instead, a simplified harness called JustRUA raised scores from 29.7 to 50.3 solely by retaining full episode history, stopping motions early, and incorporating scene geometry (even when depth was estimated strictly from RGB).",
+      "why_it_matters": "It serves as a clean reminder for eval practitioners that harness hygiene and bounded execution often matter more than stacking intricate scaffolding.",
+      "reason": "A controlled evaluation study isolating which specific harness and interface design choices actually drive benchmark improvements in frontier foundation model agents.",
+      "item": {
+        "key": "arxiv:2611.16009",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "JustRUA: A Controlled Study of GPT-6 Robot-Use Agents",
+        "url": "https://huggingface.co/papers/2611.16009",
+        "discussion_url": null,
+        "published": "2026-11-13T00:00:00Z",
+        "summary": "GPT-6 Astra can drive a robot arm directly through a fixed harness, and scores of such robot-use agents on RoboDojo have risen quickly since. Reported systems differ in harness and test subset and often change several designs at once, so it is hard to tell which choices produce the gains. We take these designs apart and test them in one framework, along the harness around the model, the action interface, the reuse of experience and the scene geometry given to the model. A lean harness that keeps the full episode history and stops each motion early goes a long way. Reusing experience changes how the model acts but is not a free lunch, and scene geometry helps most, even when depth is predicted from RGB alone. JustRUA starts from the official L3 harness and keeps only what matters most. Even with no learned policy, self-improvement loop or task-specific tuning, this simple harness raises the score on the RoboDojo simulation benchmark substantially, from 29.7 to 50.3.",
+        "content": "JustRUA: A Controlled Study of GPT-6 Robot-Use Agents\nAbstract\nA simplified evaluation harness that keeps full episode history and stops motions early substantially improves robot-use agent scores on RoboDojo, with scene geometry providing the largest additional benefit.\nGPT-6 Astra can drive a robot arm directly through a fixed harness, and scores of such robot-use agents on RoboDojo have risen quickly since. Reported systems differ in harness and test subset and often change several designs at once, so it is hard to tell which choices produce the gains. We take these designs apart and test them in one framework, along the harness around the model, the action interface, the reuse of experience and the scene geometry given to the model. A lean harness that keeps the full episode history and stops each motion early goes a long way. Reusing experience changes how the model acts but is not a free lunch, and scene geometry helps most, even when depth is predicted from RGB alone. JustRUA starts from the official L3 harness and keeps only what matters most. Even with no learned policy, self-improvement loop or task-specific tuning, this simple harness raises the score on the RoboDojo simulation benchmark substantially, from 29.7 to 50.3.\nCommunity\nJustRUA is a controlled study of GPT-6 Astra robot-use agents on RoboDojo. We take the designs recent systems add (harness, action interface, reuse of experience, scene geometry) and test them one at a time in one framework. The harness we end up with is simple and goes from 29.7 to 50.3, with no learned policy, self-improvement loop or task-specific tuning. Every configuration, with its score, cost and rollouts, is on the project page.\nI love that the lean harness wins: full episode history plus stopping each motion early, and scene geometry helping most. It makes me wonder how much of the earlier gains were just extra layers. Is the geometry gain similar when depth is predicted from RGB alone?\nThank you for sharing your work. JustRUA isolates the contributions of history, demonstrations, retained memory, geometry, and action execution within a shared robot-use interface. The RoboDojo results show that geometric information and bounded execution can make a substantial difference, while the tested demonstration formats do not consistently improve the aggregate baseline.\nWe discuss your work in Section 7.2 (“Sources of improvement and comparable evidence”), p. 69 of the updated manuscript of our survey, In-Context Learning for Robots: Methods and Applications. We use these controlled comparisons to explain how to attribute improvements to the particular information and execution resources supplied to a robot-use agent. Read the updated discussion.\nIf you find our discussion of evaluating contextual robot control useful for your own work, we would be grateful if you would consider citing the survey.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- HexaShell: A Universal Harness for Robot Coding Agents in Simulation and the Real World (2026)\n- WorldSketch: Sketching World Models for Zero-Shot Mobile Manipulation (2026)\n- Recursive Video In-Context Learning for Agentic Robot (2026)\n- An Unexpected Robot Policy: Early Evaluations of GPT-6 Astra on RoboDojo and Beyond (2026)\n- LogLook: Execution-Grounded Memory for Frontier-Model Robot Planners (2026)\n- SEAR: Self-Evolving Agentic Robotics (2026)\n- RoboARCade: Benchmarking Agentic Robot Control (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2611.16009 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 1\nSpaces citing this paper 1\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 5.0,
+        "comments": 4,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Mapping the residual stream reveals conversation manifolds",
+      "summary": "An interpretability experiment mapped thousands of conversations inside Qwen3-1.7B's 2,048-dimensional residual stream to visualize how multi-turn interactions cluster in latent space. When projected across global PCA axes, English question-and-answer exchanges across 100 topics collapsed into a remarkably flat sheet, with 99.3% of token variance contained within a single 3D plane. Introducing German and Croatian conversations mapped into neighboring, overlapping spaces, whereas Chinese conversations occupied a noticeably offset region. The results emphasize that residual geometry reflects a joint entanglement of topic, writing system, tokenization characteristics, and syntax rather than isolated semantic meaning.",
+      "why_it_matters": "Provides intuitive geometric insight into how internal model representations organize conversation context and multilingual state transitions across turns.",
+      "reason": "Offers practical mechanistic interpretability insights by mapping how real-world multi-turn conversation dynamics are organized in internal model representations.",
+      "item": {
+        "key": "operator0x.com/field-notes/qwen-conversation-state-space",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "What thousands of conversations look like inside a language model",
+        "url": "https://operator0x.com/field-notes/qwen-conversation-state-space/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50481321",
+        "published": "2026-11-13T10:26:01Z",
+        "summary": "Comments",
+        "content": "AI experiments / Representation geometry\nWhat thousands of conversations look like inside a language model\nI mapped thousands of conversations inside Qwen to see how language takes shape.\nEvery conversation that could happen with a language model–every question, misunderstanding, explanation, and unfinished argument–produces a sequence of internal states.\nCould we map that landscape? Would conversations about similar things travel through neighboring regions? Would the same idea, expressed in different languages, arrive somewhere recognizably similar?\nThose questions led me to build an interactive atlas of Qwen3-1.7B’s internal representations.\nBefore looking at the maps, it helps to know what is being mapped. The model breaks text into tokens – words, parts of words, or punctuation. Each token selects a row from an embedding table: a learned list of numbers that supplies its starting representation.\nI wanted to map thousands of conversations and see how they take shape in vector space. The vectors I’m interested in come from the residual stream, the model’s central shared workspace. The embedding table supplies its starting vectors, with one vector at each token position, and the layers read from and add to this workspace as they process the text. Taras Tsugrii’s chapter on the residual stream explains this perspective in more detail.\nIn Qwen3-1.7B, each position’s vector contains 2,048 numbers. Calling this a model’s “mind” is a metaphor, but the vectors are concrete: we can record them, compare them, and examine how their geometry changes with context.\nI began with 100 topics and generated question-and-answer examples across English, Chinese, German, and Croatian, alongside a separate collection of coding examples. This was a small, deliberately constructed sample of a much larger possibility space.\nInside the embedding table\nBefore examining a conversation, I wanted to see the model’s starting vectors. Each input token is associated with a learned row in the embedding table. Those vectors become the initial representations that the model’s layers transform.\nEach point in the orange cloud below represents one token’s input embedding, projected into three dimensions. A token can be a whole word, part of a word, or punctuation. The embedding table appears here as a cloud of starting points, with no conversation order connecting them. Rotating it gives a first glimpse of their geometry.\nThe embedding table already encodes learned relationships between tokens. Training shapes these vectors through patterns in how tokens are used, giving the model a meaningful starting point for understanding and processing text. The layers then refine those starting representations using the context available at each position. A whole conversation contains many token states, rather than one single 2,048-number description.\nThe shape of English\nI started with 900 English question-and-answer examples across 100 topics, all processed by the same frozen model.\nEach token begins with a learned vector from the embedding table. Qwen’s layers update its representation using the context available at that position. I recorded the final token states and normalized their lengths so the visualization compared directions.\nWhereas the orange points show each token’s starting embedding, the colored lines connect the states the model produces from those embeddings. Each token – a word, part of a word, or punctuation – is transformed from its starting vector into a final state shaped by the conversation so far. Connecting these final states in text order gives one colored path per conversation, with many conversations shown together.\nTo keep the comparison fair, I computed one Global PCA frame using the vocabulary embeddings and all the conversation averages. I then revealed the datasets one at a time. Adding a language to these pictures changes visibility, while the global axes stay fixed.\nAcross a hundred topics, the English states seemed to occupy a thin sheet. As the camera turned, a broad shape narrowed almost to an edge.\nThat impression survived measurement: a best-fitting plane contained approximately 99.3% of the English token states’ variation within this 3D projection.\nIt was tempting to interpret the sheet as evidence that the model had compressed an enormous variety of conversations into a remarkably simple surface. Before accepting that explanation, I wanted to change something more fundamental than the topic.\nDoes language change the shape?\nI introduced Chinese versions of the same topics and question intents, then let Qwen generate its answers independently.\nThe pink states appeared in a neighboring region, visibly offset from English.\nThe separation made an abstract question tangible. A representation can carry information about both the subject being discussed and the language used to discuss it.\nIf similar questions in Chinese and English occupy different regions, what does that separation represent? The idea itself? The writing system? The vocabulary and structure the model needs to produce its answer?\nThe geometry alone could not disentangle those possibilities. Language, script, tokenization, wording, and answer quality all changed together in this experiment.\nPerhaps expecting a representation to contain “pure meaning,” cleanly detached from the form used to express it, was already an assumption I had brought to the map.\nThen I added German and Croatian.\nThese offered a useful comparison: two more natural languages using Latin-script writing.\nGerman and Croatian occupied the broad neighborhood of English, with substantial overlap. Chinese remained more visibly offset in this view.\nThe picture suggested overlapping regions with different centers and shapes. It did not establish separate language compartments throughout the model’s entire residual space.\nThe shapes also reflected the practical construction of the examples. Croatian responses contained many more Qwen tokens than the English responses…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "vLLM cut release candidate v0.34.0rc4, adding speculative decoding warmup fixes to its test runner.",
+      "item": {
+        "key": "github.com/vllm-project/vllm/releases/tag/v0.34.0rc4",
+        "source": "vLLM releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.34.0rc4",
+        "url": "https://github.com/vllm-project/vllm/releases/tag/v0.34.0rc4",
+        "discussion_url": null,
+        "published": "2026-11-14T10:15:55Z",
+        "summary": "[Release][Tests] Give the #67296 warmup-gate test runner num_speculat…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain Core 1.8.1 adds a per-context gateway override for LangSmith along with minor dependency bumps.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.1",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-core==1.8.1",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.1",
+        "discussion_url": null,
+        "published": "2026-11-15T14:57:13Z",
+        "summary": "Changes since langchain-core==1.8.0\n\nrelease(core): 1.8.1 ( #41855 )\n\nchore(deps): bump soupsieve from 4.0 to 4.1 in /libs/core ( #41850 )\n\nfeat(core): per-context LangSmith gateway override via langsmith_gateway ( #41836 )\n\nchore(deps): bump soupsieve from 2.9 to 4.0 in /libs/core ( #41833 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "llama.cpp build b12425 adds support for reading output head sizes directly from tensors to accommodate Qwen3-ForcedAligner.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12425",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12425",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12425",
+        "discussion_url": null,
+        "published": "2026-11-15T20:26:37Z",
+        "summary": "model : read qwen3vl output head size from the tensor ( #32349 )\n\nAllows Qwen3-ForcedAligner, whose output head (5000 timestamp classes) is smaller than the vocab.\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/67872415\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.5 DLLs\n\nWindows arm64 (CUDA 13) - CUDA 13.5 DLLs\n\nWindows x64…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A new architectural explainer dissects modern positional embedding methods and token indexing across LLMs.",
+      "item": {
+        "key": "magazine.sebastianraschka.com/p/understanding-positional-embeddings",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Understanding Positional Embeddings in Modern LLMs",
+        "url": "https://magazine.sebastianraschka.com/p/understanding-positional-embeddings",
+        "discussion_url": "https://news.ycombinator.com/item?id=50506376",
+        "published": "2026-11-15T12:14:06Z",
+        "summary": "The Methods Behind How LLMs Represent Token Positions",
+        "content": "This article explains how LLMs encode and process token position information by covering classic and contemporary methods like RoPE. It’s essentially a comprehensive journey where we will work through the mechanisms with visual examples, a little math, and a small PyTorch implementation. And, of course, we will then also look at how modern architectures adapt or omit explicit positional encodings.\n\nBelow, you can find a preview of which positional embedding choices are used in 2026 open-weight models. We will discuss these choices later after covering the underlying mechanisms.\n\nFigure 1: A preview of the gallery’s 2026 architectures, grouped by positional encoding. Architecture figures taken from my LLM gallery .\n\nBut why spending so much time writing/reading about this rather minor building block? LLMs keep evolving, and as I was preparing a new article on the latest LLM architecture trends this year, I realized that I never covered the positional information methods used in LLMs in any article so far. So, instead of letting the other article get out of hand, I thought it might make sense to publish this as a standalone building block for the upcoming LLM architecture and trends analysis.\n\nAlso, over the years, many readers have asked me for a tutorial on relative positional embeddings (aka RoPE) to follow up on the learned absolute embeddings used in GPT. It’s been on my TODO list for a long time, so I finally revisited my old draft and put this walkthrough together, which will cover\n\ndifferent positional methods in LLMs;\n\n(finally) how RoPE works;\n\nwhat methods are used by recent open LLMs.\n\nNote that this article assumes some familiarity with basic LLM architectures and works well as a follow-up to Build a Large Language Model (From Scratch) . If the concepts and computation of the attention internals, particularly query, key, and value vectors, are a little fuzzy, I recommend checking my self-attention walkthrough as a refresher:\n\nThe article is also very technical and likely too detailed for some. However, I really wanted to have this foundation out there for future articles to reference. And no worries, the next one will return to a more comfortable style.\n\nPS: I started experimenting with Substack’s new “perks” system. As a thank-you to supporters, I’ve added image exports and metadata from the architecture gallery for you to use in your own analyses.\n\nPPS: If you are already familiar with how position embeddings work, feel free to fast-forward to Section 6, Positional choices in modern architectures .\n\nNote that this article may be best read in a web browser than an email client. I recommend checking out the web view here , which also has a navigation bar on the left side.\n\n1. Where position information enters an LLM\n\nLet’s start with the overall architecture. A tokenizer encodes the input text into token IDs. Next, the input token embedding layer of an LLM maps each of these IDs to a vector of numbers. We usually refer to these entries in that vector as “features” (similar to classic ML). The transformer blocks inside the LLM then modify these vectors using attention and feedforward layers. Lastly, the model’s output layer produces logit scores (converted into probabilities) for the next token.\n\nThe following shows this path in GPT-2 (a relatively classic LLM) and MiniMax-M3 (a more recent LLM released this year; a placeholder for most other recent LLMs). As we can see, the architectures are not too different from each other, but before we get to the positional information parts, let’s focus on the orange blocks for now (the token embedding layers) and the transformer blocks above them; the other architecture differences aren’t needed for this explanation.\n\nFigure 2: Token embedding layers in GPT-2 and MiniMax-M3, highlighted in orange. (Side note: M3’s first three out of 60 feedforward layers are dense not MoEs.)\n\nA token embedding layer, shown in the figure above, maps each token ID to a vector. Position information is then added afterward. Concretely, and as we will discuss in more detail later, GPT-2 adds a position vector to each token embedding before the modified embedding enters the first transformer block. On the other hand, MiniMax-M3 adds the positional information in each transformer block using a method called RoPE inside attention.\n\nWe will talk about these methods in more detail later, but first, let’s start with the big picture information explaining why explicit positional information is added or needed.\n\n1.1 Why add positional information?\n\nConsider the following two input sentences as a simple example:\n\n“The red fox jumps over the gray fox.”\n\n“The gray fox jumps over the red fox.”\n\nChanging the word order changes which fox does the jumping, as illustrated in the following figure.\n\nFigure 3: Changing the word order changes which fox jumps.\n\nFor the examples in this article, we will treat each word as one token for simplicity. (As you know, real tokenizers can split words into smaller subword tokens.) The first sentence then has eight token positions, from 0 through 7.\n\nFigure 4: Token IDs and positions in the toy sentence.\n\n# Assume the following small vocabulary.\n# Real vocabularies typically have 50k to 200k entries\nvocab = {\n\"The\": 0,\n\"red\": 1,\n\"fox\": 2,\n\"jumps\": 3,\n\"gray\": 4,\n\"over\": 5,\n\"the\": 6,\n}\n\n(If you are interested in how vocabularies are built, check out my tokenizer materials on GitHub .)\n\nNote that “fox”, which appears twice in the input sentence, gets the same token ID 2 in both cases. And since they both have the same token ID, irrespective of the position in the input sentence, they would get the same embedding vector from the embedding layer.\n\nNow, let’s consider a regular self-attention mechanism with no positional encoding (and no causal mask), where every input token can attend to every other token in the input. In this scenario, swapping any two words, like “red” and “gray”, would still result in the same embeddings and attention scores between each token pair.\n\nGPT-style models do use a causal (autoregressive) mask, which restricts each token to itself and earlier tokens. Interestingly, this causal mask gives the computation some implicit order information. In our example, “jumps” can attend to “red” in the first sentence and “gray” in the second. So, a causal LLM can theoretically already distinguish these sentences even without explicit positional embeddings. (We will return to this idea later when discussing the “NoPE” concept.)\n\nNonetheless, GPT-2 and most newer LLMs include explicit positional information because it gives attention a direct signal about positions. That’s because even though the causal mask determines which tokens are accessible and provides implicit order information, it doesn’t distinguish a separation of one position from a separation of ten, for example. So, explicit positional methods are still useful (or even essential), since they supply that information.\n\nIf this all sounded confusing, don’t worry, it was more meant as an overview, and we will step through these concepts a bit more slowly in the remaining article.\n\n2. Adding a position vector to each token embedding\n\nWe briefly talked about implicit positional information through causal attention masks (and we will revisit this again in more detail later). However, we now switch gears and talk about the explicit ways to add positional information.\n\nThe perhaps simplest and most direct (but not “cheapest”) approach is to give each sequence position its own vector. We add that vector to the token embedding, so the resulting, modified embedding vector is then passed to the first transformer block. This exact procedure is discussed in the following subsections.\n\n2.1 Learned absolute position embeddings in GPT-2\n\nTo illustrate the use of an explicit, learned positional vector to the input embeddings, let’s consider GPT-2 as a concrete example. GPT-2 learns a table of position vectors during training. The following figure…",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "Sebastian Raschka"
+        ]
+      }
+    },
+    {
+      "line": "Edge0-145B surfaces as a new candidate for running frontier-scale weights locally on workstation hardware.",
+      "item": {
+        "key": "edge0.ai/blog/introducing-edge0-145b-frontier-ai-capabilities-on-your-own-computer",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Edge0-145B: Frontier AI Capabilities on Your Own Computer",
+        "url": "https://edge0.ai/blog/introducing-edge0-145b-frontier-ai-capabilities-on-your-own-computer",
+        "discussion_url": "https://news.ycombinator.com/item?id=50475713",
+        "published": "2026-11-12T23:06:17Z",
+        "summary": "",
+        "content": "",
+        "score": 355.0,
+        "comments": 105,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Keep your harnesses lean and your bootloaders unlocked.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Open source",
+      "headline": "llama.cpp reaches version 1.0.0",
+      "blurb": "llama.cpp has officially reached version 1.0.0, providing a stronger foundation for the local AI ecosystem.",
+      "item": {
+        "key": "huggingface.co/blog/ggml-org/llama-cpp-v1",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "llama.cpp v1.0.0 : A stronger foundation for the local AI ecosystem",
+        "url": "https://huggingface.co/blog/ggml-org/llama-cpp-v1",
+        "discussion_url": null,
+        "published": "2026-11-13T14:05:22Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Developer tools",
+      "headline": "Anthropic brings parallel AI workers to Claude Code Projects",
+      "blurb": "Anthropic upgraded Claude Code Projects to run parallel AI workers for concurrent task execution.",
+      "item": {
+        "key": "claude.com/resources/articles/projects-redesigned",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Anthropic upgrades Claude Code Projects to run parallel AI workers",
+        "url": "https://claude.com/resources/articles/projects-redesigned",
+        "discussion_url": "https://news.ycombinator.com/item?id=50492141",
+        "published": "2026-11-14T00:28:11Z",
+        "summary": "",
+        "content": "",
+        "score": 100.0,
+        "comments": 95,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Cloud inference",
+      "headline": "SGLang-Neuron brings SGLang serving to AWS Trainium",
+      "blurb": "AWS launched SGLang-Neuron in Deep Learning Containers, enabling model serving and RL rollouts on Trainium using PyTorch.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/deploy-frontier-ai-models-on-aws-trainium-with-sglang-neuron",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Deploy frontier AI models on AWS Trainium with SGLang-Neuron",
+        "url": "https://aws.amazon.com/blogs/machine-learning/deploy-frontier-ai-models-on-aws-trainium-with-sglang-neuron/",
+        "discussion_url": null,
+        "published": "2026-11-12T22:03:34Z",
+        "summary": "SGLang-Neuron is now publicly available through an AWS Deep Learning Container. With SGLang-Neuron, you can serve models and generate reinforcement learning rollouts with SGLang on AWS Trainium using the same SGLang interface you already know, all running on native PyTorch.",
+        "content": "Today, Amazon announced that SGLang-Neuron is publicly available and can be accessed through an AWS Deep Learning Container, released by RadixArk in collaboration with Annapurna Labs. With SGLang-Neuron, you can serve models and generate reinforcement learning (RL) rollouts with SGLang on AWS Trainium using the same SGLang interface you use today. Trainium is a portfolio of AWS AI chips that delivers strong economics for AI training and inference at scale. Now, running SGLang on Trainium follows the SGLang workflow you already know: you launch models through SGLang’s server interface and invoke the endpoint using the same generation APIs. Underneath that interface, SGLang-Neuron runs on native PyTorch. With its out-of-tree plugin design, Trainium support and SGLang core develop independently and iterate faster.\n\nHow SGLang runs on Trainium\n\nSGLang-Neuron is an out-of-tree plugin that connects SGLang with AWS Trainium. Installing the plugin registers the neuron platform through SGLang’s plugin entry points, and setting SGLANG_PLATFORM=neuron selects it when the server starts. SGLang core continues to provide the API server, request lifecycle, RadixAttention, and prefix-cache bookkeeping. The plugin implements the Trainium-specific models, attention, mixture of experts (MoE), and the graph runner.\n\nFigure 1: SGLang-Neuron on AWS Trainium\n\nTorchNeuron registers Trainium as a native PyTorch device. SGLang-Neuron uses standard PyTorch operations for the model execution path and incorporates kernels written with the Neuron Kernel Interface (NKI) for performance. It compiles these operations and kernels into executable programs using torch.compile , which the graph runner prepares and executes during serving.\n\nSGLang-Neuron also supports PD disaggregation . In this configuration, a prefill server computes the prompt KV cache and transfers it to a decode server using NIXL over Elastic Fabric Adapter (EFA) . The decode server then generates the remaining tokens. Each server still uses SGLang’s scheduler and request lifecycle, while the plugin manages the Trainium execution and KV-cache transfer path.\n\nServing models on AWS Trainium using SGLang-Neuron\n\nTo follow this walkthrough, you use a Trainium3 Amazon Elastic Compute Cloud (Amazon EC2) instance with a pytorch-inference-sglang-neuronx container. Here are the steps:\n\nStart the container.\n\ndocker run --rm -it \\\n--privileged --ipc=host \\\n-v /path/to/work:/work \\\npublic.ecr.aws/neuron/pytorch-inference-sglang-neuron:v0.1.0-neuron-py314-sdk-2.33.0-ubuntu26.04 \\\n/bin/bash\n\nLaunch the SGLang model server inside the container.\n\nSGLANG_PLATFORM=neuron \\\npython -m sglang.launch_server \\\n--model-path openai/gpt-oss-120b \\\n--tp-size 8 \\\n--ep-size 8 \\\n--kv-cache-dtype fp8_e4m3 \\\n--context-length 10240 \\\n--chunked-prefill-size 8192 \\\n--max-running-requests 64 \\\n--max-total-tokens 655360 \\\n--mem-fraction-static 0.8 \\\n--host 127.0.0.1 \\\n--port 30000\n\nSend a request to the model server.\n\ncurl -s http://127.0.0.1:30000/v1/chat/completions \\\n-H 'Content-Type: application/json' \\\n-d '{\n\"model\": \"openai/gpt-oss-120b\",\n\"messages\": [\n{\"role\": \"user\", \"content\": \"Explain why the sky appears blue.\"}\n],\n\"temperature\": 0,\n\"max_tokens\": 128\n}'\n\nFor additional information, please see the SGLang-Neuron getting started guide for setup instructions, and explore the repository documentation for supported models, features, and validated configurations.\n\nConclusion\n\nSGLang-Neuron brings SGLang’s familiar serving workflow to AWS Trainium through native PyTorch. You can get started by launching the SGLang-Neuron container and following the quickstart to serve a supported model. Try it with your workloads, contribute through the project repository, and share feedback to help shape future model and feature support.\n\nAbout the authors\n\nAlex Nails\n\nAlex is a Member of Technical Staff at RadixArk. He leads MultiHardware and is a core developer of SGLang.\n\nYihao Wang\n\nYihao is a Member of Technical Staff at RadixArk. He works on both multi-modal/diffusion models and multi-hardware.\n\nLingyan Hao\n\nLingyan is a Product Manager at RadixArk. She works on SGLang adoption and multi-hardware enablement.\n\nSrecharan Selvam\n\nSrecharan is a software engineer working on AI Inference technology at Annapurna Labs, Amazon.\n\nZeyu Wang\n\nZeyu is a software engineer working on AI Inference technology at Annapurna Labs, Amazon.\n\nVinesh Ravuri\n\nVinesh is a software engineer working on AI Inference technology at Annapurna Labs, Amazon.\n\nYuchen Jiang\n\nYuchen is a software engineer working on AI Inference technology at Annapurna Labs, Amazon.\n\nPinak Panigrahi\n\nPinak works on performance optimization of AI models on AWS Trainium at Annapurna Labs, Amazon.\n\nChi Wang\n\nChi is a Software Development Manager working on AI Inference technology at Annapurna Labs, Amazon.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 24,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 24,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 32,
+      "kept": 18,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 907,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1387,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 288,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 199,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 214,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-12T21:30:40.136624Z",
+    "candidates": 114,
+    "triaged": 114,
+    "enriched": 7,
+    "headline_candidates": 123,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 454.9,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 32330,
+      "output_tokens": 8157,
+      "cost_usd": 0.054836
+    }
+  }
+}
