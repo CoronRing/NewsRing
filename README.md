@@ -15,7 +15,7 @@ No ads. No sponsors. No engagement ranking. One config file, free to run.
 <a href="https://coronring.github.io/NewsRing/today.html"><img src="https://coronring.github.io/NewsRing/today.png" alt="Today's top AI stories, picked by NewsRing" width="820"></a>
 
 <sub>That card is live. NewsRing rebuilds it every morning at the same URL.<br>
-<a href="https://coronring.github.io/NewsRing/today.html"><b>Read today's full digest →</b></a> · <a href="news_today.md">as Markdown</a> · <a href="https://coronring.github.io/blog/news-today">on my site</a></sub>
+<a href="https://coronring.github.io/NewsRing/today.html"><b>Read today's full digest →</b></a> · <a href="news_today.md">as Markdown</a> · <a href="https://coronring.github.io/blog/news-today">on my site</a> · <a href="https://coronring.github.io/newsring"><b>get it by email</b></a></sub>
 
 </div>
 
@@ -107,9 +107,18 @@ LLM free tiers rate-limit hard and popular models go "overloaded" at peak hours.
 | Command | What it does |
 |---|---|
 | `newsring run` | Produce and publish today's digest. `--dry-run` prints it; `--no-email` skips email; `--lookback-hours N` sets the window. |
-| `newsring email` | Email the newest archived digest. |
+| `newsring email` | Email the newest archived digest to the configured recipients. |
+| `newsring broadcast` | Hand the newest archived digest to the public mailing list's service. |
 | `newsring sources` | Check every source, no model calls. |
 | `newsring site` | Republish the site and card from the archive. |
+
+## Getting it by email
+
+Two different things share that name.
+
+**Your own digest**, configured your way, is what this repository is for: clone it, edit one TOML file, and it mails you whatever you asked for. [`docs/configuration.md`](docs/configuration.md) covers the settings and [`docs/deployment.md`](docs/deployment.md) covers running it for free on GitHub Actions.
+
+**My digest**, unmodified, is a public mailing list you can join at [coronring.github.io/newsring](https://coronring.github.io/newsring). Everyone on it gets the identical email, the one written for my own interests, each morning. There is a confirmation link, a one-click unsubscribe in every message, and no address is kept in this repository: the list lives in a small service of its own, described in the [design doc](docs/design.md#the-public-mailing-list).
 
 ## Built on railtracks
 

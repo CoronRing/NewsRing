@@ -13,7 +13,13 @@ the link:
 ``today.png``             the newest top stories card (1200×630 at 2×)
 ``news_today.json``       the newest digest as JSON (`render.to_web_json`)
 ``news_today.md``         the newest digest as Markdown
+``broadcast_today.json``  the newest digest as a ready-to-send message
 ========================  =================================================
+
+``broadcast_today.json`` is how the public mailing list is served without this
+repository ever holding an address: the digest is rendered once into it, and
+the subscriber service fetches it and sends that one message to everyone on
+the list. See `send_broadcast`.
 """
 
 from __future__ import annotations
@@ -24,12 +30,22 @@ import os
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from typing import Any
+
+import httpx
 
 from newsring.card import card_html, render_png
 from newsring.config import Config
 from newsring.history import list_records, record_path
 from newsring.models import DigestRecord
-from newsring.render import index_html, to_email_html, to_html, to_markdown, to_web_json
+from newsring.render import (
+    index_html,
+    to_broadcast_json,
+    to_email_html,
+    to_html,
+    to_markdown,
+    to_web_json,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +53,7 @@ CARD_FILE = "today.png"
 TODAY_PAGE = "today.html"
 FEED_JSON = "news_today.json"
 FEED_MARKDOWN = "news_today.md"
+BROADCAST_JSON = "broadcast_today.json"
 
 
 class DeliveryError(Exception):
@@ -182,6 +199,23 @@ def build_site(archive_dir: Path, site_dir: Path, config: Config) -> int:
             to_markdown(newest, image_url=local_image, project_url=project),
             encoding="utf-8",
         )
+        # Published whether or not a broadcast is configured. It is the same
+        # digest as the page beside it, costs a few kilobytes, and publishing
+        # it unconditionally means the subscriber service can be pointed at any
+        # NewsRing site without that site being rebuilt first.
+        (site_dir / BROADCAST_JSON).write_text(
+            json.dumps(
+                to_broadcast_json(
+                    newest,
+                    subject=f"{config.delivery.email.subject_prefix}{newest.title}",
+                    web_url=urls.dated_page,
+                    project_url=project,
+                ),
+                indent=2,
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
     (site_dir / ".nojekyll").touch()
     return len(records)
 
@@ -250,3 +284,53 @@ def send_email(record: DigestRecord, config: Config, *, has_card: bool) -> list[
     if not sent:
         raise DeliveryError("email delivery failed for every recipient: " + "; ".join(failures))
     return sent
+
+
+def send_broadcast(record: DigestRecord, config: Config) -> dict[str, Any]:
+    """Tell the subscriber service that a new digest is published.
+
+    The list of subscribers is deliberately not reachable from here. This sends
+    one authenticated request carrying a date; the service fetches
+    `BROADCAST_JSON` from the site, substitutes each reader's unsubscribe link,
+    and sends. Nothing about who is on the list crosses back, so a public CI
+    log sees only counts.
+
+    The date is sent so the service can refuse to send a reader the same
+    digest twice: a workflow may be re-run, and a retry should be harmless.
+
+    Args:
+        record: The digest that was published.
+        config: The configuration; the endpoint and the bearer token come from
+            the environment variables `delivery.broadcast` names.
+
+    Returns:
+        The service's JSON response, which reports counts and nothing else.
+
+    Raises:
+        DeliveryError: If the endpoint or token is unset, or the service could
+            not be reached or refused the request.
+    """
+    settings = config.delivery.broadcast
+    url = os.environ.get(settings.url_env, "").strip()
+    token = os.environ.get(settings.token_env, "").strip()
+    if not url:
+        raise DeliveryError(f"broadcast is enabled but {settings.url_env} is empty")
+    if not token:
+        raise DeliveryError(f"broadcast is enabled but {settings.token_env} is empty")
+    try:
+        response = httpx.post(
+            url,
+            json={"date": record.date},
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=settings.timeout_s,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except httpx.HTTPStatusError as exc:
+        # The body can quote the request, so only the status is repeated here.
+        raise DeliveryError(
+            f"the broadcast service refused: HTTP {exc.response.status_code}"
+        ) from exc
+    except Exception as exc:  # noqa: BLE001 - any transport failure reads the same
+        raise DeliveryError(f"broadcast failed: {type(exc).__name__}") from exc
+    return payload if isinstance(payload, dict) else {}

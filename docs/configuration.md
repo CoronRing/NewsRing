@@ -107,6 +107,7 @@ Each digest has a dated page that never changes, `2026-10-13.html`. The newest d
 | `today.png` | The top stories card, 1200×630 rendered at 2×. |
 | `news_today.json` | The newest digest as JSON, for another site to render when the page is viewed. Plain-text fields plus `*_html` twins rendered from Markdown with raw HTML disabled. |
 | `news_today.md` | The newest digest as Markdown. |
+| `broadcast_today.json` | The newest digest as a ready-to-send email: subject, HTML body and plain-text body, with `{{UNSUBSCRIBE_URL}}` where a reader's own unsubscribe link goes. Written whether or not a broadcast is configured. |
 | `index.html` | Today's card, a link to today's digest, and every past digest. |
 
 On GitHub Pages a project site shares its user site's origin, so `https://<you>.github.io` can fetch `/<repo>/news_today.json` with no CORS setup.
@@ -130,6 +131,26 @@ EMALIA_PASSWORD=<16-character app password>
 ```
 
 Emalia also supports OAuth and Google service accounts; see its `docs/authentication.md`.
+
+### `[delivery.broadcast]`
+
+The public mailing list. **No subscriber address is in this repository, in its configuration, or in its CI logs.** A separate service takes the signups, confirms them, holds the list and does the sending; `newsring broadcast` only tells it that a digest is published, and it reads `broadcast_today.json` from the site.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `enabled` | `false` | Whether `newsring broadcast` does anything. A run never broadcasts on its own: the workflow does it in a job of its own, after the site is deployed, because the service reads the message from the site. |
+| `url_env` | `"NEWSRING_BROADCAST_URL"` | Variable holding the service's broadcast endpoint. |
+| `token_env` | `"NEWSRING_BROADCAST_TOKEN"` | Variable holding the bearer token it expects. Kept out of the file so the file can be committed. |
+| `timeout_s` | `300.0` | How long to wait. The whole list is sent inside that one request, so this is minutes rather than seconds. |
+
+```bash
+NEWSRING_BROADCAST_URL=https://<host>/news/api/broadcast
+NEWSRING_BROADCAST_TOKEN=<the token the service was deployed with>
+```
+
+`newsring broadcast` prints three counts: sent, already had it, and failed. It never prints an address. Re-running it is harmless, because the service records which digest each reader last received.
+
+The service used here is `news/` in the [website repository](https://github.com/CoronRing/coronring.github.io), whose README covers the signup flow, the confirmation step and the subscriber cap. Any service that accepts `POST {"date": "<YYYY-MM-DD>"}` with a bearer token and can fetch `broadcast_today.json` would do.
 
 ## `[[sources]]`
 

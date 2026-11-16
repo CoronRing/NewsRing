@@ -24,6 +24,16 @@ from newsring.models import DigestHeadline, DigestRecord, DigestStory, SourceRep
 #: Related coverage shown per story. A big launch can gather a dozen; three is plenty.
 MAX_RELATED_LINKS = 3
 
+#: Stand-in for a reader's own unsubscribe link in a broadcast message.
+#:
+#: A broadcast is rendered once and sent to many people, but the unsubscribe
+#: link has to differ per reader or one click would take the whole list off.
+#: Rendering once and substituting per message keeps the expensive half shared
+#: and the per-reader half trivial. The sender replaces every occurrence of
+#: this exact string; it contains no characters that HTML or Markdown escaping
+#: would alter, so it survives both renderers intact.
+UNSUBSCRIBE_PLACEHOLDER = "{{UNSUBSCRIBE_URL}}"
+
 _md = MarkdownIt("commonmark", {"html": False, "linkify": False}).disable("image")
 
 _FONTS = (
@@ -385,7 +395,11 @@ def _inline_md(text: str) -> str:
 
 
 def to_email_html(
-    record: DigestRecord, *, web_url: str | None = None, project_url: str | None = None
+    record: DigestRecord,
+    *,
+    web_url: str | None = None,
+    project_url: str | None = None,
+    unsubscribe_url: str | None = None,
 ) -> str:
     """Render a digest as an HTML email with inline styles.
 
@@ -393,6 +407,9 @@ def to_email_html(
         record: The digest.
         web_url: This digest's page on the site, linked as "read on the web".
         project_url: Where readers can get their own feed.
+        unsubscribe_url: Where this reader can leave the list. Omitted for a
+            digest the reader asked for directly, such as the author's own
+            copy, and required for anything sent to a subscriber list.
 
     Returns:
         A complete HTML document suitable as an email body.
@@ -453,7 +470,14 @@ def to_email_html(
             f'<span style="{_E["cta_text"]}">Your interests, your tone. No ads, no sponsors, open source.</span><br>'
             f'<a href="{escape(project_url, quote=True)}" style="{_E["button"]}">Get NewsRing →</a></div>'
         )
-    out.append(f'<div style="{_E["foot"]}">{escape(stats_line(record))}</div></div>')
+    out.append(f'<div style="{_E["foot"]}">{escape(stats_line(record))}</div>')
+    if unsubscribe_url:
+        out.append(
+            f'<div style="{_E["foot"]}">You are getting this because you asked NewsRing '
+            f"to send it. {_ea('Unsubscribe', unsubscribe_url)} and it stops, with no "
+            "reply needed.</div>"
+        )
+    out.append("</div>")
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
@@ -531,4 +555,49 @@ def to_web_json(
         "slow_day_note": record.slow_day_note,
         "sign_off": record.sign_off,
         "stats": stats_line(record),
+    }
+
+
+# -- Broadcast message ----------------------------------------------------------------
+
+
+def to_broadcast_json(
+    record: DigestRecord,
+    *,
+    subject: str,
+    web_url: str | None = None,
+    project_url: str | None = None,
+) -> dict[str, Any]:
+    """Render a digest as a ready-to-send message for the subscriber service.
+
+    Everyone on the public list gets the same digest, so it is rendered once,
+    here, and published as a file. The service that holds the list fetches this
+    and sends it verbatim, substituting `UNSUBSCRIBE_PLACEHOLDER` per reader.
+    That keeps one renderer for every copy of a digest and keeps the subscriber
+    addresses in the one place that needs them.
+
+    Args:
+        record: The digest.
+        subject: The subject line, prefix already applied.
+        web_url: This digest's page on the site, linked as "read on the web".
+        project_url: Where readers can get their own feed.
+
+    Returns:
+        A JSON-ready mapping: ``version``, ``date``, ``title``, ``subject``,
+        ``unsubscribe_placeholder``, ``html`` and ``text``.
+    """
+    unsubscribe_line = f"Unsubscribe: {UNSUBSCRIBE_PLACEHOLDER}"
+    return {
+        "version": 1,
+        "date": record.date,
+        "title": record.title,
+        "subject": subject,
+        "unsubscribe_placeholder": UNSUBSCRIBE_PLACEHOLDER,
+        "html": to_email_html(
+            record,
+            web_url=web_url,
+            project_url=project_url,
+            unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER,
+        ),
+        "text": to_markdown(record, project_url=project_url) + f"\n\n---\n\n{unsubscribe_line}\n",
     }

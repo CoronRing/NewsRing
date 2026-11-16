@@ -1,6 +1,6 @@
 # NewsRing design
 
-**Version 0.3.0** · October 2026
+**Version 0.5.0** · November 2026
 
 NewsRing is a personal news agent. Once a day it reads a list of free sources, picks the stories that match one reader's stated interests, and writes them up in the tone that reader asked for. The only product is the digest itself: a Markdown and HTML page, archived, optionally emailed, and optionally published as a static site.
 
@@ -147,8 +147,33 @@ Each record's `stats.served_by` lists which model and key answered each call.
 Every destination renders from the same `DigestRecord`.
 
 - **Archive** (always): `news/<date>.json` and `news/<date>.md`, plus `news_today.md` at the repository root with the card on top.
-- **Static site** (`delivery.site_dir`): one dated page per digest, rebuilt from the whole archive each run so template changes apply retroactively, plus fixed URLs for the newest digest: `today.html`, `today.png`, `news_today.json` and `news_today.md`. Pages follow the reader's light or dark setting.
+- **Static site** (`delivery.site_dir`): one dated page per digest, rebuilt from the whole archive each run so template changes apply retroactively, plus fixed URLs for the newest digest: `today.html`, `today.png`, `news_today.json`, `news_today.md` and `broadcast_today.json`. Pages follow the reader's light or dark setting.
 - **Email** (`delivery.email.enabled`): sent through [Emalia](https://github.com/CoronRing/GS-Emalia)'s `MailClient`, one message per recipient so a list never exposes its addresses. Email clients ignore CSS variables and most of `<style>`, so the email is a separate template with inline styles in a single light theme.
+- **The public mailing list** (`delivery.broadcast.enabled`): a separate service, described below. A run does not send it; it tells the service that a digest is published.
+
+### The public mailing list
+
+Anyone can subscribe at [coronring.github.io/newsring](https://coronring.github.io/newsring) and get the same digest the author gets. Everyone on the list receives the identical message, so the pipeline above is untouched: one run, the same three model calls, one `DigestRecord`. What is added is one published file and one request.
+
+**NewsRing publishes the message; it does not hold the list.** `build_site` writes `broadcast_today.json` beside the pages it already writes: the subject, an HTML body and a plain-text body, rendered once by the same `to_email_html` and `to_markdown` that produce the author's own copy. In place of a reader's unsubscribe link it carries `{{UNSUBSCRIBE_URL}}`, a placeholder chosen because neither HTML escaping nor Markdown rendering alters it.
+
+**A separate service holds the list and does the sending.** It lives in the website repository (`coronring.github.io/news`), runs beside the two other services on that host, and keeps its subscribers in SQLite on a named volume. After the site is deployed, the workflow's `list` job calls `newsring broadcast`, which POSTs the digest's date and a bearer token to that service; the service fetches `broadcast_today.json`, substitutes each reader's own unsubscribe link, and sends one message per reader.
+
+The split is the point:
+
+| | Why not in this repository |
+|---|---|
+| The addresses | This repository is public and its CI logs are public. A subscriber's address is personal data and must never be in either. |
+| The signup, confirmation and unsubscribe flow | They need an HTTP endpoint that answers at any hour. A scheduled workflow runs once a day. |
+| The sending credentials for the list | Already on the host for the service that needs them; duplicating them into repository secrets widens the blast radius for nothing. |
+
+What crosses the boundary is a date and a token, and what comes back is three counts. A run therefore costs nothing per subscriber, and a public CI log has nothing to leak.
+
+**Re-running is harmless.** Each subscriber's row records the date of the last digest they were sent, and the service only sends to readers whose row does not already carry today's date. A dispatched re-run, or a retry after a half-finished send, reaches nobody twice. The workflow also sends the date it published, and the service refuses the whole send if the file it fetches is dated differently, which is what a lagging Pages deploy looks like.
+
+**Confirmed opt-in, because anyone can type anyone's address.** The service stores nothing at signup: the address rides inside a signed link, and a row is only written when that link is clicked. So an abusive signup leaves no record anywhere, and this is also what makes unsubscribing a deletion rather than a flag. Every message carries a one-click unsubscribe, as a footer link and as the `List-Unsubscribe` headers mail clients act on themselves.
+
+**The list is capped at 50.** Not a product decision but a sending one: the mailbox behind it is an ordinary consumer account with a daily cap in the hundreds and a reputation that a daily bulk send to strangers will spend. Raising the cap is a decision to move to a real sending service first, which needs a domain to verify. The service's own [README](https://github.com/CoronRing/coronring.github.io/blob/main/news/README.md) carries the rest.
 
 ### Showing today's news on another site
 
@@ -181,5 +206,34 @@ Proposed, not built:
 - **Agentic mode for comparison.** A tool-calling agent with `list_sources`, `fetch_source` and `read_article`, run on the same day's sources, to compare picks, cost and coverage against the pipeline. It would also exercise railtracks' tool loop, which the pipeline deliberately does not use.
 - **Feedback loop.** Thumbs-up and thumbs-down links in the email or site that append to a small preference log the editor reads, so the profile sharpens over time.
 - **Evaluation.** Score each day's picks against the profile with a judge model, using EvalRing, so prompt or model changes can be compared on stored candidate lists.
-- **Per-topic sections.** Let the editor group picks under the reader's interest headings.
 - **More source kinds.** Reddit JSON, Bluesky lists, YouTube channel feeds, and newsletters through an inbox read by Emalia.
+
+### Opening the digest to other readers
+
+Proposed on 2026-11-15, nothing built. Three stages, each useful on its own, and each one only worth building once the stage before it exists.
+
+#### Stage 1: one list, one email — **built, November 2026**
+
+A signup page, a confirmed opt-in, and the same digest to everyone on the list. See [The public mailing list](#the-public-mailing-list) above for how it works and where each piece lives. The signup is on the project page as its live demo, on the home deck's NewsRing frame as an action, and on its own page at `/newsring`.
+
+One thing from the original sketch was not built and should not be: the fan-out does not happen in `recipients()`. Putting the list in this repository's environment would have put subscriber addresses in a public repository's secrets and in reach of a public CI log.
+
+#### Stage 2: a preference page per reader
+
+Every email carries a small **config** button at the foot. It opens a page belonging to that reader, reached by a signed link so no account or password is needed. The page holds their preferences, including a free-text description of what they want to read, in the same spirit as `[profile] interests` today. One subscriber, one profile.
+
+This is the point where the single shared digest ends and a run has to produce more than one output, so the cost model changes: picks and prose become per-profile rather than per-day.
+
+#### Stage 3: a sectioned digest with per-section controls
+
+Instead of one ranked list, the digest is assembled from parts, and the preference page controls each part on its own. This supersedes the "per-topic sections" idea above.
+
+| Section | What it is | What the reader controls |
+|---|---|---|
+| **Headlines** | The 3 or 4 biggest stories of the day, close to what the top stories card already picks. | On or off, and how many. |
+| **Category news** | Stories grouped under the categories the reader chooses, such as LLMs, agents, hardware, policy, research. | Which categories, a weight per category, and how many stories in total. |
+| **Suggested actions** | 2 or 3 things the reader could do today off the back of the news: try project X, test model Y, read paper Z. | On or off, and how many. |
+
+**Category weights are relative, not quotas.** A reader who gives LLMs a 1 and agents a 2 is saying that agent news is worth twice as much to them when the editor is choosing between two comparable stories. It is not a demand that two thirds of the digest be agent stories, and on a day with no good agent story the weight must not force a weak one in. The weights, the chosen categories and the free-text description all go into the editor's prompt; the counts are enforced in code afterwards, the way `count.max` already is.
+
+Suggested actions are the only part that needs something the pipeline does not do today. Turning a story into something doable needs both the day's picks and the reader's own description of what they are working on, so it is either an extra job for the writer or a fifth agent that runs after the picks are fixed.

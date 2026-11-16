@@ -3,6 +3,8 @@
 #           news_today.md back as history, and build the site
 #   deploy  publish the site to GitHub Pages
 #   email   send the digest, after deploy so its "read on the web" link works
+#   list    hand the public mailing list to the subscriber service, also after
+#           deploy, because the service reads the message from the site
 # See docs/deployment.md for the secrets this needs.
 name: Daily digest
 
@@ -19,6 +21,10 @@ on:
         required: false
       send_email:
         description: "Email the digest"
+        type: boolean
+        default: true
+      broadcast:
+        description: "Send the digest to the public mailing list"
         type: boolean
         default: true
 
@@ -123,3 +129,37 @@ jobs:
           EMALIA_PROVIDER: ${{ vars.EMALIA_PROVIDER || 'gmail' }}
           EMALIA_PASSWORD: ${{ secrets.EMALIA_PASSWORD }}
         run: uv run newsring email
+
+  # The public list. A job of its own because it shares nothing with the one
+  # above: no mailbox credentials, no mail extra, and no recipient list. It
+  # sends one authenticated request and the subscriber service does the rest.
+  #
+  # Skipped rather than failed when the endpoint is not configured, so a fork
+  # of this repository runs the whole workflow without it.
+  list:
+    needs: [digest, deploy]
+    if: >-
+      (github.event_name == 'schedule' || inputs.broadcast) &&
+      github.repository_owner == 'CoronRing'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.digest.outputs.sha }}
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884  # v10.3.0
+
+      - name: Install
+        run: uv sync --frozen
+
+      - name: Broadcast
+        env:
+          NEWSRING_BROADCAST_URL: ${{ secrets.NEWSRING_BROADCAST_URL }}
+          NEWSRING_BROADCAST_TOKEN: ${{ secrets.NEWSRING_BROADCAST_TOKEN }}
+        run: |
+          if [ -z "$NEWSRING_BROADCAST_URL" ]; then
+            echo "::notice::No broadcast endpoint configured; the public list was not sent."
+            exit 0
+          fi
+          uv run newsring broadcast

@@ -72,6 +72,15 @@ project_url = "https://github.com/CoronRing/NewsRing"
 # Locally, `newsring run --no-email` skips it.
 enabled = true
 
+[delivery.broadcast]
+# The public mailing list. Nobody's address is here or anywhere else in this
+# repository: a separate service takes the signups, confirms them, holds the
+# list and does the sending. `newsring broadcast` only tells it that a digest
+# is published, and it reads `broadcast_today.json` from the site.
+#
+# Needs NEWSRING_BROADCAST_URL and NEWSRING_BROADCAST_TOKEN in the environment.
+enabled = true
+
 # -- Community and curation -----------------------------------------------------
 
 [[sources]]

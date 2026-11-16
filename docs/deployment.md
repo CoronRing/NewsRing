@@ -12,13 +12,16 @@ NewsRing needs somewhere to run once a day, somewhere to keep the archive betwee
 
 ## GitHub Actions
 
-`.github/workflows/daily.yml` runs at 09:00 Pacific, using the schedule's `timezone` field so daylight saving is handled by GitHub. It has three jobs:
+`.github/workflows/daily.yml` runs at 09:00 Pacific, using the schedule's `timezone` field so daylight saving is handled by GitHub. It has four jobs:
 
 1. **digest**: produces the digest and the top stories card, commits `news/` and `news_today.md` to `main`, and builds the site. It never sees the mail credentials. If a whole attempt fails (for example, every Gemini model overloaded for several minutes), it waits ten minutes and tries again, up to three attempts.
 2. **deploy**: publishes the site to GitHub Pages.
-3. **email**: sends the digest, after deploy, so the "read on the web" link in the email already works. It never sees the model keys.
+3. **email**: sends the author's own copy, after deploy, so the "read on the web" link in the email already works. It never sees the model keys.
+4. **list**: hands the public mailing list to the subscriber service, also after deploy, because the service reads the message from the site. It holds no mailbox credentials and no addresses — one authenticated request, three counts back. It is skipped entirely when no endpoint is configured, so a fork runs the rest of the workflow unchanged.
 
-It can also be run by hand from the Actions tab, with an optional window override and a switch to skip email.
+Jobs 3 and 4 are separate because they share nothing: different credentials, different failure modes, and one can be off while the other works.
+
+It can also be run by hand from the Actions tab, with an optional window override and switches to skip the email and the list.
 
 ### One-time setup
 
@@ -32,6 +35,8 @@ It can also be run by hand from the Actions tab, with an optional window overrid
    | `NEWSRING_EMAIL_TO` | email | Recipients, comma separated. A secret so a public repository does not publish its readers' addresses. |
    | `EMALIA_ADDRESS` | email | The sending mailbox. |
    | `EMALIA_PASSWORD` | email | That mailbox's app password. |
+   | `NEWSRING_BROADCAST_URL` | list | The subscriber service's broadcast endpoint, for example `https://<host>/news/api/broadcast`. Leave it unset and the list job skips itself. |
+   | `NEWSRING_BROADCAST_TOKEN` | list | The bearer token that service was deployed with. The same value is `NEWS_BROADCAST_TOKEN` on the host. |
 
    and optionally the variable `EMALIA_PROVIDER` (defaults to `gmail`).
 4. Run the workflow once by hand to check it.
@@ -41,7 +46,8 @@ It can also be run by hand from the Actions tab, with an optional window overrid
 - **Scheduled runs are not exact.** GitHub queues `schedule` events. They commonly start 5 to 30 minutes late, and the first scheduled run of this workflow started 4.5 hours late. A late run loses no news, since every run reads a fixed 72 hours.
 - **Schedules pause on inactive repositories.** GitHub disables scheduled workflows in a public repository after 60 days without activity. The daily commit should keep the repository active; if the schedule is ever disabled, re-enable it from the Actions tab.
 - **The bot's commits do not trigger CI.** Pushes made with the workflow's own token never start other workflows.
-- **Logs are public** on a public repository. NewsRing logs model and key *numbers* when failing over, and the number of email recipients, never keys or addresses.
+- **Logs are public** on a public repository. NewsRing logs model and key *numbers* when failing over, and the number of email recipients, never keys or addresses. The list job is built the same way: it sends a date and receives three counts, so there is no address for it to print even by accident.
+- **The public list is not in this repository.** Subscribers, confirmations and unsubscribes all live in the `news/` service in the website repository. If that service is down, the list job fails and nothing else does; the digest, the site and the author's own copy are unaffected.
 - **Traces are off in CI** (`RAILTRACKS_DISABLE_EVENTS=true`), since the runner is discarded after each run.
 
 ## Always-on host

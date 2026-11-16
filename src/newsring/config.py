@@ -194,6 +194,34 @@ class EmailDelivery(_Strict):
     subject_prefix: str = "NewsRing: "
 
 
+class BroadcastDelivery(_Strict):
+    """Hand the public copy of a digest to the subscriber service.
+
+    The public mailing list is not kept in this repository and never reaches
+    this process. A separate service holds the addresses, the confirmations and
+    the unsubscribes; all a run does is tell it that a new digest is published,
+    and the service fetches `broadcast_today.json` from the site and sends it.
+    So a broadcast costs nothing per subscriber here, and a public CI log has
+    nothing to leak.
+
+    Attributes:
+        enabled: Whether `newsring broadcast` is expected to do anything. A run
+            never broadcasts on its own: the scheduled workflow does it in a
+            step of its own, after the site is deployed, so the message's web
+            link and the file it is read from are both live.
+        url_env: Environment variable holding the service's broadcast endpoint.
+        token_env: Environment variable holding the bearer token it expects.
+            Kept out of the config file so the file can be committed.
+        timeout_s: How long to wait. Sending to a whole list happens inside the
+            request, so this is minutes rather than seconds.
+    """
+
+    enabled: bool = False
+    url_env: str = "NEWSRING_BROADCAST_URL"
+    token_env: str = "NEWSRING_BROADCAST_TOKEN"
+    timeout_s: float = Field(default=300.0, gt=0)
+
+
 class DeliverySettings(_Strict):
     """Where a finished digest goes.
 
@@ -211,6 +239,7 @@ class DeliverySettings(_Strict):
         project_url: Where readers can get their own feed, shown on the card,
             the site and in email.
         email: Email delivery settings.
+        broadcast: Public mailing list settings.
     """
 
     archive_dir: Path = Path("news")
@@ -220,6 +249,7 @@ class DeliverySettings(_Strict):
     site_title: str = "NewsRing"
     project_url: str = "https://github.com/CoronRing/NewsRing"
     email: EmailDelivery = EmailDelivery()
+    broadcast: BroadcastDelivery = BroadcastDelivery()
 
     @property
     def public_url(self) -> str:

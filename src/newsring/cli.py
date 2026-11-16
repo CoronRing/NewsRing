@@ -222,6 +222,49 @@ def email(
 
 
 @app.command()
+def broadcast(
+    config_path: Path = ConfigOption,
+    day: str | None = typer.Option(
+        None, "--date", help="Digest date (YYYY-MM-DD). Defaults to the newest."
+    ),
+) -> None:
+    """Send an archived digest to the public mailing list.
+
+    This does not send anything itself. The subscriber service holds the list
+    and does the sending; this tells it that a digest is published and reports
+    what it did. Run it after the site is deployed, because the service reads
+    the message from the site.
+    """
+    config = _load(config_path)
+    logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
+    from newsring.deliver import DeliveryError, send_broadcast
+    from newsring.history import list_records
+
+    if not config.delivery.broadcast.enabled:
+        typer.echo("Broadcast is disabled in the configuration.")
+        return
+    records = list_records(config.resolve(config.delivery.archive_dir))
+    record = next((r for r in records if day is None or r.date == day), None)
+    if record is None:
+        typer.echo(f"No archived digest{' for ' + day if day else ''}", err=True)
+        raise typer.Exit(code=1)
+    if not record.stories and not record.quick_hits:
+        typer.echo(f"The {record.date} digest has no stories; broadcast skipped.")
+        return
+    try:
+        result = send_broadcast(record, config)
+    except DeliveryError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+    sent = result.get("sent", "?")
+    skipped = result.get("skipped", 0)
+    failed = result.get("failed", 0)
+    typer.echo(
+        f"Broadcast the {record.date} digest: {sent} sent, {skipped} already had it, {failed} failed"
+    )
+
+
+@app.command()
 def version() -> None:
     """Print the NewsRing version."""
     typer.echo(__version__)
