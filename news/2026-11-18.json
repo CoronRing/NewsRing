@@ -1,0 +1,736 @@
+{
+  "date": "2026-11-18",
+  "generated_at": "2026-11-18T23:25:32.412743Z",
+  "title": "Agent Bottlenecks, Sandboxed MoEs, and Automated Outages",
+  "intro": "Today's updates span frontier releases, harness memory frameworks, and local MoE inference hacks. We also take a hard look at why AI coding agents are inflating code review backlogs and causing high-profile IT outages. Grab your coffee while we sort through the engineering signal.",
+  "stories": [
+    {
+      "headline": "Google Drops Gemini 4 Neon with Antigravity Harness Integration",
+      "summary": "Google DeepMind released Gemini 4 Neon, a frontier model featuring a 1-million-token context window priced at $3 per million input tokens ($0.15 cached) and $15 per million output tokens. The model scored 61 on the Artificial Analysis Intelligence Index at its xhigh setting and reached 58.6 on the Artificial Analysis Coding Agent Index. In multi-agent workflows, Neon can act as an orchestrator directing parallel Hydrogen subagents in Google Antigravity, where its SWE-sweep score jumps from 12.8% on mini-SWE to 39.0%. DeepMind also reported its lowest fabrication rate to date in internal Antigravity evaluations.",
+      "why_it_matters": "DeepMind's orchestrator tooling and harness-specific benchmark gains provide clear data for multi-agent system design.",
+      "reason": "Google DeepMind has released Gemini 4 Neon, introducing its latest model iteration across multimodal and reasoning benchmarks.",
+      "item": {
+        "key": "blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Gemini 4 Neon",
+        "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50552424",
+        "published": "2026-11-18T21:34:07Z",
+        "summary": "hero image for Gemini 4 Neon",
+        "content": "Introducing Gemini 4 Neon\nToday, we’re introducing Gemini 4 Neon — bringing frontier-level intelligence with fast end-to-end task completion across complex software engineering, knowledge work, and science workflows.\nNeon ranks ahead of comparable models and #3 overall with a score of 61 on the Artificial Analysis Intelligence Index at its xhigh thinking level, landing just behind larger, slower models. On the Vals Index, Neon ranks #2 and lands on the Pareto frontier. Beyond just pushing on raw model capability, we’re continuing to make our models better to work with, Neon ranks #2 on steerability (adapting cleanly to mid-task user corrections) on the new Agent Arena Index. Neon also excels at multi-step instruction following and builds on our ongoing progress to curb fabrication, recording our lowest fabrication rate yet in internal Google Antigravity testing.\nThe model is priced at $3 per million input tokens ($0.15 per million cached input tokens, a 95% discount) and $15 per million output tokens, with a 1 million-token context window.\nGemini 4 Neon is rolling out today in the Gemini API in Google AI Studio, Gemini for business (via API and model dropdown), for paid Google AI Pro and Ultra subscribers in Google Antigravity, and for Pro and Ultra subscribers in the Gemini app.\nDelivers across enterprise, analytical, and scientific work\nEnterprise work lives in spreadsheets, PDFs, charts, audio, and video. Neon can synthesize across all of these inputs in a single 1 million-token context window and turns inputs into structured deliverables. Independent evaluations rank Neon as one of the top models and on benchmarks like the Vals Index, it ranks #2 (70.9%), and reaches #1 on both the Legal Research Bench and Tax Agent Bench.\nNeon also shows strong wins across categories on Surge AI, ranking #1 on most benchmarks across finance, accounting, spreadsheet modeling, and complex constraint following. It also scores 73.5% on Chartography for reading dense professional charts and performs on par with leading models on Agents' Last Exam v1.1 (75.8%). It achieves #1 overall on both Zapier’s AutomationBench (56.3%) and Andon Labs' Vending-Bench 2 ($16,843), a long-horizon simulation of running a business. Finally, it debuts #2 globally with a score of 1336 on Arena's new Agent Arena Index across 4,200+ real-world agent sessions.\nOn scientific and mathematical reasoning, spanning quantitative analysis, mathematics, and technical research problems, Neon is best in class on Terminal-Bench Science (70.5%), RiemannBench (84.0%), and HLE-Diamond (71.3%).\nBuilt for production-ready code\nEngineered for long-running agent workflows, Neon sustains performance through complex, tool-heavy tasks end-to-end — whether running standalone or acting as a fast, high-judgment Orchestrator directing parallel Hydrogen subagents in Google Antigravity. It cuts down on redundant file reads, shares progress as it works, and handles context compaction reliably in long sessions.\nAcross core developer and researcher workflows, Neon achieves frontier performance and is competitive with the leading models in its class, ranking #1 overall on the Artificial Analysis Coding Agent Index (58.6), with a score of 65.2% on Terminal-Bench 4.1 and 46.2% (at its default high setting) on FrontierCode 2.0. For production-ready code, Neon handles multi-file debugging and refactoring across repositories with targeted, surgical edits. On SWE-sweep, it already leads on the mini-SWE harness (12.8%) and more than triples to a state-of-the-art 39.0% in Google Antigravity showing what the Antigravity harness unlocks.\nBrings efficiency and control to production-grade workflows\nWe’re refining thinking levels with each new model release to give teams finer control and a smoother progression from one tier to the next. Neon’s four levels scale steadily, letting teams dial intelligence and token spend to what each workload needs.\nNeon delivers high performance at a lower cost per task across third-party benchmarks. At its default high thinking level, it pairs a high Artificial Analysis Intelligence Index score with a 32% lower cost per task than Carbon. It also sits on the Pareto frontier on both the Vals index and Agent Arena at high, with roughly 50% to 80% lower cost per task than top competing frontier models. xhigh thinking adds deeper, multi-step reasoning for the hardest engineering, analytical, and scientific workloads. Neon shows its highest intelligence score here, while still costing 36%+ less per task than competing models at their highest setting.\nBuilt for fast, efficient, frontier-level cyber defense\nAs agentic coding scales, generating secure code from the start is critical. Gemini 4 Neon for cyber produces more secure code than Carbon across all easy, medium, and hard challenges on AutoBaxBench, achieving state-of-the-art on the hard tier (76%).\nSecuring systems also means proactively finding flaws before attackers do. Penetration testing has served as a cornerstone of enterprise cybersecurity. On WebExploitBench v1.2, Neon is state-of-the-art (51.26%) at half the cost of competing large models.\nTo fortify existing code, Neon for cyber delivers frontier-level performance across the code hardening lifecycle — vulnerability finding, validating, and patching — all while being faster and more cost efficient than large frontier models.\n- Finding code vulnerabilities: Neon achieves state-of-the-art performance on SEC-bench Pro (90.5%), while costing roughly half as much per challenge.\n- Validating risk through exploitation: To prioritize which vulnerabilities to remediate, defenders rely on models to check which vulnerabilities are exploitable. On ExploitGym, it achieves frontier-level performance using half the tokens of Carbon.\n- Patching vulnerabilities: Fixing the root cause of vulnerabilities is a critical step in the cybersecurity defense lifecycle. Neon reaches 70.7% on Collinear’s CWE-bench v2, driving a 3.4% uplift over…",
+        "score": 295.0,
+        "comments": 286,
+        "also_in": [
+          "Hacker News front page",
+          "Google Gemini Blog"
+        ]
+      },
+      "related": [
+        {
+          "key": "deepmind.google/blog/introducing-gemini-4-neon",
+          "source": "Google DeepMind",
+          "tags": [
+            "lab"
+          ],
+          "title": "Introducing Gemini 4 Neon",
+          "url": "https://deepmind.google/blog/introducing-gemini-4-neon/",
+          "discussion_url": null,
+          "published": "2026-11-18T21:35:43Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "OpenAI Outlines Operating-System Sandboxing Mechanics in Codex",
+      "summary": "OpenAI published technical details on how Codex executes commands on local developer machines while enforcing security limits. The breakdown details the operating-system-level sandboxing mechanisms used to restrict filesystem and network access across macOS, Linux, and Windows environments. This architecture allows autonomous agents to execute local commands without granting unrestricted system access.",
+      "why_it_matters": "Understanding OS-level sandboxing mechanics is critical for safely deploying local code-executing LLM agents.",
+      "reason": "OpenAI details the operating-system-level sandboxing mechanics Codex uses to restrict filesystem and network access during autonomous agent code execution.",
+      "item": {
+        "key": "openai.com/index/inside-the-codex-sandbox",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Inside the Codex sandbox",
+        "url": "https://openai.com/index/inside-the-codex-sandbox",
+        "discussion_url": null,
+        "published": "2026-11-18T08:00:00Z",
+        "summary": "See how Codex runs commands on your machine while enforcing the filesystem and network limits you control across macOS, Linux, and Windows.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "1,200-Task RL Boosts Qwen3.8 on Terminal-Bench 4.1",
+      "summary": "RadixArk released DaisyRose-27B, a Qwen3.8-27B derivative fine-tuned via reinforcement learning on 1,200 curated long-horizon tasks over 18 days on 144 H200 GPUs. The model increased its pass@1 score on Terminal-Bench 4.1 from 5.6% to 12.0% across sessions lasting up to 1M tokens. Training relied on their open-source Miles framework in asynchronous mode, hitting 37% model FLOPs utilization and reducing training costs by 57% compared to Megatron baselines. The team also ran roughly 944,000 sandboxes via AgentENV, keeping cloud sandbox infrastructure costs 80% lower through dynamic memory allocation.",
+      "why_it_matters": "It demonstrates how targeted post-training RL and dynamic sandbox infrastructure can dramatically improve open-weight CLI agent performance.",
+      "reason": "This open post-training release demonstrates how a 1,200-task RL pipeline more than doubles Qwen3.8 performance on CLI-based agent benchmarks like Terminal-Bench 4.1.",
+      "item": {
+        "key": "radixark.com/blog/daisyrose-27b",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "DaisyRose-27B: 1,200-task RL took Qwen3.8 from 5.6% to 12% on Terminal-Bench 4.1",
+        "url": "https://www.radixark.com/blog/daisyrose-27b",
+        "discussion_url": "https://news.ycombinator.com/item?id=50551046",
+        "published": "2026-11-18T19:39:16Z",
+        "summary": "Comments",
+        "content": "All posts\nDaisyRose-27B: Pushing the Frontier of Post-Training Efficiency\nToday we are releasing DaisyRose-27B, RadixArk’s first model, built on Qwen3.8-27B and trained with reinforcement learning using Miles. We trained it on long-horizon agent tasks with sessions up to 1M tokens, with just 1,200 curated tasks in 18 days on 144 H200 GPUs. DaisyRose-27B improves Terminal-Bench 4.1 pass@1 from 5.6% to 12.0%. Beyond Terminal-Bench 4.1, it also delivers gains on a variety of other reasoning, instruction following, and coding benchmarks.\nWe are releasing BF16, FP8, and NVFP4 checkpoints for everyone to try and build on. In this post, we explain how carefully designed tasks and efficient infrastructure made these gains possible on a limited compute budget.\nDaisyRose-27B scores higher than the original Qwen3.8-27B model on every benchmark above1. The largest gain is on Terminal Bench 4.1, a notoriously hard long-horizon benchmark. Our magic lies in the following three key ingredients: high-quality training data, efficient training backend, and robust sandboxes.\nHigh-quality Training Data\nWe built the tasks in partnership with Eigent AI, starting from Eigent AI’s large pool of tasks in machine learning, software engineering, science, and other fields. Together we built thousands of candidates. About 1,200 of them made it into the final training set. The training tasks are selected based on three criteria.\n- Each task targets a mistake the original model makes. We ran the original Qwen3.8-27B on every training task and carefully redesigned each one so that it brings out the mistakes we want the model to stop making. We then tuned each task until its solve rate fell within a suitable range, neither too easy nor too hard for the model to learn from.\n- Every task is a long job with several problems chained together. Each task entails a chain of interdependent problems, so an agent has to navigate through multiple stages of reasoning, planning, and execution. Each attempt gets up to 1.5 hours in the sandbox, with more than 100 tool-calls and more than 256k output tokens.\n- There is no room for reward hacking. We reviewed every task along with the model's attempts at it. Any task that could be passed without really solving it, or that had a design flaw, was fixed or removed before training.\nEfficient training backend\nRadixArk trained DaisyRose-27B with Miles, our open-source reinforcement learning framework for large-scale model post-training, in fully asynchronous mode: the agent keeps working while the model learns, and neither waits for the other. While 128 H200s run the inference on agent tasks, 16 more run the trainer and learn from the trajectories. After every step, the updated model goes out to the 128 GPUs that run the agent. The learning runs on our internal training backend, which is built for agent training: each step learns from a handful of very long sessions, some as long as 1M tokens, folded into multiple trajectories via harness summarization.\n57% lower training cost. On this release, 37% of each GPU's peak compute went into useful training work (model FLOPs utilization, or MFU) on our backend. The open-source trainer, built on Megatron, reached 16% on comparable runs. So the same training needs 57% less GPU time. The gain is even larger on mixture-of-experts models: 6.2× on Qwen3.6-35B-A3B, and more than 10× on the roughly 300B-parameter GLM-5.3-Flash.\n2× faster end to end. Counting the time the agent spends on its tasks, the release run trained on about 16,800 tokens per second across its 144 GPUs. The open-source trainer reached about 8,300 on the same GPUs.\nStable over weeks. The release run trained for weeks on 144 H200s, 63,000 GPU-hours in total. From the first step to the last, its speed and efficiency held steady.\nRobust sandbox service\nDuring training, every attempt the agent makes runs in a sandbox: a fresh copy of the task's environment where the agent runs commands, edits files, and is then graded. All of the RadixArk team's work on this release ran in sandboxes on our own service, built on the open-source AgentENV project, to which we also contribute fixes. Between mid-September and mid-November, the service ran about 944,000 sandboxes for this project, with up to 1,566 running at the same time.\nReliable as it grew. The service grew from a single machine to as many as 12. We shipped ten upgrades to it, nearly all of them while training was running. Across all nine weeks, 99% of sandbox creations succeeded, and since late October more than 99.95% have. Getting there took a steady stream of fixes and improvements, such as keeping a machine from freezing when it runs out of memory.\n80% lower cost. Our cloud infrastructure cost for the project's sandboxes was about 80% lower than the cost of running the same sandboxes with popular cloud sandbox providers. One way we keep costs down is to give each sandbox memory that grows and shrinks with what it actually uses. A sandbox usually uses only a small part of the memory it asks for, so each machine can run many more sandboxes.\nTry DaisyRose-27B, or train your own\nYou can download DaisyRose-27B from Hugging Face, and you can train your own agents with our open source reinforcement learning framework Miles.\nDaisyRose-27B is one example of what high-quality data and efficient infrastructure can make possible. We are bringing this approach to teams building specialized models, with a focus on improving the capabilities they need while preserving the model’s broader strengths. If you are exploring post-training for your own model, reach out at contact@radixark.ai.\nWe are deeply grateful to Eigent AI for working closely with us on training data, and to the Qwen team for creating Qwen3.8-27B, the foundation of our work. We also thank the Miles and SGLang communities, as well as other open-source projects, including slime, AgentENV, and Harbor.\n- How we evaluated: Terminal Bench 4.1 is averaged over 8 runs per task, using our internal…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "huggingface.co/blog/RadixArk/daisyrose-27b-pushing-the-frontier-of-post-trainin",
+          "source": "Hugging Face Blog",
+          "tags": [
+            "lab",
+            "open-source"
+          ],
+          "title": "DaisyRose-27B: Pushing the Frontier of Post-Training Efficiency",
+          "url": "https://huggingface.co/blog/RadixArk/daisyrose-27b-pushing-the-frontier-of-post-trainin",
+          "discussion_url": null,
+          "published": "2026-11-18T19:54:56Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "On-Policy Distillation Alters ReAct Interaction Patterns",
+      "summary": "A new paper analyzes how on-policy distillation (OPD) reshapes ReAct reasoning and tool-calling behaviors across mathematical, embodied, and multi-turn benchmarks. While general-reasoning supervision boosted math accuracy from 16.7% to 38.0% and dropped mathematical tool attempts from 70.4% to 14.4%, domain-specific ALFWorld supervision caused τ^2-bench accuracy to collapse from 41.5% to 6.6%. The performance drop was accompanied by frequent tool calls that violated user-information dependencies. To mitigate negative transfer, the authors implemented selective OPD based on teacher preference shifts, recovering τ^2 accuracy to 29.9%.",
+      "why_it_matters": "This research highlights catastrophic negative transfer and degraded tool-calling mechanics when fine-tuning agents across disparate domains.",
+      "reason": "This research analyzes how on-policy distillation reshapes LLM ReAct interaction patterns and tool-calling behaviors across multi-turn agent benchmarks.",
+      "item": {
+        "key": "arxiv:2611.19244",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Agentic On-Policy Distillation Implicitly Reshapes LLMs' ReAct Patterns",
+        "url": "https://huggingface.co/papers/2611.19244",
+        "discussion_url": null,
+        "published": "2026-11-18T00:00:00Z",
+        "summary": "On-policy distillation (OPD) transfers specialized capabilities to language-model agents, but its cross-domain effects on interaction remain unclear. We investigate how OPD reshapes ReAct interaction patterns across mathematics, ALFWorld, and τ^2-bench, focusing on reasoning, actions, and observation acquisition. General-reasoning supervision reduces mathematical tool attempts from 70.4% to 14.4% while increasing accuracy from 16.7% to 38.0%; code-interpreter supervision improves household actions and retail queries. In contrast, ALFWorld supervision reduces τ^2-bench accuracy from 41.5% to 6.6%, accompanied by frequent tool calls that violate user-information dependencies. To address negative transfer using only source-domain training trajectories, we explore selective OPD guided by teacher preference changes before and after domain-specific RL. Retaining the top 95% of positions raises τ^2 accuracy from 11.5% to 29.9% with a source-learning trade-off.",
+        "content": "Agentic On-Policy Distillation Implicitly Reshapes LLMs' ReAct Patterns\nAbstract\nOn-policy distillation can improve or degrade language-model agent interaction across domains, and selectively retaining teacher-preferred positions mitigates negative transfer at a cost to source-domain learning.\nOn-policy distillation (OPD) transfers specialized capabilities to language-model agents, but its cross-domain effects on interaction remain unclear. We investigate how OPD reshapes ReAct interaction patterns across mathematics, ALFWorld, and τ^2-bench, focusing on reasoning, actions, and observation acquisition. General-reasoning supervision reduces mathematical tool attempts from 70.4% to 14.4% while increasing accuracy from 16.7% to 38.0%; code-interpreter supervision improves household actions and retail queries. In contrast, ALFWorld supervision reduces τ^2-bench accuracy from 41.5% to 6.6%, accompanied by frequent tool calls that violate user-information dependencies. To address negative transfer using only source-domain training trajectories, we explore selective OPD guided by teacher preference changes before and after domain-specific RL. Retaining the top 95% of positions raises τ^2 accuracy from 11.5% to 29.9% with a source-learning trade-off.\nCommunity\nOn-policy distillation (OPD) transfers specialized capabilities to language-model agents, but its cross-domain effects on interaction remain unclear. We investigate how OPD reshapes ReAct interaction patterns across mathematics, ALFWorld, and τ2-bench, focusing on reasoning, actions, and observation acquisition. General-reasoning supervision reduces mathematical tool attempts from 70.4% to 14.4% while increasing accuracy from 16.7% to 38.0%; code-interpreter supervision improves household actions and retail queries. In contrast, ALFWorld supervision reduces τ2-bench accuracy from 41.5% to 6.6%, accompanied by frequent tool calls that violate user-information dependencies. To address negative transfer using only source-domain training trajectories, we explore selective OPD guided by teacher preference changes before and after domain-specific RL. Retaining the top 95% of positions raises τ2 accuracy from 11.5% to 29.9% with a source-learning trade-off.\nThe drop from 41.5% to 6.6% on τ^2-bench after ALFWorld supervision is the number that stuck with me. I'd like to know if the extra tool calls that break user-information dependencies show up from the first turns, or only after a few steps. Did you look at when in the trajectory the violations start?\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 7.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Airbnb Tracks Cost-Per-Task for Bedrock Coding Agents",
+      "summary": "Airbnb published its operational engineering framework for managing foundation models behind its internal AirChat coding assistant via Amazon Bedrock. To navigate frequent model releases, Airbnb pairs pre-rollout task evaluations with production CloudWatch metrics like InvocationLatency, OutputTokenCount, and EstimatedTPMQuotaUsage. They explicitly measure cost per task—the list-price token cost needed for an agent to complete a task—to set model defaults and effort ceilings. Real-time production gateway logs allow them to adjust default models and maximum reasoning efforts whenever operational usage diverges from offline evals.",
+      "why_it_matters": "It offers a clear production blueprint for balancing model evaluation against token spend when deploying coding agents at scale.",
+      "reason": "Airbnb details its evaluation methodology and observability patterns for choosing model backends to balance cost-per-task against task accuracy for production coding agents.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/how-airbnb-uses-cost-per-task-to-operate-coding-agents-on-amazon-bedrock",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "How Airbnb uses cost per task to operate coding agents on Amazon Bedrock",
+        "url": "https://aws.amazon.com/blogs/machine-learning/how-airbnb-uses-cost-per-task-to-operate-coding-agents-on-amazon-bedrock/",
+        "discussion_url": null,
+        "published": "2026-11-18T21:48:19Z",
+        "summary": "Airbnb runs evals on real engineering tasks and uses Amazon Bedrock observability to choose models for its coding agents and control production costs. This post shows how cost per task guides model selection, why production spending can differ from eval results, and how to monitor latency, manage quotas, and attribute spend.",
+        "content": "Amazon Bedrock provides access to foundation models from multiple providers through a common API, with AWS managing the model infrastructure. It integrates with AWS access controls and monitoring, and processes prompts, code, and model responses within AWS.\n\nAs coding agents move into production, changes in models and usage can affect latency, capacity, and cost. Amazon Bedrock runtime metrics in Amazon CloudWatch help teams investigate latency increases, throttling, and changes in token consumption. Evaluations, or evals, complement these operational metrics by assessing the quality of an agent’s work on a fixed set of representative tasks.\n\nIn this post, we show how Airbnb evaluates models for coding agents and monitors their use on Amazon Bedrock. We explain how cost per task guides model selection and how production data helps us revisit those choices as usage changes. We also describe the runtime signals used to investigate latency, throttling, and spend.\n\nAt Airbnb, thousands of engineers and engineering-adjacent people use AirChat, our internal tool for running coding agents, every week. The agents send their model requests through our large language model (LLM) gateway, which runs on Amazon Bedrock. Bedrock processes Airbnb’s code, prompts, and model responses within AWS. Eight new models came out in about five weeks. By mid-October, about two thirds of the requests our engineers sent through coding agents went to those new models.\n\nEach release can change output tokens, cost, latency and capacity at once, and the benchmark charts published with a launch don’t show how a model handles our engineers’ work. So we run two systems side by side. Before a rollout, we run evals on our own tasks to measure each model’s score and cost per task. Cost per task is the list-price cost of all the tokens an agent uses to finish one task.\n\nAfter a rollout, observability shows us what changed in production. When production usage doesn’t match the eval results, we find out why.\n\nSolution overview\n\nYou can diagnose most production problems with a few signals in the AWS/Bedrock namespace in CloudWatch:\n\nLatency: InvocationLatency , TimeToFirstToken , OutputTokenCount , and output tokens per second (OTPS), which you derive.\n\nThrottling: InvocationThrottles , plus the tokens each request reserves against your quota, which you publish yourself. Bedrock also publishes EstimatedTPMQuotaUsage , which measures your estimated tokens per minute (TPM) quota consumption, including cache write tokens and output burndown multipliers, across all inference APIs ( Converse , InvokeModel , ConverseStream , and InvokeModelWithResponseStream ). You can use this metric to set proactive alarms before reaching your quota limit, track your quota consumption across your models, and request further quota increases before usage is rate limited.\n\nCost: InputTokenCount (uncached input), CacheReadInputTokenCount , CacheWriteInputTokenCount and OutputTokenCount , each priced at its own rate. Cache reads cost less than uncached input, and cache writes can cost more depending on the model. A lower cache hit rate can increase cost per request.\n\nOn top of these metrics, we add cost per task. Our evals measure a score and a cost per task for every model and every reasoning effort we allow. Reasoning effort is a setting that controls how much a model reasons before it responds. We use the results to choose each default, which is the model and effort that our coding tools use unless an engineer picks another, and each effort ceiling, which is the highest effort we allow for a model.\n\nArchitecture\n\nEngineers run AirChat on their AirDev workspaces, which are personal development machines in the cloud. They can also hand a task to AirChat Remote, which runs cloud agents in separate cloud workspaces while the engineer does something else. Both paths go through our LLM gateway to Amazon Bedrock.\n\nFigure 1 shows how AirChat and AirChat Remote reach Amazon Bedrock through our gateway. It also shows how evals and production monitoring guide model defaults and effort ceilings.\n\nFigure 1: Coding agents and cloud agents call Amazon Bedrock through our LLM gateway. Our usage records and CloudWatch metrics show real use, and we use eval results to set defaults and effort ceilings\n\nThe gateway records the model, client, team, and user for each request. We use these records only in aggregate, for cost and capacity planning. CloudWatch supplies token counts, latency, errors, and throttles. We compare those production signals with our eval scores and cost per task to decide when defaults or effort ceilings need to change.\n\nPrerequisites\n\nOn the AWS side, you need:\n\nAccess to the models in Amazon Bedrock you plan to run and evaluate. For model availability by AWS Region, see Regional availability by models in the Amazon Bedrock User Guide.\n\nStreaming calls through ConverseStream or InvokeModelWithResponseStream . Bedrock publishes TimeToFirstToken only for the streaming APIs.\n\nModel invocation logging, turned on in every AWS Region you call. It’s off by default. The logs can hold full prompts and responses along with the caller’s identity, so restrict who can read them and set a retention period.\n\nTagged IAM roles for your callers, with cost allocation tags activated. Activate them before you start collecting, because activation doesn’t backfill earlier costs.\n\nYou also need three things of your own:\n\nA set of tasks from your own engineering work. Give each one a starting repository state, the prompt an engineer would write and a grader you trust. A grader is the program or model that scores the agent’s work. We build our tasks from real code changes, the review comments on those changes and the decisions that the original ticket didn’t spell out. Step 2 shows one.\n\nA gateway or proxy in front of Bedrock that records the model, the client, the team, the user and the token counts for each request.\n\nA table of public list prices for every model you run, with a date on each entry, so you can price eval tokens and production tokens on the same basis.\n\nBefore rollout, define what the agents can access and which actions need human review. Run code in isolated workspaces and test generated changes before merging. Amazon Bedrock Guardrails can help filter harmful content and sensitive information in prompts and responses. For responses based on supplied reference material, contextual grounding checks can flag unsupported claims. Test these controls on your own tasks and include their latency and cost in your measurements.\n\nWalkthrough\n\nStart by measuring what a complete task costs. Then use those results to choose model defaults, check production behavior, manage capacity, and attribute spend.\n\nStep 1: What does one finished task cost you?\n\nA coding agent takes many requests to finish one task, and on each request the model re-reads the context so far. So we price the whole task.\n\nBedrock reports four kinds of tokens for each request: uncached input, cache reads, cache writes and output. In an eval run we price all four for every request and add up the requests in the task. Every cost in this post uses the public list prices dated for that run. We record the average cost next to the score for every model, reasoning effort and agent client we test, and the average includes low-scoring attempts.\n\nReasoning effort changes both score and cost. On one model we tested, moving from low to high effort raised the score by 0.8 points. Cost per task was 2.5 times as high. We use these results to set effort ceilings, which the gateway enforces.\n\nStep 2: How fast can you evaluate a new model?\n\nOn the afternoon a new model came out, a single request to our agents started an eval campaign, which runs the new model through all our task suites. A suite is a fixed set of tasks of one type, and we have seven. Agents spread hundreds of tasks across the suites and several cloud workspaces, and each result appeared as soon as a grader scored…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Automated AI Vulnerability Patches Trigger Enterprise Outages",
+      "summary": "Wall Street executives and the NSA notified Congress that recent nationwide tech outages—including flight groundings, banking downtime, and NSA network degradation—were caused by automated AI patch deployments rather than cyberattacks. Organizations using advanced AI to scan legacy codebases discovered massive vulnerabilities and rushed to push automated fixes faster than existing infrastructure could handle. Secretary of Homeland Security Markwayne Mullin noted that pushing automated software updates to legacy hardware overwhelmed critical systems. Officials expect similar operational disruptions to continue as enterprises struggle to safely deploy high-volume automated remediation.",
+      "why_it_matters": "A stark real-world warning of what happens when autonomous patch generation bypasses robust staging and rate-limiting controls.",
+      "reason": "A major operational incident report highlights how autonomous AI-driven code patching has caused widespread outages across enterprise systems.",
+      "item": {
+        "key": "washingtonsun.com/technology/bank-ceos-nsa-tell-congress-ai-driven-patches-behind-outages",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Bank CEOs, NSA Tell Congress That AI-Driven Patches Are Behind Outages",
+        "url": "https://www.washingtonsun.com/technology/bank-ceos-nsa-tell-congress-ai-driven-patches-behind-outages",
+        "discussion_url": "https://news.ycombinator.com/item?id=50540836",
+        "published": "2026-11-18T01:45:11Z",
+        "summary": "",
+        "content": "Wall Street executives and the National Security Agency have told members of Congress that this week’s widespread tech outages were caused by attempts to fix vulnerabilities identified by artificial intelligence, according to three sources familiar with the private conversations.\nOver the last few days, the country has faced a series of startling tech failures, leading to a pause in all flights nationwide, customers being unable to access their bank accounts and a highly classified communications network at the National Security Agency going down.\nWhile it does not appear that these disruptions were caused by a cyberattack, government and banking officials have told lawmakers that they stem from attempts to fix gaps in cyber defenses identified by AI models, the sources said. The fixes, however, temporarily overwhelmed the systems.\n“These models are identifying massive vulnerabilities, and that increases the urgency to patch right away,” said one congressional official briefed on the matter. “They’re trying to push through a lot of patches all at once — more than the system was designed for.”\nTrending\nOn Monday, banks such as JP Morgan Chase blamed software-related bugs for the service issues. On Tuesday, the NSA said that “scheduled routine maintenance” was responsible for the “temporary degradation” of some of its networks. Secretary of Homeland Security Markwayne Mullin told CNBC on Tuesday that “they’re pushing new technology on top of really old computer systems, and it just seems to overwhelm the system. ... We’re going to see more of this as new technology rolls out.”\nPowerful companies and government agencies have increasingly trained the most powerful AI models on themselves, seeking to identify the vulnerabilities that others may weaponize against them. Once these gaps are identified, they are under immense pressure to patch them as soon as possible, knowing that malicious actors have access to comparable AI tools — or will soon.\nThis urgency is what has driven a wide range of public- and private-sector actors to rush fixes to their systems faster than they normally would, the sources said. But even entities with large resources, such as the nation’s top banks and the intelligence community, are finding it difficult to do so without accidentally causing outages. The sources spoke on the condition of anonymity to describe private conversations.\nThe outages rippled across the country this week. The Federal Aviation Administration canceled more than 20,000 flights as a result of the nationwide ground stop, according to The Wall Street Journal. Microsoft experienced a major outage of Outlook.\nMicrosoft blamed a technical defect for the disruption. It is also unclear what caused the FAA systems to go down.\n“There’s some sense in which this is reassuring, in that it means there’s not an attack. But it shows the extent to which safety critical infrastructure we rely on is based on software with large vulnerabilities on legacy systems,” said Nathan Calvin, the chief strategy officer at Encode. “Updating those is going to be a rocky process, and as we get more advanced models this won’t be a one and done thing — we’ll continue to find more vulnerabilities.”\nThe NSA did not immediately respond to a request for comment.",
+        "score": 95.0,
+        "comments": 56,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Self-Improvement Memory Preserves Harness Edits Across Models",
+      "summary": "Researchers from Google and Penn State introduced Self-Improvement Memory (SIM) to maintain harness optimizations when underlying policy models or benchmarks change. SIM groups harness edits by recurring problems and logs their rationale, predicted outcomes, actual outcomes, and context, allowing future optimizers to make informed revisions while policy weights stay frozen. Across four domains, SIM outperformed harness-only continuation baselines, yielding a statistically significant 2.36-point average improvement across ten coding runs. The strategy preserves optimization context without relying solely on raw harness code updates.",
+      "why_it_matters": "It introduces a structured methodology for preserving context in agent harness optimization when upgrading underlying LLMs or benchmarks.",
+      "reason": "This paper addresses agent harness optimization by introducing a self-improvement memory framework that tracks and adapts harness edits across changing policy models.",
+      "item": {
+        "key": "arxiv:2611.18856",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Self-Improvement Memory Enables Continual Recursive Self-Improvement",
+        "url": "https://huggingface.co/papers/2611.18856",
+        "discussion_url": null,
+        "published": "2026-11-18T00:00:00Z",
+        "summary": "Harness optimization is often studied with a fixed policy model and benchmark. When either changes, the optimizer must decide which parts of an evolved harness to reuse or revise, but the harness alone may not explain why earlier edits were made or how they performed. In this work, we study Continual Recursive Self-Improvement (CRSI), a setting for continuing existing harness-optimization methods across compatible benchmarks or policy models. We propose Self-Improvement Memory (SIM) for the harness optimizer, rather than the task-solving policy. SIM groups edits by recurring harness problem and records their rationale, predicted and observed outcomes, and evaluation context. New attempts extend this history as optimization continues. In our experiments across four domains, SIM achieves higher final scores than harness-only and root-cause-only continuation in cross-dataset and pairwise cross-model comparisons. Across ten independent source runs in coding, paired continuations with SIM improve final scores by an average of 2.36 points over harness-only continuation (p=0.003).",
+        "content": "Self-Improvement Memory Enables Continual Recursive Self-Improvement\nAbstract\nContinual recursive self-improvement lets harness optimizers reuse and revise prior edits across changing benchmarks or policy models by storing rationales, predicted and observed outcomes, and evaluation contexts in a self-improvement memory, improving final scores over continuation baselines.\nHarness optimization is often studied with a fixed policy model and benchmark. When either changes, the optimizer must decide which parts of an evolved harness to reuse or revise, but the harness alone may not explain why earlier edits were made or how they performed. In this work, we study Continual Recursive Self-Improvement (CRSI), a setting for continuing existing harness-optimization methods across compatible benchmarks or policy models. We propose Self-Improvement Memory (SIM) for the harness optimizer, rather than the task-solving policy. SIM groups edits by recurring harness problem and records their rationale, predicted and observed outcomes, and evaluation context. New attempts extend this history as optimization continues. In our experiments across four domains, SIM achieves higher final scores than harness-only and root-cause-only continuation in cross-dataset and pairwise cross-model comparisons. Across ten independent source runs in coding, paired continuations with SIM improve final scores by an average of 2.36 points over harness-only continuation (p=0.003).\nCommunity\nAuthor affiliations (as listed in the paper): Google Cloud AI · Google DeepMind · Google Cloud AI Research · The Pennsylvania State University.\nWe started with a practical question: after spending many rounds improving an agent’s harness, what should we carry forward when the model or benchmark changes?\nThe code is an obvious answer. But it often leaves out why a check was added, what a prompt change was meant to fix, or which earlier attempts failed. That history can matter when the next optimizer has to decide what to keep and what to revise.\nWe study Continual Recursive Self-Improvement (CRSI) and introduce Self-Improvement Memory (SIM). SIM groups harness edits by the problems they address and records their rationale, predicted and observed outcomes, and evaluation context. The components proposing and selecting edits both read this history. New attempts extend it as optimization continues, while the task-solving model’s weights stay frozen.\nOur comparisons start from the same source-evolved harness, with matched target tasks, policy, optimization rounds, and candidate budgets. Across four domains, full SIM achieves higher final scores than harness-only and root-cause-only continuation in the six cross-dataset and four Opus-to-Gemini comparisons we test.\nWe also run ten independent coding source optimizations, each followed by paired continuations with and without SIM. SIM finishes ahead in nine pairs, with a mean gain of 2.36 score points (95% CI: 1.05–3.68; p = 0.003).\nThe setting requires compatible execution interfaces. Most main cross-domain comparisons use one run per condition, and matching rounds does not imply equal token or runtime cost. These results support carrying optimization history into continued search; they do not guarantee improvement on every transfer.\nThe images below show the idea and the coding results, including the negative pair. Happy to discuss the setup or hear how others preserve this kind of experience.\nThe project page is now live: https://lucasxinyu.github.io/sim/\nIt includes an interactive explanation of the memory record, paired coding results (including the negative pair), cross-dataset and cross-model comparisons, and links to the paper.\nStoring why an edit was made, its predicted outcome and the observed one seems like what an engineer would write in a lab notebook, so it makes sense that it helps continuation. The 2.36 points over harness-only is a clear result. I wonder if the predicted-versus-observed record matters most, or the rationale alone gets most of it. Did you ablate the fields?\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 29.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Hugging Face Hacks MoE Expert Offloading in Transformers",
+      "summary": "A technical post from Hugging Face explores MoE parameter streaming to enable large model inference on consumer devices with limited RAM. Standard Transformers offloading previously copied entire expert banks per layer on every token, creating severe PCIe and memory bottlenecks. By replacing the offload cache with a device slot pool preallocated across layers and remapping router expert IDs directly to those slots, the author enabled standard grouped_mm operations on cached experts. This tweak boosted OLMoE-1B-7B performance from 10.1 tok/s to 34.6 tok/s (approaching vanilla's 38.1 tok/s) and resulted in a pull request to Transformers.",
+      "why_it_matters": "Optimizing MoE expert offloading via shared slot pools directly addresses local inference constraints for memory-limited agent backends.",
+      "reason": "Hugging Face outlines memory-saving techniques to serve 180B-parameter Mixture-of-Experts models on devices with only 32GB of system RAM.",
+      "item": {
+        "key": "huggingface.co/blog/moe-expert-streaming",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "180B Parameters, 32GB of RAM: Pushing MoE Inference to the Limit with Transformers",
+        "url": "https://huggingface.co/blog/moe-expert-streaming",
+        "discussion_url": null,
+        "published": "2026-11-18T00:00:00Z",
+        "summary": "",
+        "content": "180B Parameters, 32GB of RAM: Pushing MoE Inference to the Limit with Transformers\nStreaming MoE experts directly from SSD gets within 6% of Strata on token generation.\nI've been trying to rely less on online models and run bigger ones locally. At home I have a PC with two RTX 4090s (let's call it Orthrus - the two-headed hound of Greek mythology), and for work I have a MacBook M5 with 32G of unified memory.\nOrthrus runs on Windows 11, because my kids play games all the time. I had a dual boot with Ubuntu, but their games ended up taking most of the two terabytes of disk.\nI am also a huge fan of RMD (rooms moving development): one hour in the kitchen sipping my coffee, two hours at my office desk, then the sofa. A fixed desktop tower is not for me.\nMy first experiment was to run Qwen 3.8 27B with llama.app on Orthrus and use\nit from my laptop through pi. That model does the coding tasks, an online\nmodel like Opus does the orchestration, and the second RTX runs a FIM model for\nauto-completion in Neovim.\nWhen I talked about this on social networks, I got very strong feedback: use Strata with Qwen3.8-Flash-Next.\nWhat is Strata?\nStrata is an inference engine for MoE models like Qwen. Only the hot experts stay in VRAM, the rest goes to RAM, or even to disk. Experts are 90%+ of a MoE model's weights, so a 180B model like this one can run on a GPU with much less memory. Like my RTX 4090!\nIt works on a laptop too, and I stumbled on this blog post doing exactly that: Qwen3.8-Flash-Next on a 32 GB Mac M4, faster than llama.cpp, at 13.5 tok/s.\nThat's too slow for how I use coding agents, but it's an interesting itch to scratch. A whole range of MoE models don't fit in a MacBook's unified memory and could run at a decent speed.\nHow do other engines offload?\nBefore committing to Strata, I looked at what llama.cpp, vLLM and Transformers do when a MoE model doesn't fit. Three questions matter: where do the experts live, where does the expert matmul run, and what moves on each token?\nllama.cpp maps the GGUF file with mmap and can keep the experts on the\nCPU (--cpu-moe, --n-cpu-moe N, -ot \"exps=CPU\", or --fit on to pick for\nyou). Those experts are also computed on the CPU, so only the activations\ncross PCIe, never the weights. Great when the experts fit in RAM. When they\ndon't, the page cache thrashes. A GPU expert cache (--moe-cache-mib) just\nlanded, but it fragments the graph (2 splits per token become 50) and loses\n~10% even when everything fits.\nvLLM's --cpu-offload-gb N puts N GB of weights in pinned RAM, and kernels\nread them in place over PCIe. For a MoE layer, that's only the routed experts,\nbut nothing is cached: a hot expert crosses PCIe again on every token, and\nthere's no disk tier. By default the offloaded weights include dense layers,\nread on every token; --cpu-offload-params experts keeps it to the experts. That fits vLLM's big\nbatches, which touch almost every expert anyway, less so one user on one GPU.\nTransformers offloads through Accelerate (device_map=\"auto\",\noffload_folder), one module at a time: hooks copy its weights to the GPU\nbefore forward. For a MoE, that module is a layer's whole expert bank, so\nevery token copies every expert of every offloaded layer to use 8 or 10 of them.\nNo cache, no notion of routing. And on a Mac, CPU and GPU share the same memory,\nso \"offload to CPU\" frees nothing.\nI ran all of them on Qwen3.6-35B-A3B on one A10G (24 GB), with plenty of RAM, and Harry Mellor reran vLLM with better flags:\nOffloading only the experts doubles vLLM's speed, and FP8 helps on top (half the bytes per expert, more of the model on the GPU). vLLM's other offload backend, which copies groups of layers ahead of time, ran under 1 tok/s.\nIf the experts fit in RAM, llama.cpp is hard to beat. If they don't, you have to stream only what the router picks, through a bounded cache, fast enough that the SSD is the bottleneck and not Python, ideally reusing the model's fast expert kernels. That's Qwen3.8-Flash-Next on a 32 GB Mac, and Transformers couldn't do it out of the box.\nMaking Qwen3.8-Flash-Next work on my 32 GB Mac with Transformers\nStrata was already too slow for me on the laptop, and Transformers was not going to beat it anytime soon. But the Accelerate path was so far off that I wanted to try fixing offloading in Transformers itself, with the big model on my laptop as the target, knowing it would probably stay too slow for how I work.\nAll of the code was built with AI: the Transformers PR, the model-specific package and the Metal kernels. My part was choosing what to try, reading the profiles, and deciding what to keep. Everything is in a Space: tarekziade/moe-expert-streaming.\nStart small\nI started with OLMoE-1B-7B, which fits in memory, so I could compare every token with vanilla Transformers.\nFirst version: experts on disk, an LRU cache on the device, and a Python loop\nrunning one expert at a time. With every expert already cached, it did 10.1\ntok/s. Vanilla did ~32. The I/O was fine, my loop was not: vanilla uses\ngrouped_mm, which runs all the experts of a layer in one kernel.\nThe fix, and the key idea of this project, was to turn the cache into a slot\npool: one preallocated device tensor shared by all layers, plus a per-layer\ntable from expert id to slot. Remap the router's expert ids to slots and the\npool looks like a regular expert bank, so grouped_mm runs on it as is. No\ncustom expert matmul needed. That got it to 34.6 tok/s, against 38.1 for\nvanilla.\n\t\n\t\t\n\t\n\t\n\t\texperts_offload\n\t\nI then turned the standalone loader into an option of from_pretrained, in\nhuggingface/transformers#50717.\nTo try it, install Transformers from that PR:\npip install \"git+https://github.com/huggingface/transformers.git@refs/pull/50717/head\"\nThen, moving from OLMoE to the real target, Qwen3.8-Flash-Next:\npath = snapshot_download(\"tarekziade/Qwen3.8-Flash-Next-expert-streaming\")\nmodel = AutoModelForCausalLM.from_pretrained(\n    f\"{path}/dense\",\n    dtype=torch.bfloat16,\n    device_map={\"\": \"mps\"…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS Architecture Connects Bedrock AgentCore to Private APIs",
+      "summary": "AWS published a reference architecture for connecting Amazon Bedrock AgentCore Gateway to private internal APIs and MCP servers within centralized enterprise networks. The design places self-managed VPC Lattice resource gateways in dedicated network account subnets, routing all cross-VPC traffic through a central inspection firewall via AWS Transit Gateway. AgentCore attaches to the shared resource configuration via AWS RAM, allowing central network teams to inspect all inbound and outbound payload flows. The post details traffic paths, token authorization passing, and security configurations required to prevent agents from bypassing firewalls.",
+      "why_it_matters": "Provides practical reference patterns for enterprise developers deploying Bedrock AgentCore agents and MCP servers behind strict firewalls.",
+      "reason": "AWS shares reference architecture patterns for securely connecting Bedrock AgentCore and MCP servers to private enterprise APIs behind centralized firewalls.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/connect-amazon-bedrock-agentcore-gateway-to-private-apis-in-a-hub-and-spoke-network-with-centralized-inspection",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Connect Amazon Bedrock AgentCore Gateway to private APIs in a hub-and-spoke network with centralized inspection",
+        "url": "https://aws.amazon.com/blogs/machine-learning/connect-amazon-bedrock-agentcore-gateway-to-private-apis-in-a-hub-and-spoke-network-with-centralized-inspection/",
+        "discussion_url": null,
+        "published": "2026-11-18T19:05:45Z",
+        "summary": "Many enterprises run a centralized network model: one account owns every VPC and a central firewall inspects all traffic. This post shows a tested pattern for connecting Amazon Bedrock AgentCore Gateway to private APIs and MCP servers in that model, with the VPC Lattice resource gateway in the network account so every hop crosses the firewall.",
+        "content": "In many enterprises, a central network team owns every virtual private cloud (VPC) and subnet, and every flow between VPCs must pass a central firewall in both directions. Agents that call internal REST APIs and Model Context Protocol (MCP) servers through Amazon Bedrock AgentCore Gateway , a capability of Amazon Bedrock AgentCore, must meet the same two requirements. Amazon Bedrock AgentCore is a platform to build, connect, and optimize agents at scale, with any framework or model.\n\nThis post shows a pattern that meets both requirements. The network team keeps ownership of every subnet, and traffic between the Gateway and your private APIs and MCP servers crosses the central firewall in both directions. It covers where to place the Amazon VPC Lattice resource gateway that the Gateway uses to reach private targets. It also covers who owns each piece, six configuration decisions, and the checks that confirm the pattern works.\n\nWe built and tested the pattern in the US East (N. Virginia) AWS Region ( us-east-1 ), in a lab with three member accounts and a management account in AWS Organizations. The AWS CloudFormation templates, test scripts, test evidence, and reference material (address plan, full validation checks, troubleshooting, quotas) are in the companion repository . Use the pattern as a guideline and adjust it to your own account architecture.\n\nTerms used in this post\n\nResource gateway: The Amazon VPC Lattice entry point into a VPC: elastic network interfaces (ENIs) in subnets you choose. Backends see its addresses as the source of each connection.\n\nResource configuration: A VPC Lattice object that names one backend (here, an internal load balancer or VPC endpoint DNS name and port) behind a resource gateway. You can share it with other accounts through AWS Resource Access Manager (AWS RAM).\n\nManaged mode and self-managed mode: The two private endpoint options for Gateway targets. In managed mode, AgentCore creates the resource gateway for you. In self-managed mode, you create it and give the target a resource configuration.\n\nWhen to use this pattern\n\nUse this pattern when all of the following are true:\n\nA network account owns every VPC, subnet, and AWS Transit Gateway attachment, and shares application subnets through AWS RAM.\n\nA central firewall in an inspection VPC must inspect traffic entering and leaving every VPC.\n\nApplication teams manage only their own resources and security groups.\n\nOtherwise, one of the options in Table 1 fits better.\n\nTable 1: When another option fits better.\n\nYour environment\nUse\n\nThe Gateway account can own subnets that reach your tools\nManaged mode\n\nTraffic between the Gateway and the tools doesn’t need central inspection\nSelf-managed mode , as documented\n\nTools are reachable on public endpoints\nA standard Gateway target\n\nWe also considered managed mode in subnets that AgentCore owns, a resource gateway in each tool VPC or in the central endpoints VPC, and internet-facing load balancers with AWS WAF per tool. The alternatives write-up explains why each falls short under these constraints.\n\nDesign requirements for centralized inspection\n\nThe network account owns every subnet. The Gateway and application accounts build only in subnets shared to them through AWS RAM.\n\nEvery flow between VPCs crosses the central firewall, in both directions. The central firewall in the inspection VPC inspects the traffic between the Gateway and your private APIs and MCP servers.\n\nAgentCore Gateway reaches private targets through a VPC Lattice resource gateway, and the two private endpoint modes place it differently. Managed mode creates it in the Gateway account, which fits environments where that account can own the subnets it runs in. Self-managed mode, as documented, places it in subnets with direct access to the backend, which fits environments that do not require inspection between the Gateway and the tool. This environment needs both conditions at once, so the pattern uses self-managed mode with one change. The network account owns the resource gateway and places it in subnets routed through AWS Transit Gateway, so every request and reply passes the inspection VPC.\n\nSolution overview\n\nGive the resource gateway its own VPC and subnets in the network account. Don’t share them, and keep backends out of them. Route them through the transit gateway so every request and reply between VPCs crosses the firewall. Share one resource configuration per backend with the AgentCore account through AWS RAM. Figure 1 shows the accounts, VPCs, and traffic path.\n\nFigure 1: The network account owns every VPC and the resource gateway. The other accounts own only what they place in shared subnets. Solid lines cross the firewall in both directions. Step numbers match the following traffic path\n\nTraffic path\n\nThe agent, in a shared subnet with no internet route, calls the Gateway URL. Private DNS on the Gateway interface endpoint resolves it inside the agent’s VPC.\n\nAWS WAF, if attached, evaluates the request. The Gateway checks its resource policy and the inbound JSON Web Token (JWT), then picks the target and tool.\n\nThe Gateway gets an outbound OAuth token for the tool account and sends the request through VPC Lattice to the resource gateway in the network account.\n\nThe resource gateway subnets route to the transit gateway, which sends the traffic through the inspection VPC to the tool account’s internal Application Load Balancer (ALB) or execute-api endpoint. (Crosses the firewall.)\n\nThe ALB or Amazon API Gateway validates the token and forwards the request to the backend.\n\nThe response returns the same way. (Crosses the firewall.)\n\nHow does Gateway traffic enter the network account’s VPC without a transit gateway attachment in the AgentCore account? When you create a target, AgentCore associates the shared resource configuration with its own VPC Lattice service network. VPC Lattice then delivers connections from that service network to the resource gateway’s network interfaces in your VPC. AWS operates that hop, and from there your routes and firewall take over.\n\nWhat this pattern doesn’t do. Check these limits against your requirements before you adopt it:\n\nNo payload inspection –  Traffic is TLS end to end from the Gateway to the ALB, with a certificate the Gateway validates. The firewall sees flow metadata and the TLS Server Name Indication (SNI), not payloads. Request content is in the Gateway, AWS WAF, and ALB logs.\n\nSome legs skip the firewall –  The agent-to-interface-endpoint leg and the Gateway-to-resource-gateway leg don’t cross it. Neither do the token requests that AgentCore makes to each identity provider.\n\nNo end-user identity at the tool –  With the client credentials grant, every call that reaches the tool carries the Gateway’s client identity. To trace a call to a caller, use the inbound JWT claims in the Gateway application logs.\n\nWho owns what\n\nTable 2: Who creates what.\n\nOne time\nNew API on a connected ALB\nNew ALB or tool account\n\nNetwork team\nResource gateway and its VPC, subnets, and routes. Firewall rules. A default route from the tool VPC to the transit gateway for the ALB’s signing-key fetch. Gateway interface endpoint and policy. AWS RAM share\nNothing\nOne resource configuration added to the share. A firewall rule if the range is new\n\nTool team\nAn ALB certificate whose subject alternative name matches the target host name that the AgentCore team uses\nA listener rule (with jwt-validation ) on their ALB\nAn internal ALB and security group, and an app client for the Gateway (client credentials grant, with a scope such as tools/invoke )\n\nAgentCore team\nGateway, inbound authorizer, resource policy, optional AWS WAF\nOne Gateway target per API or MCP server\nA target, plus an OAuth credential provider for a new identity provider\n\nA new operation or tool on an existing target needs no new target: update the OpenAPI spec with UpdateGatewayTarget , or call SynchronizeGatewayTargets for an MCP server. The repository’s build order…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Harvard Study Finds Coding Agents Shift Bottleneck to Code Review",
+      "summary": "A working paper by Harvard PhD candidates Fiona Chen and James Stratton evaluated operational data across 718 firms to measure the impact of AI coding agents. While developers at adopting firms wrote 30% more code, created 20% more commits, and submitted 23% more pull requests, overall resolved Jira issues showed no statistically significant increase. Instead, the surplus code increased pull request review times by 49%, shifting the primary engineering bottleneck straight into code review. Task size analysis using GPT-4o embeddings confirmed that issues were not larger, proving that drafting speed alone does not increase deployed engineering output.",
+      "why_it_matters": "Empirically demonstrates that accelerating agent code generation without addressing code review bottlenecks yields zero net deployment gain.",
+      "reason": "A study by Harvard researchers reveals that deployment of AI coding agents shifts the primary software engineering bottleneck from writing code to code review.",
+      "item": {
+        "key": "complexdiscovery.com/harvard-researchers-find-ai-coding-agents-shifted-the-bottleneck-to-code-review",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Harvard researchers find AI coding agents shifted the bottleneck to code review",
+        "url": "https://complexdiscovery.com/harvard-researchers-find-ai-coding-agents-shifted-the-bottleneck-to-code-review/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50538303",
+        "published": "2026-11-17T21:16:12Z",
+        "summary": "",
+        "content": "Editor’s Note: Engineers at firms that adopted AI coding agents added about 30 percent more code, yet finished work did not measurably rise and getting code through review took 49 percent longer, according to a working paper by Harvard Ph.D. candidates Fiona Chen and James Stratton covering 718 firms. The paper, a job-market paper with no indication of completed peer review, measures what happens at the human checkpoint once drafting speeds up. Harvey’s motion-to-dismiss workflow and Cooley’s redaction agent, still in development with Google Cloud, both keep a lawyer at a comparable checkpoint, and neither announcement reports a measure of that review stage.\nFor eDiscovery, privacy and compliance professionals, the study suggests a measurement approach for legal AI buyers: consider approved work product, revision rates and reviewer time alongside drafting output. It also shows that AI authorship can leave metadata in collaboration systems that records and legal hold programs may need to reach. Watch for a revised version of the paper and for any legal vendor that publishes review-stage figures, keeping in mind that the study examined software, not legal work.\nContent Assessment: Harvard researchers find AI coding agents shifted the bottleneck to code review\nInformation - 92%\nInsight - 90%\nRelevance - 88%\nObjectivity - 90%\nAuthority - 92%\n90%\nExcellent\nA short percentage-based assessment of the qualitative benefit expressed as a percentage of positive reception of the recent article from ComplexDiscovery OÜ titled, \"Harvard researchers find AI coding agents shifted the bottleneck to code review.\"\nNews Analysis – Artificial Intelligence Beat\nHarvard researchers find AI coding agents shifted the bottleneck to code review\nComplexDiscovery OÜ Staff\nEngineers at firms that adopted AI coding agents added about 30 percent more code, but finished work did not measurably rise and getting code through review took 49 percent longer, a Harvard working paper found.\nIn the study’s data, the extra coding produced no detectable rise in finished work, and code review became the bottleneck. Fiona Chen and James Stratton, both Ph.D. candidates at Harvard University, measured that pattern across 725,938 workers at 718 companies. Two legal AI announcements this month, Harvey’s motion-to-dismiss workflow and a court-filing redaction agent Cooley is developing with Google Cloud, place a lawyer at a comparable review step, and neither reports a measure of it.\nWhat the Harvard data measured\nHow much weight that pattern can bear depends on where the numbers came from. Chen and Stratton built the study on data from Jellyfish, a company that sells an analytics platform tracking engineering activity, and joined it to LinkedIn employment records collected by Revelio Labs. The sample runs from January 2021 to March 2026 and covers Jellyfish client firms that consented to research use of their data. The paper’s tables list 68.3 million Jira issues, 200.9 million commits, 49.1 million pull requests and 21.3 million calendar events, though only 213 of the 718 firms supplied calendar data.\nThe design is a staggered difference-in-differences comparison, which tracks month by month how outcomes changed at adopting firms against firms that had not yet adopted. A comparison like that is only as good as the reasons adoption dates differed, and here the authors point to a process legal and security teams will recognize, because they sit inside it. The paper says timing was shaped mainly by when firms learned about the tools and by how long procurement took, meaning sourcing, legal and security approvals and pilot programs. One interviewee’s firm approved a tool in about a day; another interviewee put the average approval time at six to 12 months.\nThe authors call those procurement delays plausibly unrelated to how fast a firm was growing, which they argue supports comparing early and late adopters. They acknowledge one known imbalance, that larger firms adopted earlier, and they control for firm size. If some hidden difference remains, the authors say, it would more likely make AI look more productive than it is, not less. A bias in that direction would make the flat output result, if anything, generous to AI.\nThe current version of the paper is dated Aug. 4, 2026, and the first was dated Jan. 7. Chen circulated it as her job-market paper, and nothing in the version reviewed for this article indicates journal acceptance or completed peer review. Her website lists coverage links to The Wall Street Journal and The Economist, and legal trade press picked it up this month, including an Oct. 12 eDiscovery Today post by Doug Austin that relayed an Ars Technica report.\nDrafts went up and finished issues did not\nWith that provenance in view, the coding results are large. Lines of code added rose by 1,494 per worker-month against a baseline of 5,017, about 30 percent. Commits rose 20 percent, and pull requests, the bundles of code submitted for review, rose 23 percent. The authors note that these estimates capture the added effect of agents at firms that already had AI coding assistants, not the effect of AI from a standing start.\nOutput is where the gain stops. The paper counts finished work as Jira issues resolved, and an issue counts as complete when its code is deployed to production. Agents moved that measure by 0.12 issues per worker-month on a 3.67 baseline, with a standard error of 0.17. That result is statistically indistinguishable from zero, and the 95 percent confidence interval rules out an increase above about 12 percent of the baseline, well short of the 30 percent rise in code written.\nThe authors tested the obvious escape route. If engineers had shifted to larger tasks, a flat issue count would understate real output. So the researchers labeled a 0.5 percent sample of issues by size with GPT-4o and extended those labels to every issue with a text-embedding model. They found no shift in average issue size, and pull…",
+        "score": 313.0,
+        "comments": 429,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "Mastra launched Mastra Factory, open-sourcing the internal software factory tooling used to build their TypeScript agent framework.",
+      "item": {
+        "key": "news.ycombinator.com/item?id=50548660",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: Mastra Factory, the open-source software factory we use to build Mastra",
+        "url": "https://news.ycombinator.com/item?id=50548660",
+        "discussion_url": "https://news.ycombinator.com/item?id=50548660",
+        "published": "2026-11-18T16:53:42Z",
+        "summary": "Hi HN, we're Shane, Sam, and Abhi.\nAlmost two years ago, we shared Mastra, our open-source TypeScript agent framework, on Show HN: https://news.ycombinator.com/item?id=43103073 . It got a few hundred upvotes; a couple of weeks later our downloads had doubled, and we were off to the races.\nToday we're sharing Mastra Factory, the open-source software factory we built to help maintain Mastra itself.\nAt Mastra, we now average nearly 4M downloads per week, and with Factory our team now merges hundreds of PRs a week across the mastra-ai GitHub org. Last week, Factory opened and merged 238 PRs, alongside 630 merged PRs from humans.\nThere's a lot of debate about what a software factory is. For us Factory is a configurable agentic kanban board that's @-taggable in Slack.\nUnder the hood, it uses Mastra’s durable agents for long-running sessions, our conversational memory system, a markdown based wiki with source citations to incorporate company knowledge, signals that subscribe to PR comments wired up into sessions, and a customizable cloud sandbox with our coding harness (working on supporting Claude Code, Codex etc).\nWhen we started out, we modeled Factory around our existing…",
+        "content": "",
+        "score": 74.0,
+        "comments": 25,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    },
+    {
+      "line": "A new paper introduces an Environment Evolution Loop to scale long-horizon coding agent training environments beyond static validation.",
+      "item": {
+        "key": "arxiv:2611.21152",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "From Repositories to Training Environments: Scaling Long-Horizon Coding Agents with Environment Evolution Loop",
+        "url": "https://huggingface.co/papers/2611.21152",
+        "discussion_url": null,
+        "published": "2026-11-18T00:00:00Z",
+        "summary": "Training coding agents for long-horizon tasks requires environments with verifiable feedback. Existing pipelines often follow a linear process that ends with validation, establishing usability but providing little guidance on improving training value. Recursive self-improvement (RSI) often requires model rollouts or model training followed by downstream evaluation, with costs and feedback delays amplified on long-horizon tasks. How can we use timely, reliable proxy signals to improve training value and synthesize environments at scale? We present RepoFactory, an automated pipeline that converts real repositories into verifiable environments where agents build complete projects from scratch given a language specification. Its Environment Evolution Loop optimizes a multiplicative objective combining validity, structural coupling, and implementation scope through proxy feedback. RepoFactory produces 10,159 environments across 17 software domains. Training Qwen3.5-35B-A3B on these environments yields RepoHorizen-35B-A3B, which achieves gains of 22.6 percentage points on NL2Repo-Bench and 8.5 points on average across five benchmarks covering long-horizon coding and agentic tasks in…",
+        "content": "",
+        "score": 11.0,
+        "comments": 1,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A post on Hacker News highlights Energy-Based Reasoners claiming up to 385x more efficient inference.",
+      "item": {
+        "key": "energy-based-reasoners.github.io/",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Energy-Based Reasoners: 385x more efficient inference",
+        "url": "https://energy-based-reasoners.github.io/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50543989",
+        "published": "2026-11-18T09:29:32Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "Lobsters (AI)"
+        ]
+      }
+    },
+    {
+      "line": "NVIDIA reported that its Vera Rubin NVL72 architecture led agentic inference benchmark results on MLPerf Endpoints v1.0.",
+      "item": {
+        "key": "developer.nvidia.com/blog/nvidia-vera-rubin-nvl72-leads-agentic-inference-performance-on-mlperf-endpoints-v1-0",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "NVIDIA Vera Rubin NVL72 Leads Agentic Inference Performance on MLPerf Endpoints v1.0",
+        "url": "https://developer.nvidia.com/blog/nvidia-vera-rubin-nvl72-leads-agentic-inference-performance-on-mlperf-endpoints-v1-0/",
+        "discussion_url": null,
+        "published": "2026-11-16T16:00:00Z",
+        "summary": "Agentic workloads are demanding more from inference systems. AI agents carry growing conversation histories across turns and generate a mix of reasoning, tool...",
+        "content": "Agentic workloads are demanding more from inference systems. AI agents carry growing conversation histories across turns and generate a mix of reasoning, tool...\nAgentic workloads are demanding more from inference systems. AI agents carry growing conversation histories across turns and generate a mix of reasoning, tool calls, and responses. Inference systems must support users at scale while remaining responsive. MLPerf Endpoints v1.0 evaluates this balance between serving capacity and responsiveness using coding and enterprise workflows through API…\n\nSource",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain released version 1.5.2, adding source metadata tagging for synthetic human-in-the-loop tool messages.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain%3D%3D1.5.2",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain==1.5.2",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain%3D%3D1.5.2",
+        "discussion_url": null,
+        "published": "2026-11-18T22:30:45Z",
+        "summary": "Changes since langchain==1.5.1\n\nrelease(langchain): 1.5.2 ( #41948 )\n\nfeat(langchain): tag synthetic HITL tool messages with source metadata ( #41928 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "llama.cpp release b12527 fixes potential out-of-bounds array reads when parsing limit configs.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12527",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12527",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12527",
+        "discussion_url": null,
+        "published": "2026-11-18T22:59:51Z",
+        "summary": "model : limite: reject mudd configs that index past mudd_tap_idx on load ( #32562 )\n\nn_mudd_taps comes from limite.mudd.tap_count, a scalar read separately\n\nfrom the length-checked tap_indices array. mudd_tap_idx is a fixed\n\nstd::array<int32_t, 512> indexed at [i*n_taps] in both the tensor load\n\nand the graph build, so a crafted GGUF with n_layer * n_mudd_taps > 512\n\nreads past the array.\n\nReject that at hparams load; the one check covers both index sites.\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/69393968\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your pull requests pass review quickly and your sandboxes stay unthrashed.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Research result",
+      "headline": "Claude solves open problems in black hole physics",
+      "blurb": "Anthropic reported that Claude solved two open problems in theoretical physics concerning black holes and the search for quantum gravity.",
+      "item": {
+        "key": "anthropic.com/research/claude-black-hole-physics",
+        "source": "Anthropic Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "Claude solves two open problems in the physics of black holes",
+        "url": "https://www.anthropic.com/research/claude-black-hole-physics",
+        "discussion_url": null,
+        "published": "2026-11-17T00:00:00Z",
+        "summary": "Claude has solved two open problems in theoretical physics. Both concern black holes and the search for a theory of quantum gravity.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "AI research",
+      "headline": "OpenAI models optimize RISC-V and silicon chip design",
+      "blurb": "OpenAI models optimized circuits in Jalapeño silicon and improved RISC-V core designs using GPT-6 Astra.",
+      "item": {
+        "key": "openai.com/index/advancing-chip-design-with-our-models",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Advancing chip design with OpenAI models",
+        "url": "https://openai.com/index/advancing-chip-design-with-our-models/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50549493",
+        "published": "2026-11-18T17:45:47Z",
+        "summary": "OpenAI models optimized circuits used in Jalapeño silicon and improved RISC‑V core designs, showing progress in AI-assisted chip design with GPT‑6 Astra.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "OpenAI News"
+        ]
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "Cloudflare releases open-weight Clairic models",
+      "blurb": "Cloudflare has released Clairic and Clairic-flash as open-weight models as Clairic graduates from preview on Workers AI.",
+      "item": {
+        "key": "blog.cloudflare.com/open-clairic",
+        "source": "Cloudflare AI",
+        "tags": [
+          "infra"
+        ],
+        "title": "An updated Clairic and Clairic-flash are now open-weight, from the new Workers AI Superintelligence team",
+        "url": "https://blog.cloudflare.com/open-clairic/",
+        "discussion_url": null,
+        "published": "2026-11-18T22:00:00Z",
+        "summary": "Add your teaser here. It should complement the headline, not repeat it. Teaser cannot be longer than 240 characters. The Blog Review Gem will suggest an excerpt.\nClairic graduates from preview, while Clairic-flash joins the repertoire on Workers AI. We’re doing an open-weight release for both extraction models.",
+        "content": "Cloudflare has become a neolab. We’re building our own frontier AI models for our customers and the open-source community.\n\nToday, we’re announcing two open-weight model releases:\n\nWe’re introducing an updated version of Clairic . Since the preview, we’ve improved extraction from complex documents including images and PDFs (new!), with more reliable handling of tables, lists, and dates, and better grounding of answers in the source material.\n\nWe’re introducing Clairic-flash , a lighter, faster version of Clairic that delivers strong extraction and prediction performance in a compact, 9-billion-parameter model.\n\nBoth extraction models are hosted on Workers AI and full open weights are available on Hugging Face .\n\nWe’re also excited to re-introduce ourselves as the Workers AI superintelligence team, the frontier AI research team behind Clef , Clairic, and lots more in the works. This team is working quickly to push the AI frontier and build useful models for Cloudflare’s customers and the open source community.\n\nA new version of Clairic: redesigned after the preview release\n\nSince announcing Clairic  in preview, we have received a ton of use cases and helpful feedback on how customers wanted to use an extraction model. We heard about use cases ranging from extracting data from images like receipts to reading values from support tickets. We knew that we wanted extraction to be the clear focus for the model, so it had to excel at reading from unstructured data.\n\nWe decided to go back to the drawing board with Clairic and redesigned our architecture, differentiating this new version of Clairic from our preview release. For ordinary text and number extraction fields, we now use parallel slot autoregressive generation  instead of a single forward pass. Each field uses the tokens it has already written to choose its next token, then stops at its own end marker. All the fields advance together in the serving batch, still giving lightning-fast latency per request. This boosted our accuracy in extraction for both text and images, and the trade-off in accuracy offsets the small latency cost. For computation, estimation, and extraction use cases, we trained special heads that can handle estimates, forecasts, durations, calculated dates, and explicit arithmetic.\n\nAlthough the model architecture evolved, we kept the parts of the typed API interface that make the answers useful: confidence scores, character spans, and probabilities are still intact with every request. The model is still incredibly fast and cheap. From the evals below, you can see how our newer versions of Clairic have greatly improved on extraction across text, images, PDFs, and more.\n\nEval\n\nClairic-preview\n\nClairic\n\nClairic-flash\n\nD1.2 + OCR\n\nScaleDown\n\nFresh text fields, 96 requests\n\n295/336\n\n335/336\n\n328/336\n\n304/336\n\n259/336\n\nInternal eval (mchen) - mixed-input fields, 36 requests\n\n207/226\n\n221/226\n\n213/226\n\n116/226\n\n156/226\n\nTracked customer assertions, 139 request shapes\n\n1,033/1,263\n\n1,263/1,263\n\n1,263/1,263\n\n973/1,263\n\n653/1,263\n\nSynthetic receipt fields in text and images\n\n369/576\n\n576/576\n\n576/576\n\n397/576\n\n280/576\n\nThere are no public extraction benchmarks yet, but we ran our internal evals for other emerging extraction models on the market, such as Liquid AI’s D1.2 (pipelined with Apple Vision for optical character recognition) and Scaledown’s Extract . Our Clairic models excel across extraction use cases, but take these evals as directional guidance since they are self-reported. We wanted to show an illustrative picture of how Clairic is performing across generalized extraction use cases and celebrate the fact that other companies are releasing extraction models as well — confirming our original hypothesis that extraction was a pain point for LLM users because of the cost, latency, and accuracy.\n\nBut is it fast?\n\nWe ran latency tests for Clairic and Clairic-flash, measuring complete HTTP response from a self-hosted server, including all fields in the request. Even with the redesigned architecture, you can expect responses in under one second — much faster than typical LLM responses for similar workloads.\n\nEval set\n\nRequests per model\n\nClairic p50 / p95\n\nClairic-flash p50 / p95\n\nFresh text fields\n\n96\n\n358 / 736 ms\n\n155 / 328 ms\n\nFresh image fields\n\n48\n\n453 / 976 ms\n\n305 / 605 ms\n\nCommercial leases\n\n180\n\n691 / 803 ms\n\n379 / 519 ms\n\nLoan pricing\n\n600\n\n395 / 407 ms\n\n188 / 192 ms\n\nTraffic forecasting\n\n114\n\n532 / 585 ms\n\n243 / 261 ms\n\nExpense audit, development\n\n60\n\n632 / 742 ms\n\n393 / 512 ms\n\nBetter extraction for images and PDFs\n\nIn our preview blog post , Clairic read a photo of a receipt. Now the Clairic family of models can read PDFs too, so you can ask for the supplier, line items, and total in one request, even when they appear on different pages. You can include up to four images or PDF pages in total, and line items can come back as rows that keep each description, quantity, and price together. Due to Clairic’s new architecture, image reading accuracy has improved from 207 errors to 0 on our internal benchmarks, explicitly covering text and images.\n\nPromotional pricing on Clairic for a limited time\n\nWhen we first launched our preview endpoint of Clairic at @cf/cloudflare/clairic , we hosted the 9B variant as it was faster and easier to train, at the preview price of $0.10 per M input tokens. We’re now moving the 9B model to the @cf/cloudflare/clairic-flash  endpoint and the 27B model will live at @cf/cloudflare/clairic .\n\nThe 27B Clairic model will be priced at $0.24 per M input tokens, while the 9B Clairic-flash model will be priced at $0.10 per M input tokens. Although the model does technically generate output tokens, we decided to keep the System One  pricing principles and are only charging on input tokens: we eat the cost of the output token generation.\n\nIn order to make this a seamless swap, we’re offering a promotional discount on Clairic — until December 1, 2026, both Clairic and Clairic-flash will cost $0.10 per M input tokens. This means you get to try out the higher quality variant of Clairic at the same price. If your applications are hooked up to the Clairic endpoint that we released in preview, you will automatically benefit from the better extraction capabilities of our new model, which we’re rolling out in place.\n\nIf you’d like to move more cost-sensitive workloads to the cheaper 9B Clairic-flash variant, we encourage you to do so. On December 1, we’ll be ending the promotional discount for Clairic and pricing will resume at $0.24 per M input tokens instead of the discounted $0.10 per M input tokens.\n\nClairic and Clairic-flash (new) are open-weight\n\nBoth Clairic models are now open-weight on Hugging Face  as well. We have seen an outpouring of experiments and tuned models from our release of Clef, and we’re happy to continue supporting teams and research with our open-weight release of Clairic.\n\nOur mission with these System One models is to help people augment their expensive LLM usage with smaller, faster, cheaper models that are purpose-built for a specific task. We hope that releasing these models open-weight encourages others to experiment and build on our ideas as well.\n\nTry them out\n\nClairic and Clairic-flash are available on Workers AI as @cf/cloudflare/clairic  and @cf/cloudflare/clairic-flash . The developer documentation  has the full API schemas, which remain unchanged from our preview endpoint. We’re also publishing the open-weight releases for Clairic  and Clairic-flash  on Hugging Face.\n\nThe team behind these models — the Workers AI superintelligence team — is just getting started, and growing fast to push frontier AI research at Cloudflare. Join us early  and help shape what the superintelligence team becomes.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 27,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 25,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 913,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1411,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 288,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 201,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 214,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 5,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-15T23:19:06.728627Z",
+    "candidates": 150,
+    "triaged": 150,
+    "enriched": 7,
+    "headline_candidates": 156,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 385.7,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 38930,
+      "output_tokens": 12299,
+      "cost_usd": 0.169086
+    }
+  }
+}
