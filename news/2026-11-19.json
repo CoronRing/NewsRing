@@ -1,0 +1,688 @@
+{
+  "date": "2026-11-19",
+  "generated_at": "2026-11-19T23:40:44.498563Z",
+  "title": "Dynamic Tool Loading, Harness Defaults, and Eval Resolution",
+  "intro": "Today's highlights focus squarely on agent architecture and serving mechanics. Google and AWS are rolling out major harness-level improvements for tool schemas and execution lifecycles, while new research reveals why self-evolving agent loops so frequently hit a wall. On the infrastructure side, Cerebras and NVIDIA tackle the messy reality of production inference pipelines.",
+  "stories": [
+    {
+      "headline": "Gemini API introduces deferred tool schema retrieval",
+      "summary": "Google has added native Tool Retrieval to the Gemini API via its Interactions endpoint to tackle context bloat from massive toolsets. By passing a `tool_search` tool and setting `defer_loading: true`, developers can omit parameter schemas from the initial prompt while keeping names and descriptions visible. When the model invokes a deferred tool, the API fetches the full schema and emits the function call within the same request turn. Server-side retrieval works across Gemini 3.6 and Gemini 4 models, preserves prompt prefix caching across turns, supports remote MCP servers, and offers an optional client-side mode for private tool registries.",
+      "why_it_matters": "Stashing parameter schemas outside the context window fixes context bloat and degraded tool-selection accuracy when scaling agents up to dozens or hundreds of integrated tools.",
+      "reason": "Google introduces native tool retrieval in the Gemini API, allowing agents to dynamically query and load relevant tools instead of stuffing full schema sets into the context window.",
+      "item": {
+        "key": "blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval",
+        "source": "Google AI Blog",
+        "tags": [
+          "lab"
+        ],
+        "title": "Introducing Tool Retrieval in the Gemini API",
+        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+        "discussion_url": null,
+        "published": "2026-11-19T18:00:00Z",
+        "summary": "Gemini spark on a space background",
+        "content": "Introducing Tool Retrieval in the Gemini API\nToday we're launching Tool Retrieval in the Gemini API, available in preview in the Interactions API.\nWhen an agent connects to dozens or even hundreds of tools, sending every full parameter schema on every request adds up fast. It inflates input token counts, adds latency, and lowers tool-selection accuracy as the candidate list grows. Tool Retrieval lets your agent keep its full tool library on standby and load parameter schemas only when the current task needs them.\nHow it works\nTo turn on Tool Retrieval, add a tool_search tool to your request and set defer_loading: true on the tools you want to hold back. The model still sees the name and description of every deferred tool, so it knows what's available, but the parameter schemas stay out of context. When the model needs a tool, it asks for it by name, the API loads the full schema, and the model calls the function, all inside the same request.\nfrom google import genai\nclient = genai.Client()\ntools = [\n   {\"type\": \"tool_search\"},\n   {\n       \"type\": \"function\",\n       \"name\": \"issue_refund\",\n       \"description\": \"Refund an order to the original payment method.\",\n       \"defer_loading\": True,\n       \"parameters\": {\n           \"type\": \"object\",\n           \"properties\": {\n               \"order_id\": {\"type\": \"string\"},\n               \"amount\": {\"type\": \"number\"},\n           },\n           \"required\": [\"order_id\", \"amount\"],\n       },\n   },\n   # ... 50+ other deferred functions (leave frequent tools undeferred)\n]\ninteraction = client.interactions.create(\n   model=\"gemini-4-hydrogen\",\n   input=\"Order A-1042 arrived damaged. Please refund 40 dollars.\",\n   tools=tools,\n)\nInside that single API call, the model searches for issue_refund, the API loads its schema, and the model emits the function_call. All three steps appear in interaction.steps, making it easy to inspect which tools the model considered when debugging tool names or descriptions:\n\"steps\": [\n {\n   \"type\": \"tool_search_call\",\n   \"id\": \"tsc_7f2a\",\n   \"arguments\": {\"function_names\": [\"issue_refund\"]},\n   \"signature\": \"...\"\n },\n {\n   \"type\": \"tool_search_result\",\n   \"call_id\": \"tsc_7f2a\",\n   \"result\": [{\"type\": \"function\", \"name\": \"issue_refund\", \"parameters\": {...}}],\n   \"signature\": \"...\"\n },\n {\n   \"type\": \"function_call\",\n   \"id\": \"fc_91c3\",\n   \"name\": \"issue_refund\",\n   \"arguments\": {\"order_id\": \"A-1042\", \"amount\": 40}\n }\n]\nFrom here it's normal function calling: your code runs the refund and sends back a function_result.\nThere's no index to build or host. Gemini runs the search on the server, so the only changes to your code are the new tool and a flag on the tools you want to defer. You can keep your most-used tools loaded up front and defer the long tail.\nTool Retrieval also plays well with prefix caching. Deferred schemas stay out of the start of the prompt, and the schemas the model loads are added later in the conversation, so the cached prefix stays the same from turn to turn.\nTool Retrieval also works with remote MCP servers in the Gemini API. Set defer_loading: true on an mcp_server tool and every tool that server exposes is loaded on demand, so you can connect a large server without listing its tools one by one.\nHow client-side retrieval works\nIf you maintain your own tool registry, embedding index, or per-user permission filter, declare the tool_search with \"execution\": \"client\" and define your search parameters. Client-side retrieval adds one round trip per search, because your app runs the lookup. Tools do not need to be declared upfront, so you can also expose new tools mid-conversation when a user connects an integration:\ntools = [{\n    \"type\": \"tool_search\",\n    \"execution\": \"client\",\n    \"name\": \"search_tools\",\n    \"description\": \"Search the internal tool registry for functions.\",\n    \"parameters\": {\n        \"type\": \"object\",\n        \"properties\": {\"query\": {\"type\": \"string\"}},\n        \"required\": [\"query\"],\n    },\n}]\n# When the model emits a function_call for \"search_tools\",\n# return matching {\"type\": \"function\", ...} schemas in function_result:\nfollowup = client.interactions.create(\n    model=\"gemini-4-hydrogen\",\n    previous_interaction_id=interaction.id,\n    tools=tools,\n    input=[{\n        \"type\": \"function_result\",\n        \"name\": \"search_tools\",\n        \"call_id\": step.id,\n        \"result\": my_registry.search(**step.arguments),\n    }],\n)\nHow pricing and supported models work\nTool Retrieval has no separate charge. Input and output tokens are billed at the standard rates for the model you call. Turning on tool_search adds a small, fixed block of input tokens, and each schema the model loads is billed as input for the rest of the conversation, the same as a tool declared up front. You save tokens when the schemas you never load outweigh the ones you do, which is the usual case for large libraries. Measure it against your own traffic.\nTool Retrieval works with Gemini 3.6 and later models, including all Gemini 4 models, in the Interactions API.\nHow to get started\n- Read the documentation — Full setup guide with examples\n- Compare Gemini models — Find the best model for your use case\n- Join the discussion on Discord — Share feedback with the team",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Bedrock AgentCore adopts open-source Strands harness defaults",
+      "summary": "Amazon Bedrock has updated its AgentCore harness to run on the open-source Strands harness foundation, packaging agent execution inside kernel-isolated microVMs. The update brings deterministic lifecycle hooks into the loop, allowing developers to enforce custom guardrails, permission checks, and notifications at specific checkpoints. Managed defaults now include proactive context summarization, context offloading for bulky tool returns, automatic prompt caching on Anthropic models via Bedrock Converse, and built-in tools for planning (`todo_write`), granular filesystem handling, web retrieval, and internal subagent delegation.",
+      "why_it_matters": "Lifecycle hooks provide a clean, deterministic mechanism to intercept tool calls and enforce policy without wrestling with non-deterministic agent loop implementations.",
+      "reason": "Bedrock AgentCore now integrates the open-source Strands harness, adding deterministic lifecycle hooks, proactive context management, and automatic prompt caching for agent orchestration.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/amazon-bedrock-agentcore-harness-adds-strands-harness-defaults-built-in-tools-and-lifecycle-hooks",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Amazon Bedrock AgentCore harness adds Strands harness defaults, built-in tools, and lifecycle hooks",
+        "url": "https://aws.amazon.com/blogs/machine-learning/amazon-bedrock-agentcore-harness-adds-strands-harness-defaults-built-in-tools-and-lifecycle-hooks/",
+        "discussion_url": null,
+        "published": "2026-11-19T20:01:06Z",
+        "summary": "Amazon Bedrock AgentCore harness now runs on the open-source Strands harness, bringing a recommended model, task-oriented defaults, automatic prompt caching, proactive context management, and new built-in tools. It also adds lifecycle hooks so you can run deterministic allow or deny checks at defined points in the agent loop.",
+        "content": "When building an AI agent, selecting a model is only the first step. The agent still needs tools, instructions for finishing the job, a way to manage context growth in long sessions, and guardrails before it executes any consequential actions, like issuing a refund.\n\nWe are upgrading Amazon Bedrock AgentCore harness to use Strands harness, our open-source agent harness, released earlier this year, available under an Apache 2.0 license. AgentCore harness also introduces lifecycle hooks, so you can apply your own deterministic checks and notifications at defined points in the agent loop.\n\nWith this upgrade, agents that rely on the managed defaults get a recommended model, a task-oriented system prompt, automatic prompt caching (initially for Anthropic models on Amazon Bedrock), and proactive context management. They also get additional built-in tools for planning, web retrieval, filesystem access, context offloading, and task delegation. This gives agents greater capabilities during long tasks, allowing them to keep track of subtasks, reduce context window usage, and delegate work. With hooks, you can transform non-deterministic AI behavior into predictable, safe, and governed workflows by running deterministic code at specific lifecycle checkpoints.\n\nThere’s no new resource type or integration to adopt. You automatically get both updates in the AgentCore harness you already use.\n\nStrands capabilities, on AWS\n\nStrands harness provides an assembled agent foundation with recommended instructions, tools, and context management. Amazon Bedrock AgentCore harness operates that foundation as a managed AWS service. The result is a production-grade default agent that doesn’t require you to assemble and operate the harness or its infrastructure yourself.\n\nYou do not need to provision compute, bundle and host the agent loop, manage session scaling, or operate tool-execution infrastructure. Each session runs in a secure, kernel-isolated microVM in AgentCore runtime, a capability of Amazon Bedrock AgentCore, with managed compute, scaling, and high availability.\n\nAgentCore achieves this by connecting the harness to the services required for production agents, including session persistence, streaming responses, usage metadata, observability, AgentCore memory, Identity, Gateway, Browser, Code Interpreter, and customer-provided containers. You retain control over the model, instructions, tools, permissions, and lifecycle policies while AgentCore manages the underlying execution environment.\n\nA more capable managed harness\n\nHarness now provides a stronger experience when you use its managed defaults:\n\nA current recommended model. When you omit the model, Harness uses a recommended default model that evolves as new models are released, always keeping your harnesses up to date. Explicit harness-level and per-invocation model configurations continue to take precedence.\n\nTask-oriented instructions. The managed system prompt encourages the agent to gather relevant context, use appropriate tools, continue until the task is resolved, adapt to failures or denied actions, and verify its work before reporting completion. The default system prompt improves over time to support the latest harness behavior.\n\nAutomatic prompt caching. For supported models using Converse on Amazon Bedrock, Harness caches the system prompt, tool definitions, and conversation history. Repeated calls with the same prompt and tool surface can use lower-priced cache-read tokens, reducing input processing latency and cost.\n\nProactive context management. By default, Harness summarizes older conversation turns while retaining recent context once the context window reaches a configurable threshold. Keeping the context lean this way helps Harness run at about 34% lower token cost than other leading harnesses .\n\nContext offloading. Large tool results can be moved out of the immediate model context. The agent receives a preview and can retrieve the complete result when needed, reducing repeated context usage without losing access to the data.\n\nPlanning across invocations. The todo_write tool maintains a structured task plan that can be restored in later invocations within the same session, including after conversation summarization.\n\nFocused delegation. The subagent tool delegates a self-contained task to a fresh worker and returns the result to the parent agent. The worker is internal to the invocation, not a separately managed harness resource, and shares invocation limits and your tool-call lifecycle hooks.\n\nWeb retrieval. The web_fetch tool retrieves content from a specified webpage to give your harness up-to-date external context.\n\nGranular filesystem access. With separate read , write , and edit tools, you can grant only the granular filesystem capabilities an agent needs.\n\nCustomer-provided Model Context Protocol (MCP) servers, AgentCore Gateway (a capability of Amazon Bedrock AgentCore), Browser, Code Interpreter, inline functions, skills, memory, and customer-provided containers continue to work through the existing harness interfaces.\n\nRecommended by default, configurable when needed\n\nHarness manages its defaults so that agents using them receive the current AgentCore recommended experience as models, instructions, context management, and built-in capabilities improve.\n\nExplicit configuration always takes precedence:\n\nConfigure a model ID to keep using a specific model.\n\nConfigure systemPrompt to completely replace the managed system prompt.\n\nConfigure truncation to keep a specific context-management policy.\n\nList individual allowedTools selectors to maintain a fixed tool surface.\n\nWhen allowedTools is omitted or set to [\"*\"] , Harness provides the current recommended built-in tool set. Because this set can gain capabilities over time, applications with a fixed security or capability boundary should list only the tools they need.\n\nFor example, the following configuration permits read-only filesystem access and web retrieval without granting shell access or file modification:\n\n{\n\"allowedTools\": [\n\"read\",\n\"web_fetch\"\n]\n}\n\nGovern consequential actions with lifecycle hooks\n\nWith lifecycle hooks, you can run your own deterministic code at defined points in the agent loop. For example, an AWS Lambda function can allow or deny a request or a tool call, and an Amazon Simple Notification Service (Amazon SNS) topic or Amazon EventBridge event bus can receive a notification to record activity or start an asynchronous workflow.\n\nHarness supports four lifecycle events:\n\nEvent\nWhen it runs\nEffect of a Lambda denial\n\nbefore_invocation\nBefore the agent processes the request\nStops the invocation with hook_stopped\n\nbefore_tool_call\nAfter the model proposes a tool call and before execution\nSkips the tool call. The agent loop continues\n\nafter_tool_call\nAfter a tool result exists\nRetains the result and stops before further inference\n\nafter_invocation\nAfter the invocation completes\nReports the decision. Output already streamed cannot be retracted\n\nOnly Lambda hooks can change the agent loop. They run synchronously and return allow or deny, with an optional reason. SNS and Amazon EventBridge hooks are notifications and don’t block the agent loop.\n\nFor example, a customer-support agent can investigate an order on its own while a before_tool_call hook checks each refund against an approval limit before the refund tool runs. The following configuration attaches that Lambda function to the harness:\n\n[\n{\n\"beforeToolCall\": {\n\"name\": \"refund_policy\",\n\"target\": {\n\"lambda\": {\n\"arn\": \"arn:aws:lambda:us-west-2:123456789012:function:refund-policy\",\n\"timeoutSeconds\": 10,\n\"failureMode\": \"deny\"\n}\n}\n}\n}\n]\n\nThe function receives the proposed tool call in the hook payload and returns a decision:\n\ndef lambda_handler(event, _context):\ntool = event[\"context\"]\nif tool[\"toolName\"] == \"issue_refund\" and tool[\"toolInput\"][\"amount\"] > 500:\nreturn {\"decision\": \"deny\", \"reason\": \"Refund exceeds the $500 auto-approval limit.\"}\nreturn {\"decision\"…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "OpenAI evaluates coding agents on research engineering tasks",
+      "summary": "OpenAI has published an evaluation analyzing how coding agents accelerate internal AI research workloads. The research assesses the jagged boundaries of autonomous execution, examining where model performance remains uneven and detailing specific operational failure modes. The paper looks closely at the implications of these uneven performance limits on the viability of recursive self-improvement loops in production engineering environments.",
+      "why_it_matters": "Understanding the failure boundaries and uneven capabilities of coding agents is critical for building realistic harnesses that don't fail when handed autonomous research or engineering tasks.",
+      "reason": "OpenAI evaluates coding agents deployed on research engineering tasks, analyzing their jagged performance boundaries and failure modes during autonomous execution.",
+      "item": {
+        "key": "openai.com/index/research-acceleration-jagged-frontier",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Research acceleration: The jagged frontier",
+        "url": "https://openai.com/index/research-acceleration-jagged-frontier",
+        "discussion_url": null,
+        "published": "2026-11-18T08:00:00Z",
+        "summary": "OpenAI measures how coding agents are accelerating AI research, where their performance remains uneven, and what this signals about recursive self-improvement.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Gemini for Mac adds background desktop computer-use",
+      "summary": "Google has released computer-use capabilities within the Gemini Mac application, letting the model execute multi-step GUI workflows across desktop software, local files, and the browser. Unlike approaches that hijack user input, Gemini runs inside an isolated background window with a live chat preview, leaving the user's primary desktop and cursor unaffected. The interface requires explicit app permission grants, supports mid-task pausing, and prompts for confirmation before executing consequential actions.",
+      "why_it_matters": "Running OS-level automation in an isolated background window sidesteps the frustrating UI lockouts typical of desktop computer-use agents.",
+      "reason": "Google is introducing computer-use capabilities to Gemini on macOS, enabling GUI automation and multi-step tool use across local desktop applications.",
+      "item": {
+        "key": "blog.google/innovation-and-ai/products/gemini-app/computer-use-mac",
+        "source": "Google Gemini Blog",
+        "tags": [
+          "lab",
+          "models"
+        ],
+        "title": "Let Gemini tackle repetitive chores on your Mac",
+        "url": "https://blog.google/innovation-and-ai/products/gemini-app/computer-use-mac/",
+        "discussion_url": null,
+        "published": "2026-11-19T17:00:00Z",
+        "summary": "Prompting Gemini to take a kid's butterfly sketch, model it, and rig it in Blender",
+        "content": "Let Gemini tackle repetitive chores on your Mac\nStarting today, computer use in the Gemini app for Mac helps you get multi-step tasks done across your local files, desktop apps, and the web. This saves you time on the repetitive work that normally takes dozens of clicks. Just describe what you need, and Gemini handles the clicking, typing, menus, and forms for you.\nGemini works inside an isolated background window with a live preview right in your chat. Your main screen and cursor remain completely free, so you can keep typing, designing, or taking calls without interruption. Privacy and safety are built in: you choose which apps Gemini can access, watch every step live, pause at any time, and approve key actions before they happen.\nHere are a few ways you can start trying it today:\n- Speed up creative workflows: Batch color-grade photos in your favorite design software or set up complex 3D scenes.\n- Skip manual form entry: Extract weights, dimensions, and addresses from local PDFs to fill out multi-box shipping quotes.\n- Turn live data into ready-to-present decks: Pull metrics and screenshots from live dashboards across multiple regions and build a presentation in Google Slides.\n- Batch-list items for sale: Analyze clothing photos from a local folder, research pricing, log item details, and stage listings on resale platforms.\nComputer use is rolling out in English in the U.S. in the Gemini app for Mac. 1 Download the app at gemini.google/mac to get started.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "theverge.com/tech/1037902/google-gemini-macos-ai-computer-use",
+          "source": "The Verge (AI)",
+          "tags": [
+            "press"
+          ],
+          "title": "Gemini on Mac can now use your computer",
+          "url": "https://www.theverge.com/tech/1037902/google-gemini-macos-ai-computer-use",
+          "discussion_url": null,
+          "published": "2026-11-19T18:21:13Z",
+          "summary": "Google's Gemini app for macOS now has computer use, meaning it can help you \"get multi-step tasks done across your local files, desktop apps, and the web,\" the company says. Google suggests the feature might be useful for things like speeding up workflows, filling in forms, making presentations, and listing items for sale. Users will […]",
+          "content": "Google's Gemini app for macOS now has computer use, meaning it can help you \"get multi-step tasks done across your local files, desktop apps, and the web,\" the company says . Google suggests the feature might be useful for things like speeding up workflows, filling in forms, making presentations, and listing items for sale.\n\nUsers will be able to decide which of your apps Gemini can access, and be able to follow along as Gemini works because it has its own background window that shows a live preview in your chat, Google says. The feature is rolling out now in English for users in the US.\n\nGemini is introducing the new feature ahead of Apple l …\n\nRead the full story at The Verge.",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Why agent self-evolution stalls: the Resolution Hypothesis",
+      "summary": "A paper studying agent self-evolution across seven methods and six models (spanning over 1,000 runs and 10 million LLM calls) argues that recursive improvement stalls due to noisy evaluations rather than poor candidate generation. The authors show that score distributions across mainstream benchmarks are frequently multimodal rather than Gaussian. Because evaluator noise exceeds the margins of improvement, artifact selection performs no better than random choice, compounding errors across rounds; similarly, method-level differences of a few percentage points are often smaller than the variance between two runs of the same technique.",
+      "why_it_matters": "It explains why LLM-based self-improvement loops fail to bootstrap: your proposer is likely generating viable improvements, but your benchmark and LLM judge lack the resolution to distinguish them from noise.",
+      "reason": "This paper investigates why autonomous agent evolution and self-improvement loops often fail, tracing the issue to resolution limits in evaluating proposed modifications.",
+      "item": {
+        "key": "arxiv:2611.23068",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "The Resolution Hypothesis: Agent Evolution's Key Is Identifying Improvements",
+        "url": "https://huggingface.co/papers/2611.23068",
+        "discussion_url": null,
+        "published": "2026-11-19T00:00:00Z",
+        "summary": "Agent evolution follows a simple loop: a proposer writes candidate artifacts (prompts, skills, memories) and selection accepts those that score higher. This loop has shown promise, yet practitioners face a puzzle: methods trade wins across papers, and evolution often fails to bootstrap on certain tasks. We trace this puzzle to the Resolution Hypothesis: agent evolution stalls not because methods fail to propose better artifacts, but because noisy evaluations cannot reliably identify them. Across seven evolution methods and six models (over 10M LLM calls), we find support for the hypothesis at both levels where evaluation scores are used. At the candidate level (choosing artifacts), helpful candidate artifacts exist, but selection is no better than random at telling them from harmful ones, so errors accumulate across rounds. At the method level (ranking methods), typical margins of a few percentage points are smaller than the difference between two independent runs of the same method, so published rankings often rest on luck. Together, these findings indicate that agent evolution is often bottlenecked by reliably identifying improvements. This calls for a shift in how we develop…",
+        "content": "The Resolution Hypothesis: Agent Evolution's Key Is Identifying Improvements\nAbstract\nAgent evolution is often bottlenecked by noisy evaluations that cannot reliably identify better candidate artifacts or rank methods, so progress requires making true improvements detectable and accumulable.\nAgent evolution follows a simple loop: a proposer writes candidate artifacts (prompts, skills, memories) and selection accepts those that score higher. This loop has shown promise, yet practitioners face a puzzle: methods trade wins across papers, and evolution often fails to bootstrap on certain tasks. We trace this puzzle to the Resolution Hypothesis: agent evolution stalls not because methods fail to propose better artifacts, but because noisy evaluations cannot reliably identify them. Across seven evolution methods and six models (over 10M LLM calls), we find support for the hypothesis at both levels where evaluation scores are used. At the candidate level (choosing artifacts), helpful candidate artifacts exist, but selection is no better than random at telling them from harmful ones, so errors accumulate across rounds. At the method level (ranking methods), typical margins of a few percentage points are smaller than the difference between two independent runs of the same method, so published rankings often rest on luck. Together, these findings indicate that agent evolution is often bottlenecked by reliably identifying improvements. This calls for a shift in how we develop and evaluate self-improving agents, from designing ever more candidate improvement systems to making true improvements detectable and accumulable.\nCommunity\nTL;DR: Much of the current community effort on agent evolution / RSI (across skills, harnesses, memory, etc.) is focusing on the wrong bottleneck. Proposing better artifacts is actually quite easy—the real challenge is reliably identifying whether an artifact truly helps. In fact, many seemingly impressive gains reported in recent work come down to exploiting evaluation shortcuts.\nEverything you want to know about the reality of agent evolution is in this paper. For instance, we mapped out the actual score density distributions across mainstream evolution methods, frontier models, and standard benchmarks (spanning 1,030+ evolution runs and 10M+ LLM calls!). Everyone in the field has wanted to see these curves, though computing each one is prohibitively expensive—so we bit the bullet and absorbed the cost to save the community from hitting the same walls.\nSurprise: Many of these score distributions aren't Gaussian at all—they are multimodal!\nWe also packed the paper with tons of hard-earned, practical insights:\n- How can a single sentence hack mainstream benchmarks and reproduce 90% of full evolution gains?\n- Are there actually transferable skills that genuinely boost performance on Terminal-Bench v2.1? (Spoiler: Yes, and we show why standard selectors miss them.)\nPlus plenty more actionable know-how inside. If you are building or evaluating self-evolving agents, you'll definitely walk away with something valuable!\n🔗 Project Page: https://lineshogan.github.io/resolution-hypothesis/\nThe finding that typical method margins are smaller than the gap between two runs of the same method applies well beyond evolution. It's the same trap when teams compare their current model against a candidate on a small eval set and ship on a 2-point difference. Did paired, per-case comparison (same items, counting wins vs losses) separate helpful from harmful candidates better than comparing mean scores? I'm curious whether the \"no better than random\" result at the candidate level holds under that kind of selection too.\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 35.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Building robust streaming tool parsers in Rust with NVIDIA Dynamo",
+      "summary": "NVIDIA shared architectural details on building low-latency tool-calling parsers in Rust using `frontend-crates`, the components powering NVIDIA Dynamo. The post details the operational headaches of processing streaming tokens, including mid-stream syntax truncation, semantic mismatches like unauthorized tools, and boundary recognition without markup leakage. To ensure reliable extraction without masking raw model outputs, the system relies on language-neutral YAML fixtures in a shared Conformance Corpus covering interleaved, malformed, and streaming token cases across multiple model families.",
+      "why_it_matters": "Production agent frameworks frequently break on malformed streaming tool calls and marker leaks, making formal conformance testbeds and low-level Rust parsers essential infrastructure.",
+      "reason": "NVIDIA explores implementing low-latency Rust parsers to handle streaming, truncated, and malformed tool-calling outputs in production agent harnesses.",
+      "item": {
+        "key": "developer.nvidia.com/blog/build-tool-calling-parsers-in-rust-with-ai-agents",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "Build Tool-Calling Parsers in Rust with AI Agents",
+        "url": "https://developer.nvidia.com/blog/build-tool-calling-parsers-in-rust-with-ai-agents/",
+        "discussion_url": null,
+        "published": "2026-11-19T16:30:46Z",
+        "summary": "A tool call can arrive in pieces, an argument can be cut short, or model-specific markup can leak into the answer. A frontend parser turns that output, received...",
+        "content": "A tool call can arrive in pieces, an argument can be cut short, or model-specific markup can leak into the answer. A frontend parser turns that output, received as token IDs or decoded text, into visible text, reasoning, and tool calls an application can use.\nIn this post, you’ll learn how tool-call parsing works and use an AI agent to build a parser for a new model. You’ll start with a weather request and a human-reviewed test set, using frontend-crates, the reusable Rust components behind NVIDIA Dynamo tool-calling parsers.\nSuppose you ask for the weather in Paris. The model may generate reasoning followed by a get_weather call with a city argument. The frontend prepares and tokenizes the prompt, then an inference engine runs the LLM to generate tokens. The parser consumes token IDs or decoded text and separates reasoning, visible text, and tool calls in order. A protocol adapter turns those events into an OpenAI-compatible response, using the same parsing path for batch JSON and streaming updates.\nThe tricky part is recognizing where each piece starts and ends. A call can be malformed or incomplete, a marker can appear inside an argument, or ordinary text can surround the call. The parser has to handle these boundaries without losing data, duplicating calls, or leaking model-specific markup.\nReturning to the weather request: the model might stop halfway through a city name or call a tool that wasn’t offered. Either can disrupt the agent’s next action. The following NVIDIA Nemotron examples show these two failures.\nSyntax error. The argument and tool-call frame never close, so no complete call can be parsed.\n</think><tool_call>\n<function=get_weather><parameter=city>Par\nSemantic error. The frame is valid, but the named tool is absent from the request.\n</think><tool_call>\n<function=unknown_tool><parameter=city>Paris</parameter></function>\n</tool_call>\nThese failures require different handling. If the model names an unavailable tool, the parser reports the call it received, and the serving layer validates tool availability, authorization, schema, and call policy. Changing the tool name would hide what the model actually generated.\nAn incomplete call is harder to judge while the stream is open. The rest of the city name may arrive in the next chunk, and a marker can split across chunks, too. Emit too early and syntax leaks into the answer; wait too long and ordinary text gets delayed. The parser needs consistent rules for what to emit, what to buffer, and how to handle the end of the stream.\nA parser can encounter an unbounded range of inputs. With invalid input, it must follow documented recovery rules rather than guess the model’s intent. Even a syntactically valid call that conforms to the schema can be the wrong choice for the user’s request. The parser needs a consistent grammar and recovery policy so it can preserve valid data without inventing calls or leaking model-specific markup.\nTo check those decisions, frontend-crates pairs model outputs with expected results in a shared Conformance Corpus.\nUsing the Conformance Corpus\nUse the Conformance Corpus to check how applicable parsers handle behavior first observed in one model. Its language-neutral YAML fixtures pair fixed input with expected output, so Rust parsers and Python references can run the same cases. A regression test for leaked markup, duplicate calls, or lost arguments can cover other families when adapted to their grammars.\nFor a new parser, start with all UNIFIED.* cases across model families. They cover complete, malformed, truncated, multiple, and interleaved calls, plus streaming boundaries and end-of-input behavior. Adapt inputs to your model’s grammar and request settings, add model-specific edge cases, and explain exclusions. You can’t test every possible output, but you can reuse cases from other formats.\nTable 1 shows the UNIFIED.1-tool_only case from the Parser Conformance Table. In this example, the GOLDEN test set pairs four model-specific inputs with the same expected result: get_weather with city set to Paris. The markers differ, but each case tests the same behavior. Adapting the input format makes the same behavioral test reusable across models.\nTutorial: Create a new parser\nNow you can create a parser for a model that frontend-crates doesn’t support yet. Ask your AI agent to read this post and work through the tutorial, starting with the prompt in step 1. Your model’s specification defines the grammar; the shared cases provide behaviors to test.\nYou’ll need a frontend-crates checkout, Rust and Cargo, and the conformance dependencies. The parser exercise runs on a CPU using fixed test fixtures, so you don’t need a GPU. End-to-end testing also requires a working Dynamo runtime, discovery services, and hardware for your model. When you’re ready to test end-to-end, launch the tests with Dynamo runtime on the actual model and GPU(s).\nThe workflow in Figure 2 starts with the model’s grammar, recovery rules, and reviewed GOLDEN expectations. The agent writes or fixes the parser, runs tests, and uses failures to guide the next change. If it proposes changing the expected behavior, review that decision before accepting it.\nTest your parser end to end with real models before claiming deployment support. Plan time to allocate a machine, load the model, initialize the runtime, and run your own test cases. Turn failures into unit tests for the agent, then rerun the end-to-end test to check the fix.\n1. Start with a prompt\nGive the agent this prompt: In the frontend-crates checkout, follow .agents/skills/tool-parser-generator/SKILL.md to create a v2 Unified parser for [MODEL_NAME]. Research its grammar and prepare the GOLDEN test set, adapting applicable UNIFIED.* cases. Pause for human review. After approval, implement, validate, and provide the local conformance report URL for human inspection.\n2. Define the GOLDEN test set\nThe GOLDEN test set defines the behavior your parser will be tested against. Use the prompt…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "QDA uses closed-loop coding agents to optimize LLM quantization",
+      "summary": "Researchers have introduced QDA, a framework where an LLM agent designs and refines post-training quantization (PTQ) schemes in an autonomous loop. To bypass lengthy benchmark runs, QDA scores candidate configurations in minutes using KL divergence against unquantized reasoning traces, backed by long-generation tests to catch pathological failure modes like repetition loops. Across four reasoning models, QDA improved accuracy over strong public baselines by up to 2.2 points at W3A16, and recovered 98.3% of FP8 accuracy on GLM-5.3-Flash at NVFP4 with zero inference kernel overhead.",
+      "why_it_matters": "Combining rapid proxy metrics with a stackable quantization library shows how agents can effectively navigate complex, hardware-specific optimization spaces that usually demand human experts.",
+      "reason": "QDA demonstrates using LLM agents in a closed loop to automatically discover and optimize post-training quantization schemes for efficient serving.",
+      "item": {
+        "key": "arxiv:2611.23388",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "QDA: Closed-Loop LLM Quantization Design with Agents",
+        "url": "https://huggingface.co/papers/2611.23388",
+        "discussion_url": null,
+        "published": "2026-11-19T00:00:00Z",
+        "summary": "Post-training quantization is the standard way to serve large language models at low cost. However, the best quantization recipe differs across models and precisions. As a result, experts must redesign it for every new model, which is time-consuming and often sub-optimal. Fortunately, an LLM agent can take over this design by refining the recipe over rounds of building and evaluating candidates, so that more rounds lead to better recipes. However, evaluating one quantized reasoning model takes tens of GPU-hours, and combining methods from different codebases means porting each to the new architecture by hand. We present QDA, a system in which an agent designs the recipe for each model and precision. To make evaluation fast, QDA scores each candidate in minutes by its output KL divergence from the original model on reasoning traces that the agent never sees, and checks promising ones with long generations to catch failures such as repetition loops. To make building fast, QDA provides a library of public PTQ methods that are compatible with one another and with new model architectures. Across four reasoning models, QDA improves accuracy over the strongest public recipe by 0.9, 1.4…",
+        "content": "Abstract\nPost-training quantization is the standard way to serve large language models at low cost. However, the best quantization recipe differs across models and precisions. As a result, experts must redesign it for every new model, which is time-consuming and often sub-optimal. Fortunately, an LLM agent can take over this design by refining the recipe over rounds of building and evaluating candidates, so that more rounds lead to better recipes. However, evaluating one quantized reasoning model takes tens of GPU-hours, and combining methods from different codebases means porting each to the new architecture by hand. We present QDA, a system in which an agent designs the recipe for each model and precision. To make evaluation fast, QDA scores each candidate in minutes by its output KL divergence from the original model on reasoning traces that the agent never sees, and checks promising ones with long generations to catch failures such as repetition loops. To make building fast, QDA provides a library of public PTQ methods that are compatible with one another and with new model architectures. Across four reasoning models, QDA improves accuracy over the strongest public recipe by 0.9, 1.4 and 2.2 percentage points on average at W4A16, W4A8 and W3A16, using 64 GPU-hours per search. On the 320B-parameter MoE model GLM-5.3-Flash at NVFP4 W4A4, it recovers 98.3% of the FP8 model's accuracy, against 96.9% for the best vendor checkpoint. Every QDA checkpoint also runs on existing serving kernels with no inference overhead. We will release the library, the evaluator and the harness.\nCommunity\nQDA brings a coding agent into LLM quantization design. For each model and precision, the agent designs the post-training quantization recipe on its own, with no human in the loop. Its checkpoints beat the strongest public recipe on four reasoning models, by 0.9, 1.4 and 2.2 points on average at W4A16, W4A8 and W3A16, and run on existing kernels with no inference overhead.\nThe agent works the way a quantization expert does: it proposes a recipe, builds it, measures it and decides what to change next. Two things make this loop fast enough for up to 36 candidates in one eight-hour search: a KL score that takes minutes instead of dozens of GPU-hours, and a library of 21 PTQ methods that stack in any order. We find that no method wins everywhere: the best recipe differs for every model and precision, and the agent finds it by searching.\nOn the 320B-parameter GLM-5.3-Flash at NVFP4, one 6.5-hour, $69 search recovers 98.3% of the FP8 model's accuracy, against 96.9% for NVIDIA's release. The tools matter too: given NVIDIA ModelOpt's tools instead of ours, the same agent falls 0.5–1.3 points behind on Qwen3.6-35B. A search costs $19–75 of agent tokens.\nGet this paper in your agent:\nhf papers read 2611.23388 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 30\nqda-lab/QDA-Qwen3.6-35B-A3B-W4A16-SGLang\nDatasets citing this paper 1\nqda-lab/qda-recipe-inputs\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 12.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Cerebras pairs GPUs with Wafer-Scale Engines for disaggregated serving",
+      "summary": "Cerebras has deployed a disaggregated inference architecture in production that offloads the prompt processing (prefill) phase to GPUs—specifically AMD Instinct chips—while dedicating Cerebras Wafer-Scale Engines exclusively to autoregressive decode. Leveraging the massive SRAM capacity and memory bandwidth of the CS-3 system for decode while offloading compute-heavy prefill yielded a 5x improvement in throughput per megawatt compared to an aggregated CS-3 deployment. The architecture communicates intermediate KV cache state over RDMA via Cerebras' KV Portal software, supporting integrations with vLLM and SGLang.",
+      "why_it_matters": "Decoupling memory-bandwidth-bound decode from compute-bound prefill across distinct hardware architectures represents the next major efficiency leap for ultra-low-latency agent serving.",
+      "reason": "Cerebras details its disaggregated inference architecture, decoupling prefill and decode stages to maximize throughput and minimize latency in production serving.",
+      "item": {
+        "key": "cerebras.ai/blog/cerebras-launches-disaggregated-inference",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Cerebras Disaggregated Inference",
+        "url": "https://www.cerebras.ai/blog/cerebras-launches-disaggregated-inference",
+        "discussion_url": "https://news.ycombinator.com/item?id=50540472",
+        "published": "2026-11-18T00:56:23Z",
+        "summary": "",
+        "content": "We’ve deployed Cerebras Wafer Scale Engines with GPUs to deliver lightning-fast tokens at scale\nThe world is hungry for ultrafast tokens. In 2026, Cerebras saw an insatiable demand for fast inference, both on our inference cloud and via our partners. To meet demand, we began developing disaggregated inference: GPUs handle prompt processing (prefill) and Cerebras systems handle output generation (decode).\nThis solution is now in production and delivers five times more tokens per megawatt at the same ultrafast Cerebras speeds.\nWe can now serve more ultrafast tokens via Cerebras Inference Cloud to meet market demand. Infrastructure partners can also leverage the Cerebras disaggregated solution to achieve more ultrafast tokens in their own datacenters.\nAlongside our recently announced CS-4, our dramatically scaled manufacturing, and our planned 700MW of data center capacity, disaggregated inference will enable Cerebras and partners to serve many more ultrafast tokens in 2027 and beyond.\nIn this blog we cover:\n- The need for more ultrafast inference capacity\n- Why Cerebras is advantaged for decode\n- Cerebras disaggregated inference production results\n- Cerebras disaggregated inference for infrastructure partners\nThe need for more fast inference capacity\nAgentic applications like Muse, Copilot, and Codex are scaling rapidly and require highly interactive inference to keep users engaged. To meet the growing demand of these applications in a power-constrained environment, our industry must deliver significantly more inference capacity per megawatt, at response speeds that make these applications useful.\nSources: Goldman Sachs Research, “AI Agents Forecast to Boost Tech Cash Flow as Usage Soars,” May 20, 2026; Goldman Sachs data center capacity estimates, as reported by Investing.com, November 6, 2026.\nThat is why Cerebras invested in disaggregation. Pairing a prefill accelerator for prompt processing with the Cerebras System for response generation increases token throughput per megawatt while preserving Cerebras’ ultrafast generation speeds. For inference providers, that means more capacity to serve customers and greater revenue potential from the same power budget.\nWhy Cerebras is advantaged for decode\nAn inference request has two main stages. Prompt processing, known as prefill, processes the input and produces intermediate model state. Response generation, known as decode, uses that state to generate output tokens. There are many ways to split the inference workload, including draft–target and attention–FFN among others, but separating prefill from decode is uniquely advantageous when the goal is highly interactive inference.\nDecode is autoregressive. That means the model generates one token at a time, using each generated token as an input to generate the next. Each step means reading model data from memory again, so memory bandwidth matters a lot. In the ultrafast inference domain, SRAM-centric chips have an advantage because they can keep that data on-chip and read it much more quickly. Cerebras takes this to wafer scale, with tens of gigabytes of SRAM and tens of petabytes per second of memory bandwidth on a single chip—350× the SRAM capacity and 5,400× the memory bandwidth of a typical GB300 GPU. This allows the Cerebras System to fit more concurrent requests and model layers directly on the chip, enabling the CS-3, CS-4, and CS-5 to achieve ultrafast speeds at an attractive throughput.\nCerebras disaggregated inference production results\nPairing Cerebras systems, which are optimized for ultrafast decode, with accelerators well-suited to the compute needs of prefill, such as AMD Instinct GPUs, allows the delivery of an immense amount of ultrafast inference at scale. In a production deployment on the Cerebras Inference Cloud, AMD Instinct GPUs process prompts, and Cerebras CS-3 systems generate responses. Moving prompt processing to GPUs allows Cerebras systems to devote their serving capacity to response generation. In our measured production deployment, this combination delivered 5X the throughput per megawatt of a CS-3-only configuration, with no loss in token generation speed.\nSource: November 14th shared GPT-OSS-120B endpoint via the Cerebras Inference Cloud throughput per megawatt before and after enabling disaggregated inference, normalized to the aggregated inference baseline (1×).\nWe plan to deploy disaggregated inference broadly across hundreds of megawatts in the Cerebras Inference Cloud and in partner deployments by the end of 2027. Our aim is to increase the ultrafast inference capacity available for our customers.\nCerebras disaggregated inference for infrastructure partners\nThe Cerebras disaggregated inference solution was also built for our partners to adopt. Infrastructure partners can deploy disaggregated inference clusters based on Cerebras-provided reference architecture, co-locating their chosen prefill accelerators and Cerebras systems within a unified network. For software integration, partners can either integrate with the Cerebras end-to-end disaggregated software stack or a decode-only SDK.\nThe end-to-end disaggregated software stack is best suited for partners optimizing time-to-market. It consists of:\n- A disaggregated inference framework to route requests between prefill and decode pools and manage replica capacity and health.\n- A prefill engine to process prompts using open-source inference engines like vLLM or SGLang.\n- A Cerebras decode engine for response generation on Cerebras systems.\n- KV Portal software, an interface to transfer intermediate model state, including key-value caches, between prefill and decode engines over RDMA.\nThe decode-only SDK is best suited for partners optimizing for control. With the decode-only SDK, partners can bring their own inference framework and prefill engine to the Cerebras decode engine and KV Portal software. In addition, the decode-only SDK provides development aids such as a mock Cerebras decode replica and a…",
+        "score": 107.0,
+        "comments": 27,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "MAI releases Code 2 and Code 2 Flash for enterprise coding tasks",
+      "summary": "MAI has launched MAI Code 2 and Code 2 Flash, two models optimized specifically for common enterprise coding workflows like multi-file edits, repo reasoning, and debugging. Benchmarked across DeepSWE 1.1, Terminal Bench 2.1, SWE-Atlas, and FrontierCode v1.1, MAI claims Code 2 delivers 98% of GPT-6.1 Sol's performance at 40% of the cost, while intentionally avoiding tuning for long-horizon agentic or scientific problems. MAI Code 2 Flash targets high-volume tasks such as rapid edits and inline explanations, with specialized variants already deployed across Microsoft 365 and FabricIQ products.",
+      "why_it_matters": "The deliberate decision to optimize for narrow, high-frequency repository edits over open-ended long-horizon agency offers a pragmatic, cost-effective alternative for daily software tasks.",
+      "reason": "MAI releases Code 2 and Code 2 Flash, a new model family tailored for coding tasks and agentic software development workflows.",
+      "item": {
+        "key": "microsoft.ai/news/introducing-mai-code-2-and-mai-code-2-flash",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "MAI Code 2 and Code 2 Flash",
+        "url": "https://microsoft.ai/news/introducing-mai-code-2-and-mai-code-2-flash/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50535885",
+        "published": "2026-11-17T18:25:13Z",
+        "summary": "",
+        "content": "MAI Cyber 2 Flash: Leading security. Lower cost\nMAI Code 2 and MAI Code 2 Flash: two new coding models built for everyday enterprise coding tasks, delivering leading performance at a fraction of the cost of competing models.\nMAI Code 2 is at the frontier of price-performance for common enterprise coding tasks and excels in taking code to production, deep debugging, multi-file implementation, repo-wide reasoning, and UI. It does all of this while also delivering changes code maintainers would merge, at a fraction of frontier cost.\nMeanwhile, MAI Code 2 Flash is designed for high-volume work such as code explanations, targeted edits, routine fixes, and rapid iterations, while bringing quality at a much lower cost.\nTo deliver the best price-performance, we’ve built these models to prioritize the coding work our customers do every day. They’re explicitly not yet tuned for harder problems, like fundamental science research and very long-horizon agentic work.\nAveraged over four widely used benchmarks that target the everyday enterprise coding tasks we see in GitHub Copilot (DeepSWE 1.1, Terminal Bench 2.1, SWE-Atlas and FrontierCode v1.1), MAI Code 2 gives you 98% of the performance of GPT-6.1 Sol at 40% of the cost, and 96% of Claude Opus 5.5’s performance at just 5% of the cost.1\nMAI Code 2 is also tuned for producing great dashboards and visualizations, and excels at visual coding. In blind frontend app evaluations, developers preferred its results over GPT-6 Sol 64% of the time.2\nIn addition, MAI Code 2 Flash offers comparable performance to GPT-6 Luna and Claude Haiku 5.5 at 65% and 20% of the cost, across three coding benchmarks measuring day-to-day, high-volume routine coding tasks.3\nMAI Code 2 is also becoming the workhorse behind Microsoft products. From Code 2 Flash, we further optimized a single model, MAI Work Flash, to serve multiple Microsoft products across Microsoft 365 and FabricIQ. \nExcel: Our model is on par for accuracy and token efficiency with GPT-6 Luna across key internal Excel customer-scenario benchmarks.\nPowerPoint: On key production benchmark scenarios that measure frequent PowerPoint tasks, our model performs on par with GPT-6 Luna in both quality and token efficiency.\nWord: Our model performs similarly to GPT-6.1 Sol (while being significantly smaller) on 5 key internal benchmarks using ~42% fewer input tokens per call than GPT-6.1 Sol in production.\nTeams: Our model beats GPT-6 Luna at tracking decisions, filling knowledge gaps, and adapting to custom instructions using up to 28% fewer tokens on instruction following and tool calling.\nFabricIQ: In offline evaluation runs, our MAI model outperforms GPT-5.6 Sol, GPT-6 Astra, and Claude Opus 5.5 at DAX query generation, the core capability behind “Chat With Your Data” for Power BI semantic models.\nGet started\nMAI Code 2 and Code 2 Flash are available in GitHub Copilot, and Code 2 Flash is in limited-access preview in Microsoft Foundry. Soon, we’ll be releasing them on OpenRouter, Vercel, Hermes, OpenCode, and Kilo.\nLearn more about customizing MAI Code 2 on our Custom Models page.\nAbout these results\nResults reflect evaluations on specific coding tasks and configurations. Performance and cost comparisons vary by workload, model configuration, reasoning effort, and pricing assumptions.",
+        "score": 421.0,
+        "comments": 171,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "LangChain OpenAI 1.8.5 fixes streamed Responses tool call argument preservation and standardizes message-finish event reasons.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-openai%3D%3D1.8.5",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-openai==1.8.5",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-openai%3D%3D1.8.5",
+        "discussion_url": null,
+        "published": "2026-11-19T23:16:22Z",
+        "summary": "Changes since langchain-openai==1.8.4\n\nrelease(openai): 1.8.5 ( #41969 )\n\nfix(openai): preserve streamed Responses tool call arguments ( #41963 )\n\nfeat(core): standardize finish reason on message-finish events ( #41926 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Llama.cpp build b12555 adds OpenCL support for dp4a in decomposed flash attention and int8 KQ matrix multiplication.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12555",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12555",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12555",
+        "discussion_url": null,
+        "published": "2026-11-19T22:59:01Z",
+        "summary": "opencl: support dp4a for KQ mm in decomposed FA ( #32577 )\n\nopencl: support int8 KQ for DK = 512\n\nCo-authored-by: Shaofei Qi shaoqi@qti.qualcomm.com\n\nCo-authored-by: Hongqiang Wang wangh@qti.qualcomm.com\n\nAssisted-by: Codex\n\nopencl: allow query chunk up to 96 for int8 KQ\n\nCo-authored-by: Shaofei Qi shaoqi@qti.qualcomm.com\n\nCo-authored-by: Hongqiang Wang wangh@qti.qualcomm.com\n\nAssisted-by: Codex\n\nopencl: extend build_program_from_source to allow non-fatal failure\n\nAssisted-by: Codex\n\nopencl: add int8 KQ for decomposed FA with DK <= 256\n\nCo-authored-by: Shaofei Qi shaoqi@qti.qualcomm.com\n\nCo-authored-by: Hongqiang Wang wangh@qti.qualcomm.com\n\nAssisted-by: Codex\n\nCo-authored-by: Li He lih@qti.qualcomm.com\n\nCo-authored-by: Hongqiang Wang wangh@qti.qualcomm.com\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/69894362\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) -…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Amazon Bedrock AgentCore payments now allows agents to purchase x402-enabled APIs and tools from AWS Marketplace directly via the developer's AWS bill.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/enable-ai-agents-to-pay-for-aws-marketplace-x402-products-with-amazon-bedrock-agentcore-payments",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Enable AI agents to pay for AWS Marketplace x402 products with Amazon Bedrock AgentCore payments",
+        "url": "https://aws.amazon.com/blogs/machine-learning/enable-ai-agents-to-pay-for-aws-marketplace-x402-products-with-amazon-bedrock-agentcore-payments/",
+        "discussion_url": null,
+        "published": "2026-11-19T23:02:16Z",
+        "summary": "Amazon Bedrock AgentCore payments now supports AWS Marketplace, so agents can discover and buy x402-enabled products, APIs, data, and content and pay in USD on the developer's AWS bill, with no stablecoin wallets or API keys. This post walks through a research agent that finds a tool, pays per request through AWS Billing, and answers with sources.",
+        "content": "When Amazon Bedrock AgentCore payments became generally available in August 2026, agents could autonomously pay for paid APIs, MCP servers, and web content over open protocols like x402 and MPP with payment limits and full observability. Today we extend that autonomy to AWS Marketplace , so agents can discover and buy x402-enabled software, APIs, data, and content, and pay in USD on the agent developer’s AWS bill, removing the need for stablecoin wallets or API keys.\n\nFigure 1: Overview of AgentCore payments showing the new AWS Billing integration for purchasing on AWS Marketplace\n\nDevelopers can also configure and automate discovery through the AWS Marketplace connector in AgentCore Gateway . Existing guardrails carry over, developers can set spending limits and approved sellers using AgentCore policy, and the payment session cap is enforced by AgentCore payments, so an agent is unable to overspend. Transactions are auditable in AWS CloudTrail and AWS Cost Explorer . Because agent purchases run through AWS accounts on both sides, agentic purchasing meets the security and auditability enterprises expect.\n\nThe x402 catalog on AWS Marketplace is expanding with a growing roster of trusted, verified sellers. Tavily, a live search provider for agentic commerce, is one of them:\n\nAgentic commerce isn’t just about giving agents the ability to pay. It’s about giving enterprises the confidence to let them.\n\nThat conviction is driving Tavily’s collaboration with the AWS team on the design of Agentic Commerce. By bringing secure, x402 powered transactions to AWS Marketplace and connecting agents with trusted, KYC verified providers, AWS is laying the foundation for autonomous commerce at production scale.\n\nThis is what enterprise ready agentic commerce looks like.\n\n— Rotem Weiss, Founder & CEO, Tavily\n\nWhat’s launching today\n\nToday’s launch adds AWS Billing as a payment option in AgentCore payments. An agent can now pay x402-enabled AWS Marketplace sellers per request, in USD, settling on their AWS bill.\n\nWhen an AWS Marketplace seller responds with 402 Payment Required, its response includes a signed quote for the purchase. With AWS Billing, the agent can forward the seller’s x402 response to AgentCore payments. AgentCore payments checks session budgets, then returns a payment token. The agent retries the request to the seller with the payment token included and receives a successful response. AWS bills the charge to the AWS account where Payment Manager is set up, and the charge appears on that account’s AWS bill.\n\nTo set up AWS Marketplace purchasing, the developer creates a Payment Manager with an AWS Billing connector. The connector only requires you to set up a service-linked role to access AWS Marketplace. Then, for each task, developers can create a payment session with a spending limit and give the agent the session ID.\n\nAn agent’s first purchase from a seller creates an agreement for the AWS account with that seller, and AWS Marketplace automatically tracks later purchases against it. Each product will then show up as an AWS Marketplace line item. If your organization uses Private Marketplace , agents can only buy the products it allows.\n\nIn addition, to discover new sellers, we are launching a new AWS Marketplace connector in AgentCore Gateway . This optional integration helps agents find products and their endpoints. At launch, AWS Billing supports the x402 exact scheme, where the seller quotes a fixed price for each request.\n\nIn this post, we walk through a research agent that discovers a tool, pays for a single request through AWS Billing, and answers with sources, with nothing set up in advance. We also provide an accompanying GitHub sample that you can use to evaluate the setup in your own AWS account.\n\nSample walkthrough\n\nSuppose a financial analyst asks the agent what was announced about agentic payments this week. The model wasn’t trained on this week’s news, so the agent looks for a search tool. Through AgentCore Gateway, it searches AWS Marketplace, reads the listing from Tavily, an AWS Marketplace seller, and requests the listing’s x402 endpoints.\n\nThe agent calls the endpoint and receives an x402 payload with price details. The agent then forwards the x402 payload to AgentCore payments. AgentCore payments checks it against the remaining session budget and returns a payment token. Once these checks are passed, the agent sends the request again with the token attached, and gets the search results. Its answer includes sources and states what it bought and what it cost.\n\nIn this workflow, agents can apply their reasoning to decide which AWS Marketplace tool to use.\n\nHow it works\n\nFigure 2: End-to-end flow of the sample solution using a Strands agent\n\n1. Discover. The agent calls three read-only gateway tools in order: search listings, get a listing, and list its fulfillment options. Search listings tool only returns endpoints that accept x402. The last call returns the seller’s endpoint URL and the payment protocols it accepts.\n\n2. Get a quote. The agent calls the endpoint with no payment attached. The seller answers with HTTP 402 and puts a signed quote in the PAYMENT-REQUIRED header. AWS Marketplace checks the signature against the seller’s registered key, which means a quote with an altered price gets rejected.\n\n3. Pay. The agent passes the quote to the ProcessPayment API with the payment type AWS_BILLING_X402 . If budget remains in the session, AgentCore payments issues a payment token. If not, the call fails and the developer is not charged.\n\n4. Redeem. The agent sends the request again, this time with the token in the PAYMENT-SIGNATURE header, and the seller returns the content. Payment tokens are valid for about five minutes, so the agent completes steps 2 through 4 in a single pass.\n\n5. Settle. On the developer’s first purchase from a seller, AWS Marketplace creates the agreement with that seller. After that it meters each charge to their AWS bill. Settlement runs asynchronously and shows up in their AWS bill monthly.\n\nPrerequisites\n\nTo create an AWS Billing connector, developers’ AWS accounts must have the AWS Marketplace service-linked role AWSServiceRoleForMarketplaceAgenticCommerce . AWS Marketplace uses this role to bill AWS Marketplace purchases that their agents make to their AWS account. Refer to the documentation for more details.\n\nHands-on\n\nThe open-source GitHub sample in the agentcore-samples repository runs through a demo of the new functionality. It can help you configure AgentCore payments for AWS Marketplace, connect Tavily, run the agent, and inspect the transaction. You can refer to the documentation for more details.\n\nStep 1: Configure AgentCore payments\n\nsetup_aws_billing.py creates a payment manager with an AWS Billing connector, plus the AWS Marketplace service-linked role and three separate AWS Identity and Access Management (IAM) roles. The session role can set budgets but can’t pay. Meanwhile the agent role can pay but can’t create sessions, so the agent has no way to raise its own budget.\n\npython setup_aws_billing.py --region us-east-1\n\nStep 2: Connect Tavily\n\nsetup_gateway.py creates an AgentCore Gateway with the AWS Marketplace connector and gives the agent role the appropriate permissions to use it. The gateway’s role is limited to three read-only AWS Marketplace actions. If you choose to skip this step, you can instead set SELLER_URL in the environment variables to the seller’s endpoint, and the agent will pay that URL only rather than using AgentCore Gateway discovery.\n\npython setup_gateway.py --region us-east-1\n\nStep 3: Run the agent\n\nThe script creates a payment session as the session role and then runs the agent as the agent role. By default the session budget is $0.05 and the per-request cap is $0.02.\n\npython strands_marketplace_agent.py \"What was announced about agentic payments this week? Cite sources.\"\n\nThe agent searches, looks at listings, gets an endpoint, and pays once. In this test run…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Fuck Your AI Safeguards",
+      "item": {
+        "key": "ounapuu.ee/posts/2026/11/19/unsafeguards",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Fuck Your AI Safeguards",
+        "url": "https://ounapuu.ee/posts/2026/11/19/unsafeguards/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50562262",
+        "published": "2026-11-19T16:30:18Z",
+        "summary": "",
+        "content": "",
+        "score": 445.0,
+        "comments": 177,
+        "also_in": []
+      }
+    },
+    {
+      "line": "SageMaker AI inference endpoints now automatically monitor for latency drift, idle GPUs, and sub-optimal serving configurations.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/amazon-sagemaker-ai-now-detects-latency-drift-idle-gpus-and-missed-optimizations-on-your-inference-endpoints",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Amazon SageMaker AI now detects latency drift, idle GPUs, and missed optimizations on your inference endpoints",
+        "url": "https://aws.amazon.com/blogs/machine-learning/amazon-sagemaker-ai-now-detects-latency-drift-idle-gpus-and-missed-optimizations-on-your-inference-endpoints/",
+        "discussion_url": null,
+        "published": "2026-11-19T21:28:18Z",
+        "summary": "Amazon SageMaker AI now monitors your generative AI inference endpoints by default and tells you when a change could improve performance or lower cost. It tracks latency, GPU utilization, and serving configuration, then sends a finding through AWS Health with a one-click path to benchmark alternatives in SageMaker Studio before you apply any change.",
+        "content": "Every inference endpoint is well tuned the day it goes into production. Teams choose an instance type, serving configuration, and scaling settings that suit the model and its traffic at launch. With the endpoint serving smoothly, they understandably move on to the next priority. The workload, however, rarely stays still. Traffic patterns evolve, prompts grow longer, serving engines such as vLLM ship new releases, SageMaker inference develops new optimization techniques, and new fine-tuned checkpoints change the resources your model needs. Over time, a well-tuned endpoint quietly drifts. Latency and time to first token edge upward. A configuration that was never quite ideal keeps missing available performance gains. A GPU provisioned for demand that never materialized sits idle week after week. Because nothing has failed, no alarm sounds, and the drift goes unnoticed until users feel it or the bill reflects it.\n\nAmazon SageMaker AI now monitors your generative AI inference endpoints and tells you when a change could improve performance or lower cost by using Generative AI optimized inference recommendations  feature with Agentic experience in   Amazon SageMaker Studio . Monitoring is on by default for SageMaker AI inference endpoints using vLLM serving containers and GPU instances, with no setup required, and you can opt out of endpoints. SageMaker AI looks only at operational signals: latency, GPU utilization, and the endpoint’s serving configuration. It does not read your requests or responses. From those signals, it surfaces three kinds of findings:\n\nLatency drift: A week-over-week rise in median (p50) end-to-end latency or time to first token.\n\nUnused capacity: GPUs you pay for that sit mostly idle.\n\nConfiguration gaps: A serving container that’s missing newer performance improvements or security patches, or an optimization such as speculative decoding or GPU kernel tuning that your model supports but the endpoint doesn’t use.\n\nSageMaker AI sends a finding through AWS Health, with one notification per endpoint that covers that endpoint’s findings. When a notification arrives, you can act on it in one place. It opens the SageMaker AI agentic experience in Amazon SageMaker Studio with the endpoint, and its recent traffic already filled in. From there, you run inference recommendations to benchmark your current configuration against alternatives and compare them side by side on response time, throughput, and cost per million tokens. That turns a judgment call into a decision backed by data. Benchmarks run on separate compute, and nothing changes on your endpoint until you choose to apply a result.\n\nIn this post, we show how SageMaker AI monitors your endpoints and how to read the notifications it sends through AWS Health. We then show how to go from a notification to a benchmarked decision in SageMaker Studio. We walk through three example scenarios, show how to apply or dismiss a recommendation safely, and explain how to opt an endpoint out of monitoring.\n\nSolution overview\n\nSageMaker AI inference recommendations follow a four-step loop: observe, notify, recommend, and decide. Each step is designed so that you stay in control, and your production endpoint isn’t changed without your explicit action.\n\nObserve – Monitoring of latency and capacity usage is on by default for eligible endpoints. It doesn’t read your requests or responses, and it carries no additional GPU cost.\n\nNotify –  When there is something worth acting on, you receive a plain language notification in AWS Health, plus email, explaining what was observed, why it matters, and a recommended next step.\n\nRecommend (opt in) –  One selection opens the SageMaker AI agentic experience in SageMaker Studio, prefilled with the endpoint and its observed traffic, so you can benchmark alternatives on separate compute.\n\nDecide –  Compare response time, throughput, and cost side by side. Production is not changed until you apply a result.\n\nThe feature produces a few types of findings. The following table summarizes what triggers each one and what gets tested when you choose to benchmark.\n\nFinding\nWhat triggers it\nWhat a benchmark tests\n\nLatency drift\nResponse time moves relative to the endpoint’s week-over-week trends\nTensor parallelism settings and alternate instance types or sizes\n\nUnderutilized GPUs\nGPU utilization stays well below capacity over the window\nCheaper instance types and smaller sizes at observed peak traffic\n\nSpeculative decoding not enabled\nModel and container support it, but it is off (configuration based)\nCurrent configuration compared to speculative decoding enabled\n\nServing container\nThe endpoint’s serving container has a newer version with a performance improvement and security patches for critical and high finding Common Vulnerabilities and Exposures (CVEs).\nCurrent compared to updated container\n\nUntuned GPU kernels\nKernel configuration is not tuned for the model and hardware\nDefault compared to tuned kernels\n\nPrerequisites\n\nMonitoring itself needs no setup, it is on by default. The following prerequisites apply when you choose to act on a finding by running a benchmark and, optionally, applying a change:\n\nAccess to AWS Health and the AWS User Notifications console.\n\nA SageMaker Studio domain and AWS Identity and Access Management (IAM) permissions to run inference recommendation jobs and update endpoints.\n\nSufficient service quota for the benchmark instances you want to test.\n\nCost note: Monitoring has no GPU cost. Benchmarks use standard SageMaker AI charges, or your machine learning (ML) reservation if you have one.\n\nUnderstand a finding notification\n\nYou receive notifications in AWS Health on the console and by email and each one follows the same structure, so it’s quick to scan:\n\nEndpoint: Which endpoint the finding applies to.\n\nWhat we noticed: The observation, stated plainly, with estimates clearly labeled as estimates.\n\nWhy it matters: The impact on latency, capacity, or cost.\n\nRecommended action: A single selection into the agentic experience in SageMaker Studio to investigate.\n\nNotifications report observations and label estimates. No benchmark has run at this point. A representative notification reads as follows:\n\nSubject: [Action may be required] SageMaker AI inference improvements for your endpoint\n\nSageMaker AI tracks the latency and capacity usage of your inference endpoints by default, and found improvements for one of them. It does not read your requests or responses.\n\nWhat we noticed: Over the past week, time to first token on this endpoint increased compared with the week before.\n\nRecommended action: Open SageMaker Studio to benchmark alternatives on separate compute. Your production endpoint is not changed.\n\nCadence : Each endpoint gets one notification that covers the applicable findings. You get at most one notification per endpoint at a time, covering all its findings, and SageMaker AI limits how many an account receives at once. Notifications are AWS Region specific, so you see an endpoint’s findings when you’re signed in to that endpoint’s Region.\n\nWalkthrough: From notification to decision\n\nIn this section, we review a few scenarios of endpoint optimizations that will trigger findings to be reported.\n\nScenario 1: Catch week-over-week latency regression\n\nA team runs a chat assistant on a single SageMaker AI endpoint. They add retrieval to improve answer quality, so every request now carries pages of retrieved context and prompts get much longer. Nothing breaks, and no alarm they set trips, but responses start more slowly.\n\nSageMaker AI compares the endpoint’s median (p50) time to first token and median end-to-end latency with the previous week. When either one rises enough over the week, it flags the change. Because the comparison is against the endpoint’s own history, the team doesn’t need to set a threshold in advance.\n\nNotification: AWS Health reports that time to first token increased relative to the prior week.\n\nStudio session: One selection…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Cloudflare's Workers AI team has open-sourced the weights for extraction models Clairic and Clairic-flash.",
+      "item": {
+        "key": "blog.cloudflare.com/open-clairic",
+        "source": "Cloudflare AI",
+        "tags": [
+          "infra"
+        ],
+        "title": "An updated Clairic and Clairic-flash are now open-weight, from the new Workers AI Superintelligence team",
+        "url": "https://blog.cloudflare.com/open-clairic/",
+        "discussion_url": null,
+        "published": "2026-11-18T22:00:00Z",
+        "summary": "Clairic graduates from preview, while Clairic-flash joins the repertoire on Workers AI. We’re doing an open-weight release for both extraction models.",
+        "content": "Cloudflare has become a neolab. We’re building our own frontier AI models for our customers and the open-source community.\n\nToday, we’re announcing two open-weight model releases:\n\nWe’re introducing an updated version of Clairic . Since the preview, we’ve improved extraction from complex documents including images and PDFs (new!), with more reliable handling of tables, lists, and dates, and better grounding of answers in the source material.\n\nWe’re introducing Clairic-flash , a lighter, faster version of Clairic that delivers strong extraction and prediction performance in a compact, 9-billion-parameter model.\n\nBoth extraction models are hosted on Workers AI and full open weights are available on Hugging Face .\n\nWe’re also excited to re-introduce ourselves as the Workers AI superintelligence team, the frontier AI research team behind Clef , Clairic, and lots more in the works. This team is working quickly to push the AI frontier and build useful models for Cloudflare’s customers and the open source community.\n\nA new version of Clairic: redesigned after the preview release\n\nSince announcing Clairic  in preview, we have received a ton of use cases and helpful feedback on how customers wanted to use an extraction model. We heard about use cases ranging from extracting data from images like receipts to reading values from support tickets. We knew that we wanted extraction to be the clear focus for the model, so it had to excel at reading from unstructured data.\n\nWe decided to go back to the drawing board with Clairic and redesigned our architecture, differentiating this new version of Clairic from our preview release. For ordinary text and number extraction fields, we now use parallel slot autoregressive generation  instead of a single forward pass. Each field uses the tokens it has already written to choose its next token, then stops at its own end marker. All the fields advance together in the serving batch, still giving lightning-fast latency per request. This boosted our accuracy in extraction for both text and images, and the trade-off in accuracy offsets the small latency cost. For computation, estimation, and extraction use cases, we trained special heads that can handle estimates, forecasts, durations, calculated dates, and explicit arithmetic.\n\nAlthough the model architecture evolved, we kept the parts of the typed API interface that make the answers useful: confidence scores, character spans, and probabilities are still intact with every request. The model is still incredibly fast and cheap. From the evals below, you can see how our newer versions of Clairic have greatly improved on extraction across text, images, PDFs, and more.\n\nEval\n\nClairic-preview\n\nClairic\n\nClairic-flash\n\nD1.2 + OCR\n\nScaleDown\n\nFresh text fields, 96 requests\n\n295/336\n\n335/336\n\n328/336\n\n304/336\n\n259/336\n\nInternal eval (mchen) - mixed-input fields, 36 requests\n\n207/226\n\n221/226\n\n213/226\n\n116/226\n\n156/226\n\nTracked customer assertions, 139 request shapes\n\n1,033/1,263\n\n1,263/1,263\n\n1,263/1,263\n\n973/1,263\n\n653/1,263\n\nSynthetic receipt fields in text and images\n\n369/576\n\n576/576\n\n576/576\n\n397/576\n\n280/576\n\nThere are no public extraction benchmarks yet, but we ran our internal evals for other emerging extraction models on the market, such as Liquid AI’s D1.2 (pipelined with Apple Vision for optical character recognition) and Scaledown’s Extract . Our Clairic models excel across extraction use cases, but take these evals as directional guidance since they are self-reported. We wanted to show an illustrative picture of how Clairic is performing across generalized extraction use cases and celebrate the fact that other companies are releasing extraction models as well — confirming our original hypothesis that extraction was a pain point for LLM users because of the cost, latency, and accuracy.\n\nBut is it fast?\n\nWe ran latency tests for Clairic and Clairic-flash, measuring complete HTTP response from a self-hosted server, including all fields in the request. Even with the redesigned architecture, you can expect responses in under one second — much faster than typical LLM responses for similar workloads.\n\nEval set\n\nRequests per model\n\nClairic p50 / p95\n\nClairic-flash p50 / p95\n\nFresh text fields\n\n96\n\n358 / 736 ms\n\n155 / 328 ms\n\nFresh image fields\n\n48\n\n453 / 976 ms\n\n305 / 605 ms\n\nCommercial leases\n\n180\n\n691 / 803 ms\n\n379 / 519 ms\n\nLoan pricing\n\n600\n\n395 / 407 ms\n\n188 / 192 ms\n\nTraffic forecasting\n\n114\n\n532 / 585 ms\n\n243 / 261 ms\n\nExpense audit, development\n\n60\n\n632 / 742 ms\n\n393 / 512 ms\n\nBetter extraction for images and PDFs\n\nIn our preview blog post , Clairic read a photo of a receipt. Now the Clairic family of models can read PDFs too, so you can ask for the supplier, line items, and total in one request, even when they appear on different pages. You can include up to four images or PDF pages in total, and line items can come back as rows that keep each description, quantity, and price together. Due to Clairic’s new architecture, image reading accuracy has improved from 207 errors to 0 on our internal benchmarks, explicitly covering text and images.\n\nPromotional pricing on Clairic for a limited time\n\nWhen we first launched our preview endpoint of Clairic at @cf/cloudflare/clairic , we hosted the 9B variant as it was faster and easier to train, at the preview price of $0.10 per M input tokens. We’re now moving the 9B model to the @cf/cloudflare/clairic-flash  endpoint and the 27B model will live at @cf/cloudflare/clairic .\n\nThe 27B Clairic model will be priced at $0.24 per M input tokens, while the 9B Clairic-flash model will be priced at $0.10 per M input tokens. Although the model does technically generate output tokens, we decided to keep the System One  pricing principles and are only charging on input tokens: we eat the cost of the output token generation.\n\nIn order to make this a seamless swap, we’re offering a promotional discount on Clairic — until December 1, 2026, both Clairic and Clairic-flash will cost $0.10 per M input tokens. This means you get to try out the higher quality variant of Clairic at the same price. If your applications are hooked up to the Clairic endpoint that we released in preview, you will automatically benefit from the better extraction capabilities of our new model, which we’re rolling out in place.\n\nIf you’d like to move more cost-sensitive workloads to the cheaper 9B Clairic-flash variant, we encourage you to do so. On December 1, we’ll be ending the promotional discount for Clairic and pricing will resume at $0.24 per M input tokens instead of the discounted $0.10 per M input tokens.\n\nClairic and Clairic-flash (new) are open-weight\n\nBoth Clairic models are now open-weight on Hugging Face  as well. We have seen an outpouring of experiments and tuned models from our release of Clef, and we’re happy to continue supporting teams and research with our open-weight release of Clairic.\n\nOur mission with these System One models is to help people augment their expensive LLM usage with smaller, faster, cheaper models that are purpose-built for a specific task. We hope that releasing these models open-weight encourages others to experiment and build on our ideas as well.\n\nTry them out\n\nClairic and Clairic-flash are available on Workers AI as @cf/cloudflare/clairic  and @cf/cloudflare/clairic-flash . The developer documentation  has the full API schemas, which remain unchanged from our preview endpoint. We’re also publishing the open-weight releases for Clairic  and Clairic-flash  on Hugging Face.\n\nThe team behind these models — the Workers AI superintelligence team — is just getting started, and growing fast to push frontier AI research at Cloudflare. Join us early  and help shape what the superintelligence team becomes.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your schemas stay cached and your eval variance stay low.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "Google DeepMind introduces Gemini 4 Neon",
+      "blurb": "Google has expanded its Gemini 4 lineup with the introduction of Gemini 4 Neon.",
+      "item": {
+        "key": "deepmind.google/blog/introducing-gemini-4-neon",
+        "source": "Google DeepMind",
+        "tags": [
+          "lab"
+        ],
+        "title": "Introducing Gemini 4 Neon",
+        "url": "https://deepmind.google/blog/introducing-gemini-4-neon/",
+        "discussion_url": null,
+        "published": "2026-11-18T21:35:43Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Agentic AI",
+      "headline": "Gemini for macOS adds computer use to control desktop apps",
+      "blurb": "The macOS app can now execute multi-step tasks across local files, desktop applications, and the web.",
+      "item": {
+        "key": "theverge.com/tech/1037902/google-gemini-macos-ai-computer-use",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Gemini on Mac can now use your computer",
+        "url": "https://www.theverge.com/tech/1037902/google-gemini-macos-ai-computer-use",
+        "discussion_url": null,
+        "published": "2026-11-19T18:21:13Z",
+        "summary": "Google's Gemini app for macOS now has computer use, meaning it can help you \"get multi-step tasks done across your local files, desktop apps, and the web,\" the company says. Google suggests the feature might be useful for things like speeding up workflows, filling in forms, making presentations, and listing items for sale. Users will […]",
+        "content": "Google's Gemini app for macOS now has computer use, meaning it can help you \"get multi-step tasks done across your local files, desktop apps, and the web,\" the company says . Google suggests the feature might be useful for things like speeding up workflows, filling in forms, making presentations, and listing items for sale.\n\nUsers will be able to decide which of your apps Gemini can access, and be able to follow along as Gemini works because it has its own background window that shows a live preview in your chat, Google says. The feature is rolling out now in English for users in the US.\n\nGemini is introducing the new feature ahead of Apple l …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Product update",
+      "headline": "ChatGPT rolls out real-time Live Dictation globally",
+      "blurb": "ChatGPT now transcribes audio as you speak across web, desktop, and mobile apps instead of waiting for recordings to finish.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1037634/openai-chatgpt-live-dictation",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "ChatGPT can transcribe as you speak now with Live Dictation",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1037634/openai-chatgpt-live-dictation",
+        "discussion_url": null,
+        "published": "2026-11-19T15:16:45Z",
+        "summary": "ChatGPT can receive audio prompts from your microphone faster now with a Live Dictation feature that transcribes as you speak, rather than waiting until you finish recording. It's rolling out now globally on all ChatGPT plans on the web, desktop app, and iOS and Android apps. While using dictation in ChatGPT, you can tap or […]",
+        "content": "ChatGPT can receive audio prompts from your microphone faster now with a Live Dictation feature that transcribes as you speak, rather than waiting until you finish recording. It's rolling out now globally on all ChatGPT plans on the web, desktop app, and iOS and Android apps. While using dictation in ChatGPT, you can tap or click the audio waveform to show the live text transcript the AI is generating, then edit it in the prompt box when you're done.\n\nDictation in ChatGPT is getting faster and more reliable.\n\nWith Live Dictation, your speech turns into text as you talk, so you spend less time waiting for your message to finish transcribing.\n\n…\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 27,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 29,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 913,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1414,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 289,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 201,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 214,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-16T23:27:05.442255Z",
+    "candidates": 151,
+    "triaged": 80,
+    "enriched": 7,
+    "headline_candidates": 156,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 819.1,
+    "usage": {
+      "calls": 6,
+      "input_tokens": 43388,
+      "output_tokens": 20082,
+      "cost_usd": 0.123188
+    }
+  }
+}
