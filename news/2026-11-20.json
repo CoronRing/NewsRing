@@ -1,0 +1,700 @@
+{
+  "date": "2026-11-20",
+  "generated_at": "2026-11-20T23:03:43.791201Z",
+  "title": "Looped Transformers, METR Judgment Evals, and Guarding CoT Distillation",
+  "intro": "Today's digest covers open-weight looped transformer architectures, statistical non-inferiority testing for LLM judges, and updated METR evaluation benchmarks highlighting limits in fuzzy reasoning. We also dive into GPU memory and attention optimizations, OS-level agent privacy boundaries, and OpenAI's safeguards against reasoning extraction.",
+  "stories": [
+    {
+      "headline": "Thinking Machines releases Inkling 2 Mini with middle-layer looping",
+      "summary": "Thinking Machines has released Inkling 2 Mini, a 26.4B parameter MoE model with 3.4B active parameters (5.4B effective under looping) that runs its middle layers three times per token. Quantized using native NVFP4 and MXFP8 to fit a ~20GB memory footprint, the model targets long-horizon local agent workflows and scores 48.2% on DeepSWE v1.1. Crucially, the extra reasoning loops shorten the chain of thought while preserving legibility and keeping agentic sabotage metrics stable. It ships with immediate Ollama support and leads open-weight models of comparable size on tool-use benchmarks like BrowseComp and MCP Atlas.",
+      "why_it_matters": "It gives local agent developers a fast, low-footprint open-weight model specifically optimized for tool calling and extended agentic reasoning.",
+      "reason": "Thinking Machines released Inkling 2 Mini, a 26B parameter (5.4B active) multimodal open-weight model supporting tool calling and reasoning, with immediate serving support in Ollama.",
+      "item": {
+        "key": "thinkingmachines.ai/news/inkling-2-mini",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Inkling 2 Mini",
+        "url": "https://thinkingmachines.ai/news/inkling-2-mini/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50581260",
+        "published": "2026-11-20T20:12:19Z",
+        "summary": "Comments",
+        "content": "Today we are releasing Inkling 2 Mini, a fast, powerful model that’s small enough to run on your laptop.\nInkling 2 Mini is a looped transformer, running the middle layers of the model three times for every token. This allows the model to apply more reasoning and reach the right answer with fewer tokens, especially on tasks such as agentic coding that depend on reasoning quality. Inkling 2 Mini leads every open-weights model with less than 100B total parameters on benchmarks such as DeepSWE v1.1 (48.2%) and Vals Index v2.2 (46.5%). It runs faster than similarly performing models as well.\nInkling 2 Mini is a Mixture-of-Experts model with 26.4B total parameters, 3.4B active, and 5.4B weight activations per token to account for looping. Looping allows the model to reason longer without writing its reasoning down, which matters for monitoring: our ability to oversee and understand what the model does by reading its chain of thought (CoT).\nWe measured the impact of looping on both performance and monitorability with Inkling 2 Mini and a research-specific variable-loop variant we are releasing alongside it. The variable-loop model’s no-CoT time horizon improved from 16 seconds at one pass to 37 seconds with three, and its performance on a benchmark of serial reasoning kept improving out to ten loops—twice as many as it was trained with. The model’s chain of thought grew shorter with more loops but stayed legible throughout. The model didn’t trend higher on tests of agentic sabotage as loops were added.\nWe’re excited to offer some of the first models with looped architecture available to researchers. The variable-loop model was used for our monitorability experiments as it allows for cleaner comparisons between different looping depths.\nMost of Inkling 2 Mini’s weights were trained and are deployed natively in NVFP4, with the last four layers in MXFP8. The total memory footprint of Inkling 2 Mini is ~20GB, allowing it to run on local devices such as consumer laptops and desktop AI computers. Our researchers took Inkling 2 Mini on a flight, where it ran offline on a MacBook Pro and built a playable flight simulator in a few minutes.\nInkling 2 Mini is released with open weights and is available on Tinker today for inference and customization.\nCapabilities\nInkling 2 Mini’s strengths mirror those of Inkling 2 Small: it does best on long-horizon agentic work and is the best among open-weights models of similar size on most tasks we measured.\nInkling 2 Mini scores ahead of every comparable model on agentic coding benchmarks such as DeepSWE v1.1 and SWE-bench Pro v2, and is behind only Qwen3.8-27B on others. On PMPP-Hard, a kernel-optimization benchmark, it approaches the score of the much larger Inkling 2 Small.\nWhile looping improves the model’s reasoning, it doesn’t enable its weights to store more facts—knowledge is mostly a function of total parameter count. Inkling 2 Mini’s score on AA-Omniscience, a measure of factuality, is in line with other models of the same size. Studying the variable-loop model, we saw that performances on long-context benchmarks improve with more passes, such as GraphWalks BFS and MRCR v2; but knowledge-intensive benchmarks doesn’t improve with more passes, such as AA-Omniscience, SimpleQA Verified, SimpleVQA, and WorldVQA.\nInkling 2 Mini overcomes the knowledge gap by efficiently using search and tools. It leads open-weights models of similar size on BrowseComp, DeepSearchQA, and MCP Atlas. It is also strong on knowledge work benchmarks that incorporate search and tool use.\nResearchers at Stanford measure intelligence per joule: how much energy an LLM needs per query to reach a given level of performance.Researchers at Stanford’s Hazy Research Lab and Scaling Intelligence Lab got early testing access to Inkling 2 Mini. Inkling 2 Mini scored 0.703 running on NVIDIA DGX Spark, significantly higher than other models: 0.430 for Qwen3.6-35B-A3B, 0.159 for Gemma-4-26B-A4B and 0.036 for Qwen3.5-27B.Intelligence per Watt: Measuring Intelligence Efficiency of Local AI, Saad-Falcon and Narayan et al., 2025Inkling 2 Mini ran on NVIDIA DGX Spark (128GB) at MXFP8 precision with low reasoning effort in this experiment. The other models ran at NVFP4 (Qwen3.6-35B-A3B and Gemma-4-26B-A4B) and INT4 (Qwen3.5-27B).\nEfficiency combined with performance makes Inkling 2 Mini a strong choice for running multiple persistent agents on local hardware. All 20 residents of the energy-conscious village of Thinkyville are managed by Inkling 2 Mini running on a single offline MacBook.\nLimitations\nInkling 2 Mini is not the strongest small model for multi-turn chat or for instructions with many constraints: it scores 50.0% on MultiChallenge and 33.4% on ComplexConstraints v1.1, behind Qwen3.8-27B on both. It also trails larger models on reasoning-intensive benchmarks such as CritPt v2 and HLE-Diamond.\nArchitecture and training\nInkling 2 Mini is a 24-layer model derived from our mainline predictive scaling ladder. The main changes from the mainline recipe were pruning two-thirds of the experts to reduce the model’s size and the introduction of looping to improve reasoning. The rest of training, including quantization and the data mix, followed our mainline recipe.\nLooping design\nInkling 2 Mini has 24 layers, divided into four blocks of six layers each. The two middle blocks run three times, while the first and last blocks each run once. This design builds on prior work on looped transformers and is motivated by the intuition that the middle layers of the model carry more abstract reasoning, while the first and last few layers devote more space to translating between embeddings and internal representations.Universal Transformers, Dehghani et al., 2018 In our experiments, looping the middle 12 layers resulted in larger gains in accuracy than looping the last 12 on 27 out of 28 different evaluations.\nOur model uses attention residuals.Attention Residuals, Kimi Team: Guangyu Chen et al., 2026 Instead of…",
+        "score": 460.0,
+        "comments": 69,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": [
+        {
+          "key": "github.com/ollama/ollama/releases/tag/v0.40.17-rc3",
+          "source": "Ollama releases",
+          "tags": [
+            "release",
+            "inference"
+          ],
+          "title": "v0.40.17",
+          "url": "https://github.com/ollama/ollama/releases/tag/v0.40.17-rc3",
+          "discussion_url": null,
+          "published": "2026-11-20T21:53:21Z",
+          "summary": "Inkling 2 Mini\n\nInkling 2 Mini from Thinking Machines is a 26B parameter model with 5.4B active.\n\nIts looped layers give it more computation per token than its size suggests, and it still fits on a Mac at about 20GB. It handles text and images, tool calls, and thinking, and scores 79.2% on SWE-Bench Verified).\n\nollama run inkling-2-mini\n\nWhat's Changed\n\nollama launch claude supports Claude Code's deferred tool loading, so MCP tools are loaded when needed instead of all at\n\nonce\n\nOllama on Apple silicon now serves multiple requests at once.\n\nollama launch opencode sets thinking options from the model's metadata\n\nollama launch pi refreshes Pi's model list after sign-in and passes along prompt arguments\n\nollama launch chatgpt --restore asks before switching an active profile and preserves existing settings and chat history;\n\nquitting ChatGPT yourself now lets it exit through its own quit prompt\n\nRunning ollama with no arguments in a non-interactive shell prints help instead of erroring\n\nCtrl+C or Ctrl+G while in a multiline \"\"\" block leaves multiline mode instead of swallowing the next line\n\nChanging the context shift setting no longer reloads the model\n\nVulkan now uses mmap for…",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "huggingface.co/blog/inkling2mini",
+          "source": "Hugging Face Blog",
+          "tags": [
+            "lab",
+            "open-source"
+          ],
+          "title": "Welcome Inkling 2 Mini, Cutting-edge Performance for your Local Setup",
+          "url": "https://huggingface.co/blog/inkling2mini",
+          "discussion_url": null,
+          "published": "2026-11-20T00:00:00Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "huggingface.co/thinkingmachines/Inkling-2-Mini",
+          "source": "HF Trending Models",
+          "tags": [
+            "models"
+          ],
+          "title": "thinkingmachines/Inkling-2-Mini (image-text-to-text)",
+          "url": "https://huggingface.co/thinkingmachines/Inkling-2-Mini",
+          "discussion_url": null,
+          "published": null,
+          "summary": "Trending model. Task: image-text-to-text. Library: transformers. Created 2026-11-17. 295 likes, 136 downloads.",
+          "content": "",
+          "score": 286.0,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "METR updates time-horizon evals to show judgment plateau",
+      "summary": "AI evaluation non-profit METR updated its time-horizon benchmark by introducing open-ended tasks requiring human judgment alongside standard verifiable tasks. While frontier models continue their exponential progress in coding, not a single model was able to design an AI evaluation that METR staff found useful for actual research. Top models like Opus 5.5 only managed borderline above the bar scores on fuzzy judgment evaluations. The results highlight that success in reinforcement learning on easily verifiable domains like coding does not automatically transfer to open-ended R&D judgment.",
+      "why_it_matters": "It provides concrete empirical proof of the failure modes and performance limits of LLMs when evaluating or executing tasks without clear automated verification.",
+      "reason": "METR updated its capability evaluation benchmark, finding that AI models continue exponential progress in coding but hit plateaus on tasks requiring complex human judgment.",
+      "item": {
+        "key": "technologyreview.com/2026/11/20/1149399/the-most-misunderstood-graph-in-ai-just-got-a-major-update",
+        "source": "MIT Technology Review (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "The most misunderstood graph in AI just got a major update",
+        "url": "https://www.technologyreview.com/2026/11/20/1149399/the-most-misunderstood-graph-in-ai-just-got-a-major-update/",
+        "discussion_url": null,
+        "published": "2026-11-20T18:15:15Z",
+        "summary": "A new report from the AI evaluation nonprofit METR finds that some AI capabilities are continuing to improve along an exponential trajectory—but it also indicates that models aren’t quite as good at tasks that require judgment as they are at coding.  The report is an update to the organization’s time horizon plot, which was widely…",
+        "content": "A new report from the AI evaluation nonprofit METR finds that some AI capabilities are continuing to improve along an exponential trajectory—but it also indicates that models aren’t quite as good at tasks that require judgment as they are at coding.\n\nThe report is an update to the organization’s time horizon plot, which was widely shared— and widely misinterpreted , owing to the complexity of the measures it used. METR evaluated models by having them attempt a large suite of tasks, each of which had also been completed by humans. Each task’s difficulty was scored by how long it took the human testers to finish it—and then models were rated according to the length of the tasks that they could complete. That plot showed that AI systems were rapidly improving—every four months, the length of the tasks that frontier models could successfully complete doubled.\n\nThe updated plot adds more tasks—some that are estimated to take humans far longer than those in the original suite, and others that are more open-ended. One of the biggest questions in AI right now is the extent to which progress on “verifiable” tasks—where it’s possible to check automatically whether an AI system has succeeded or failed—carry over into tasks on which success or failure is harder to measure. We know how to teach neural networks how to do verifiable tasks: Researchers have the systems attempt one many times, strengthen the neural pathways that contribute to success, and weaken the pathways that contribute to failures. That’s why AI systems have become so good at coding and math, two domains where it’s possible to determine automatically whether a solution does or doesn’t work.\n\nIt’s much harder to apply this technique, known as reinforcement learning, to tasks where success is less well defined or takes longer to ascertain—such as choosing a new research direction. For the same reason, it’s tough to evaluate AI performance on these tasks, so METR’s original time horizon plot didn’t include any of them. But it’s precisely this type of task that will prove essential if AI systems are to automate research and development.\n\nAnd AI research and development is an especially hot topic right now. Parts of the AI community are still reeling from a different, heavily redacted METR report from earlier this month, which claimed that AI might be speeding up the pace of AI progress at Anthropic by a factor of two. That report sparked fears that the company (which just had a blockbuster IPO) could soon achieve full recursive self-improvement, a regime in which AI systems autonomously design their own successors with no human involvement.\n\nMETR researchers have worked to make sure their new suite of tasks includes some of the fuzzier, judgment-laden ones that could be most relevant to AI research and development. In one task, they ask models to design new AI evaluations that METR could use in its research and then have human METR employees score the results. Even though the most advanced models are now better than almost every human at software engineering, here they fall short: Not one of the AI-designed evaluations was good enough for METR employees to consider it useful for their research.\n\nIn another task, models have to score philosophical arguments. This task is intended to capture the extent to which models can exercise good judgment—though METR writes in the report that employees disagree about how relevant the task is for automation of AI R&D. On this task, too, models fell short of human performance.\n\nThough it’s difficult to score these new tasks—and even harder to determine what the scores mean—experts I spoke with appreciate that METR is incorporating new types of evaluations into its work. “We’re at the point where AI evaluations need to get more creative,” says Sayash Kapoor, a computer scientist and incoming professor at UC Berkeley. “Trying to push the envelope of the space of evaluations is a welcome change.”\n\nKapoor says he wasn’t surprised to see that models fall short of performance on more open-ended tasks, such as designing an AI evaluation—in a preprint from August , he and his collaborators reported that AI models are not yet able to reproduce human computer science research on their own. And in a Wednesday blog post, OpenAI reported that its models don’t do as well on the real-world tasks its employees assign them as they do on the easier, more verifiable tasks in METR’s original suite.\n\nStill, people disagree about how to interpret current performance differences on easily verifiable and hard-to-verify tasks, Kapoor says. Though he thinks that research taste—the ability to choose promising questions, hypotheses, and experiments—will prove a major bottleneck in automating AI R&D, others contend that models trained on easy-to-verify tasks will eventually be able to successfully complete open-ended tasks as well. And progress on verifiable tasks doesn’t seem to be slowing down.\n\nEven if the models do lag behind human performance on open-ended tasks right now, the new report suggests that they might be getting better. Some of the newest models, such as Opus 5.5, tend to achieve what METR calls “borderline above the bar” performance on the evaluation design tasks—not yet usable for METR’s research, but promising. Just a year ago, every model was scoring in the “clearly below the bar” category.\n\nBut because these open-ended and judgment-heavy tasks are so tough to design and score, METR includes few of them in its report, and that makes it difficult to predict whether and how models might continue to progress in these areas. “The improvement we observe, I think that does tell us something for the current moment,” says Najoung Kim, a linguist and computer scientist at Boston University. “I’m not sure just yet how to think about how it would extrapolate.”\n\nMatt Putz, a member of the technical staff at METR, says that predicting progress on these kinds of tasks is likely to remain difficult. “By their nature, hard-to-verify or judgment-laden tasks are much harder to study, and especially to quantify,” he said in an email. “Ultimately, I don’t think we’ll be able to establish trends as clean and robust as for the easy-to-specify [tasks].”\n\nIn general, METR is clearly butting up against the practical difficulties of testing AI performance on difficult and underspecified tasks—precisely the ones most relevant to automating AI R&D. METR’s time horizon plots score task difficulty by evaluating how long it would take a human to complete the task, and for the original plot they measured this quantity by actually having people try each task.\n\nIn the new report, however, the completion times are mostly estimates, because paying people for tasks that might take hundreds of hours, or that only a few experts are qualified to complete, is prohibitively expensive and time-consuming. Other tasks have more specific shortcomings—for example, for the philosophical argument task, just one person rated most of the arguments, and agents are judged by how well they agree with that particular individual. It’s possible that the scores would change if more experts were surveyed—but that, too, is time-consuming.\n\nIt’s still early days for evaluating models on tasks that are hard to validate or require judgment. And while the experts I spoke with see the inclusion of these tasks in METR’s newest time horizon plot as a clear step in the right direction, they agree that we are still far from achieving any definitive answers about whether, and how quickly, automated AI R&D might be coming. “This move toward open-ended tasks is promising,” Kapoor says. But, he adds, “there is just such a lot more to be done to actually get a fuller understanding.”",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AltRA-Test evaluates LLM judges without overlapping human annotations",
+      "summary": "Researchers have proposed AltRA-Test, a statistical framework that determines whether an LLM judge can validly replace human annotators without requiring identical item coverage across humans. The method uses bootstrap resampling to replace one human annotation in a panel with an LLM output, checking if inter-annotator agreement remains non-inferior. Across 18 LLMs and 20 datasets, the framework consistently needed around 100 items to render a reliable judgment. Real-world tests showed LLMs passed replacement criteria in roughly half of the tested tasks.",
+      "why_it_matters": "It gives developers building LLM-as-judge pipelines a rigorous statistical test to validate model replacement on sparse, real-world human annotation datasets.",
+      "reason": "This paper introduces AltRA-Test, a statistical evaluation framework to determine when LLM judges can validly replace human annotators without requiring overlapping human labels.",
+      "item": {
+        "key": "arxiv:2611.26073",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "AltRA-Test: An Alternative Annotator Test for LLM Judges Without Shared Annotators",
+        "url": "https://huggingface.co/papers/2611.26073",
+        "discussion_url": null,
+        "published": "2026-11-20T00:00:00Z",
+        "summary": "Large language models (LLMs) are increasingly used as judges and graders to replace human annotators, raising the question of when such replacement is statistically justified. To support such decisions, the Alternative Annotator Test (Alt-Test) was introduced for dense settings where all items are annotated by the same annotators. However, in many large-scale annotation settings, items are annotated by different subsets of annotators. We therefore propose the Alternative Annotator Test with Resampled Annotations (AltRA-Test), a statistical test that does not require that all items are annotated by the same annotators. AltRA-Test uses a bootstrap that resamples items, draws k human annotations for each item, and substitutes one of them with an LLM annotation. This produces paired all-human and mixed human-LLM panels. A replacement is supported when the inter-annotator agreement (IAA) of the mixed panel is statistically non-inferior to the IAA of the all-human panel, i.e., when the LLM preserves the signal that the human annotators share. We establish that AltRA-Test is a consistent test of asymptotic level alpha. We then evaluate it through simulations and real-world experiments in…",
+        "content": "AltRA-Test: An Alternative Annotator Test for LLM Judges Without Shared Annotators\nAbstract\nA statistical test, AltRA-Test, determines when large language models can replace human annotators by comparing inter-annotator agreement in resampled mixed human-LLM panels, and evaluations show it often requires about 100 items and makes better replacement decisions than baselines.\nLarge language models (LLMs) are increasingly used as judges and graders to replace human annotators, raising the question of when such replacement is statistically justified. To support such decisions, the Alternative Annotator Test (Alt-Test) was introduced for dense settings where all items are annotated by the same annotators. However, in many large-scale annotation settings, items are annotated by different subsets of annotators. We therefore propose the Alternative Annotator Test with Resampled Annotations (AltRA-Test), a statistical test that does not require that all items are annotated by the same annotators. AltRA-Test uses a bootstrap that resamples items, draws k human annotations for each item, and substitutes one of them with an LLM annotation. This produces paired all-human and mixed human-LLM panels. A replacement is supported when the inter-annotator agreement (IAA) of the mixed panel is statistically non-inferior to the IAA of the all-human panel, i.e., when the LLM preserves the signal that the human annotators share. We establish that AltRA-Test is a consistent test of asymptotic level alpha. We then evaluate it through simulations and real-world experiments in which we test 18 LLMs and 5 prompting techniques on 20 datasets across text, image, audio, and video. Across these evaluations, about 100 items often suffice for the test. In simulations, where we know whether the LLM is a better or a worse annotator than the humans, AltRA-Test makes more correct replacement decisions than existing baselines. In real-world data experiments, LLMs pass the test in about half of the setups, depending mainly on the task. Since replacement is not always justified, we encourage researchers to test it for their task.\nCommunity\nAltRA-Test is a statistical test of whether an LLM judge can replace human annotators, and it needs no shared annotators, only three human annotations per item.\nI like that this works when different people annotated different items, which the abstract describes as common in large-scale labeling. Asking whether the mixed panel agrees as well as the all-human panel feels like a fair bar for an LLM judge. If the test does not support replacement, is it usually a few ambiguous items or a broad drop across the dataset?\nGet this paper in your agent:\nhf papers read 2611.26073 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 1\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 20.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "OpenComputer launches open-source containerized agent harness",
+      "summary": "OpenComputer has released an Apache 2.0 open-source alternative to Devin designed to run coding agents inside isolated environments. The architecture uses a gateway VM named Calvin that listens for Slack triggers and spins up Claude Code, Codex, or OpenCode sessions inside rootless Podman containers. System state is written locally before persisting to a git-backed store. In early benchmark tests, OpenComputer opened pull requests 3.3x faster than Devin across four task runs.",
+      "why_it_matters": "It provides a self-hostable, open-source agent harness architecture for managing isolated coding environments and team-facing agent orchestration.",
+      "reason": "OpenComputer provides an open-source agent harness designed for autonomous computer-use and software development environments.",
+      "item": {
+        "key": "github.com/diggerhq/opencomputer",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: OpenComputer – an open source alternative to Devin",
+        "url": "https://github.com/diggerhq/opencomputer",
+        "discussion_url": "https://news.ycombinator.com/item?id=50581403",
+        "published": "2026-11-20T20:19:56Z",
+        "summary": "Comments",
+        "content": "The open-source Devin alternative: a coding agent your team works with in Slack, on its own computers, in your cloud or ours.\nCloud | Self-hosting | Docs | Website | Benchmark | Community | X\nOpenComputer is the open source, self hostable alternative to Devin. Mention @Computer in a Slack thread with a task, it works on its own computer, you & your team can watch and steer it as it goes, and the result lands as a pull request.\nIt is open source from the compute layer up, so you can run all of it in your own cloud account, or start on OpenComputer Cloud in two minutes.\nWe built it to feel as fast as Claude Code on your laptop: in our benchmark it opens PRs 3.3x faster than Devin.\nOpenComputer is built to be simple to self-host without giving up scale or security. The whole stack runs on a single VM, which we recommend locking down to outbound-only network access.\nThe VM runs the gateway, Calvin: a thin bridge that listens for Slack events and starts a session with Claude Code, Codex or OpenCode, depending on your configuration. Each session is isolated with rootless Podman. Its state is written first to the VM's local disk, then persisted to a git-backed store.\nThe rest of the stack runs on Cloudflare Workers and Durable Objects. Support for Fly and other platforms is coming soon.\nThe fastest way to experience @Computer is to install the Slack app from the cloud: sign up here, connect your repos, and install the Slack app to get started.\n- 3.3x faster than Devin: all 4 PRs open with CI green in 56s vs 185s (benchmark)\n- 2.6x faster than the average of the 4 most popular cloud agents: first push in 24s vs a 62s average (benchmark)\n- 3-day free trial with 600 work minutes\n- Bring your own ChatGPT / Codex subscription\nApache 2.0. See LICENSE.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Signal restricts screenshots to block OS-level AI scrapers",
+      "summary": "Signal has updated its mobile apps to block screenshotting on iOS and Android to prevent background OS agents like Siri and Gemini from parsing message context. Signal President Meredith Whittaker stated that OS platforms currently fail to provide granular privacy controls for application developers to block ambient AI scrapers without degrading user experience. Whittaker acknowledged the screenshot block is an incomplete defense, as OS agents can still potentially access data via system storage paths. Signal is calling on Apple, Google, and Microsoft to build proper developer controls and prevent accessibility APIs from acting as data backdoors.",
+      "why_it_matters": "It highlights the security and isolation friction between client-side OS AI agents and privacy-sensitive application boundaries.",
+      "reason": "Signal updated its mobile applications to block OS-level AI agents from taking screenshots and accessing private screen context.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1038390/signal-blocking-ai-agent-screenshots-mobile-app",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Signal is blocking Gemini and Siri AI from reading your screen",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1038390/signal-blocking-ai-agent-screenshots-mobile-app",
+        "discussion_url": null,
+        "published": "2026-11-20T12:30:47Z",
+        "summary": "Signal is restricting the ability to take screenshots on Android and iOS devices in an effort to prevent AI agents from reading users' messages and other data. The agentic AI capabilities built into operating systems that analyze on-screen information to learn more about the user are \"undermining Signal's ability to independently guarantee privacy,\" Signal president […]",
+        "content": "Signal is restricting the ability to take screenshots on Android and iOS devices in an effort to prevent AI agents from reading users’ messages and other data. The agentic AI capabilities built into operating systems that analyze on-screen information to learn more about the user are “undermining Signal’s ability to independently guarantee privacy,” Signal president Meredith Whittaker said in a blog post, while urging OS providers to make it easier for app developers to control what data agents can access.\nSignal is blocking Gemini and Siri AI from reading your screen\nSignal will now restrict screenshots on mobile devices, and says AI agents are ‘hostile to privacy.’\n“We want to be very clear: it is a serious problem that Signal – and application developers beyond – lack robust tools to prevent AI agents from undermining application-level privacy,” Whittaker said. “Even where we are able to detect and block AI data access, Google, Apple, Microsoft, and others do not provide ways for developers to easily restrict such AI data access without making drastic compromises to the core user experience. This is also the reason we are currently unable to implement these protections on macOS.”\nSignal is addressing the privacy concerns by blocking the ability to take screenshots in the app on iOS 27 and Android, which should prevent Siri, Gemini, and other Android AI assistants from reading on-screen content. Users can restore screenshot capabilities in Signal’s app settings, but Whittaker warns that doing so will “potentially expose your (and your contacts’) Signal content to these AI agents, and break our privacy guarantees.” Whittaker admits that Signal’s screenshot-blocking remedy is “incomplete,” as it doesn’t address alternative ways that AI agents can access app data, such as retrieving it via the device file system.\nSignal took a similar approach last year to prevent Microsoft’s controversial Recall feature from capturing secured chats. The encrypted messaging service says it’s struggling to develop a better solution due to the lack of available information regarding how AI agents are actually accessing application data, and is now calling on Apple, Google, and Microsoft to provide “simple technical tools and accurate documentation” to app developers. Signal also says more tools are needed to prevent third-party agents, like Meta’s Muse, from using deep accessibility settings in apps like a “skeleton key” to access application data.\n“We all need to recognize that the current integration of AI agents into the operating system, without these common-sense remedies, represents an existential threat to privacy at the application layer, and the ability of independent developers like Signal to protect your sensitive data,” said Whittaker. “Signal is the canary in the coal mine, but this affects the entire ecosystem and should galvanize anyone who cares about these fundamental rights.”",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "OpenAI details safeguards against chain-of-thought distillation",
+      "summary": "OpenAI published research detailing defenses against adversarial distillation, focusing on preventing attackers from extracting protected internal reasoning traces. Internal experiments demonstrated that student models trained on raw teacher chain-of-thought traces transfer offensive cyber capabilities far more effectively than those trained on summaries or final answers. By deploying updated request-level protections and adversarial fine-tuning in GPT-6.2 Astra, OpenAI reduced trace extraction success rates from 54.0% to 0.2%. The company noted that campaign-level anomaly detection is now used alongside API controls to disrupt systematic extraction attempts.",
+      "why_it_matters": "It shows how internal reasoning traces act as primary attack vectors for capability extraction and how model providers are defending agent CoT outputs.",
+      "reason": "OpenAI detailed its defense strategies against adversarial distillation and capability extraction through model safeguards and anomaly detection.",
+      "item": {
+        "key": "openai.com/index/combatting-adversarial-distillation",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Combatting adversarial distillation",
+        "url": "https://openai.com/index/combatting-adversarial-distillation",
+        "discussion_url": null,
+        "published": "2026-11-20T10:00:00Z",
+        "summary": "OpenAI’s layered approach to adversarial distillation combines model training, safeguards, detection, and enforcement to protect against capability extraction.",
+        "content": "Combatting adversarial distillation\nHow we’re addressing safety risks of distillation and lessons we’ve learned for strengthening safeguards across the industry.\nAs frontier AI models become more capable, safeguards play an increasingly important role in how they can be used responsibly. Adversarial distillation creates a path for bad actors to reproduce these capabilities without appropriate safeguards. An actor may use a frontier model’s outputs without authorization to train another model with similar capabilities, then deploy it without comparable protections. For instance, an adversary might distill a model’s cyber capabilities and use the resulting model to help carry out cyberattacks that the original model would have refused to assist with or that its safeguards would have blocked.\nWe’re sharing how OpenAI detects and disrupts adversarial distillation, how we’ve strengthened protections for our models’ protected reasoning, and what we’ve learned that can help strengthen defenses across the industry.\nOur approach to adversarial distillation combines adversarial testing, model training, classifiers, and API-level protections with investigations into coordinated attempts to extract model capabilities. These updated safeguards align more closely with those we use for biology and cybersecurity.\nWe place particular emphasis on preventing attackers from extracting our models’ protected reasoning: the intermediate steps a model generates internally while working toward an answer, known as its chain-of-thought. These traces can contain information the final answer leaves out, making them especially valuable training data for another model.\nWe’ve strengthened our defenses against protected reasoning extraction in GPT‑6.2 Astra and GPT‑6.2 Sol. In an internal adaptive evaluation using strong automated red-teaming, we tested whether attackers could recover protected reasoning the model had generated while answering an earlier prompt. The average attack success rate fell from 54.0% against GPT‑6 Astra with its original safeguards to 0.2% against GPT‑6.2 Astra with its updated safeguards.\nDistillation is a common machine-learning technique in which one model learns from data produced by another. For example, a model can learn from another model’s answers, its reasoning, or its judgments about which answers are better and why. Beyond intellectual property concerns, unauthorized distillation poses serious safety risks. Through adversarial distillation, a second model can learn advanced frontier capabilities without inheriting the safeguards that govern how the original model can use them.\nThe concern is especially clear in dual-use domains like cybersecurity and biology. A model that helps defenders find vulnerabilities in software could also help an attacker exploit them; a model that assists with biological research could also help someone develop a harmful pathogen. If such capabilities were transferred to a model with weaker safeguards, it may provide assistance that the original model would have refused, or that the original safeguards would have blocked.\nOur models help users with coding and defensive cybersecurity tasks. A second model trained on many of those benign outputs may learn skills that also apply to offensive cybersecurity tasks. To better understand this, we study how distillation, especially involving reasoning traces, may transfer risky cyber capabilities.\nIn this setting, the model that produces the training data is called the teacher, and the model that learns from it is called the student. In an internal study on how cyber capabilities transfer, we used the content normally visible to users—final responses, reasoning summaries, and tool interactions—as our baseline for distillation, and tested how much additional cyber capability transfers when the student has access to the teacher’s exact reasoning traces.\nWe started each training run from the same pretrained student model. We created a supervised fine-tuning dataset consisting primarily of trajectories from Astra-level teacher models working on coding and defensive cybersecurity tasks. Each trajectory includes all of the steps a model takes as it works through a task, including any tool interactions and its final response. We evaluated each student after fine-tuning and again after a lightweight round of reinforcement learning in cybersecurity and coding environments.\nAfter supervised fine-tuning, the student trained on exact reasoning traces generally outperformed the student trained on reasoning summaries. After reinforcement learning, the exact-trace student still scored higher at the largest inference budget tested on both benchmarks shown, while the summary-trained student scored higher at lower budgets.\nOur cyber distillation results suggest that protecting reasoning traces can limit cyber capability transfer, even when the underlying task is one allowed under our usage policies. Across many such interactions, exact reasoning traces can teach a student skills that generalize beyond the tasks the teacher originally performed. We will continue studying how much additional capability transfers across different student models and distillation training recipes.\nWe defend against adversarial distillation at two complementary levels of our safeguard stack. At the request level, model behavior, classifier checks, and API controls limit reasoning trace extraction. At the campaign level, we look for patterns in request-level and account-level signals that can reveal coordinated extraction attempts. In turn, attacks uncovered in investigations become examples for training and testing our safeguards.\nAdversarial training teaches models to recognize reasoning extraction attempts and refuse to disclose protected reasoning, while preserving responses to legitimate requests for explanations and assistance. Adversarial training examples come from successful attacks identified through internal automated red-teaming…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "LightningMoBA accelerates Mixture of Block Attention for Hopper GPUs",
+      "summary": "LightningMoBA introduces dynamic routing, KV-centric ownership, and execution pipelining to speed up long-context Mixture of Block Attention (MoBA). Unlike FlashMoBA's fixed Top-k selection, LightningMoBA applies dynamic score thresholds to adjust per-query block allocation, while grouping tasks by KV-block to maximize tile reuse. Tested on Hopper GPUs across context lengths up to 128K, it achieved 1.20x to 1.60x end-to-end generation speedups while improving mean RULER scores from 74.42 to 75.28. The authors also extended the dynamic routing mechanism to training, demonstrating up to 1.60x speedups.",
+      "why_it_matters": "It offers concrete GPU kernel and scheduling optimizations for dynamic sparse attention, directly impacting serving efficiency for long-context LLM applications.",
+      "reason": "This paper introduces dynamic routing and KV-centric execution optimizations for Mixture of Block Attention (MoBA) to accelerate long-context serving.",
+      "item": {
+        "key": "arxiv:2611.26268",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Accelerating Mixture of Block Attention via Dynamic Routing, KV-Centric Execution and Runtime Pipelining",
+        "url": "https://huggingface.co/papers/2611.26268",
+        "discussion_url": null,
+        "published": "2026-11-20T00:00:00Z",
+        "summary": "Mixture of Block Attention (MoBA) reduces long-context computation by selecting key-value (KV) blocks for each query. FlashMoBA implements MoBA efficiently but retains a fixed Top-k budget and query-centric schedule. Fixed Top-k applies one budget across different score distributions and couples routing to task granularity; query-range ownership fragments K/V reuse when several ranges select the same column. We present LightningMoBA, which co-designs selection and execution through dynamic routing, KV-centric ownership, and runtime pipelining. Dynamic routing thresholds MoBA's per-query block scores and directly emits variable-cardinality sparse metadata. KV-centric ownership groups selected rows by (query head, KV block) column, splits high-fanout columns into bounded tasks, and reuses each task's loaded KV tile. On Hopper, pipelining overlaps regular K/V transfers and irregular query gathers with Tensor Core computation. Together, these mechanisms decouple retention from GPU scheduling granularity. At matched Top-16 retention across five checkpoints, LightningMoBA accelerates end-to-end generation by 1.20 to 1.60x while raising mean RULER score from 74.42 to 75.28.",
+        "content": "Accelerating Mixture of Block Attention via Dynamic Routing, KV-Centric Execution and Runtime Pipelining\nAbstract\nLightningMoBA combines dynamic routing, KV-centric ownership, and runtime pipelining to accelerate long-context attention while maintaining or improving quality.\nMixture of Block Attention (MoBA) reduces long-context computation by selecting key-value (KV) blocks for each query. FlashMoBA implements MoBA efficiently but retains a fixed Top-k budget and query-centric schedule. Fixed Top-k applies one budget across different score distributions and couples routing to task granularity; query-range ownership fragments K/V reuse when several ranges select the same column. We present LightningMoBA, which co-designs selection and execution through dynamic routing, KV-centric ownership, and runtime pipelining. Dynamic routing thresholds MoBA's per-query block scores and directly emits variable-cardinality sparse metadata. KV-centric ownership groups selected rows by (query head, KV block) column, splits high-fanout columns into bounded tasks, and reuses each task's loaded KV tile. On Hopper, pipelining overlaps regular K/V transfers and irregular query gathers with Tensor Core computation. Together, these mechanisms decouple retention from GPU scheduling granularity. At matched Top-16 retention across five checkpoints, LightningMoBA accelerates end-to-end generation by 1.20 to 1.60x while raising mean RULER score from 74.42 to 75.28.\nCommunity\nSparse attention improves efficiency by reducing unnecessary computation. On GPUs, however, sparse-index construction, irregular memory access, and task scheduling can offset part of those savings. MoBA reduces computation by routing each query to relevant KV blocks, while FlashMoBA further optimizes GPU execution. Building on this foundation, we address two limitations: fixed Top-k budgets do not adapt to different query score distributions, and query-centric task ownership can lead to repeated KV-block loads across tasks, limiting data reuse.\nWe designed LightningMoBA to jointly optimize routing and GPU kernel execution, with three main improvements over FlashMoBA:\n🔹 Dynamic routing: Replace fixed Top-k with a relative threshold, allowing each query to retain a different number of relevant blocks. Sparse indices are generated directly during scoring, without maintaining an ordered Top-k candidate set or training an additional indexer.\n🔹 KV reuse: Within each attention head, group queries that access the same KV block so that each task reuses its loaded K/V. Work for heavily accessed blocks is split across multiple tasks to bound the per-task workload.\n🔹 Pipelined execution: On Hopper GPUs, overlap data movement and query gathers with Tensor Core computation to reduce stalls.\n🚀 Our experiments evaluate both end-to-end performance and the contributions of individual optimizations. Across five models and context lengths from 4K to 128K on the full RULER suite, matching the average retention budget to Top-16 yields 1.20–1.60× average end-to-end speedups per model over FlashMoBA, while the overall mean RULER score increases from 74.42 to 75.28. To separate routing gains from execution-backend improvements, we also compare both routing strategies under the same optimized backend. Across six configurations on two models, dynamic routing at the Top-64 budget improves both speed and quality, achieving 1.16–1.56× end-to-end speedups and 0.85–5.95 percentage-point gains in RULER scores.\nWe also extend LightningMoBA to training. In a 100-step Qwen3-4B training experiment with 128K context, both routing strategies use the same optimized forward and adapted backward implementations. Dynamic routing achieves 1.23× and 1.60× end-to-end training speedups at Top-32 and Top-64, respectively, while training cross-entropy remains close between the two strategies.\nWe hope LightningMoBA can further improve MoBA’s training and inference efficiency and provide useful guidance for implementing other dynamic sparse attention methods on GPUs.\nVariable per-query block budgets are the first thing I'd stress. A kernel whose shape changes per request is a bad fit for CUDA graph capture and pre-allocated KV pools — you either pad back to the worst case and give up the win, or drop off the fast path entirely. In continuous batching it's worse than per-request: the noisiest query in the batch drags everyone's block budget up, so the saving holds on a single stream and thins out at the tail where latency actually matters. KV-centric ownership worries me for a different reason — blocks get reclaimed on a schedule the prefix cache doesn't know about, and I'd expect hit rates to sag quietly rather than fail loudly. The per-kernel number is the easy one to report. I want tokens/sec at a fixed p99 SLO under skewed arrivals, and how much of it survives once the router threshold has to be retuned per layer instead of set once.\nGet this paper in your agent:\nhf papers read 2611.26268 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 16.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Ollama dynamic Metal memory management in mlxrunner",
+      "summary": "Ollama released v0.40.17-rc2, updating its Apple Silicon mlxrunner engine to dynamically adjust Metal KV cache history based on real-time memory pressure. Instead of pre-allocating a fixed 8 GiB memory allowance, the updated runner monitors available memory headroom and execution space. Unused buffers and cold history are automatically freed when system memory compression increases while preserving active request paths. This optimization targets better resource sharing during local execution.",
+      "why_it_matters": "It optimizes KV cache retention and memory efficiency in Ollama, improving local inference stability when serving agents on Apple Silicon.",
+      "reason": "Ollama's pre-release updates mlxrunner to dynamically adjust Metal KV cache history based on available memory pressure rather than reserving a fixed allowance.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.17-rc2",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.17-rc2: mlxrunner: adapt saved history to memory pressure (#19678)",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.17-rc2",
+        "discussion_url": null,
+        "published": "2026-11-19T23:41:42Z",
+        "summary": "mlxrunner: adapt saved history to memory pressure\n\nRetain Metal prefix history using observed memory headroom and execution\n\nworkspace rather than a fixed 8 GiB allowance. Release unused buffers and\n\ncold history when system compression grows, preserving reusable paths and\n\nactive requests.\n\nCover pressure reclamation, snapshot ownership, memory observation, and\n\ncacheless request isolation.\n\naddress comments\n\naddress comments",
+        "content": "Repository navigation\nv0.40.17-rc2\n      \n      dhiltgen\n    tagged this\n      \n        19 Nov 23:41\n      \n  \n* mlxrunner: adapt saved history to memory pressure\nRetain Metal prefix history using observed memory headroom and execution\nworkspace rather than a fixed 8 GiB allowance. Release unused buffers and\ncold history when system compression grows, preserving reusable paths and\nactive requests.\nCover pressure reclamation, snapshot ownership, memory observation, and\ncacheless request isolation.\n* address comments\n* address comments",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "LangChain Anthropic v1.7.12 standardizes finish reasons on message events and fixes tool search result caller preservation while raising the LangGraph requirement.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.12",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-anthropic==1.7.12",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.12",
+        "discussion_url": null,
+        "published": "2026-11-19T23:00:21Z",
+        "summary": "Changes since langchain-anthropic==1.7.11\n\nrelease(anthropic): 1.7.12 ( #41966 )\n\nfeat(core): standardize finish reason on message-finish events ( #41926 )\n\nchore(langchain): require langgraph 1.2.16 or newer ( #41959 )\n\nfix(anthropic): preserve caller on tool_search_tool_result blocks ( #41958 )\n\nfix(anthropic): don't share the async HTTP client between models ( #41946 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Kimi Code CLI v2.7.0 added native Amazon Bedrock support, enabling developers to connect the coding agent using standard AWS credential chains.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/use-kimi-code-cli-with-models-on-amazon-bedrock",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Use Kimi Code CLI with models on Amazon Bedrock",
+        "url": "https://aws.amazon.com/blogs/machine-learning/use-kimi-code-cli-with-models-on-amazon-bedrock/",
+        "discussion_url": null,
+        "published": "2026-11-20T00:33:30Z",
+        "summary": "Kimi Code CLI v2.7.0 adds a native Amazon Bedrock provider, so you can connect the open source coding agent to models like Kimi K3.1 Pro using your standard AWS credential chain (named profiles or SSO) instead of a separate API key. This post shows how to configure the provider and send your first request.",
+        "content": "Kimi Code CLI is an open source coding agent from Moonshot AI, the creator of the Kimi series of open-weight foundation models. Previously, using Kimi Code with models on Amazon Bedrock meant configuring a generic connection “provider” with an Amazon Bedrock API key. For many AWS customers, this meant introducing an extra credential to obtain and protect.\n\nWith v2.7.0, Moonshot AI adds a native bedrock provider to the CLI. You can now configure the agent to use your standard AWS credential chain, including named profiles and single sign-on (SSO), instead of creating and managing a separate API key.\n\nIn this post, we show you how to connect Kimi Code CLI to models on Amazon Bedrock using your existing AWS credentials. We use Kimi K3.1 Pro Highspeed as an example, which supports streaming, configurable reasoning, image input, and client-side tool calling.\n\nWhat’s new\n\nAmazon Bedrock provides pay-per-token inference for a range of open and proprietary models from leading providers, available through standard APIs . Processing stays within the AWS data boundary, as detailed in the Data protection section of the User Guide. The model cards detail which APIs and features are supported for each model.\n\nIn older versions of the Kimi Code CLI, you could connect to Amazon Bedrock through a provider with type = \"openai\" or type = \"openai_responses\" . These use the OpenAI-compatible Chat Completions or Responses APIs, respectively. This approach required you to set the regional base_url and provide an Amazon Bedrock API key . The key could be short-term or long-term, but it was a separate credential for you to obtain and manage.\n\nThe native provider changes that setup:\n\nUse your existing AWS authentication workflow. The bedrock provider can resolve temporary credentials through the standard AWS Command Line Interface (AWS CLI) credential chain. You can use the default chain or select a named profile, including a profile backed by SSO.\n\nOverride the protocol for each model, if needed. The provider infers an API format and regional endpoint from the model ID, but you can change them as detailed in the “Override endpoint URL and protocol” section of this post.\n\nAWS recommends short-term credentials over long-term credentials. This new path reduces reliance on manually managed API keys, but it doesn’t change your responsibility to protect AWS credentials and scope permissions appropriately.\n\nHow it works\n\nThe native provider handles authentication and request routing in four steps:\n\nResolve AWS credentials. Unless you configure an Amazon Bedrock API key, the bedrock provider uses the standard AWS credential chain in your environment. You can set AWS_PROFILE to select a specific named profile .\n\nGenerate a short-lived bearer token. The provider uses @aws/bedrock-token-generator to create a short-term Amazon Bedrock API key, and renews it when necessary. You don’t need to place any AWS access key or manually generated Amazon Bedrock key in the Kimi Code config.toml . However, an explicit key given through api_key or api_key_env takes precedence if you provide it.\n\nBuild the regional endpoint. The provider resolves AWS_REGION or AWS_DEFAULT_REGION and constructs the appropriate bedrock-runtime endpoint for the model’s inferred API. For Kimi models, this resolves to the recommended OpenAI-compatible Chat Completions path.\n\nCall the selected inference profile. The model alias maps to an Amazon Bedrock model or inference profile ID. This example uses the global inference profile global.moonshotai.kimi-k3.1 . The global. prefix selects the profile, while AWS_REGION determines the regional endpoint that receives your request.\n\nThe CLI then streams the model response and can use the model’s client-side tool-calling support during coding tasks. Authentication, authorization, model access, and network connectivity must all succeed for a request to complete. The ephemeral API keys generated by the provider are valid for up to 12 hours or your AWS session length, whichever is shorter.\n\nPrerequisites\n\nFor this walkthrough, we use Kimi K3.1 Pro Highspeed as an example model, accessed through global cross-Region inference for broadest availability and lowest cost. Review the Amazon Bedrock pricing to understand expected costs before using the model.\n\nTo follow along, you need:\n\nAn AWS account with access to the target model and inference profile in a supported source AWS Region. Check the Kimi K3.1 Pro Highspeed model card for current Region and inference-profile support.\n\nKimi Code CLI v2.7.0 or later. Follow the Kimi Code CLI installation guide and run kimi --version to check your installation.\n\nThe AWS CLI , to follow the profile and identity-check commands in this post. The optional aws login workflow requires AWS CLI v2.32.0 or later.\n\nAn AWS Identity and Access Management (IAM) identity (user or assumed role) with permissions to invoke the target model and inference profile in your chosen AWS Region.\n\nThe following example IAM policy grants the permissions used by this walkthrough, for the Kimi K3.1 Pro Highspeed model and global inference profile only. Replace ${AWS_REGION} with your source Region (for example, us-west-2 for US West Oregon) and ${AWS_ACCOUNT_ID} with your 12-digit AWS account ID:\n\n{\n\"Version\": \"2012-10-17\",\n\"Statement\": [\n{\n\"Sid\": \"BedrockShortTermBearerToken\",\n\"Effect\": \"Allow\",\n\"Action\": \"bedrock:CallWithBearerToken\",\n\"Resource\": \"*\",\n\"Condition\": {\n\"StringEquals\": {\n\"bedrock:bearerTokenType\": \"SHORT_TERM\"\n}\n}\n},\n{\n\"Sid\": \"BedrockReadKimiK31InferenceProfile\",\n\"Effect\": \"Allow\",\n\"Action\": \"bedrock:GetInferenceProfile\",\n\"Resource\": \"arn:aws:bedrock:${AWS_REGION}:${AWS_ACCOUNT_ID}:inference-profile/global.moonshotai.kimi-k3.1\"\n},\n{\n\"Sid\": \"BedrockInvokeKimiK31GlobalProfile\",\n\"Effect\": \"Allow\",\n\"Action\": [\n\"bedrock:InvokeModel\",\n\"bedrock:InvokeModelWithResponseStream\"\n],\n\"Resource\": \"arn:aws:bedrock:${AWS_REGION}:${AWS_ACCOUNT_ID}:inference-profile/global.moonshotai.kimi-k3.1\"\n},\n{\n\"Sid\": \"BedrockInvokeKimiK31ModelsThroughGlobalProfile\",\n\"Effect\": \"Allow\",\n\"Action\": [\n\"bedrock:InvokeModel\",\n\"bedrock:InvokeModelWithResponseStream\"\n],\n\"Resource\": [\n\"arn:aws:bedrock:${AWS_REGION}::foundation-model/moonshotai.kimi-k3.1\",\n\"arn:aws:bedrock:::foundation-model/moonshotai.kimi-k3.1\"\n],\n\"Condition\": {\n\"StringEquals\": {\n\"bedrock:InferenceProfileArn\": \"arn:aws:bedrock:${AWS_REGION}:${AWS_ACCOUNT_ID}:inference-profile/global.moonshotai.kimi-k3.1\"\n}\n}\n},\n{\n\"Sid\": \"BedrockInvokeKimiK31DefaultProject\",\n\"Effect\": \"Allow\",\n\"Action\": [\n\"bedrock:InvokeModel\"\n],\n\"Resource\": \"arn:aws:bedrock:${AWS_REGION}:${AWS_ACCOUNT_ID}:project/default\",\n\"Condition\": {\n\"StringEquals\": {\n\"bedrock:ModelArn\": \"arn:aws:bedrock:${AWS_REGION}:${AWS_ACCOUNT_ID}:inference-profile/global.moonshotai.kimi-k3.1\"\n}\n}\n}\n]\n}\n\nThe foundation-model ARN without a Region or account ID is intentional and required for global cross-Region routing. The BedrockInvokeKimiK31DefaultProject statement is only required if using the openai_responses protocol, not with the default openai (Chat Completions).\n\nSecurity of your AWS environment is a shared responsibility . Review and grant IAM permissions according to the principle of least privilege , particularly for production environments. Consider using a dedicated IAM role for Kimi Code CLI, separate from your regular AWS activities.\n\nGet started with the bedrock provider\n\nAfter your prerequisites are ready, follow these steps to configure AWS authentication, add the provider and model, and send a test request.\n\nStep 1: Configure AWS credentials\n\nThere are different ways to authenticate with the AWS CLI , depending on your organization’s setup. With Named profiles , you can configure multiple AWS contexts and switch between them.\n\nFor example:\n\nIf you use SSO through AWS IAM Identity Center , run aws configure sso --profile YOUR_PROFILE_NAME to set up a profile, then run aws sso login --profile YOUR_PROFILE_NAME to authenticate.\n\nTo use AWS Management Console credentials…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "The BMW Group published governance practices for managing hundreds of developer-facing AI agents across its R&D teams.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/how-the-bmw-group-governs-hundreds-of-agents-across-thousands-of-developers",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "How the BMW Group governs hundreds of agents across thousands of developers",
+        "url": "https://aws.amazon.com/blogs/machine-learning/how-the-bmw-group-governs-hundreds-of-agents-across-thousands-of-developers/",
+        "discussion_url": null,
+        "published": "2026-11-19T22:20:23Z",
+        "summary": "When hundreds of agents serve thousands of developers, governance cannot be an afterthought. The BMW Group shares the practices and patterns its R&D teams use to build, govern, and operate AI agents at enterprise scale without sacrificing speed, quality, or compliance.",
+        "content": "When hundreds of agents serve thousands of developers, enterprise governance can’t be an afterthought.\n\nAt the BMW Group’s R&D, more than 12,500 developers work on approximately 500 million lines of vehicle software code. This software is augmented by the BMW Connected Vehicle backend, a cloud-based system of more than 1,300 microservices providing digital services for 24 million vehicles in the field. In regulated industry, the bar for (software) quality, stability, and governance compliance is exceptionally high.\n\nWhile research, frameworks, and guidelines now facilitate building agents, industrializing and operating high-quality agents in an efficient, scalable manner remains a significant challenge.\n\nScaling agentic AI across a large organization cannot be achieved by isolated teams. It requires collective effort, locally driven experimentation, and active knowledge sharing across the enterprise. This creates a fundamental governance dichotomy: Development teams need the freedom to innovate rapidly, while the enterprise must enforce standards for safety, security, composability, and cost-efficiency. Without that balance, organizations risk a fragmented landscape of AI islands and costly duplicate work. This presents a real challenge given hundreds of globally distributed teams building agents across the BMW Group.\n\nIn this post, we detail the practices and patterns that support BMW’s R&D teams in building, governing and operating agents at scale without sacrificing speed, quality or compliance.\n\nSolution\n\nOur premise is straightforward: build agents that can cooperate from the start. This requires an architecture that makes diversity composable, governable, and automatable, without requiring a single framework or toolchain.\n\nCentral to this architecture is the agent harness, a runtime layer wrapped around a large language model (LLM). It provides the execution loop, tool dispatch, memory management, and observability hooks for autonomous operation.\n\nJust as the AWS Well-Architected Framework standardized cloud infrastructure design, agentic systems need equivalent patterns, reusable blueprints encoding governance, composability, and operational best practices from the start.\n\nWe organize our solution around five interlocking practices, drawn from hands-on experience building and operating agentic systems at enterprise scale since 2023. Each practice is codified as infrastructure as code (IaC), making adoption repeatable, auditable, and enforceable across teams without blocking DevOps velocity.\n\nGovern proactively, not retroactively\n\nGovernance must be structural from the start and maintained across the full lifecycle. We advocate for three properties of effective agentic governance:\n\nFramework-agnostic and externalized: Governance rules such as authentication, authorization, rate limiting and content filtering are enforced at the integration layer. This includes a Model Context Protocol (MCP) gateway, a central agent registry and orchestration boundary, rather than within individual agent codebases. This means governance survives framework migrations, model swaps, and team reorganizations.\n\nDomain-sensitive and graduated: Not every agent action carries the same risk: drafting documentation, updating customer records, and production database writes demand very different levels of oversight. We implement graduated trust through per-step autonomy levels:\n\nLevel 0 (Human-in-the-loop): Every action requires explicit human approval. This is the starting point for new agents and high-risk operations.\n\nLevel 1 (Human-on-the-loop): The agent executes autonomously but surfaces decisions for asynchronous human review. Suitable for medium-risk tasks with defined inputs, outputs, and rollback options.\n\nLevel 2 (Autonomous within guardrails): The agent operates independently within strictly defined policy boundaries, enforced deterministically rather than through prompt instructions (see below). Reserved for low-risk, well-understood operations with verified track records.\n\nAssign trust levels per step, not per agent. A single workflow can include steps at all three levels, so teams can start conservatively and incrementally increase autonomy as confidence builds, grounded in measurable evaluation data, not assumptions.\n\nDeterministically enforced: Governance runs as deterministic code outside the agent’s reasoning loop. In practice, this happens mainly in the CI/CD pipeline. Permission checks, policy-as-code rules, and compliance validations gate every deployment there, before an agent reaches production. Because these checks run separately from the agent, neither the agent nor its prompts are in a position to override them. Egress controls (recipient allowlisting, outbound secret scanning) help prevent an agent holding confidential data from disclosing it through an otherwise legitimate call.\n\nInstrument, verify, and evaluate continuously\n\nObservability in agentic systems goes beyond traditional application monitoring. The real question is no longer whether a service returned an HTTP 200 status, but whether an agent produced a faithful, policy-compliant output, and how this can be demonstrated through observable execution traces. Answering that requires a ground-truth dataset covering common queries and edge cases. This dataset is used for evaluation from day one, so quality is measured against representative and appropriately governed evaluation datasets for evaluation, not synthetic prompts.\n\nThis infrastructure cannot be retrofitted and must be part of the initial design. The continuous integration and continuous delivery (CI/CD) pipeline enforces this, so agents lacking instrumentation fail validation before evaluation runs.\n\nWe recommend instrumenting three dimensions:\n\nIntent tracing: Capture the observable agent trajectory (reasoning steps, tool invocations, and context retrievals) for each execution. OpenTelemetry spans create a queryable lineage from user request to final output.\n\nVerification and evaluation as CI: Any change to the agent (prompt edits, tool additions, model swaps) triggers the pipeline. Verification runs first with automated regression tests covering agent components and then their interactions. As most harness components are deterministic, these tests are fast and fully automatable. Evaluation runs second, scoring non-deterministic output against the ground-truth dataset, gated on quality thresholds. This sequencing is deliberate: Verification acts as a gate, so evaluations only run on a passing build.\n\nModel tiering and routing telemetry: When agents route between models, capture the routing decision and its justification, not just the outcome. Tier assignments are derived from evaluation results per task type and poor outcomes flow back as new evaluation cases.\n\nStart focused, design for composition\n\nFor distributed cloud systems, the industry solved the complexity of end-to-end workflows by adopting architectural patterns such as microservices or service meshes. The evolution of agentic systems needs to follow a similar trajectory, moving from monolithic, generalist agents toward multiple collaborating specialized agents.\n\nTeams should define the problem before considering agents’ functionality. Before writing any orchestration logic, they should produce five concrete artifacts:\n\nClear scope definition: what the agent should and shouldn’t do.\n\nInteraction model : how users and other agents will invoke it.\n\nUnambiguous tool definitions: each tool and parameter precisely defined.\n\nGround-truth dataset : the evaluation reference described above, established before any implementation begins.\n\nEvaluation criteria: quality thresholds and benchmarks the agent will be measured against.\n\nThis discipline prevents the most common failure modes we observe: agents that take on too many responsibilities accumulate bloated prompts, reducing accuracy and increasing latency.\n\nOnce a single agent is well-scoped, it must be designed as a…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "A security researcher planted 2 million secret canary prompts in AI supply chains, uncovering significant privacy leaks and data retention issues.",
+      "item": {
+        "key": "arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate",
+        "source": "Ars Technica",
+        "tags": [
+          "press"
+        ],
+        "title": "Researcher plants 2m canaries into the AI supply chain. A privacy disaster surfaced.",
+        "url": "https://arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate/",
+        "discussion_url": "https://arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate/#comments",
+        "published": "2026-11-20T20:59:08Z",
+        "summary": "Test using prompts with unique, trackable secrets proves that data doesn't stay private.",
+        "content": "Researchers planted 2 million digital tripwires in requests sent through a sprawling network of AI services to find out what happened to sensitive information entrusted to them. What they discovered was an ecosystem that leaked highly sensitive data like a sieve.\n\nThe exposure was found through an ingenious experiment designed to test if sensitive information can leak through the vast chain of widely used AI services and how that information is exploited when it does. Many of today’s AI apps use services such as OpenRouter or Vercel that act as brokers. These “AI routers,” sometimes also known as “AI gateways,” receive large numbers of prompts sent from AI app end users and route them to an available inference engine based on criteria such as the one charging the lowest price or being best suited for the given task. Instead of using Anthropic, OpenAI, or another big provider, the developer hires an AI router to find the most suitable model.\n\nSecurity breaches, prompt theft, and privacy violations\n\nTo test for potential leakage, researcher HD Moore assembled a collection of AWS access keys, functioning credentials tied to empty AWS accounts, passwords for services such as SSH, and unique URLs, DNS names, and private git repository references. None of the secrets had ever been used before, and he controlled the infrastructure that received any requests using the credentials. He then seeded each secret into exactly one prompt sent to a single provider. In the event any of the secrets were leaked, these “canaries”—so called because they resemble the role of that bird when taken into coal mines—would allow Moore to identify each link in the chain that was responsible.\n\nRead full article\n\nComments",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "DreamCoder, an open-source coding harness and terminal IDE designed for agent workflows, was released by the author of Mastering Emacs.",
+      "item": {
+        "key": "masteringemacs.org/article/announcing-dreamcoder",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "DreamCoder: Coding harness and IDE from the author of Mastering Emacs",
+        "url": "https://www.masteringemacs.org/article/announcing-dreamcoder",
+        "discussion_url": "https://news.ycombinator.com/item?id=50581110",
+        "published": "2026-11-20T20:03:59Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Y Combinator startup Maritime launched a managed cloud platform tailored for orchestrating production AI agent environments and lifecycles.",
+      "item": {
+        "key": "news.ycombinator.com/item?id=50549188",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Launch HN: Maritime (YC F26) – A managed cloud for production AI agents",
+        "url": "https://news.ycombinator.com/item?id=50549188",
+        "discussion_url": "https://news.ycombinator.com/item?id=50549188",
+        "published": "2026-11-18T17:26:28Z",
+        "summary": "Hi HN, we're Ary and Maria, co-founders of Maritime ( https://maritime.sh ). We're building an agent-native cloud that handles everything from custom environments to lifecycle management for AI agents.\nDemo: https://www.youtube.com/watch?v=lCWMdBQ96rY\nThere’s been an explosion of sandbox companies coming out of SF, but sandboxes solve maybe 10% of the infrastructure problem for AI agents. The approach that most sandboxing companies take is:\nYou buy Hetzner/OVH Cloud bare metal servers, use Firecracker to slice the servers up into VMs, sell those VMs with low margins.\nIt’s a bit of an oversimplification, but the point is it’s a narrow solution to a fairly difficult problem.\nWe talked to a couple hundred companies that are building AI agents. From personal assistants and coding agents to specialized healthcare agents, and the main pattern we saw was that even after choosing a sandbox provider, you still have to build additional infrastructure just to get things working. These were the primary points of friction:\n1. Agent lifecycle management.\nThere’s a lot that you have to build in order to properly give your agents VMs: things like sleep/wake, persistent storage, triggers…",
+        "content": "",
+        "score": 60.0,
+        "comments": 64,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Keep your execution loops tight and your CoT traces locked down.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Math research",
+      "headline": "Mathematician claims Riemann Hypothesis proof using Claude",
+      "blurb": "Anthropic mathematician Levent Alpöge claims to have solved the Generalized Riemann Hypothesis using Claude.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1010051/anthropic-riemann-hypothesis-millennium-prize-problem",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Anthropic mathematician claims to have solved prestigious Millennium Prize problem with Claude",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1010051/anthropic-riemann-hypothesis-millennium-prize-problem",
+        "discussion_url": null,
+        "published": "2026-11-20T16:34:13Z",
+        "summary": "Anthropic mathematician Levent Alpöge claims he has proved the Riemann hypothesis, one of mathematics's most notoriously difficult problems, with the help of Claude, cracking a puzzle that has eluded some of the world's best mathematicians for decades. If verified, it would mark yet another seismic achievement for AI in mathematics and add to the upheaval […]",
+        "content": "Anthropic went public on November 19th, 2026. | Photo: Getty Images\n\nAnthropic mathematician Levent Alpöge claims he has proved the Riemann hypothesis, one of mathematics's most notoriously difficult problems, with the help of Claude, cracking a puzzle that has eluded some of the world's best mathematicians for decades. If verified, it would mark yet another seismic achievement for AI in mathematics and add to the upheaval already unleashed by OpenAI's previous, often inelegant forays into the field.\n\nAlpöge's solution has yet to be verified independently. Anthropic has not commented or involved itself in Alpöge's announcement. In a document on his website , Alpöge says he texted Anthropic CEO Dario Amodei abo …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Hardware design",
+      "headline": "AI discovers and verifies new Frostbite CPU architecture",
+      "blurb": "A new CPU architecture named Frostbite was discovered, designed, and verified entirely by AI.",
+      "item": {
+        "key": "architectlabs.com/blog/frostbite",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Frostbite: A new CPU architecture discovered, designed and verified by AI",
+        "url": "https://architectlabs.com/blog/frostbite",
+        "discussion_url": "https://news.ycombinator.com/item?id=50572503",
+        "published": "2026-11-20T10:01:41Z",
+        "summary": "Comments",
+        "content": "",
+        "score": 599.0,
+        "comments": 316,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    },
+    {
+      "kicker": "Model release",
+      "headline": "Thinking Machines releases Inkling 2 Mini with looped layers",
+      "blurb": "The 26B parameter multimodal model uses looped layers to maximize per-token compute on local hardware.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.17-rc3",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.17",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.17-rc3",
+        "discussion_url": null,
+        "published": "2026-11-20T21:53:21Z",
+        "summary": "Inkling 2 Mini\n\nInkling 2 Mini from Thinking Machines is a 26B parameter model with 5.4B active.\n\nIts looped layers give it more computation per token than its size suggests, and it still fits on a Mac at about 20GB. It handles text and images, tool calls, and thinking, and scores 79.2% on SWE-Bench Verified).\n\nollama run inkling-2-mini\n\nWhat's Changed\n\nollama launch claude supports Claude Code's deferred tool loading, so MCP tools are loaded when needed instead of all at\n\nonce\n\nOllama on Apple silicon now serves multiple requests at once.\n\nollama launch opencode sets thinking options from the model's metadata\n\nollama launch pi refreshes Pi's model list after sign-in and passes along prompt arguments\n\nollama launch chatgpt --restore asks before switching an active profile and preserves existing settings and chat history;\n\nquitting ChatGPT yourself now lets it exit through its own quit prompt\n\nRunning ollama with no arguments in a non-interactive shell prints help instead of erroring\n\nCtrl+C or Ctrl+G while in a multiline \"\"\" block leaves multiline mode instead of swallowing the next line\n\nChanging the context shift setting no longer reloads the model\n\nVulkan now uses mmap for…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 25,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 26,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 29,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 915,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1421,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 290,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 201,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 214,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-17T22:59:22.405532Z",
+    "candidates": 145,
+    "triaged": 145,
+    "enriched": 7,
+    "headline_candidates": 151,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 261.4,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 34313,
+      "output_tokens": 13398,
+      "cost_usd": 0.172051
+    }
+  }
+}

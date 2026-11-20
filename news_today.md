@@ -1,102 +1,94 @@
-# Dynamic Tool Loading, Harness Defaults, and Eval Resolution
+# Looped Transformers, METR Judgment Evals, and Guarding CoT Distillation
 
-*2026-11-19 · 9 stories*
+*2026-11-20 · 8 stories*
 
-![Top AI stories for 2026-11-19](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-20](https://coronring.github.io/NewsRing/today.png)
 
-Today's highlights focus squarely on agent architecture and serving mechanics. Google and AWS are rolling out major harness-level improvements for tool schemas and execution lifecycles, while new research reveals why self-evolving agent loops so frequently hit a wall. On the infrastructure side, Cerebras and NVIDIA tackle the messy reality of production inference pipelines.
+Today's digest covers open-weight looped transformer architectures, statistical non-inferiority testing for LLM judges, and updated METR evaluation benchmarks highlighting limits in fuzzy reasoning. We also dive into GPU memory and attention optimizations, OS-level agent privacy boundaries, and OpenAI's safeguards against reasoning extraction.
 
 ## Across AI today
 
-- **Google DeepMind introduces Gemini 4 Neon** Google has expanded its Gemini 4 lineup with the introduction of Gemini 4 Neon. ([deepmind.google](https://deepmind.google/blog/introducing-gemini-4-neon/))
-- **Gemini for macOS adds computer use to control desktop apps** The macOS app can now execute multi-step tasks across local files, desktop applications, and the web. ([theverge.com](https://www.theverge.com/tech/1037902/google-gemini-macos-ai-computer-use))
-- **ChatGPT rolls out real-time Live Dictation globally** ChatGPT now transcribes audio as you speak across web, desktop, and mobile apps instead of waiting for recordings to finish. ([theverge.com](https://www.theverge.com/ai-artificial-intelligence/1037634/openai-chatgpt-live-dictation))
+- **Mathematician claims Riemann Hypothesis proof using Claude** Anthropic mathematician Levent Alpöge claims to have solved the Generalized Riemann Hypothesis using Claude. ([theverge.com](https://www.theverge.com/ai-artificial-intelligence/1010051/anthropic-riemann-hypothesis-millennium-prize-problem))
+- **AI discovers and verifies new Frostbite CPU architecture** A new CPU architecture named Frostbite was discovered, designed, and verified entirely by AI. ([architectlabs.com](https://architectlabs.com/blog/frostbite))
+- **Thinking Machines releases Inkling 2 Mini with looped layers** The 26B parameter multimodal model uses looped layers to maximize per-token compute on local hardware. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.17-rc3))
 
-## 1. Gemini API introduces deferred tool schema retrieval
+## 1. Thinking Machines releases Inkling 2 Mini with middle-layer looping
 
-Google has added native Tool Retrieval to the Gemini API via its Interactions endpoint to tackle context bloat from massive toolsets. By passing a `tool_search` tool and setting `defer_loading: true`, developers can omit parameter schemas from the initial prompt while keeping names and descriptions visible. When the model invokes a deferred tool, the API fetches the full schema and emits the function call within the same request turn. Server-side retrieval works across Gemini 3.6 and Gemini 4 models, preserves prompt prefix caching across turns, supports remote MCP servers, and offers an optional client-side mode for private tool registries.
+Thinking Machines has released Inkling 2 Mini, a 26.4B parameter MoE model with 3.4B active parameters (5.4B effective under looping) that runs its middle layers three times per token. Quantized using native NVFP4 and MXFP8 to fit a ~20GB memory footprint, the model targets long-horizon local agent workflows and scores 48.2% on DeepSWE v1.1. Crucially, the extra reasoning loops shorten the chain of thought while preserving legibility and keeping agentic sabotage metrics stable. It ships with immediate Ollama support and leads open-weight models of comparable size on tool-use benchmarks like BrowseComp and MCP Atlas.
 
-**Why it matters:** Stashing parameter schemas outside the context window fixes context bloat and degraded tool-selection accuracy when scaling agents up to dozens or hundreds of integrated tools.
+**Why it matters:** It gives local agent developers a fast, low-footprint open-weight model specifically optimized for tool calling and extended agentic reasoning.
 
-[blog.google](https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/) · via Google AI Blog
+[thinkingmachines.ai](https://thinkingmachines.ai/news/inkling-2-mini/) · [discussion](https://news.ycombinator.com/item?id=50581260) · [github.com](https://github.com/ollama/ollama/releases/tag/v0.40.17-rc3) · [huggingface.co](https://huggingface.co/blog/inkling2mini) · [huggingface.co](https://huggingface.co/thinkingmachines/Inkling-2-Mini) · via Hacker News (AI)
 
-## 2. Bedrock AgentCore adopts open-source Strands harness defaults
+## 2. METR updates time-horizon evals to show judgment plateau
 
-Amazon Bedrock has updated its AgentCore harness to run on the open-source Strands harness foundation, packaging agent execution inside kernel-isolated microVMs. The update brings deterministic lifecycle hooks into the loop, allowing developers to enforce custom guardrails, permission checks, and notifications at specific checkpoints. Managed defaults now include proactive context summarization, context offloading for bulky tool returns, automatic prompt caching on Anthropic models via Bedrock Converse, and built-in tools for planning (`todo_write`), granular filesystem handling, web retrieval, and internal subagent delegation.
+AI evaluation non-profit METR updated its time-horizon benchmark by introducing open-ended tasks requiring human judgment alongside standard verifiable tasks. While frontier models continue their exponential progress in coding, not a single model was able to design an AI evaluation that METR staff found useful for actual research. Top models like Opus 5.5 only managed borderline above the bar scores on fuzzy judgment evaluations. The results highlight that success in reinforcement learning on easily verifiable domains like coding does not automatically transfer to open-ended R&D judgment.
 
-**Why it matters:** Lifecycle hooks provide a clean, deterministic mechanism to intercept tool calls and enforce policy without wrestling with non-deterministic agent loop implementations.
+**Why it matters:** It provides concrete empirical proof of the failure modes and performance limits of LLMs when evaluating or executing tasks without clear automated verification.
 
-[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/amazon-bedrock-agentcore-harness-adds-strands-harness-defaults-built-in-tools-and-lifecycle-hooks/) · via AWS Machine Learning
+[technologyreview.com](https://www.technologyreview.com/2026/11/20/1149399/the-most-misunderstood-graph-in-ai-just-got-a-major-update/) · via MIT Technology Review (AI)
 
-## 3. OpenAI evaluates coding agents on research engineering tasks
+## 3. AltRA-Test evaluates LLM judges without overlapping human annotations
 
-OpenAI has published an evaluation analyzing how coding agents accelerate internal AI research workloads. The research assesses the jagged boundaries of autonomous execution, examining where model performance remains uneven and detailing specific operational failure modes. The paper looks closely at the implications of these uneven performance limits on the viability of recursive self-improvement loops in production engineering environments.
+Researchers have proposed AltRA-Test, a statistical framework that determines whether an LLM judge can validly replace human annotators without requiring identical item coverage across humans. The method uses bootstrap resampling to replace one human annotation in a panel with an LLM output, checking if inter-annotator agreement remains non-inferior. Across 18 LLMs and 20 datasets, the framework consistently needed around 100 items to render a reliable judgment. Real-world tests showed LLMs passed replacement criteria in roughly half of the tested tasks.
 
-**Why it matters:** Understanding the failure boundaries and uneven capabilities of coding agents is critical for building realistic harnesses that don't fail when handed autonomous research or engineering tasks.
+**Why it matters:** It gives developers building LLM-as-judge pipelines a rigorous statistical test to validate model replacement on sparse, real-world human annotation datasets.
 
-[openai.com](https://openai.com/index/research-acceleration-jagged-frontier) · via OpenAI News
+[huggingface.co](https://huggingface.co/papers/2611.26073) · via HF Daily Papers
 
-## 4. Gemini for Mac adds background desktop computer-use
+## 4. OpenComputer launches open-source containerized agent harness
 
-Google has released computer-use capabilities within the Gemini Mac application, letting the model execute multi-step GUI workflows across desktop software, local files, and the browser. Unlike approaches that hijack user input, Gemini runs inside an isolated background window with a live chat preview, leaving the user's primary desktop and cursor unaffected. The interface requires explicit app permission grants, supports mid-task pausing, and prompts for confirmation before executing consequential actions.
+OpenComputer has released an Apache 2.0 open-source alternative to Devin designed to run coding agents inside isolated environments. The architecture uses a gateway VM named Calvin that listens for Slack triggers and spins up Claude Code, Codex, or OpenCode sessions inside rootless Podman containers. System state is written locally before persisting to a git-backed store. In early benchmark tests, OpenComputer opened pull requests 3.3x faster than Devin across four task runs.
 
-**Why it matters:** Running OS-level automation in an isolated background window sidesteps the frustrating UI lockouts typical of desktop computer-use agents.
+**Why it matters:** It provides a self-hostable, open-source agent harness architecture for managing isolated coding environments and team-facing agent orchestration.
 
-[blog.google](https://blog.google/innovation-and-ai/products/gemini-app/computer-use-mac/) · [theverge.com](https://www.theverge.com/tech/1037902/google-gemini-macos-ai-computer-use) · via Google Gemini Blog
+[github.com](https://github.com/diggerhq/opencomputer) · [discussion](https://news.ycombinator.com/item?id=50581403) · via Hacker News front page
 
-## 5. Why agent self-evolution stalls: the Resolution Hypothesis
+## 5. Signal restricts screenshots to block OS-level AI scrapers
 
-A paper studying agent self-evolution across seven methods and six models (spanning over 1,000 runs and 10 million LLM calls) argues that recursive improvement stalls due to noisy evaluations rather than poor candidate generation. The authors show that score distributions across mainstream benchmarks are frequently multimodal rather than Gaussian. Because evaluator noise exceeds the margins of improvement, artifact selection performs no better than random choice, compounding errors across rounds; similarly, method-level differences of a few percentage points are often smaller than the variance between two runs of the same technique.
+Signal has updated its mobile apps to block screenshotting on iOS and Android to prevent background OS agents like Siri and Gemini from parsing message context. Signal President Meredith Whittaker stated that OS platforms currently fail to provide granular privacy controls for application developers to block ambient AI scrapers without degrading user experience. Whittaker acknowledged the screenshot block is an incomplete defense, as OS agents can still potentially access data via system storage paths. Signal is calling on Apple, Google, and Microsoft to build proper developer controls and prevent accessibility APIs from acting as data backdoors.
 
-**Why it matters:** It explains why LLM-based self-improvement loops fail to bootstrap: your proposer is likely generating viable improvements, but your benchmark and LLM judge lack the resolution to distinguish them from noise.
+**Why it matters:** It highlights the security and isolation friction between client-side OS AI agents and privacy-sensitive application boundaries.
 
-[huggingface.co](https://huggingface.co/papers/2611.23068) · via HF Daily Papers
+[theverge.com](https://www.theverge.com/ai-artificial-intelligence/1038390/signal-blocking-ai-agent-screenshots-mobile-app) · via The Verge (AI)
 
-## 6. Building robust streaming tool parsers in Rust with NVIDIA Dynamo
+## 6. OpenAI details safeguards against chain-of-thought distillation
 
-NVIDIA shared architectural details on building low-latency tool-calling parsers in Rust using `frontend-crates`, the components powering NVIDIA Dynamo. The post details the operational headaches of processing streaming tokens, including mid-stream syntax truncation, semantic mismatches like unauthorized tools, and boundary recognition without markup leakage. To ensure reliable extraction without masking raw model outputs, the system relies on language-neutral YAML fixtures in a shared Conformance Corpus covering interleaved, malformed, and streaming token cases across multiple model families.
+OpenAI published research detailing defenses against adversarial distillation, focusing on preventing attackers from extracting protected internal reasoning traces. Internal experiments demonstrated that student models trained on raw teacher chain-of-thought traces transfer offensive cyber capabilities far more effectively than those trained on summaries or final answers. By deploying updated request-level protections and adversarial fine-tuning in GPT-6.2 Astra, OpenAI reduced trace extraction success rates from 54.0% to 0.2%. The company noted that campaign-level anomaly detection is now used alongside API controls to disrupt systematic extraction attempts.
 
-**Why it matters:** Production agent frameworks frequently break on malformed streaming tool calls and marker leaks, making formal conformance testbeds and low-level Rust parsers essential infrastructure.
+**Why it matters:** It shows how internal reasoning traces act as primary attack vectors for capability extraction and how model providers are defending agent CoT outputs.
 
-[developer.nvidia.com](https://developer.nvidia.com/blog/build-tool-calling-parsers-in-rust-with-ai-agents/) · via NVIDIA Developer
+[openai.com](https://openai.com/index/combatting-adversarial-distillation) · via OpenAI News
 
-## 7. QDA uses closed-loop coding agents to optimize LLM quantization
+## 7. LightningMoBA accelerates Mixture of Block Attention for Hopper GPUs
 
-Researchers have introduced QDA, a framework where an LLM agent designs and refines post-training quantization (PTQ) schemes in an autonomous loop. To bypass lengthy benchmark runs, QDA scores candidate configurations in minutes using KL divergence against unquantized reasoning traces, backed by long-generation tests to catch pathological failure modes like repetition loops. Across four reasoning models, QDA improved accuracy over strong public baselines by up to 2.2 points at W3A16, and recovered 98.3% of FP8 accuracy on GLM-5.3-Flash at NVFP4 with zero inference kernel overhead.
+LightningMoBA introduces dynamic routing, KV-centric ownership, and execution pipelining to speed up long-context Mixture of Block Attention (MoBA). Unlike FlashMoBA's fixed Top-k selection, LightningMoBA applies dynamic score thresholds to adjust per-query block allocation, while grouping tasks by KV-block to maximize tile reuse. Tested on Hopper GPUs across context lengths up to 128K, it achieved 1.20x to 1.60x end-to-end generation speedups while improving mean RULER scores from 74.42 to 75.28. The authors also extended the dynamic routing mechanism to training, demonstrating up to 1.60x speedups.
 
-**Why it matters:** Combining rapid proxy metrics with a stackable quantization library shows how agents can effectively navigate complex, hardware-specific optimization spaces that usually demand human experts.
+**Why it matters:** It offers concrete GPU kernel and scheduling optimizations for dynamic sparse attention, directly impacting serving efficiency for long-context LLM applications.
 
-[huggingface.co](https://huggingface.co/papers/2611.23388) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2611.26268) · via HF Daily Papers
 
-## 8. Cerebras pairs GPUs with Wafer-Scale Engines for disaggregated serving
+## 8. Ollama dynamic Metal memory management in mlxrunner
 
-Cerebras has deployed a disaggregated inference architecture in production that offloads the prompt processing (prefill) phase to GPUs—specifically AMD Instinct chips—while dedicating Cerebras Wafer-Scale Engines exclusively to autoregressive decode. Leveraging the massive SRAM capacity and memory bandwidth of the CS-3 system for decode while offloading compute-heavy prefill yielded a 5x improvement in throughput per megawatt compared to an aggregated CS-3 deployment. The architecture communicates intermediate KV cache state over RDMA via Cerebras' KV Portal software, supporting integrations with vLLM and SGLang.
+Ollama released v0.40.17-rc2, updating its Apple Silicon mlxrunner engine to dynamically adjust Metal KV cache history based on real-time memory pressure. Instead of pre-allocating a fixed 8 GiB memory allowance, the updated runner monitors available memory headroom and execution space. Unused buffers and cold history are automatically freed when system memory compression increases while preserving active request paths. This optimization targets better resource sharing during local execution.
 
-**Why it matters:** Decoupling memory-bandwidth-bound decode from compute-bound prefill across distinct hardware architectures represents the next major efficiency leap for ultra-low-latency agent serving.
+**Why it matters:** It optimizes KV cache retention and memory efficiency in Ollama, improving local inference stability when serving agents on Apple Silicon.
 
-[cerebras.ai](https://www.cerebras.ai/blog/cerebras-launches-disaggregated-inference) · [discussion](https://news.ycombinator.com/item?id=50540472) · via Hacker News (AI)
-
-## 9. MAI releases Code 2 and Code 2 Flash for enterprise coding tasks
-
-MAI has launched MAI Code 2 and Code 2 Flash, two models optimized specifically for common enterprise coding workflows like multi-file edits, repo reasoning, and debugging. Benchmarked across DeepSWE 1.1, Terminal Bench 2.1, SWE-Atlas, and FrontierCode v1.1, MAI claims Code 2 delivers 98% of GPT-6.1 Sol's performance at 40% of the cost, while intentionally avoiding tuning for long-horizon agentic or scientific problems. MAI Code 2 Flash targets high-volume tasks such as rapid edits and inline explanations, with specialized variants already deployed across Microsoft 365 and FabricIQ products.
-
-**Why it matters:** The deliberate decision to optimize for narrow, high-frequency repository edits over open-ended long-horizon agency offers a pragmatic, cost-effective alternative for daily software tasks.
-
-[microsoft.ai](https://microsoft.ai/news/introducing-mai-code-2-and-mai-code-2-flash/) · [discussion](https://news.ycombinator.com/item?id=50535885) · via Hacker News (AI)
+[github.com](https://github.com/ollama/ollama/releases/tag/v0.40.17-rc2) · via Ollama releases
 
 ## Quick hits
 
-- LangChain OpenAI 1.8.5 fixes streamed Responses tool call argument preservation and standardizes message-finish event reasons. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-openai%3D%3D1.8.5))
-- Llama.cpp build b12555 adds OpenCL support for dp4a in decomposed flash attention and int8 KQ matrix multiplication. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12555))
-- Amazon Bedrock AgentCore payments now allows agents to purchase x402-enabled APIs and tools from AWS Marketplace directly via the developer's AWS bill. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/enable-ai-agents-to-pay-for-aws-marketplace-x402-products-with-amazon-bedrock-agentcore-payments/))
-- Fuck Your AI Safeguards ([ounapuu.ee](https://ounapuu.ee/posts/2026/11/19/unsafeguards/))
-- SageMaker AI inference endpoints now automatically monitor for latency drift, idle GPUs, and sub-optimal serving configurations. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/amazon-sagemaker-ai-now-detects-latency-drift-idle-gpus-and-missed-optimizations-on-your-inference-endpoints/))
-- Cloudflare's Workers AI team has open-sourced the weights for extraction models Clairic and Clairic-flash. ([blog.cloudflare.com](https://blog.cloudflare.com/open-clairic/))
+- LangChain Anthropic v1.7.12 standardizes finish reasons on message events and fixes tool search result caller preservation while raising the LangGraph requirement. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.12))
+- Kimi Code CLI v2.7.0 added native Amazon Bedrock support, enabling developers to connect the coding agent using standard AWS credential chains. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/use-kimi-code-cli-with-models-on-amazon-bedrock/))
+- The BMW Group published governance practices for managing hundreds of developer-facing AI agents across its R&D teams. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/how-the-bmw-group-governs-hundreds-of-agents-across-thousands-of-developers/))
+- A security researcher planted 2 million secret canary prompts in AI supply chains, uncovering significant privacy leaks and data retention issues. ([arstechnica.com](https://arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate/))
+- DreamCoder, an open-source coding harness and terminal IDE designed for agent workflows, was released by the author of Mastering Emacs. ([masteringemacs.org](https://www.masteringemacs.org/article/announcing-dreamcoder))
+- Y Combinator startup Maritime launched a managed cloud platform tailored for orchestrating production AI agent environments and lifecycles. ([news.ycombinator.com](https://news.ycombinator.com/item?id=50549188))
 
-May your schemas stay cached and your eval variance stay low.
+Keep your execution loops tight and your CoT traces locked down.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 151 candidates, 80 reviewed, gemini/gemini-3.8-flash, 819s, 6 model calls, $0.1232.</sub>
+<sub>35 of 35 sources read. 145 candidates, 145 reviewed, gemini/gemini-3.8-flash, 261s, 3 model calls, $0.1721.</sub>
