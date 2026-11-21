@@ -1,94 +1,84 @@
-# Looped Transformers, METR Judgment Evals, and Guarding CoT Distillation
+# Eval Brittleness, Harness-Tuned Adapters, and Agent Token Fraud
 
-*2026-11-20 · 8 stories*
+*2026-11-21 · 7 stories*
 
-![Top AI stories for 2026-11-20](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-21](https://coronring.github.io/NewsRing/today.png)
 
-Today's digest covers open-weight looped transformer architectures, statistical non-inferiority testing for LLM judges, and updated METR evaluation benchmarks highlighting limits in fuzzy reasoning. We also dive into GPU memory and attention optimizations, OS-level agent privacy boundaries, and OpenAI's safeguards against reasoning extraction.
+Today's highlights focus on the fragile mechanics of agent evaluation, a practical recipe for training models directly inside target runtime harnesses, and distributed KV caching architecture for self-hosted agent fleets. We also examine real-world fraud vectors weaponizing agent loops in production and a bold mathematical claim made alongside Claude.
 
 ## Across AI today
 
-- **Mathematician claims Riemann Hypothesis proof using Claude** Anthropic mathematician Levent Alpöge claims to have solved the Generalized Riemann Hypothesis using Claude. ([theverge.com](https://www.theverge.com/ai-artificial-intelligence/1010051/anthropic-riemann-hypothesis-millennium-prize-problem))
-- **AI discovers and verifies new Frostbite CPU architecture** A new CPU architecture named Frostbite was discovered, designed, and verified entirely by AI. ([architectlabs.com](https://architectlabs.com/blog/frostbite))
-- **Thinking Machines releases Inkling 2 Mini with looped layers** The 26B parameter multimodal model uses looped layers to maximize per-token compute on local hardware. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.17-rc3))
+- **Signal Blocks Mobile AI Agents from Reading Screens** Signal is restricting screenshots on Android and iOS to prevent system AI agents like Gemini and Siri from reading messages and on-screen data. ([theverge.com](https://www.theverge.com/ai-artificial-intelligence/1038390/signal-blocking-ai-agent-screenshots-mobile-app))
+- **Canary Tests Expose Severe Data Leaks Across AI Pipelines** An audit planting unique, trackable canary secrets into two million prompts demonstrated that data sent through the AI supply chain fails to stay private. ([arstechnica.com](https://arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate/))
+- **OpenAI Unveils Protections Against Adversarial Distillation** OpenAI detailed a multi-layered approach combining model training, safeguards, detection, and enforcement to prevent capability extraction. ([openai.com](https://openai.com/index/combatting-adversarial-distillation))
 
-## 1. Thinking Machines releases Inkling 2 Mini with middle-layer looping
+## 1. Why Public Benchmarks Fail Correct Agent Work
 
-Thinking Machines has released Inkling 2 Mini, a 26.4B parameter MoE model with 3.4B active parameters (5.4B effective under looping) that runs its middle layers three times per token. Quantized using native NVFP4 and MXFP8 to fit a ~20GB memory footprint, the model targets long-horizon local agent workflows and scores 48.2% on DeepSWE v1.1. Crucially, the extra reasoning loops shorten the chain of thought while preserving legibility and keeping agentic sabotage metrics stable. It ships with immediate Ollama support and leads open-weight models of comparable size on tool-use benchmarks like BrowseComp and MCP Atlas.
+Eugene Yan analyzed twelve prominent public benchmarks across coding, knowledge work, and computer use, uncovering that eight had graders that actively failed correct solutions. Many benchmark suites enforce strict all-pass criteria where a single flawed assertion drops the entire score, while checks frequently evaluate unstated requirements—affecting 41 of 65 tasks in Terminal Bench 4.0 and 23 of 113 in DeepSWE. On the model side, the dominant failure modes are skipping end-state verification and failing basic instruction constraints.
 
-**Why it matters:** It gives local agent developers a fast, low-footprint open-weight model specifically optimized for tool calling and extended agentic reasoning.
+**Why it matters:** If you rely on public evals to pick frontier or coding models, knowing how common false negatives and unstated constraints are is vital before trusting raw benchmark deltas.
 
-[thinkingmachines.ai](https://thinkingmachines.ai/news/inkling-2-mini/) · [discussion](https://news.ycombinator.com/item?id=50581260) · [github.com](https://github.com/ollama/ollama/releases/tag/v0.40.17-rc3) · [huggingface.co](https://huggingface.co/blog/inkling2mini) · [huggingface.co](https://huggingface.co/thinkingmachines/Inkling-2-Mini) · via Hacker News (AI)
+[eugeneyan.com](https://eugeneyan.com/writing/public-evals) · via Eugene Yan
 
-## 2. METR updates time-horizon evals to show judgment plateau
+## 2. Hugging Face Introduces In-Harness RL Adapters
 
-AI evaluation non-profit METR updated its time-horizon benchmark by introducing open-ended tasks requiring human judgment alongside standard verifiable tasks. While frontier models continue their exponential progress in coding, not a single model was able to design an AI evaluation that METR staff found useful for actual research. Top models like Opus 5.5 only managed borderline above the bar scores on fuzzy judgment evaluations. The results highlight that success in reinforcement learning on easily verifiable domains like coding does not automatically transfer to open-ended R&D judgment.
+Hugging Face shared a recipe to optimize open models for specific agent runtimes by running reinforcement learning directly inside target harnesses rather than simulated abstraction loops. Testing Qwen3.8-27B across Pi, OpenCode, and Hermes Agent with Harbor tasks, they trained custom LoRA adapters using TRL's AsyncGRPOTrainer via a proxy capturing exact token emissions. On Terminal-Bench 2.1 under the Pi harness, the adapter boosted pass@1 from 39% to 55% while dropping average token usage from 2.9K down to 1.5K through crisper tool calls and less redundant reasoning.
 
-**Why it matters:** It provides concrete empirical proof of the failure modes and performance limits of LLMs when evaluating or executing tasks without clear automated verification.
+**Why it matters:** Training directly against your production agent harness and tool interfaces eliminates distribution shift and cuts intermediate token bloat significantly.
 
-[technologyreview.com](https://www.technologyreview.com/2026/11/20/1149399/the-most-misunderstood-graph-in-ai-just-got-a-major-update/) · via MIT Technology Review (AI)
+[huggingface.co](https://huggingface.co/blog/harness-adapters-at-scale) · [huggingface.co](https://huggingface.co/harness-hub/Qwen3.8-27B-pi-adapted) · via Hugging Face Blog
 
-## 3. AltRA-Test evaluates LLM judges without overlapping human annotations
+## 3. AWS Automates Distributed KV Cache Tuning for Agents
 
-Researchers have proposed AltRA-Test, a statistical framework that determines whether an LLM judge can validly replace human annotators without requiring identical item coverage across humans. The method uses bootstrap resampling to replace one human annotation in a panel with an LLM output, checking if inter-annotator agreement remains non-inferior. Across 18 LLMs and 20 datasets, the framework consistently needed around 100 items to render a reliable judgment. Real-world tests showed LLMs passed replacement criteria in roughly half of the tested tasks.
+AWS published an architectural guide and agent skill to evaluate and configure distributed KV caching for self-hosted vLLM and SGLang fleets via ElastiCache. By integrating an LMCache connector over RDMA-enabled nodes, servers can externalize prefix KV states across prolonged, multi-turn agent sessions. The accompanying skill uses a diagnostic tool named KVTrace to simulate access patterns, calculating whether context reuse offsets loading latency before generating infrastructure configurations.
 
-**Why it matters:** It gives developers building LLM-as-judge pipelines a rigorous statistical test to validate model replacement on sparse, real-world human annotation datasets.
+**Why it matters:** Multi-turn agent loops with long prompt histories suffer severe TTFT penalties on self-hosted inference; externalized KV caches resolve cold prefill across routing changes.
 
-[huggingface.co](https://huggingface.co/papers/2611.26073) · via HF Daily Papers
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/cut-self-hosted-llm-cost-and-latency-with-the-distributed-kv-caching-agent-skill/) · via AWS Machine Learning
 
-## 4. OpenComputer launches open-source containerized agent harness
+## 4. Anthropic Researcher Claims GRH Proof With Claude
 
-OpenComputer has released an Apache 2.0 open-source alternative to Devin designed to run coding agents inside isolated environments. The architecture uses a gateway VM named Calvin that listens for Slack triggers and spins up Claude Code, Codex, or OpenCode sessions inside rootless Podman containers. System state is written locally before persisting to a git-backed store. In early benchmark tests, OpenComputer opened pull requests 3.3x faster than Devin across four task runs.
+Anthropic researcher Levent Alpöge published a claimed proof of the Generalized Riemann Hypothesis developed in collaboration with Claude. Alpöge stated that the underlying method resolves the GRH and could extend to the Extended Riemann Hypothesis, noting that the arguments were formalized without assumptions. Alpöge highlighted Claude's velocity near the completion of the work, describing the model as outpacing him in the final stages of the proof.
 
-**Why it matters:** It provides a self-hostable, open-source agent harness architecture for managing isolated coding environments and team-facing agent orchestration.
+**Why it matters:** If the formalization withstands peer review, it marks a significant validation of frontier LLM reasoning applied directly to open Millennium Prize problems.
 
-[github.com](https://github.com/diggerhq/opencomputer) · [discussion](https://news.ycombinator.com/item?id=50581403) · via Hacker News front page
+[simonwillison.net](https://simonwillison.net/2026/Nov/20/levent-alpoge/) · [theverge.com](https://www.theverge.com/ai-artificial-intelligence/1010051/anthropic-riemann-hypothesis-millennium-prize-problem) · [alpo.ge](https://alpo.ge/remark.pdf) · via Simon Willison
 
-## 5. Signal restricts screenshots to block OS-level AI scrapers
+## 5. Attackers Weaponize Agent Free Trials for Token Arbitrage
 
-Signal has updated its mobile apps to block screenshotting on iOS and Android to prevent background OS agents like Siri and Gemini from parsing message context. Signal President Meredith Whittaker stated that OS platforms currently fail to provide granular privacy controls for application developers to block ambient AI scrapers without degrading user experience. Whittaker acknowledged the screenshot block is an incomplete defense, as OS agents can still potentially access data via system storage paths. Signal is calling on Apple, Google, and Microsoft to build proper developer controls and prevent accessibility APIs from acting as data backdoors.
+ChatPRD creator Claire Vo detailed emerging abuse patterns targeting her production product management agent, ultimately forcing the removal of free trials. Fraud rings weaponized automated sign-up loops and promo codes to tunnel external workloads through the agent to build gaming maps and resell tokens. Vo noted that attackers repeatedly sent probe prompts—such as SVGs of pelicans riding bicycles—specifically designed to fingerprint the underlying model family being exploited.
 
-**Why it matters:** It highlights the security and isolation friction between client-side OS AI agents and privacy-sensitive application boundaries.
+**Why it matters:** Exposing tool-enabled agents via generous free tiers invites immediate prompt tunneling and model fingerprinting attacks aimed at reselling your upstream tokens.
 
-[theverge.com](https://www.theverge.com/ai-artificial-intelligence/1038390/signal-blocking-ai-agent-screenshots-mobile-app) · via The Verge (AI)
+[simonwillison.net](https://simonwillison.net/2026/Nov/20/token-fraud-is-here-and-its-bad/) · via Simon Willison
 
-## 6. OpenAI details safeguards against chain-of-thought distillation
+## 6. LangChain Core 1.8.4 Normalizes Finish Events
 
-OpenAI published research detailing defenses against adversarial distillation, focusing on preventing attackers from extracting protected internal reasoning traces. Internal experiments demonstrated that student models trained on raw teacher chain-of-thought traces transfer offensive cyber capabilities far more effectively than those trained on summaries or final answers. By deploying updated request-level protections and adversarial fine-tuning in GPT-6.2 Astra, OpenAI reduced trace extraction success rates from 54.0% to 0.2%. The company noted that campaign-level anomaly detection is now used alongside API controls to disrupt systematic extraction attempts.
+LangChain released langchain-core 1.8.4 with two targeted framework updates. The release standardizes the finish reason format across distinct LLM providers on message-finish events and adds source metadata tagging to synthetic human-in-the-loop tool messages.
 
-**Why it matters:** It shows how internal reasoning traces act as primary attack vectors for capability extraction and how model providers are defending agent CoT outputs.
+**Why it matters:** Standardizing finish reasons simplifies multi-provider agent orchestrators, while synthetic HITL tagging improves trace hygiene in human-in-the-loop flows.
 
-[openai.com](https://openai.com/index/combatting-adversarial-distillation) · via OpenAI News
+[github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.4) · via LangChain releases
 
-## 7. LightningMoBA accelerates Mixture of Block Attention for Hopper GPUs
+## 7. Standard Bank Deploys Automated LLM-as-a-Judge Auditing
 
-LightningMoBA introduces dynamic routing, KV-centric ownership, and execution pipelining to speed up long-context Mixture of Block Attention (MoBA). Unlike FlashMoBA's fixed Top-k selection, LightningMoBA applies dynamic score thresholds to adjust per-query block allocation, while grouping tasks by KV-block to maximize tile reuse. Tested on Hopper GPUs across context lengths up to 128K, it achieved 1.20x to 1.60x end-to-end generation speedups while improving mean RULER scores from 74.42 to 75.28. The authors also extended the dynamic routing mechanism to training, demonstrating up to 1.60x speedups.
+Standard Bank Group implemented an automated governance pipeline using Amazon Bedrock LLM judges orchestrated by AWS Step Functions. To approve generative use cases without manual risk bottlenecks, a pre-assessment agent on AWS Fargate extracts evidence from repositories and documentation into a 40-question Well-Architected lens. The pipeline directly stress-tests deployments with automated jailbreak probes and checks semantic consistency across reworded prompts via embedding models before escalating findings to human committees.
 
-**Why it matters:** It offers concrete GPU kernel and scheduling optimizations for dynamic sparse attention, directly impacting serving efficiency for long-context LLM applications.
+**Why it matters:** A concrete enterprise reference implementation for structuring LLM-as-a-judge pipelines to automate compliance, jailbreak scanning, and policy audits.
 
-[huggingface.co](https://huggingface.co/papers/2611.26268) · via HF Daily Papers
-
-## 8. Ollama dynamic Metal memory management in mlxrunner
-
-Ollama released v0.40.17-rc2, updating its Apple Silicon mlxrunner engine to dynamically adjust Metal KV cache history based on real-time memory pressure. Instead of pre-allocating a fixed 8 GiB memory allowance, the updated runner monitors available memory headroom and execution space. Unused buffers and cold history are automatically freed when system memory compression increases while preserving active request paths. This optimization targets better resource sharing during local execution.
-
-**Why it matters:** It optimizes KV cache retention and memory efficiency in Ollama, improving local inference stability when serving agents on Apple Silicon.
-
-[github.com](https://github.com/ollama/ollama/releases/tag/v0.40.17-rc2) · via Ollama releases
+[aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/how-standard-bank-group-automates-ai-risk-assessment-for-generative-ai/) · via AWS Machine Learning
 
 ## Quick hits
 
-- LangChain Anthropic v1.7.12 standardizes finish reasons on message events and fixes tool search result caller preservation while raising the LangGraph requirement. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.12))
-- Kimi Code CLI v2.7.0 added native Amazon Bedrock support, enabling developers to connect the coding agent using standard AWS credential chains. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/use-kimi-code-cli-with-models-on-amazon-bedrock/))
-- The BMW Group published governance practices for managing hundreds of developer-facing AI agents across its R&D teams. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/how-the-bmw-group-governs-hundreds-of-agents-across-thousands-of-developers/))
-- A security researcher planted 2 million secret canary prompts in AI supply chains, uncovering significant privacy leaks and data retention issues. ([arstechnica.com](https://arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate/))
-- DreamCoder, an open-source coding harness and terminal IDE designed for agent workflows, was released by the author of Mastering Emacs. ([masteringemacs.org](https://www.masteringemacs.org/article/announcing-dreamcoder))
-- Y Combinator startup Maritime launched a managed cloud platform tailored for orchestrating production AI agent environments and lifecycles. ([news.ycombinator.com](https://news.ycombinator.com/item?id=50549188))
+- llama.cpp release b12612 optimizes Vulkan MMVQ performance on AMD RDNA4 hardware for Q3_K, Q5_K, and IQ4_XS quantizations. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12612))
+- SageMaker HyperPod launched Global Inference Gateway, providing a single SigV4-authenticated endpoint that routes across multi-region clusters with automatic failover. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/introducing-amazon-sagemaker-hyperpod-global-inference-gateway-one-endpoint-across-regions-and-clusters/))
+- NVIDIA introduced Dynamo to tackle worker inference rollout bottlenecks in reinforcement learning training pipelines. ([developer.nvidia.com](https://developer.nvidia.com/blog/reducing-rollout-bottlenecks-in-reinforcement-learning-with-nvidia-dynamo/))
+- Ollama v0.40.17 adds support for Inkling 2 Mini, a 26B parameter (5.4B active) looped-layer vision and tool-calling model scoring 79.2% on benchmarks. ([github.com](https://github.com/ollama/ollama/releases/tag/v0.40.17))
 
-Keep your execution loops tight and your CoT traces locked down.
+May your test assertions pass without unstated requirements today.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 145 candidates, 145 reviewed, gemini/gemini-3.8-flash, 261s, 3 model calls, $0.1721.</sub>
+<sub>35 of 35 sources read. 124 candidates, 124 reviewed, gemini/gemini-3.8-flash, 221s, 3 model calls, $0.0505.</sub>

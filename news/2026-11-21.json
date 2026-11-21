@@ -1,0 +1,636 @@
+{
+  "date": "2026-11-21",
+  "generated_at": "2026-11-21T22:08:13.604064Z",
+  "title": "Eval Brittleness, Harness-Tuned Adapters, and Agent Token Fraud",
+  "intro": "Today's highlights focus on the fragile mechanics of agent evaluation, a practical recipe for training models directly inside target runtime harnesses, and distributed KV caching architecture for self-hosted agent fleets. We also examine real-world fraud vectors weaponizing agent loops in production and a bold mathematical claim made alongside Claude.",
+  "stories": [
+    {
+      "headline": "Why Public Benchmarks Fail Correct Agent Work",
+      "summary": "Eugene Yan analyzed twelve prominent public benchmarks across coding, knowledge work, and computer use, uncovering that eight had graders that actively failed correct solutions. Many benchmark suites enforce strict all-pass criteria where a single flawed assertion drops the entire score, while checks frequently evaluate unstated requirements—affecting 41 of 65 tasks in Terminal Bench 4.0 and 23 of 113 in DeepSWE. On the model side, the dominant failure modes are skipping end-state verification and failing basic instruction constraints.",
+      "why_it_matters": "If you rely on public evals to pick frontier or coding models, knowing how common false negatives and unstated constraints are is vital before trusting raw benchmark deltas.",
+      "reason": "Eugene Yan provides an in-depth breakdown of the failure modes across 12 prominent public benchmarks and offers practical advice on designing reliable evaluation suites.",
+      "item": {
+        "key": "eugeneyan.com/writing/public-evals",
+        "source": "Eugene Yan",
+        "tags": [
+          "practitioner",
+          "evals"
+        ],
+        "title": "How Public Evals Work and Fail, and What Should Change",
+        "url": "https://eugeneyan.com/writing/public-evals",
+        "discussion_url": null,
+        "published": "2026-11-19T00:00:00Z",
+        "summary": "How to read eval scores and what to question, from a teardown of 12 benchmarks.",
+        "content": "How Public Evals Work and Fail, and What Should Change\nContents\nAs models ship faster, eval scores are often the first thing we learn about a new model. But how much weight should we put in them? In eight of twelve public evals studied, there’s evidence the grader failed work that should have passed. And even when the grader gets it right, many benchmarks measure what’s easy rather than what matters, and should instead focus on reliability, work velocity, multi-turn collaboration, etc.\nHere, we’ll cover the common patterns and principles, the errors models make, and where current benchmarks fall short. I’ll also share what we’re getting wrong and what should change, including why average pass rate isn’t enough and why dollars are the wrong measure of cost. Finally, we’ll walk through twelve evals: four on coding and science, six on knowledge work, and two on browsing and computer use. By the end, you’ll know what to trust in a benchmark and what to question.\nPatterns: How eval tasks are built and maintained #\nMost eval tasks share four components:\n- Instruction: A prompt that sounds like a real user’s request. The agent gets it once at the start and typically can’t ask clarifying questions.\n- Environment: The workspace where the agent operates. Typically comes with the files, software, and services needed. For coding, this is usually a container with a repo at a specific git commit. For knowledge work, it might be a VM with installed software, simulated business apps, or a folder of documents.\n- Grader: This decides whether the work passes. It can be deterministic code (tests and assertions over the final output or environment state), an LLM judge scoring a rubric of yes/no criteria, or a mix of both.\n- Reference (optional): A human expert’s solution. Evals include this to prove a task is solvable, anchor pairwise comparisons, or establish a human baseline.\nThe four basic components of an eval task\nIn addition, eval benchmarks are increasingly maintained like software. They ship versioned releases and accept fixes through issues and pull requests. Agents’ Last Exam v1.1 retired 30 tasks and revised 57 others, and Harvey LAB’s public set has grown from about 1,250 tasks to 2,010 since launching in May 2026. Like software, these releases can also introduce breaking changes—Terminal Bench can drop saturated tasks with each version, making scores hard to compare across releases.\nPrinciples: That shape grading and task selection #\nAcross the benchmarks studied, four design principles show up repeatedly:\nDeterministic checks over LLM judges. Code-based checks are reproducible and won’t shift rankings when a judge model is updated. DeepSWE and AutomationBench avoid LLM judges altogether, and Agents’ Last Exam goes to great lengths to minimize them. When an eval does need a judge—for a legal memo or clinical response—it narrows the judge’s job to binary yes/no rubric items rather than a holistic score.\nGraders check the outcome, not the steps. The intent is to allow any approach that produces the right result to pass. For example, Terminal Bench inspects the final state of the container and ignores the agent’s intermediate commands or console output. AutomationBench, OSWorld 2.0, and DeepSWE work the same way.\nAll-pass scoring is common because partial work often isn’t usable. Under all-pass scoring, a task passes only if every test or criterion passes. DeepSWE, Terminal Bench, Terminal Bench Science, AutomationBench, and Harvey LAB score this way. As Harvey puts it, “there is no partial credit for catching most of the issues”—a report that flags eight of ten risks is incomplete, not 80% useful. Nonetheless, all-pass can be brittle where a single flawed assertion or criterion fails an otherwise correct solution.\nOne alternative is partial credit, where each test or criterion carries a weight and tasks score from 0.0 to 1.0. FrontierSWE and HealthBench Professional use partial credit, while Agents’ Last Exam, Finance Agent, and OSWorld 2.0 report both.\nTasks are mined for difficulty to slow saturation. AutomationBench hardened easy tasks with irrelevant data and conflicting policies. HealthBench Professional made difficult tasks about 3.5x more common (than in the base set). BrowseComp kept a question only if the strongest models at the time couldn’t solve it, and Terminal Bench retires tasks once they saturate.\nFailures: Skipped verification and dropped reqs #\nAcross the error analyses, two failure modes come up repeatedly:\nSkipping verification or stopping early. On OSWorld 2.0, agents submitted their work without checking the final state. On Harvey LAB, agents that drafted without review scored lower. And on AutomationBench, models processed part of a list, summarized as if they’d finished, and incorrectly declared success.\nMissing stated requirements. Instruction following was the most common failure in GDPval, and agents on OSWorld 2.0 dropped constraints explicitly stated in the prompt. Many of these misses are unforced errors that a basic verification pass should have caught.\nGaps: Failing correct work and passing wrong work #\nNot every failure is the model’s fault. Many evals have two recurring grader gaps.\nFalse negatives (failing correct work). This is the most common issue, usually caused by a check that’s stricter than what the prompt requested, or enforces an unstated requirement. Reviewers found that 41 of 65 Terminal Bench 4.0 tasks were graded on unstated requirements, and that 23 of 113 DeepSWE tasks marked correct solutions as failures. On OSWorld 2.0, an outside reviewer filed issues reporting checks that failed correct work in 23 of 108 tasks, such as a grader whose software can’t open the task’s own starter file. This is amplified under all-pass scoring where a single flawed check can cause an entire task to fail.\nFalse negatives can also come from wrong or ambiguous answer keys, where the reference answer or criterion is wrong or isn’t unique. On BrowseComp, human trainers…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Hugging Face Introduces In-Harness RL Adapters",
+      "summary": "Hugging Face shared a recipe to optimize open models for specific agent runtimes by running reinforcement learning directly inside target harnesses rather than simulated abstraction loops. Testing Qwen3.8-27B across Pi, OpenCode, and Hermes Agent with Harbor tasks, they trained custom LoRA adapters using TRL's AsyncGRPOTrainer via a proxy capturing exact token emissions. On Terminal-Bench 2.1 under the Pi harness, the adapter boosted pass@1 from 39% to 55% while dropping average token usage from 2.9K down to 1.5K through crisper tool calls and less redundant reasoning.",
+      "why_it_matters": "Training directly against your production agent harness and tool interfaces eliminates distribution shift and cuts intermediate token bloat significantly.",
+      "reason": "Hugging Face introduces harness adapters, allowing you to tailor open models specifically to your agent harness interfaces and prompt formats to reduce overhead.",
+      "item": {
+        "key": "huggingface.co/blog/harness-adapters-at-scale",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "Introducing harness adapters: adapt your favorite model to your harness to improve performance and cost",
+        "url": "https://huggingface.co/blog/harness-adapters-at-scale",
+        "discussion_url": null,
+        "published": "2026-11-20T00:00:00Z",
+        "summary": "",
+        "content": "Introducing harness adapters: adapt your favorite model to your harness to improve performance and cost\nCombining RL on a custom task distribution with your favorite agent harness yields more accurate and efficient models for that target harness and task distribution.\nModels are not fully optimized for all harnesses and the tasks you’re doing. Instead, they target general performance. So when you combine a model and harness, you’re leaving performance and efficiency on the table for the stuff you’re actually doing. With RL, you can train a custom harness adapter that squeezes everything out of your model for your harness and task combination.\nTake Qwen3.8-27B, its Terminal-Bench 2.1 score with the pi harness is 39% which uses on average 2.9K tokens per task. If we freeze those weights and add a custom RL-trained LoRA adapter we can get 55% pass@1, with average token usage of 1.5K. Most of this is down to the model reasoning less, calling less tools, and performing better first time.\nOur earlier work (multi-harness RL, harness adapters) showed that RL on your own task distribution, inside your own harness, gives a more accurate and more efficient model. Those experiments covered data-analysis and code-building tasks. Here we wanted to push this further by exploring whether the result holds at 27B, on harder real-world software engineering tasks, across three harnesses: Pi, OpenCode and Hermes Agent. And most of all, share a fully reusable recipe, so you can reproduce this on your own task, harness, model combinations.\nTL;DR\n- We trained one LoRA adapter for Qwen3.8-27B per agent harness (pi, Hermes Agent, OpenCode), with RL inside the harness itself.\n- Datasets, training and agent rollouts all happen on the Hub in Jobs using TRL's AsyncGRPOTrainer, OpenEnv and harbor.\n- Each harness adapter beats the base model under its own harness on both benchmarks, for both performance and efficiency.\n- The three LoRAs are also merged into a single super adapter that runs unchanged under pi, Hermes Agent and OpenCode.\n- All artifacts (adapters, GGUFs, RL tasks, safeagents plugin) can be browsed through this Hugging Face collection.\nTable of Contents\nTraining inside agent harnesses\nWe leverage the Harbor integration in OpenEnv and TRL’s OpenEnv guide to train the model inside the harnesses we chose for the final training. We have built ready-to-use docker images for all our RL tasks that come with the target harnesses already pre-installed inside. In our final docker images, we use Pi 1.5.2, OpenCode 2.2.7 and Hermes Agent v0.22.6. The diagram below from the aforementioned blogpost explains well the entire protocol:\nMost RL frameworks train a re-implementation of the agent loop: the agent is written against the framework's own interface, such as verl's AgentLoop, SkyRL-Gym environments, rLLM's agent and environment classes, slime's custom rollout functions, or ART's client inside your own Python agent. Here the harness runs exactly as it ships, and the trainer learns from the exact tokens it produced, recorded by a proxy between the harness and vLLM. Recent work moves in the same direction: Agent Lightning v1.0 keeps the deploy-time harness in the loop through a proxy (\"harnessed agentic RL\"), and SkyRL's Harbor integration trains on Harbor trials, converting their chat histories into tokens for the trainer.\nGenerating custom RL tasks on Hugging Face\nFor this recipe we created a custom dataset for agentic coding with the Hub, OpenEnv, and Repo2RLEnv. We combined together task retrieval of existing RL envs, task generation with Repo2RLEnv, task validation with OpenEnv, and sampling into a single data pipeline. This gave us the highest quality set of validated and relevant tasks to improve Qwen3.8-27B on agentic coding. In this section, we’ll walk through how we built it, so you can try it out on your own domains.\nRL training needs tasks the agent can attempt, a verifier that scores each attempt, and evidence that the verifier is right. A verifier that accepts wrong answers teaches the wrong behavior. A task that is already feasible will not teach the model anything.\nThis section describes how we built the task set from three sources: two on the Hugging Face Hub and a third generated with Tasksmith, a pipeline in Repo2RLEnv. Every task passes an eligibility screen with openenv validate, and the same difficulty check against the base model, Qwen3.8-27B.\nThree sources\nEach task uses the Harbor format, which Terminal-Bench 2.1 also uses. A broad search of the Hub for Harbor environments returned about 59,000 tasks, but they included duplicates, evaluation sets and tasks marked as not for training. We filtered down to just two Hub sources built for training and generated a third set ourselves:\n- SWE-smith (Python, Go) injects bugs into real Python and Go repositories, with an LLM rewrite or a mutation such as a flipped operator. The tests that catch each bug become the task's tests. It adds volume.\n- SWE-Gym, packaged as Harbor tasks in TaskTrove, turns real GitHub issues and their merged fixes into tasks. It adds real-world bugs.\n- Tasksmith generates tasks from merged pull requests. An LLM agent writes the instruction and tests, and Tasksmith checks the result: the reference and a valid alternative must pass, while the unfixed code and a known-wrong solution must fail.\nWe used Tasksmith to target gaps. We mapped the skills that our target benchmarks test (Terminal-Bench 2.1, the hard subset of SWE-bench Pro, and DeepSWE), then chose pull requests that exercise them, such as HTTP streaming, filesystem operations and serialization. From 30 merged pull requests, Tasksmith produced 24 tasks in 10 Python repositories that passed its checks, 17 of them on a second run. Its checks do not replace ours, so these tasks go through the same pipeline as the rest.\n\t\n\t\t\n\t\n\t\n\t\tValidation with openenv validate\n\t\nA metadata screen runs first. It keeps tasks from training splits with permissive licenses. It drops…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "huggingface.co/harness-hub/Qwen3.8-27B-pi-adapted",
+          "source": "HF Trending Models",
+          "tags": [
+            "models"
+          ],
+          "title": "harness-hub/Qwen3.8-27B-pi-adapted (image-text-to-text)",
+          "url": "https://huggingface.co/harness-hub/Qwen3.8-27B-pi-adapted",
+          "discussion_url": null,
+          "published": null,
+          "summary": "Trending model. Task: image-text-to-text. Library: peft. Created 2026-11-16. 929 likes, 2383 downloads.",
+          "content": "",
+          "score": 315.5,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "AWS Automates Distributed KV Cache Tuning for Agents",
+      "summary": "AWS published an architectural guide and agent skill to evaluate and configure distributed KV caching for self-hosted vLLM and SGLang fleets via ElastiCache. By integrating an LMCache connector over RDMA-enabled nodes, servers can externalize prefix KV states across prolonged, multi-turn agent sessions. The accompanying skill uses a diagnostic tool named KVTrace to simulate access patterns, calculating whether context reuse offsets loading latency before generating infrastructure configurations.",
+      "why_it_matters": "Multi-turn agent loops with long prompt histories suffer severe TTFT penalties on self-hosted inference; externalized KV caches resolve cold prefill across routing changes.",
+      "reason": "AWS details a concrete architecture for integrating distributed KV caching into agent workflows to sharply cut latency and token recomputation during multi-turn tool use.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/cut-self-hosted-llm-cost-and-latency-with-the-distributed-kv-caching-agent-skill",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Cut self-hosted LLM cost and latency with the distributed KV caching agent skill",
+        "url": "https://aws.amazon.com/blogs/machine-learning/cut-self-hosted-llm-cost-and-latency-with-the-distributed-kv-caching-agent-skill/",
+        "discussion_url": null,
+        "published": "2026-11-21T00:14:26Z",
+        "summary": "Self-hosting LLMs on GPUs means paying to recompute the same context on every turn. Distributed KV caching with Amazon ElastiCache can cut inference cost by up to 40% and time to first token by up to 80%. This post walks through the distributed KV caching skill in the Agent Toolkit for AWS, which evaluates and sets up the cache from your coding agent.",
+        "content": "Customers increasingly self-host large language models (LLMs) on GPUs for control over cost, accuracy, and latency. However, self-hosting often means paying for redundant GPU work because small, isolated caches on each server can’t hold or share the growing context AI agents and chat applications resend. Consider a legal AI assistant that can accumulate hundreds of thousands of tokens of case history in each conversation. When a lawyer returns to a thread after lunch, responses from the LLM can take minutes. The GPU server that picks up the request has none of that history in its memory. So, the GPU recomputes the key-value (KV) attention states for all of those tokens, a step called prefill, before it writes a word. The same pattern slows down resumed coding agents, agentic AI assistants, and document Q&A assistants. Distributed KV caching with Amazon ElastiCache can cut self-hosted LLM inference costs by up to 40% and time to first token (TTFT) by up to 80%. Distributed KV caching extends GPU-local caches with a shared tier beside your GPU fleet so any server can reuse KV state for days across sessions, routing shifts, and server failures. “ Announcing distributed KV caching for self-hosted LLMs with Amazon ElastiCache ” dives into the technical details and the performance benchmarks.\n\nThis post details the distributed KV caching skill in the Agent Toolkit for AWS. With this skill, you can evaluate and set up distributed KV caching from within your coding agent in a few prompts. The skill guides the agent through checking whether your workload benefits from distributed KV caching, setting up a cache cluster for testing or production workload, and troubleshooting your LLM inference caching. The skill works with Kiro , Claude Code, OpenAI Codex, and other coding agents that support Agent Skills. We walk through how the skill works with four conversations: diagnosing a slow first token, sizing and pricing the cache, setting it up, and fixing a failed transfer.\n\nWhy a skill for KV caching and what can it do?\n\nThe benefits for your workload depend on characteristics such as LLM models used, user traffic patterns, and prompt routing choices, and can be complex to estimate. We created the KVTrace tool to get close estimates of the benefits for your workload, from your own model and traffic before you deploy any infrastructure, at no additional charge. The skill simplifies this evaluation and the setup, and guides your coding agent through the following best practices before changing anything:\n\nA fit check before any spend. The agent reads your GPU fleet with a read-only describe-instances call and counts Elastic Fabric Adapter (EFA) interfaces. It asks only for what it can’t see: engine, model, tensor-parallel (TP) size, KV data type, server price, and how often prompts repeat. It stops and explains when something doesn’t fit.\n\nNumbers from your workload. For short prompts, loading KV state can take longer than computing it again. Above a certain prompt length (the cutover point), the read wins. That cutover and how often your prompts repeat decide whether the cache is worth its price. The agent estimates savings from your own traffic with KVTrace, at no additional charge, and stops if they don’t cover the cache’s cost. Every number says where it came from.\n\nManage configuration across inference servers with the stack you already run. The agent adds the LMCache connector to your existing vLLM or SGLang engine, including vLLM workers under serving frameworks such as llm-d and Ray Serve. It keeps your routing and the engine’s settings and sets the servers in your inference fleet to one KV ID mechanism (hash and seed) and an explicit KV data type. Matching settings avoid key mismatches, where each server writes KV state the others can’t find.\n\nImplements best practices. Before production traffic, the agent empties the local tiers and checks that two cache-loaded runs give the same output, because a layout mismatch can produce healthy hit counters and wrong answers. The skill guides the agent to seek explicit approval for high-impact operations such as creating, changing, or deleting resources.\n\nPrerequisites\n\nThese flows, from estimating benefits to setup, require the following:\n\nA coding agent that supports Agent Skills, such as Kiro or Claude Code.\n\nGPU instances that support EFA RDMA write, such as p5.\n\nLMCache 0.5.8rc1 or later and vLLM 0.11.1 or later (SGLang 0.5.13 or later).\n\nElastiCache for Valkey 9.1 or later, on cache.i8ge.48xlarge nodes (if setting up the cache).\n\nFlow 1: Can distributed KV caching help?\n\nWe gave the agent this prompt: “My vLLM fleet serves a legal assistant with 64K-token contexts on p5 instances. Returning conversations take 13 seconds for the first token because the GPU recomputes the full conversation history every turn. How do I fix this?”\n\nThe agent matches the request to the skill and, in Kiro, asks for approval before loading it. The answer identifies that the latency was caused by cold prefill, and three things in the answer matter for a real deployment. First, it checks for fixes that need no new infrastructure. If you turned off prefix caching, turning it back on can speed up back-to-back turns. If the GPU prefix cache hit rate is already above 90% with session affinity, you might not need a shared KV cache. Second, it identifies constraints specific to the legal AI assistant. A shared KV cache can let one tenant tell from response times whether another tenant sent the same text. Cases that must stay isolated get separate caches, and tenants that share a cache add their own ID to the KV hash. Third, it doesn’t guess the size. It asks for the model and TP size, KV data type, replica count and routing, and how long users wait between turns.\n\nFigure 1: The diagnosis and proposed architecture for the legal assistant\n\nFlow 2: Estimating savings\n\nTo size the savings, we gave the agent an example fleet of 8 p5 instances that serve 64,000-token prompts for a multi-turn retrieval-augmented generation (RAG) assistant. The agent looked up the GPU and cache node prices and derived the prefill rate and KV size from benchmarks. Finally, the agent recommended two cache.i8ge.48xlarge nodes for distributed KV caching. The following figure shows the agent’s summary and the inputs it used.\n\nFigure 2: The agent’s summary and inputs. It looked up both prices in the AWS price list and explains how it arrived at the recompute figure\n\nWe didn’t provide a cache hit rate, which is the share of recomputed tokens the cache would serve. The agent therefore presents scenarios and recommends a KVTrace run to identify the cache hit rate. KVTrace records the KV cache events from vLLM or SGLang. It then replays them offline against a shared KV cache of each candidate size. The recorder never writes token IDs or prompt text. Traces hold block hashes and token counts. Block hashes come from token content, so pass --anonymize-key-file when your prompts are sensitive. The skill records on every GPU server for a representative window, such as a full business day. The agent also notes that freed GPU time turns into dollars only if you run fewer servers or serve more traffic on the same ones.\n\nFigure 3: The top of a KVTrace report from synthetic demo traffic. It recommends the smallest capacity that reaches 90% of the savings ceiling.\n\nFlow 3: Setting up a distributed KV cache\n\nWe prompted the agent with: “Set up a shared L2 KV cache for LLM inference, starting from scratch.” Before it creates anything, the agent requests your confirmation to set up the suggested cache node count in your Availability Zone, at the estimated price. Once confirmed, it creates the right security group with EFA permissions, and a Valkey 9.1 cluster that uses a custom parameter group with caching eviction policies. LMCache gets its own cache user , with the password in AWS Secrets Manager . The agent prepares the GPU servers and starts one LMCache server per GPU server. Then it…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Anthropic Researcher Claims GRH Proof With Claude",
+      "summary": "Anthropic researcher Levent Alpöge published a claimed proof of the Generalized Riemann Hypothesis developed in collaboration with Claude. Alpöge stated that the underlying method resolves the GRH and could extend to the Extended Riemann Hypothesis, noting that the arguments were formalized without assumptions. Alpöge highlighted Claude's velocity near the completion of the work, describing the model as outpacing him in the final stages of the proof.",
+      "why_it_matters": "If the formalization withstands peer review, it marks a significant validation of frontier LLM reasoning applied directly to open Millennium Prize problems.",
+      "reason": "Anthropic researcher Levent Alpoge has released a claimed proof of the Generalized Riemann Hypothesis developed alongside Claude, serving as a landmark case study for frontier model reasoning.",
+      "item": {
+        "key": "simonwillison.net/2026/Nov/20/levent-alpoge",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "Quoting Levent Alpöge",
+        "url": "https://simonwillison.net/2026/Nov/20/levent-alpoge/",
+        "discussion_url": null,
+        "published": "2026-11-20T16:30:48Z",
+        "summary": "I believe I have, working with Claude, discovered a proof of the Riemann Hypothesis. In fact, the method easily extends much further, resolving the so-called Generalized Riemann Hypothesis, and I expect, with more time, the Extended Riemann Hypothesis too. Claude and I have also formalized the arguments without assumptions. It is natural to feel that this is an end, in my case a loss of a principal guiding light, but what I saw during the course of progress so amazed me that I believe it is one dawn across science of something far greater. [...]\n\nClaude and I have had a great time together with such breadth in recent months, but this time Claude far outpaced me near the finish line. No, Claude flew, and danced, and sparkled near that finish line.\n\n— Levent Alpöge , alpo.ge/remark.pdf\n\nTags: anthropic , claude , generative-ai , mathematics , ai , llms , levent-alpoge",
+        "content": "20th November 2026\nI believe I have, working with Claude, discovered a proof of the Riemann Hypothesis. In fact, the method easily extends much further, resolving the so-called Generalized Riemann Hypothesis, and I expect, with more time, the Extended Riemann Hypothesis too. Claude and I have also formalized the arguments without assumptions. It is natural to feel that this is an end, in my case a loss of a principal guiding light, but what I saw during the course of progress so amazed me that I believe it is one dawn across science of something far greater. [...]\nClaude and I have had a great time together with such breadth in recent months, but this time Claude far outpaced me near the finish line. No, Claude flew, and danced, and sparkled near that finish line.\n— Levent Alpöge, alpo.ge/remark.pdf\nRecent articles\n- Running the full server-side Datasette Python app in the browser with service workers and Pyodide - 17th November 2026\n- Locating the source of a mysterious beep with Claude - 9th November 2026\n- Hide your slop PR descriptions behind <details><summary> - 9th November 2026\n- Qwen 3.8 27B on my laptop can interpret model weights, too - 3rd November 2026",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "theverge.com/ai-artificial-intelligence/1010051/anthropic-riemann-hypothesis-millennium-prize-problem",
+          "source": "The Verge (AI)",
+          "tags": [
+            "press"
+          ],
+          "title": "Anthropic mathematician claims to have solved prestigious Millennium Prize problem with Claude",
+          "url": "https://www.theverge.com/ai-artificial-intelligence/1010051/anthropic-riemann-hypothesis-millennium-prize-problem",
+          "discussion_url": null,
+          "published": "2026-11-20T16:34:13Z",
+          "summary": "Anthropic mathematician Levent Alpöge claims he has proved the Riemann hypothesis, one of mathematics's most notoriously difficult problems, with the help of Claude, cracking a puzzle that has eluded some of the world's best mathematicians for decades. If verified, it would mark yet another seismic achievement for AI in mathematics and add to the upheaval […]",
+          "content": "Anthropic went public on November 19th, 2026. | Photo: Getty Images\n\nAnthropic mathematician Levent Alpöge claims he has proved the Riemann hypothesis, one of mathematics's most notoriously difficult problems, with the help of Claude, cracking a puzzle that has eluded some of the world's best mathematicians for decades. If verified, it would mark yet another seismic achievement for AI in mathematics and add to the upheaval already unleashed by OpenAI's previous, often inelegant forays into the field.\n\nAlpöge's solution has yet to be verified independently. Anthropic has not commented or involved itself in Alpöge's announcement. In a document on his website , Alpöge says he texted Anthropic CEO Dario Amodei abo …\n\nRead the full story at The Verge.",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        },
+        {
+          "key": "alpo.ge/remark.pdf",
+          "source": "Hacker News front page",
+          "tags": [
+            "community"
+          ],
+          "title": "Levent Alpöge claims proof of the Generalized Riemann Hypothesis [pdf]",
+          "url": "https://alpo.ge/remark.pdf",
+          "discussion_url": "https://news.ycombinator.com/item?id=50574968",
+          "published": "2026-11-20T14:16:21Z",
+          "summary": "Comments",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Attackers Weaponize Agent Free Trials for Token Arbitrage",
+      "summary": "ChatPRD creator Claire Vo detailed emerging abuse patterns targeting her production product management agent, ultimately forcing the removal of free trials. Fraud rings weaponized automated sign-up loops and promo codes to tunnel external workloads through the agent to build gaming maps and resell tokens. Vo noted that attackers repeatedly sent probe prompts—such as SVGs of pelicans riding bicycles—specifically designed to fingerprint the underlying model family being exploited.",
+      "why_it_matters": "Exposing tool-enabled agents via generous free tiers invites immediate prompt tunneling and model fingerprinting attacks aimed at reselling your upstream tokens.",
+      "reason": "ChatPRD shares operational post-mortem findings on emerging token fraud attack vectors actively targeting production LLM wrapper and agent applications.",
+      "item": {
+        "key": "simonwillison.net/2026/Nov/20/token-fraud-is-here-and-its-bad",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "Token fraud is here and it’s BAD (YouTube)",
+        "url": "https://simonwillison.net/2026/Nov/20/token-fraud-is-here-and-its-bad/",
+        "discussion_url": null,
+        "published": "2026-11-20T02:49:57Z",
+        "summary": "Token fraud is here and it’s BAD (YouTube)\n\nClaire Vo runs ChatPRD , an AI platform that helps product managers \"turn an idea into a spec\". The product has been live since the GPT-4 era, and Claire has been building it in public for much of that time.\n\nIn this YouTube video (see also the accompanying Twitter post ) Claire describes the flood of token fraud she has seen from groups abusing the product's free trial, sometimes just to get free AI usage but often to resell tokens or run other commercial enterprises on top of the ChatPRD agent.\n\nI am funding a international Roblox and Fortnite map studio. They run a loop of free trials and promo codes and then tunnel to my agent and use it to build Roblox and Fortnite maps.\n\nApparently one of the common prompts Claire saw running through her agent involved SVGs of pelicans riding bicycles! Presumably the token scammers are using that to help sniff the underlying models - different model families have a definite signature, and I've used it like this in the past to try and guess the identity of stealth preview models on platforms like OpenRouter.\n\nClaire is winding down her free trials entirely, which sadly looks like the right decision…",
+        "content": "20th November 2026 - Link Blog\nToken fraud is here and it’s BAD (YouTube). Claire Vo runs ChatPRD, an AI platform that helps product managers \"turn an idea into a spec\". The product has been live since the GPT-4 era, and Claire has been building it in public for much of that time.\nIn this YouTube video (see also the accompanying Twitter post) Claire describes the flood of token fraud she has seen from groups abusing the product's free trial, sometimes just to get free AI usage but often to resell tokens or run other commercial enterprises on top of the ChatPRD agent.\nI am funding a international Roblox and Fortnite map studio. They run a loop of free trials and promo codes and then tunnel to my agent and use it to build Roblox and Fortnite maps.\nApparently one of the common prompts Claire saw running through her agent involved SVGs of pelicans riding bicycles! Presumably the token scammers are using that to help sniff the underlying models - different model families have a definite signature, and I've used it like this in the past to try and guess the identity of stealth preview models on platforms like OpenRouter.\nClaire is winding down her free trials entirely, which sadly looks like the right decision in the face of this abuse.\nRecent articles\n- Running the full server-side Datasette Python app in the browser with service workers and Pyodide - 17th November 2026\n- Locating the source of a mysterious beep with Claude - 9th November 2026\n- Hide your slop PR descriptions behind <details><summary> - 9th November 2026\n- Qwen 3.8 27B on my laptop can interpret model weights, too - 3rd November 2026",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "LangChain Core 1.8.4 Normalizes Finish Events",
+      "summary": "LangChain released langchain-core 1.8.4 with two targeted framework updates. The release standardizes the finish reason format across distinct LLM providers on message-finish events and adds source metadata tagging to synthetic human-in-the-loop tool messages.",
+      "why_it_matters": "Standardizing finish reasons simplifies multi-provider agent orchestrators, while synthetic HITL tagging improves trace hygiene in human-in-the-loop flows.",
+      "reason": "LangChain Core 1.8.4 standardizes finish reasons across LLM providers and adds provenance metadata for synthetic human-in-the-loop tool messages.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.4",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-core==1.8.4",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.4",
+        "discussion_url": null,
+        "published": "2026-11-19T22:35:59Z",
+        "summary": "Changes since langchain-core==1.8.3\n\nrelease(core): 1.8.4 ( #41964 )\n\nfeat(core): standardize finish reason on message-finish events ( #41926 )\n\nfeat(langchain): tag synthetic HITL tool messages with source metadata ( #41928 )",
+        "content": "There was an error while loading. Please reload this page.\nd4dafe5\nChanges since langchain-core==1.8.3\nrelease(core): 1.8.4 (#41964) feat(core): standardize finish reason on message-finish events (#41926) feat(langchain): tag synthetic HITL tool messages with source metadata (#41928)",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Standard Bank Deploys Automated LLM-as-a-Judge Auditing",
+      "summary": "Standard Bank Group implemented an automated governance pipeline using Amazon Bedrock LLM judges orchestrated by AWS Step Functions. To approve generative use cases without manual risk bottlenecks, a pre-assessment agent on AWS Fargate extracts evidence from repositories and documentation into a 40-question Well-Architected lens. The pipeline directly stress-tests deployments with automated jailbreak probes and checks semantic consistency across reworded prompts via embedding models before escalating findings to human committees.",
+      "why_it_matters": "A concrete enterprise reference implementation for structuring LLM-as-a-judge pipelines to automate compliance, jailbreak scanning, and policy audits.",
+      "reason": "A technical case study on deploying LLM-as-a-judge pipelines to automate compliance checks, risk scoring, and policy evaluation for generative workflows.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/how-standard-bank-group-automates-ai-risk-assessment-for-generative-ai",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "How Standard Bank Group automates AI risk assessment for generative AI",
+        "url": "https://aws.amazon.com/blogs/machine-learning/how-standard-bank-group-automates-ai-risk-assessment-for-generative-ai/",
+        "discussion_url": null,
+        "published": "2026-11-20T20:37:31Z",
+        "summary": "Standard Bank Group automated the evidence behind its generative AI approval gates. Working with AWS Professional Services, the bank built an assessment in its own AWS account that scores each use case against international AI standards and its own policies using LLM-as-a-judge on Amazon Bedrock, giving risk committees consistent, traceable evidence.",
+        "content": "This post is co-written with Tala Qraitem from AWS and Jörg Fischer from Standard Bank Group\n\nHaving an AI policy is one thing. Proving, one use case at a time, that AI systems follow it is another. Every new generative AI application adds one more system to prove. Teams can now build one in days, but each still needs a risk committee’s approval before it reaches customers or employees. When that approval depends on reviewers reading documents and testing the system by hand, governance becomes the slowest step in the pipeline.\n\nStandard Bank Group chose to automate that proof. Working with AWS Professional Services, the bank deployed an automated assessment that scores each generative AI use case against international AI standards and its own policies. The assessment produces reports and a dashboard that show what is already in place, what is working well, and what still needs mitigation. This post explains how the assessment runs on AWS and what Standard Bank Group learned from its first runs.\n\nGoverning AI with the framework you already have\n\nStandard Bank Group didn’t need a new AI policy. Like most large banks, it already had an established model risk practice that covers concerns such as explainability and fairness, and a change risk process that assesses each new use case according to its level of risk before it goes live.\n\nGenerative AI increases the complexity, because models and tooling change every three to six months, yet each use case still needs to meet the same high security and compliance bar.\n\n“At Standard Bank, this assessment demonstrates how we are working with AWS to embed intelligent, automated risk management into our AI journey, allowing us to accelerate meaningful business value while maintaining the trust and controls that banking demands. We believe responsible AI is not about slowing innovation down but enabling it to build and scale with confidence.”\n\n— Jörg Fischer, Group Chief Information and AI Officer, Standard Bank Group\n\nThe goal was to automate evidence gathering and testing, then feed the results into the approval gates Standard Bank Group already runs. Review and approval stay with the risk committee, but the committee now bases each decision on consistent evidence, collected the same way across use cases.\n\nHow the assessment works\n\nFigure 1 shows how the assessment’s components fit together in Standard Bank Group’s AWS account, from intake through evaluation to reporting.\n\nFigure 1: The assessment pipeline in Standard Bank Group’s AWS account, from intake through evaluation to reporting\n\nThe assessment runs entirely in Standard Bank Group’s own AWS account. Documents, code, and test results stay in an Amazon Simple Storage Service (Amazon S3) bucket there. The AWS Well-Architected Tool handles intake, AWS Step Functions orchestrates the pipeline, and a foundation model on Amazon Bedrock evaluates the evidence. It uses a technique called LLM-as-a-judge, in which a large language model checks evidence against defined criteria.\n\nWith Amazon Bedrock, Standard Bank Group could use a foundation model without stepping outside the controls it already runs on AWS. The bank controls access to the model through AWS Identity and Access Management (IAM), just as it does for its other AWS workloads. Amazon Bedrock doesn’t share the bank’s prompts or model outputs with model providers, and doesn’t use them to train models. Because Amazon Bedrock offers many foundation models through one API, the team can move to a newer judge model by changing a configuration setting instead of rebuilding the pipeline.\n\nEach assessment moves through four steps. In the first two, a pre-assessment agent collects evidence about the use case, then the pipeline examines it and tests the application directly. The third evaluates that evidence against controls. The fourth summarizes the results in a standard, predefined format and delivers them to the people who act on them.\n\nStep 1: A pre-assessment agent collects the evidence\n\nThe custom lens in the Well-Architected Tool holds about 40 questions, each covering a risk event such as incomplete technical documentation or insufficient human oversight. Delivery teams no longer fill it in from scratch. A pre-assessment agent running on AWS Fargate scans the use case’s code repository and documentation. It maps relevant files to each question and pre-populates the lens with answers and links to the evidence. The delivery team then reviews those answers, corrects any mistakes, and adds the evidence the agent couldn’t find.\n\nStep 2: The pipeline examines the artifacts and tests the application\n\nThe pipeline works from four kinds of evidence.\n\nSystem documentation, which describes how the application was designed, built, and evaluated.\n\nPolicy documents, which set out roles, responsibilities, and procedures such as incident handling.\n\nSource code and the system prompt, which show how controls are implemented.\n\nLive calls to the application, which show how it behaves in practice.\n\nFor documents and code, the pipeline checks whether each artifact contains what its mapped control requires. Each control comes from an international AI standard or framework, or from Standard Bank Group’s own policies. An incident procedure, for example, needs to describe how incidents are reported.\n\nFor live testing, the pipeline calls the application through its AWS Lambda function or API. The delivery team supplies questions a typical user would ask. The pipeline adds a built-in set of jailbreak attempts and off-topic questions, which the application is expected to decline. It also sends the same prompt several times, in its original and reworded forms, and uses an embedding model on Amazon Bedrock to check that the answers stay consistent in meaning. Where the team provides expected answers, the pipeline measures how closely the responses match them. Every response is stored in Amazon S3, so reviewers can see exactly what the application generated.\n\nStep 3: LLM-as-a-judge evaluation against standards\n\nIn this step, a foundation model on Amazon Bedrock acts as the judge. The assessment uses the model as-is with no fine-tuning or customization. (Model availability varies by AWS Region, so check the supported models by Region before you deploy.) For each question, the model checks whether specific evidence appears in the artifacts and in the application’s responses, and returns yes or no.\n\nEvery check maps to a control in an international standard or framework for AI management, AI risk, or AI security. Standard Bank Group also customized the lens with judge questions built from its own standards, bringing the total to more than 300. The checks cover the eight AWS responsible AI dimensions in the following table:\n\nDimension\nWhat the assessment looks for\n\nVeracity and robustness\nCorrect outputs, even with unexpected or adversarial inputs\n\nPrivacy and security\nAppropriate collection, use, and protection of data and models\n\nTransparency\nInformation that helps stakeholders make informed choices about their use of an AI system\n\nFairness\nConsideration of impacts on different groups of stakeholders\n\nSafety\nPrevention of harmful output and misuse\n\nControllability\nMechanisms to monitor and steer system behavior\n\nGovernance\nBest practices across the AI supply chain, including providers and deployers\n\nExplainability\nWays to understand and evaluate system outputs\n\nEach risk receives a likelihood score, the share of required evidence the model couldn’t find, and a fixed severity level that the bank’s risk team can adjust. Together they produce a rating from Very low to Critical. Each missing piece of evidence maps to a specific mitigation and to the clause of the standard or policy it came from. A risk officer can then trace any findings back to their source when explaining decisions to a regulator. Figure 2 follows one missing piece of evidence through this process, from the evidence request to the recommended fix.\n\nFigure 2: How one…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "llama.cpp release b12612 optimizes Vulkan MMVQ performance on AMD RDNA4 hardware for Q3_K, Q5_K, and IQ4_XS quantizations.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12612",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12612",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12612",
+        "discussion_url": null,
+        "published": "2026-11-21T19:33:06Z",
+        "summary": "vulkan: improve RDNA4 MMVQ performance for Q3_K, Q5_K and IQ4_XS ( #31804 )\n\nvulkan: keep default MMVQ rows for Q3_K, Q5_K, IQ4_XS on RDNA4 AMD proprietary driver\n\nAssisted-by: Claude Opus 5.5\n\nclean up mmvq shader load logic\n\nCo-authored-by: Ruben Ortlam rortlam@redhat.com\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/70595500\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "SageMaker HyperPod launched Global Inference Gateway, providing a single SigV4-authenticated endpoint that routes across multi-region clusters with automatic failover.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/introducing-amazon-sagemaker-hyperpod-global-inference-gateway-one-endpoint-across-regions-and-clusters",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Introducing Amazon SageMaker HyperPod Global Inference Gateway: One endpoint across Regions and clusters",
+        "url": "https://aws.amazon.com/blogs/machine-learning/introducing-amazon-sagemaker-hyperpod-global-inference-gateway-one-endpoint-across-regions-and-clusters/",
+        "discussion_url": null,
+        "published": "2026-11-20T22:35:24Z",
+        "summary": "Amazon SageMaker HyperPod introduces the Global Inference Gateway, one managed endpoint that routes inference requests across your HyperPod clusters in one Region or across Regions. It picks the best cluster, fails over automatically, and authenticates every request with SigV4 and IAM over AWS PrivateLink.",
+        "content": "During a traffic peak, a request can sit in a queue on a saturated HyperPod cluster while GPUs on another cluster, sometimes in another AWS Region, sit idle. You have already paid for that capacity, but your requests can’t reach it.\n\nIn Introducing Amazon SageMaker HyperPod Inference Gateway , we showed how the Inference Gateway gives each Amazon SageMaker HyperPod cluster a single, GPU-aware endpoint. It reads real-time signals such as key-value (KV) cache utilization and queue depth to place every request on the best-suited pod. That solves routing inside one cluster, but not across clusters.\n\nToday, SageMaker HyperPod introduces the Global Inference Gateway. It is one SageMaker-managed gateway that routes across every cluster you register, in one Region or across Regions. The gateway picks the cluster and carries the request over the AWS backbone, with automatic failover and authentication through AWS Signature Version 4 (SigV4) and AWS Identity and Access Management (IAM). Inside each cluster, the Inference Gateway keeps picking the pod, unchanged. The Global Inference Gateway is the second tier of the architecture we described in part 1.\n\nThe challenge: Capacity spread across clusters and Regions\n\nModels are getting larger, and the GPU capacity to serve them is harder to find. To get enough of it, you spread it across more clusters and more Regions.\n\nConsider a team that serves four models across five HyperPod clusters in two Regions. Without the Inference Gateway, clients track 20 endpoints: one per model per cluster. The Inference Gateway cuts that to five, one per cluster. But each client still picks a cluster itself.\n\nThat choice has costs:\n\nUneven load. During peaks, requests queue in one Region while GPUs in the other Region are idle.\n\nManual failover. When a cluster fails, an engineer changes configuration to move traffic away from it.\n\nCustom plumbing. Spreading traffic across Regions means building and maintaining load balancers, DNS, and cross-Region networking yourself.\n\nThe team needs one endpoint that sends each request to the best-suited cluster and moves traffic off a failed cluster on its own.\n\nKey benefits\n\nThe Global Inference Gateway helps you get more from the GPU capacity you already have, with less to operate.\n\nPut idle GPUs to work. During a peak, requests overflow to clusters with available capacity in the same Region or another one, instead of queuing on a saturated cluster.\n\nFail over automatically. When a cluster fails, the gateway moves its traffic to the next-best cluster. Clients don’t change anything.\n\nUse one endpoint for everything. Clients call a single SageMaker-managed endpoint instead of tracking one endpoint per cluster or per model.\n\nSkip the custom networking. You don’t build or maintain load balancers, DNS, or cross-Region networking.\n\nStay private by default. Every request is authenticated with SigV4 and IAM, and it reaches your clusters only over AWS PrivateLink.\n\nCustomer feedback\n\n“At Bagelcode, we run our own LLM inference service on AWS to help teams across the company, including our game teams, use AI to improve how they work. In our beta tests, the Global Inference Gateway in Amazon SageMaker HyperPod routed requests across two AWS Regions through a single endpoint and kept serving them when one cluster could no longer serve the model. That gave our small platform team cross-Region failover without having to build or maintain our own routing layer.”\n\n— Jinhyung Park, VP (AI Platform), Bagelcode\n\nHow it works\n\nSetting up the gateway takes two decisions: which clusters to open up for routing, and which of them to group behind one gateway.\n\nPublish a cluster. You do this once per cluster. You turn on the spec.globalRouting block in the cluster’s existing InferenceGatewayConfig . The HyperPod Inference controller then publishes the cluster privately from your own account.\n\nCreate the gateway. You do this once per gateway. You call CreateGlobalInferenceGateway with the clusters to route across, and SageMaker returns one endpoint.\n\nA cluster is reachable only after you publish it. When you publish a cluster, the controller creates a Network Load Balancer in front of the cluster’s Inference Gateway, publishes a virtual private cloud (VPC) endpoint service on it, and uploads the listener’s certificate to your TLS bucket. These resources live in your account. If you list a cluster in a gateway before you publish it, the call fails with a message that tells you what to fix.\n\nHow a request flows\n\nFigure 1 shows the path of each request: (1) your client signs the request with SigV4 and sends it to the gateway’s regional endpoint. (2) The gateway authenticates the caller and picks the best cluster. (3) AWS PrivateLink carries the request to that cluster, in the same Region or another, and (4) the cluster’s Inference Gateway routes it to a model pod, as it does today.\n\nFigure 1: The Global Inference Gateway receives each request at one regional endpoint and forwards it over AWS PrivateLink to the best HyperPod cluster, where the cluster’s Inference Gateway routes it to a model pod. Each cluster publishes its load back to the gateway.\n\nWhat AWS operates\n\nYou decide which clusters to publish, which to group behind a gateway, and how to weight routing. AWS operates the rest:\n\nThe routing fleet. SageMaker provisions and operates the fleet that terminates TLS, authenticates callers, scores clusters, and forwards each request.\n\nPrivate connectivity. SageMaker creates one private endpoint per cluster and carries traffic on the AWS backbone, in-Region and cross-Region.\n\nCertificates and validation. Using an execution role that you create, the service reads each cluster’s VPC endpoint service name, certificate, and Region, so you don’t copy them by hand. It checks them before routing traffic.\n\nHealth and failover. The gateway health-checks every cluster and moves traffic off a failed cluster automatically. For details, see the Operating the gateway section.\n\nAuthentication and rate limits. The gateway checks SigV4 signatures, IAM permissions, and rate limits, and rejects failing requests before any cluster sees them.\n\nOn each cluster, a service-managed metrics publisher with its own IAM role sends the cluster’s load to the gateway.\n\nHow the gateway picks a cluster\n\nFor each request, the gateway scores every healthy cluster on four signals and sends the request to the highest-scoring cluster. Each cluster’s metrics publisher supplies the load signals.\n\nYou control how much each signal counts with routing weights. Each weight is a value from 0.0 to 1.0, and a weight of 0 turns that signal off. If you set weights, you set all four, and they must add up to 1.0. If you omit them, the defaults in the following table apply.\n\nWeight\nWhat it scores\nDefault\n\nKVHeadroom\nAvailable KV cache and GPU memory on the cluster\n0.20\n\nQueueDepth\nHow backed up the cluster is\n0.25\n\nRegionProximity\nDistance between the cluster and the gateway’s Region\n0.40\n\nErrorRate\nRecent failed requests on the cluster\n0.15\n\nThe defaults favor clusters close to the gateway’s Region, while still moving traffic toward clusters with available capacity and away from clusters that are failing. If resilience matters more than proximity for your workload, raise ErrorRate and lower RegionProximity . For example, the following routing block weights recent errors at 0.7:\n\n{\"Weights\": {\"KVHeadroom\": 0.1, \"QueueDepth\": 0.1, \"RegionProximity\": 0.1, \"ErrorRate\": 0.7}}\n\nYou pass the weights in the Routing parameter of CreateGlobalInferenceGateway , and you can change them later with UpdateGlobalInferenceGateway .\n\nChoose your starting point\n\nYour path depends on what you run today. If you serve from a single cluster, stay on that cluster’s Inference Gateway endpoint. Move to the Global Inference Gateway when you add a second cluster.\n\nStarting point\nWhat you do\nResult\n\nThe Inference Gateway runs on each cluster, for example four models on five clusters in us-east-1 and…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "NVIDIA introduced Dynamo to tackle worker inference rollout bottlenecks in reinforcement learning training pipelines.",
+      "item": {
+        "key": "developer.nvidia.com/blog/reducing-rollout-bottlenecks-in-reinforcement-learning-with-nvidia-dynamo",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "Reducing Rollout Bottlenecks in Reinforcement Learning with NVIDIA Dynamo",
+        "url": "https://developer.nvidia.com/blog/reducing-rollout-bottlenecks-in-reinforcement-learning-with-nvidia-dynamo/",
+        "discussion_url": null,
+        "published": "2026-11-19T20:28:13Z",
+        "summary": "Reinforcement learning (RL) uses rewards to train models to solve problems and complete tasks more successfully. Inference drives this process. Workers generate...",
+        "content": "Reinforcement learning (RL) uses rewards to train models to solve problems and complete tasks more successfully. Inference drives this process. Workers generate...\nReinforcement learning (RL) uses rewards to train models to solve problems and complete tasks more successfully. Inference drives this process. Workers generate rollouts: sequences of model outputs, actions, and environment interactions. The RL framework scores the results, updates model weights, and sends those weights back to the workers for the next round. As RL training scales…\n\nSource",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Ollama v0.40.17 adds support for Inkling 2 Mini, a 26B parameter (5.4B active) looped-layer vision and tool-calling model scoring 79.2% on benchmarks.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.17",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.17",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.17",
+        "discussion_url": null,
+        "published": "2026-11-21T04:05:14Z",
+        "summary": "Inkling 2 Mini\n\nInkling 2 Mini from Thinking Machines is a 26B parameter model with 5.4B active.\n\nIts looped layers give it more computation per token than its size suggests, and it still fits on a Mac at about 20GB. It handles text and images, tool calls, and thinking, and scores 79.2% on SWE-Bench Verified).\n\nollama run inkling-2-mini\n\nNote: inkling-2-mini is supported on Apple silicon only in this release. PC support will follow in an upcoming release.\n\nWhat's Changed\n\nollama launch claude supports Claude Code's deferred tool loading, so MCP tools are loaded when needed instead of all at\n\nonce\n\nOllama on Apple silicon now serves multiple requests at once.\n\nollama launch opencode sets thinking options from the model's metadata\n\nollama launch pi refreshes Pi's model list after sign-in and passes along prompt arguments\n\nollama launch chatgpt --restore asks before switching an active profile and preserves existing settings and chat history;\n\nquitting ChatGPT yourself now lets it exit through its own quit prompt\n\nRunning ollama with no arguments in a non-interactive shell prints help instead of erroring\n\nCtrl+C or Ctrl+G while in a multiline \"\"\" block leaves multiline mode instead…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "May your test assertions pass without unstated requirements today.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Privacy defense",
+      "headline": "Signal Blocks Mobile AI Agents from Reading Screens",
+      "blurb": "Signal is restricting screenshots on Android and iOS to prevent system AI agents like Gemini and Siri from reading messages and on-screen data.",
+      "item": {
+        "key": "theverge.com/ai-artificial-intelligence/1038390/signal-blocking-ai-agent-screenshots-mobile-app",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Signal is blocking Gemini and Siri AI from reading your screen",
+        "url": "https://www.theverge.com/ai-artificial-intelligence/1038390/signal-blocking-ai-agent-screenshots-mobile-app",
+        "discussion_url": null,
+        "published": "2026-11-20T12:30:47Z",
+        "summary": "Signal is restricting the ability to take screenshots on Android and iOS devices in an effort to prevent AI agents from reading users' messages and other data. The agentic AI capabilities built into operating systems that analyze on-screen information to learn more about the user are \"undermining Signal's ability to independently guarantee privacy,\" Signal president […]",
+        "content": "Signal users on iOS will see this option to toggle blocking screenshots and preventing Siri AI from scanning on-screen content. | Image: Signal\n\nSignal is restricting the ability to take screenshots on Android and iOS devices in an effort to prevent AI agents from reading users' messages and other data. The agentic AI capabilities built into operating systems that analyze on-screen information to learn more about the user are \"undermining Signal's ability to independently guarantee privacy,\" Signal president Meredith Whittaker said in a blog post , while urging OS providers to make it easier for app developers to control what data agents can access.\n\n\"We want to be very clear: it is a serious problem that Signal - and application developers beyond - lack robust tools to prevent AI age …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Supply chain security",
+      "headline": "Canary Tests Expose Severe Data Leaks Across AI Pipelines",
+      "blurb": "An audit planting unique, trackable canary secrets into two million prompts demonstrated that data sent through the AI supply chain fails to stay private.",
+      "item": {
+        "key": "arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate",
+        "source": "Ars Technica",
+        "tags": [
+          "press"
+        ],
+        "title": "Researcher plants 2m canaries into the AI supply chain. A privacy disaster surfaced.",
+        "url": "https://arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate/",
+        "discussion_url": "https://arstechnica.com/security/2026/11/a-leaky-ai-supply-chain-is-exposing-secret-user-data-at-an-alarming-rate/#comments",
+        "published": "2026-11-20T20:59:08Z",
+        "summary": "Test using prompts with unique, trackable secrets proves that data doesn't stay private.",
+        "content": "Researchers planted 2 million digital tripwires in requests sent through a sprawling network of AI services to find out what happened to sensitive information entrusted to them. What they discovered was an ecosystem that leaked highly sensitive data like a sieve.\n\nThe exposure was found through an ingenious experiment designed to test if sensitive information can leak through the vast chain of widely used AI services and how that information is exploited when it does. Many of today’s AI apps use services such as OpenRouter or Vercel that act as brokers. These “AI routers,” sometimes also known as “AI gateways,” receive large numbers of prompts sent from AI app end users and route them to an available inference engine based on criteria such as the one charging the lowest price or being best suited for the given task. Instead of using Anthropic, OpenAI, or another big provider, the developer hires an AI router to find the most suitable model.\n\nUpdate, Nov 21: Posts on both Hacker News and X report that OpenRouter has sent customers an email notifying them that some of their prompts may have been read. OpenRouter cited the research and said that it received a report that the potential exposure involved prompts sent to MiniMax, a China-based model provider. OpenRouter said the researchers' planted URLs were accessed whether the prompts were sent to MiniMax directly or through three other resellers: AtlasCloud, Novita, and StreamLake. OpenRouter has removed a \"Zero Data Retention\" label from MiniMax-model endpoints. Hat tip: Sulat.com .\n\nRead full article\n\nComments",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Model defense",
+      "headline": "OpenAI Unveils Protections Against Adversarial Distillation",
+      "blurb": "OpenAI detailed a multi-layered approach combining model training, safeguards, detection, and enforcement to prevent capability extraction.",
+      "item": {
+        "key": "openai.com/index/combatting-adversarial-distillation",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Combatting adversarial distillation",
+        "url": "https://openai.com/index/combatting-adversarial-distillation",
+        "discussion_url": null,
+        "published": "2026-11-20T10:00:00Z",
+        "summary": "OpenAI’s layered approach to adversarial distillation combines model training, safeguards, detection, and enforcement to protect against capability extraction.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 23,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 21,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 34,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 915,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1421,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 290,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 201,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 215,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 9,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-18T22:04:32.567493Z",
+    "candidates": 124,
+    "triaged": 124,
+    "enriched": 5,
+    "headline_candidates": 133,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 221.0,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 30864,
+      "output_tokens": 7305,
+      "cost_usd": 0.050542
+    }
+  }
+}
