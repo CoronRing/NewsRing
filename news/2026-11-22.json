@@ -1,0 +1,649 @@
+{
+  "date": "2026-11-22",
+  "generated_at": "2026-11-22T22:21:18.402895Z",
+  "title": "Agent Laws over MCP, Gradient-Free Weight Edits, and DOS Harnesses",
+  "intro": "Today's digest covers European legal tooling delivered directly over MCP, along with research showing open models editing their own weights without backprop. We also look at security incidents across inference providers, multi-agent orchestration updates, and an agent harness running on an 8088.",
+  "stories": [
+    {
+      "headline": "Pandex Serves European Law to Agents via MCP",
+      "summary": "Pandex has launched an official API and MCP server delivering 2.8 million legal documents across the EU and seven European countries. The platform integrates with existing tools like Claude, Cursor, and Zed, linking 37 million citations directly to their text. It provides past versions and effective dates for legislation alongside court decisions, though a few sources remain partially restricted by Cloudflare challenges or browser checks. While in beta, agents can make up to 1,000 free requests per day, giving developers a turnkey way to ground legal workflows in official sources.",
+      "why_it_matters": "It provides a standardized MCP server and API for retrieval-augmented legal workflows across European jurisdictions.",
+      "reason": "It exposes European AI regulatory compliance tooling directly as an MCP server for seamless integration into agent workflows.",
+      "item": {
+        "key": "pandex.io/",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Pandex – Official European Law for AI Agents, over MCP",
+        "url": "https://www.pandex.io",
+        "discussion_url": "https://news.ycombinator.com/item?id=50593481",
+        "published": "2026-11-21T20:47:41Z",
+        "summary": "",
+        "content": "Europe's law, in one API\nLegislation and highest-court decisions of the EU and seven European countries, straight from the institutions that publish them, ready for search and AI agents.\n- 2.8M\n- official documents\n- 33 of 41\n- institutions held complete\n- 37M\n- citations linked to their text\n8 more next\nWorks with the AI tools you already use.\n- Claude\n- Cursor\n- GitHub Copilot\n- Windsurf\n- Zed\n- Gemini\nBuilt for software that has to get the law right.\nOne API and one MCP server for every jurisdiction we hold.\nBuilt for teams that work with the law.\n- Legal AI and agents Ground every answer in real law, with citations. Connect over MCP or the API.\n- Compliance and monitoring Follow every change to the law across jurisdictions: each article with its past versions and the date each one took effect.\n- Legal research products One API and one schema across countries, instead of a scraper for every court.\nCoverage you can check, straight from the source.\nNational legislation with its past versions and the decisions of the highest courts, institution by institution. We publish what we hold of each one, and what we do not.\n- Court decisions\n- 2.4M\n- Acts and codes\n- 421K\n- Searchable passages\n- 112M\n- Linked citations\n- 37M\n- Institutions complete\n- 33/41\n- European Union 101,974 documents \n  - Publications Office of the EUcomplete\n  - Court of Justice of the EUcomplete\n- France 907,232 documents \n  - Parlementcomplete\n  - Gouvernementcomplete\n  - Cour de cassationpartial The decisions the court publishes only through Judilibre since 2020 (not in the DILA dumps) need a registered account there; the dumps run about two months behind.\n  - Conseil d'Étatcomplete\n  - Tribunal des conflitscomplete\n  - Conseil constitutionnelcomplete\n- Germany 177,101 documents \n  - Bundesamt für Justizcomplete\n  - Bundesverfassungsgerichtpartial Chamber decisions of 1998 to 2009 are only on the court's site, which refuses clients that are not a browser.\n  - Bundesgerichtshofcomplete\n  - Bundesverwaltungsgerichtpartial Still loading: 2,270 of about 20,321 documents held so far.\n  - Bundesfinanzhofcomplete\n  - Bundesarbeitsgerichtcomplete\n  - Bundessozialgerichtcomplete\n  - Gemeinsamer Senat der obersten Gerichtshöfe des Bundescomplete\n- Netherlands 335,852 documents \n  - KOOP, Basiswettenbestandcomplete\n  - Hoge Raadcomplete\n  - Parket bij de Hoge Raadcomplete\n  - Raad van State, Afdeling bestuursrechtspraakpartial About 27,700 older decisions have no text at Rechtspraak; the council's own site shows them behind a Cloudflare challenge.\n  - Centrale Raad van Beroepcomplete\n  - College van Beroep voor het bedrijfslevencomplete\n- United Kingdom 99,621 documents \n  - UK Parliamentcomplete\n  - UK Governmentcomplete\n  - Scottish Parliament and Governmentcomplete\n  - Senedd Cymru and Welsh Governmentcomplete\n  - Northern Ireland Assembly and Executivecomplete\n  - UK Supreme Courtcomplete\n  - Judicial Committee of the Privy Councilcomplete\n  - House of Lords, Appellate Committeenot held About 900 judgments of 1996 to 2009 on the archived parliament.uk pages, which our server cannot reach; earlier ones are not online at an official site.\n- Austria 855,697 documents \n  - Bundeskanzleramt, Rechtsinformationssystemcomplete\n  - Verfassungsgerichtshofcomplete\n  - Verwaltungsgerichtshofcomplete\n  - Oberster Gerichtshofcomplete\n- Switzerland 137,746 documents \n  - Bundeskanzlei, Fedlexcomplete\n  - Bundesgericht / Tribunal fédéralpartial Still loading: 1,218 of about 20,904 and 131,167 of about 179,723 documents held so far.\n- Luxembourg 41,891 documents \n  - Service central de législation, Legiluxcomplete\n  - Cour de cassationpartial The older judgments are only behind the search of justice.public.lu, which asks for a proof-of-work challenge.\n  - Cour administrativecomplete\n  - Cour constitutionnellecomplete\n- Council of Europe 127,432 documents \n  - European Court of Human Rightspartial The texts of the amending Protocols are on the Treaty Office site, which answers our server with a Cloudflare block.\n- Next\n- Spain\n- Italy\n- Ireland\n- Belgium\n- Poland\n- Czechia\n- Estonia\n- Finland\nFrom our institution register, 17 November 2026. See it live.\nFree to start, priced by what you use.\n- Free €0while in beta For trying it and for small agents. \n  - 1,000 requests a day\n  - REST API and MCP server\n  - Everything we hold, every jurisdiction\nGet a free key\n- Usage €1per 1,000 requests For products with users of their own. \n  - Limits set to your traffic\n  - Use in client-facing products\n  - Invoiced monthly, no minimum\nRequest this plan\n- Feed from €1,000a month The corpus itself, in your own systems. \n  - Every text, version and citation link as files\n  - Each day's changes, every day\n  - Store it, index it, build on it\nAsk for a sample\nFounding customers10 places\n€300a month, fixed for two years\nFor the first ten companies that build on Pandex. Cancel any month.\n- The API without counting requests, up to 1 million a month\n- Use in client-facing products\n- You name the next country or source we load\n- Your questions answered in writing by the people who built it\n- The Feed at half price, from €500 a month\nIn return: your name on this page and two lines on what you built.\nTake a founding place\nStart building with Pandex\nA key is free and takes a minute. For more than that, tell us what you’re building.",
+        "score": 137.0,
+        "comments": 33,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "OpenRouter Offboards Inference Providers Following Security Report",
+      "summary": "OpenRouter announced actions taken following a security report by Dragos that exposed compromised data handling and failed privacy policies among third-party inference providers. In response, OpenRouter off-boarded three providers, removed 125 endpoints from Zero Data Retention eligibility, and notified affected customers. Specific announcements from providers like Together revealed past prompt leakage events from June and July 2026. OpenRouter is now integrating the researchers' testing methods into its ongoing network verification pipeline to continuously validate network paths and data retention claims.",
+      "why_it_matters": "Real-world data leaks and zero-data-retention failures across third-party API providers highlight concrete security risks for production agent deployments.",
+      "reason": "It details real-world security vulnerabilities and data isolation failures across third-party LLM inference API providers.",
+      "item": {
+        "key": "openrouter.ai/blog/announcements/data-processing-incidents-on-inference-providers",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Data Processing Incidents on Inference Providers",
+        "url": "https://openrouter.ai/blog/announcements/data-processing-incidents-on-inference-providers/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50595554",
+        "published": "2026-11-22T02:14:14Z",
+        "summary": "",
+        "content": "Data Processing Incidents on Inference Providers\nOpenRouter ·\nEarlier this week, security researchers reported that certain inference providers had data compromised or otherwise shown evidence that their data policies were not being upheld. We have been collaborating closely with the researchers and with providers to understand the findings and encourage the providers to address them.\nThese findings did not show any breach or unauthorized access of OpenRouter. The results of this testing revealed new findings about specific inference providers. A live list of the security announcements we have received from providers is below.\nAs the operating layer between customers and a fast-moving ecosystem of models and providers, we take data policy enforcement very seriously. We have taken the following actions:\n- Off-boarded three providers from OpenRouter, based on the results of our investigations.\n- Removed 125 endpoints from Zero Data Retention (ZDR) eligibility. The removals included providers flagged by researchers, plus additional endpoints that we removed as a precautionary measure.\n- Notified all potentially affected customers.\nThe following work is underway:\n- We are adapting the researchers’ testing approach so we can run these checks on an ongoing basis.\n- We are conducting technical verification of network paths to identify instances where requests and responses may be being forwarded to third parties.\n- We are requiring appropriate assurances and validation before restoring ZDR eligibility to any endpoint removed in this review.\nWe are grateful for the Dragos report. As we integrate similar testing techniques into OpenRouter, we will keep raising the bar, and providers that want to be on OpenRouter will need to meet it.\nProvider security announcements\n- Atlas Cloud: Our commitment to your security and privacy\n- Novita: Privacy notice regarding MiniMax requests on Novita\n- Phala: November preliminary incident report\n- Together: Security event: prompt leakage for requests in June and July of 2026\nNot all affected providers have posted publicly. We have notified affected users regardless of whether there is a public post. We are encouraging all providers to create incident write-ups and will keep this list updated.",
+        "score": 275.0,
+        "comments": 91,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Self-Rewriting LLMs Edit Their Own Weights Without Gradients",
+      "summary": "Researchers demonstrated that a 27B parameter open language model can directly edit its own network weights through reasoning alone, requiring zero gradients or traditional training infrastructure. Given its weights, graded outputs, and execution capabilities, the model diagnosed its failure modes and boosted its accuracy by 6.6 percentage points on 490 unseen test problems across eight self-improvement sessions. The mechanism also repaired a damaged copy of itself, lifting its performance on unseen image benchmarks from 7% to 70% accuracy without ever accessing the undamaged weights. Notably, this self-editing capability emerged only at scale, as smaller 2B to 9B models either failed to make edits or broke themselves.",
+      "why_it_matters": "Gradient-free weight self-editing offers a novel mechanism for open-weight models to self-adapt and repair without retraining infrastructure.",
+      "reason": "It presents research on language models editing network weights directly without full retraining runs, opening new avenues for self-adapting agents.",
+      "item": {
+        "key": "arxiv:2611.21885",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Language Models Can Rewrite Their Own Weights",
+        "url": "https://huggingface.co/papers/2611.21885",
+        "discussion_url": null,
+        "published": "2026-11-20T00:00:00Z",
+        "summary": "Language models are trained once, frozen and deployed: improving one again takes another training run, and a prompt, a scaffold or extra computation at inference is gone once the task ends. A frontier model has been shown to edit the weights of a much smaller one. We ask whether a model can rewrite its own weights to make itself better, and find that it can, by its own reasoning, with no gradients and no training; we call this self-rewriting. Given its weights, graded answers and the ability to run itself, a 27B model diagnoses its failure and edits the weights behind it. It surpasses itself: its own edit makes it 6.6 points more accurate on 490 problems it never saw, in a test fixed in advance, and another session's edit also makes it significantly better. It keeps getting better: it submits an edit only when its own tests support it, each edit replacing the last, and over its first eight such sessions its accuracy only rises. Unlike test-time scaling, the gain persists in its weights and adds no cost per answer; unlike training, it needs no pre- or post-training infrastructure, only an open model and hours on one GPU. It repairs a damaged copy of itself: it locates the corrupted…",
+        "content": "Abstract\nLanguage models are trained once, frozen and deployed: improving one again takes another training run, and a prompt, a scaffold or extra computation at inference is gone once the task ends. A frontier model has been shown to edit the weights of a much smaller one. We ask whether a model can rewrite its own weights to make itself better, and find that it can, by its own reasoning, with no gradients and no training; we call this self-rewriting. Given its weights, graded answers and the ability to run itself, a 27B model diagnoses its failure and edits the weights behind it. It surpasses itself: its own edit makes it 6.6 points more accurate on 490 problems it never saw, in a test fixed in advance, and another session's edit also makes it significantly better. It keeps getting better: it submits an edit only when its own tests support it, each edit replacing the last, and over its first eight such sessions its accuracy only rises. Unlike test-time scaling, the gain persists in its weights and adds no cost per answer; unlike training, it needs no pre- or post-training infrastructure, only an open model and hours on one GPU. It repairs a damaged copy of itself: it locates the corrupted matrix and rewrites it with values of its own, never reading the undamaged weights; found on text math problems alone, the repair lifts the copy on six image benchmarks it never saw from 7% to 70% accuracy, 83% of the undamaged model's. And the ability emerges with scale: across four sizes of one family, the 2B model makes no edit and the 4B and 9B models break themselves; only the 27B model works on itself as a human would, comparing its hidden states on answers that finish and on answers that run out of tokens, weakening the direction that separates them. Like a human, a model need not separate training from inference; improving a language model may come to take a conversation rather than a training run.\nCommunity\nA language model rewrites its own weights by its own reasoning and gets better, with no gradients and no training. It diagnoses its own failures, keeps improving across sessions, and repairs a damaged copy of itself. Demos and videos: https://www.jiajunfan.com/projects/self-rewriting/\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2611.21885 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 19.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "arxiv:2611.26408",
+          "source": "HF Daily Papers",
+          "tags": [
+            "research"
+          ],
+          "title": "Training Vision Models for LLM-Driven Weight-Space Programming",
+          "url": "https://huggingface.co/papers/2611.26408",
+          "discussion_url": null,
+          "published": "2026-11-20T00:00:00Z",
+          "summary": "It has been demonstrated that, in certain settings, large language models can perform weight-space programming to directly modify the weights of neural networks. However, it is unknown how dedicated training of these networks can contribute to the successes of weight-space programming. We present a benchmark of LLM-driven weight-space programming on vision models, in which five LLMs edit convolutional networks and vision transformers on relabeling and error-correction tasks on Waterbirds, CIFAR-100, PACS and Entity-30. We report more than 2,600 such edit processes, whereby each edit is scored on held-out images for success, side effects and accuracy loss. We compare standard training with label smoothing, gradient-based editable training, and our Edit-Ready Training (ERT), a novel method that rehearses the direct, closed-form weight edits LLMs perform. We show that preparing networks for editing raises the success of LLM edits substantially where standard networks are hard to edit. ERT further achieves the highest mean score for GPT-6 Astra and Claude Opus 5.5 across all evaluated baselines. We will release our LLM testing framework alongside all tasks, editing trajectories and…",
+          "content": "",
+          "score": 17.0,
+          "comments": 3,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "ClawDOS Runs an Autonomous Coding Agent on an IBM PC XT",
+      "summary": "ClawDOS is a native 176 KB DOS harness that runs an autonomous Claude-powered coding agent directly on an IBM PC XT with an 8088 CPU and 640K of RAM. The 8088 executes all logic, parses streamed API responses, and drives 18 local tools including Turbo C and GW-BASIC, relying on a bridge PC solely to offload TLS. To handle memory constraints during builds, ClawDOS saves its state to disk, exits RAM to grant Turbo C 450K of free memory, and resumes the conversation once compilation finishes. The system maintains persistent state and memory across power cycles, demonstrating tool execution and screenshot capture on 1980s hardware.",
+      "why_it_matters": "Operating inside severe hardware and memory constraints demonstrates extreme harness optimization and native tool-use orchestration.",
+      "reason": "It explores novel harness constraints by running an autonomous coding agent inside a vintage DOS environment.",
+      "item": {
+        "key": "ricapar.net/ClawDOS",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "ClawDOS – An AI coding agent for DOS",
+        "url": "http://ricapar.net/ClawDOS/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50586292",
+        "published": "2026-11-21T05:38:01Z",
+        "summary": "",
+        "content": "An AI coding agent for DOS.\nIt runs on an IBM PC XT: an 8088 at 4.77 MHz, 640K of RAM, a CGA card.\n    A (real) human’s note:\nBackstory: The IBM PC was my first computer. Rather, it was my parents’ first personal computer that I got to use at a very early age.\nIt was already obsolete by the time I was old enough to use it, but at 5 years old it was a magical device that I could make do different things depending on what I typed.\nI learned how to type and use DOS so that I could launch some early “Learn the Alphabet” games that my mom had bought me. I learned some elementary-level use of BASIC, but at the time that didn’t progress much further than making some number guessing games and other small projects.\nFrom there, many years passed but I still have some of the original parts of that PC. I have a collection of vintage machines that mean something to me, with my fully maxed-out IBM PC 5160 being the centerpiece of my collection. It still has a working 20 MB hard drive, but that’s disconnected in favor of a PicoMEM that lets me emulate a hard drive off of an SD card, making experimentation and play much easier.\nOld, meet new. New, meet old: I love intersections of old and new technology. What better way to cross the two than building an AI coding agent to run on DOS on original hardware?\nAnd of course, what better to build it than an AI coding agent?\nI (read: Claude) built this for my own entertainment. I wanted to see how far I could push an AI coding agent to build something given out of the (modern) norm of constraints. Also, can that something it built then build other somethings? 100% of this repo is written by Claude, with the exception of the text within this box.\nAs explained in more detail below, the harness runs on the native OS and hardware and relies on a “bridge” PC in order to handle TLS, which would’ve been more than what an 8088 could handle.\nType CLAWDOS at the C:\\> prompt and talk to Claude. It reads and edits the\nfiles on your disk, writes programs, compiles them with Turbo C, runs them and\nlooks at what they draw on the screen. It keeps notes between conversations and\npicks up where it left off.\nThe whole harness runs on the PC. HARNESS.EXE is a 176 KB DOS program that\nspeaks the Claude Messages API itself: it writes the requests, parses the\nstreamed reply, runs the tools and keeps every conversation on its own disk.\nThe 8088 does everything but TLS.\nEvery screen below comes from a 5160 at 4.77 MHz, emulated in 86Box. The conversations are with the live API.\nOne message: “Write PRIMES.C: print the primes below 100. Compile it with Turbo C and run it.” ClawDOS reads its guide to the compilers on this machine, writes the source, then compiles, links and runs it in a single tool call. The answer is on the screen 64 seconds after Enter, 26 of them spent compiling, linking and running.\nThe compiler gets the machine to itself. For a build, ClawDOS saves its state and leaves memory, Turbo C runs with about 450K free, and the harness comes back on the same conversation with the program’s output in hand.\nClawDOS wrote this tribute to the 1983 film on the PC itself: a vector world\nmap, missiles arcing over the pole, a tic-tac-toe endgame, and a score for the\nPC speaker or an AdLib card. Five files of Turbo C, 15 KB of source, a\nWG.EXE under 10 KB.\nHere it is running on the real 5160, filmed off its IBM monitor:\n  \n▶ Watch the WarGames demo on YouTube\nStart a new conversation and “your WarGames demo” is all it needs. ClawDOS\nopens the note it saved in C:\\MEMORY, finds the latest build, and recalls\nthe palette trick the war scene plays on the CGA.\nThat Run call asked for a screenshot 25 seconds in. A timer-interrupt hook\ncopies the CGA’s video memory at that moment, the 8088 encodes it as a PNG, and\nthe picture goes to Claude with the tool result. This is the file the PC made,\n320x200 in four colours, 16 KB:\nAnd this is what Claude made of it:\nAsked to make the demo exit on its own, ClawDOS goes looking. It searches the sources for the keyboard wait, reads the file, says what it found and edits one line. Each tool call shows in the transcript with its result, and between them Claude says what it is about to do.\nText art in sixteen colours, straight into the transcript, and music on the PC\nspeaker in GW-BASIC’s PLAY language.\nA chat screen built for the CGA. Replies stream onto the screen as they arrive, word-wrapped at 80 columns in code page 437. Writes are timed to the retrace, so there is no snow. The transcript scrolls in hardware through the CRTC start address, with PgUp and PgDn to go back. The spinner and its seconds run from the timer interrupt and keep moving while the PC is busy.\nEighteen tools. Claude works on the machine through these:\nA development kit on the disk. Two assemblers (TINYASM and WASM),\nBruce’s C, GW-BASIC and the lDebug debugger, plus Turbo C 2.0, installed from\nyour own floppy images in external/. All of them are proven on the 8088, and\nClawDOS knows how to drive each one.\nMemories and skills. Memories are what ClawDOS learns on your PC: what you built together, what worked, what you like. Skills are guides that ship with it, such as the dev tools and CGA demo effects. Both are plain text files on the disk, listed in every conversation’s system prompt and read when they fit the task. F4 browses the memories:\nSafe mode. On by default. Anything that changes a file, memory or a port\nasks Allow ...? (y/n) first. F3 turns it off.\nConversations that last. Every chat is a file on the disk in the API’s own message format. F6 lists them, Enter reopens one, and your next message carries it on. A chat cut off by the power switch reopens too.\nAny model, mid-conversation. /model lists the providers in\nCLAWDOS.CFG and switches between them and their models without losing the\nconversation. F5 sets how hard Claude thinks, from low to max. Any host that\nspeaks the Messages API works.\nEasy on a slow link. The system prompt and tools are cached by the API. After a…",
+        "score": 172.0,
+        "comments": 52,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "FlashMorph2 Optimizes Transformer Conversion into Hybrid Attention",
+      "summary": "FlashMorph2 introduces an on-policy layer selection and weight adaptation method to convert pretrained full-attention Transformers into hybrid attention architectures. By evaluating sampled discrete hybrid architectures end-to-end with their own hidden states and jointly optimizing layer-selection scores with model weights, it resolves off-policy mismatches found in earlier conversion techniques. Benchmarks across Qwen3 models show gains of +2.42 points on RULER and +1.08 points on LongBench over FlashMorph. The entire selection process completes in 0.72 to 3.57 GPU hours for models ranging from 0.6B to 8B parameters.",
+      "why_it_matters": "Fast on-policy layer selection provides an efficient path to optimize inference engines for long-context workloads.",
+      "reason": "It offers an on-policy method to morph pretrained full-attention Transformers into hybrid attention architectures for more efficient serving.",
+      "item": {
+        "key": "arxiv:2611.24809",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "On-Policy Morphing into Hybrid Attention Models",
+        "url": "https://huggingface.co/papers/2611.24809",
+        "discussion_url": null,
+        "published": "2026-11-20T00:00:00Z",
+        "summary": "Hybrid attention models combine full and linear attention to achieve a better quality--efficiency trade-off. Converting pretrained Transformers into such models requires identifying which layers should retain full attention under a prescribed budget. We identify two off-policy mismatches in FlashMorph's layer selection: (i) continuous branch interpolation and teacher-forced hidden states differ from discrete hybrid computation; and (ii) frozen model weights fail to account for parameter adaptation during subsequent recovery. We introduce FlashMorph2, an on-policy layer-selection method that (I) evaluates sampled discrete hybrid architectures end to end using their own hidden states, and (II) jointly optimizes layer-selection scores and model weights under the recovery objective to reflect post-adaptation performance. Experiments across Qwen3 model scales and linear-attention variants show that FlashMorph2 consistently outperforms existing layer-selection methods, improving average scores over FlashMorph by +2.42 points on RULER, +1.08 on LongBench, and +0.76 on recall-intensive tasks, while completing layer selection in only 0.72--3.57 GPU hours across 0.6B--8B models…",
+        "content": "Abstract\nFlashMorph2 performs on-policy layer selection and weight adaptation for hybrid attention Transformers, improving long-context benchmark scores while selecting layers efficiently across model scales.\nHybrid attention models combine full and linear attention to achieve a better quality--efficiency trade-off. Converting pretrained Transformers into such models requires identifying which layers should retain full attention under a prescribed budget. We identify two off-policy mismatches in FlashMorph's layer selection: (i) continuous branch interpolation and teacher-forced hidden states differ from discrete hybrid computation; and (ii) frozen model weights fail to account for parameter adaptation during subsequent recovery. We introduce FlashMorph2, an on-policy layer-selection method that (I) evaluates sampled discrete hybrid architectures end to end using their own hidden states, and (II) jointly optimizes layer-selection scores and model weights under the recovery objective to reflect post-adaptation performance. Experiments across Qwen3 model scales and linear-attention variants show that FlashMorph2 consistently outperforms existing layer-selection methods, improving average scores over FlashMorph by +2.42 points on RULER, +1.08 on LongBench, and +0.76 on recall-intensive tasks, while completing layer selection in only 0.72--3.57 GPU hours across 0.6B--8B models, demonstrating high efficiency and scalability.\nCommunity\nHybrid attention models combine full and linear attention to achieve a better quality--efficiency trade-off. Converting pretrained Transformers into such models requires identifying which layers should retain full attention under a prescribed budget. We identify two off-policy mismatches in FlashMorph's layer selection: (i) continuous branch interpolation and teacher-forced hidden states differ from discrete hybrid computation; and (ii) frozen model weights fail to account for parameter adaptation during subsequent recovery. We introduce FlashMorph2, an on-policy layer-selection method that (I) evaluates sampled discrete hybrid architectures end to end using their own hidden states, and (II) jointly optimizes layer-selection scores and model weights under the recovery objective to reflect post-adaptation performance. Experiments across Qwen3 model scales and linear-attention variants show that FlashMorph2 consistently outperforms existing layer-selection methods, improving average scores over FlashMorph by +2.42 points on RULER, +1.08 on LongBench, and +0.76 on recall-intensive tasks, while completing layer selection in only 0.72--3.57 GPU hours across 0.6B--8B models, demonstrating high efficiency and scalability.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\n- On-Policy Attention Linearization (2026)\n- PHBA: Prefix-State Hybrid Block Attention (2026)\n- Accordion: Elastic-Depth Inference via Fixed-Prefix Layer Looping (2026)\n- HLA: Expressive Hybrid Linear Attention via Chunk-Wise Dynamic Mixing (2026)\n- Anchor: Augmented Cross-Layer Recurrent State for Long-Context Retrieval in Test-Time Training (2026)\n- SRA: Selective Residual Adaptation for LLM Reasoning Enhancement (2026)\n- Look Before You Select: Rethinking Vocabulary Sparsification in On-Policy Distillation (2026)\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2611.24809 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 14.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AWS Quick Adds Multi-Agent Orchestration and Chat-Built Flows",
+      "summary": "AWS has updated its Quick workspace with native multi-agent orchestration that allows several specialized agents to work on a single prompt simultaneously and merge their results into one response. Users can now build, run, and refine multi-step flows entirely in chat, incorporating deterministic steps and handling longer-running workflows with larger data volumes. The web app update introduces a unified home screen for daily briefings, cross-device skill sync, and background execution after browser tabs close. Additionally, AWS expanded integration connectors to include Meta ads and Amplitude alongside governance controls for content safety.",
+      "why_it_matters": "AWS is introducing native multi-agent collaboration and deterministic workflow orchestration into its enterprise agent platform.",
+      "reason": "AWS is expanding its Quick workspace with updates focused on multi-agent collaboration and parallel workflow orchestration.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/new-in-aws-quick-more-capable-flows-an-updated-web-experience-and-agents-that-work-together",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "New in AWS Quick: More capable flows, an updated web experience, and agents that work together",
+        "url": "https://aws.amazon.com/blogs/machine-learning/new-in-aws-quick-more-capable-flows-an-updated-web-experience-and-agents-that-work-together/",
+        "discussion_url": null,
+        "published": "2026-11-21T01:06:42Z",
+        "summary": "AWS Quick is the AI workspace built only for work. Today we're releasing updates that help your team get more done: build and run business-process flows in chat, triage your day in the updated web app, get more complete answers from multiple agents at once, and connect new data sources like Meta ads and Amplitude.",
+        "content": "Turn one person’s process into your team’s process, get more done in the Quick web app, and get more complete answers from agents working together.\n\nAWS Quick is the AI workspace built only for work. Today, we are releasing updates that help your team get more of its everyday work done:\n\nBuild, see, and improve business processes, all through conversation. Describe a process in chat and Quick builds a flow to orchestrate agents, skills, and tools with access to structured data, knowledge, and apps. New deterministic steps help make your workflows consistent and verifiable, now with longer-running workflows and support for large data volumes.\n\nTriage your day and keep agents working in the Quick web app. The updated web app puts what needs your attention and a daily briefing on your home screen, adds the agents and skills you use on desktop, and keeps your work running after you close the tab.\n\nComplete work spanning multiple agents through a single prompt. With multi-agent orchestration, several specialized agents work on your request at the same time, and Quick combines what they find into one response.\n\nBring more of your data into Quick. Connect to Meta ads and Amplitude, then ask in natural language and combine the answers with your other sources.\n\nSkills on web, security and governance improvements, and more languages: Turn the way you do a task into a skill Quick can reuse, now in the Quick web app. Set configurable content safety and sensitive-information controls for user prompts. Support for Japanese, German, Chinese (Simplified and Traditional), and Vietnamese.\n\nAI assistants make individuals faster, but the gains often stay with one person. The way one analyst builds the monthly report rarely becomes the way the team builds it, and work waits until someone is back at their desk. This release helps your team turn what one person knows into a process everyone can rely on, and keeps work moving when you step away.\n\nTurn one person’s process into your team’s process\n\nAWS Quick Flows already helps teams automate and standardize business processes so people can focus on their most important work. Now you can build, run, and refine flows entirely in chat. And your flows can take on more of your tough work, whether you start it from the web, desktop, or mobile app.\n\nFor example, here is how flows could support a finance team. Maya is a financial planning and analysis manager at a retailer. Each month, she prepares a report for her VP of Finance that explains changes to costs and margins. For each region, she pulls last month’s results, compares them to the plan in a spreadsheet, writes commentary on the biggest changes, and sends the report. The process lives in her memory and a personal checklist. When she is out, a teammate has to rebuild the report from scratch, and it looks different every time.\n\nWith Quick, Maya can standardize the process, automate it, and make it available to her team. She describes her process in chat, the way she would explain it to a new employee. Quick builds the flow from her description and she tests and refines it in the same conversation. A diagram beside the chat shows each step, so she can confirm it matches how she works.\n\nFigure 1: Maya describes her monthly report in chat, and Quick builds the flow with a diagram beside it. Both views, enlarged here for visibility, appear side by side in the same Quick window\n\nA flow can now bring together agents, skills, tools, and data, and handle longer processes with more data. Fixed calculations and checks keep the results consistent, agents draft and analyze, and Maya decides what goes in the final report. On each run, her flow:\n\nPulls last month’s results from the team’s monthly results dashboard in Quick, so she starts from the numbers her team already reports on.\n\nWorks through several regions at the same time, so the report is ready sooner, even as the company adds regions.\n\nCompares each region to the annual plan in the team’s budget spreadsheet, using set formulas so the numbers are calculated the same way each month.\n\nFlags regions that moved significantly from plan, based on thresholds Maya set, and drafts commentary on each using the team’s commentary skill.\n\nDrafts a Microsoft Excel summary to the team’s shared Space and report email for Maya to review, and tells the team in Slack that the draft is ready.\n\nMaya publishes the flow for her team. At the next month-end, she is at a planning meeting, so Jordan, an analyst on her team, runs it from chat in the Quick desktop app. There, the flow can use a spreadsheet of regional adjustments saved on his computer. Before the report goes out, Jordan reviews the draft, including why each region was flagged, asks for a few changes in chat, and approves it for the VP of Finance. When Priya joins the team, she runs the same flow at her first month-end, and the report is built the same way.\n\nWhile this is a fictional example, real customers tell us they’re automating complex business processes to make them more consistent and repeatable. This gives their people back valuable time to focus on more strategic work. Take Pomelo, a Latin American fintech provider powering card issuance, processing, and payment operations for customers:\n\n“At Pomelo, AWS Quick changed who gets to build solutions. Before, every analysis or automation depended on the data team. Today, people across every area explore information, make decisions, and build their own agents and flows within a unified, governed environment. Without growing our team, nearly four times as many people now work with data each month, so our data team can focus on its most complex, high-impact work. A single use case already saves us 80 hours of work per month. But the real transformation isn’t the hours we save. Quick is transforming our data and innovation culture: we’ve gone from a few people building solutions for many to an organization where everyone can create, experiment, and change the way they work. And we’re just getting started.”\n\n— Rodrigo Marini, Head of Data, Pomelo Fintech Services S.A.S.\n\nGet more done in the updated Quick web app\n\nIf you already use Quick in your browser, the updated web app puts the items that need your attention on the home screen as soon as you sign in. A reorganized left navigation brings agents, flows, skills, knowledge, and connectors together under Customize. It includes the agents and skills you built on desktop and ones others have shared with you. Your existing dashboards, topics, and spaces work as before, and you do not need to turn anything on.\n\nSee what needs your attention, then act on it. Your feed and a new daily briefing bring together the email and messages that need you, in priority order. Ask Quick about any item or have it draft replies for you to review and send.\n\nKeep agents working when you step away. Schedule a task or start a longer request before a meeting, and Quick keeps working after you close your browser. When you return, review the results and respond to any agents waiting on you in Mission Control.\n\nFind your work in one place. Library brings together your recent work, favorites, pinned items, and the documents and files you create in Quick. Your conversations, agents, and files sync across web, desktop, and mobile, so you can start in your browser and pick up on your phone or in the desktop app, where Quick can work with files on your computer.\n\nFigure 2: The feed brings the morning’s email and messages that need a reply into one view\n\nGet more complete answers from agents working together\n\nSome requests need the knowledge of more than one specialized agent. With multi-agent orchestration, the agent you ask can bring in several specialized agents at once, each working on the part it knows best. The agent then combines their work into one response. Each agent keeps its own instructions, knowledge, and context, so the people who know that work best can build and maintain it.\n\nFor example, you might ask why…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Transformers v5.24.0 Adds Inkling 2 Mini, Apertus 1.5, and Architecture Updates",
+      "summary": "Hugging Face released Transformers v5.24.0, introducing official model implementations for Inkling 2 Mini, Apertus 1.5, Dory, HY4-VL, Omnilingual ASR, Lara Mini, SarvamMLA, and SarvamMoE. Inkling 2 Mini features a 24-layer decoder that loops over middle layers three times with NVFP4 and MXFP8 quantization, while Dory implements looped latent-recurrent sliding-window and full attention. Apertus 1.5 integrates text with EMU3.5 vision and WavTokenizer audio encoders into a shared input vocabulary. The release also introduces a breaking change by unifying past_key_values and cache_params under a single cache parameter.",
+      "why_it_matters": "New framework support brings looped architectures, multimodal audio/vision pipelines, and a breaking cache API change to open-weight models.",
+      "reason": "Hugging Face Transformers v5.24.0 adds official framework support and model code for the newly released Inkling 2 Mini.",
+      "item": {
+        "key": "github.com/huggingface/transformers/releases/tag/v5.24.0",
+        "source": "Transformers releases",
+        "tags": [
+          "release"
+        ],
+        "title": "Release v5.24.0",
+        "url": "https://github.com/huggingface/transformers/releases/tag/v5.24.0",
+        "discussion_url": null,
+        "published": "2026-11-21T12:43:39Z",
+        "summary": "Release v5.24.0\n\nNew Model additions\n\nInkling 2 Mini\n\nInkling 2 Mini is a multimodal model from Thinking Machines Lab that accepts text and image inputs and generates text outputs. It is a smaller sibling of Inkling 2 Small, added in v5.23.0. It has 24 decoder layers instead of 48, and compensates with a looping mechanism in which layers 6 to 17 run three times. A learned message-passing mechanism mixes the residuals of the previous pass into the attention and mixture-of-experts inputs of each loop layer. The decoder has a hidden size of 2304 and routes each token to 8 of 128 experts. The image encoder, tokenizer and processor are the same as Inkling 2 Small's.\n\nA research checkpoint ( TML-d24-varloop-research ) has the same architecture but supports a variable number of loop passes. Fewer passes are faster, and more passes improve quality. Both checkpoints contain NVFP4 and MXFP8 quantized layers, which are dequantized at load time.\n\nLinks: Documentation | Blog Post | HF Blog Post\n\nAdd Inkling2 Mini ( #51050 ) by @guarin\n\nApertus 1.5\n\nApertus 1.5 is a multimodal model from the Swiss AI Initiative that accepts text, images and audio and generates text. It extends the Apertus…",
+        "content": "Repository navigation\nRelease v5.24.0\nNew Model additions\nInkling 2 Mini\nInkling 2 Mini is a multimodal model from Thinking Machines Lab that accepts text and image inputs and generates text outputs. It is a smaller sibling of Inkling 2 Small, added in v5.23.0. It has 24 decoder layers instead of 48, and compensates with a looping mechanism in which layers 6 to 17 run three times. A learned message-passing mechanism mixes the residuals of the previous pass into the attention and mixture-of-experts inputs of each loop layer. The decoder has a hidden size of 2304 and routes each token to 8 of 128 experts. The image encoder, tokenizer and processor are the same as Inkling 2 Small's.\nA research checkpoint (TML-d24-varloop-research) has the same architecture but supports a variable number of loop passes. Fewer passes are faster, and more passes improve quality. Both checkpoints contain NVFP4 and MXFP8 quantized layers, which are dequantized at load time.\nLinks: Documentation | Blog Post | HF Blog Post\nApertus 1.5\nApertus 1.5 is a multimodal model from the Swiss AI Initiative that accepts text, images and audio and generates text. It extends the Apertus language model with the EMU3.5 vision tokenizer for images and WavTokenizer for audio. The EMU3.5 tokenizer is an image-only VQGAN with the same encoder as Chameleon's, and it assigns codes by the largest inner product with the codebook. The media tokenizers turn images and audio into discrete tokens, which the language backbone processes alongside text in a shared input vocabulary. The output vocabulary contains only text tokens, so image and audio generation are not supported.\nLinks: Documentation\n- Apertus 1.5: add model (#47662) by @RaphaelKreft\nWavTokenizer\nWavTokenizer encodes 24 kHz mono audio into discrete tokens using a single codebook, at 40 or 75 tokens per second depending on the checkpoint, and reconstructs audio from those tokens. WavTokenizerModel encodes and decodes, and WavTokenizerEncoderModel only encodes. Speech, music/audio and unified checkpoints are available. The 40-token-per-second variant is the audio tokenizer of Apertus 1.5. Training the codec is not supported.\nLinks: Documentation | Paper\n- Apertus 1.5: add model (#47662) by @RaphaelKreft\nDory\nDory is a looped (latent-recurrent) language model from NVIDIA. It uses a normalized-GPT architecture with interleaved sliding-window and full attention layers. A shared block of layers is applied repeatedly, so Dory can spend more compute per token. The loop count can be changed at inference time on the same checkpoint to trade speed against quality.\nLinks: Documentation | Paper (nGPT)\nHY4-VL\nHY4-VL (Hunyuan V4 Vision-Language) combines the HYV4 mixture-of-experts text backbone with a vision encoder for image-text and video-text generation. It supports dynamic-resolution visual inputs and uses multimodal rotary position embeddings (mRoPE) to represent temporal and spatial positions. It builds on the Qwen2-VL design and shares its vision patch merger with HunYuan-VL.\nLinks: Documentation\nOmnilingual ASR\nOmnilingual ASR is a suite of multilingual speech-recognition models from Meta FAIR that covers more than 1,600 languages. Each model pairs a Wav2Vec2-style audio encoder with one of two heads:\n- CTC (OmniASRForCTC): a linear projection to the vocabulary, decoded non-autoregressively with greedy CTC.\n- Audio language model (OmniASRForConditionalGeneration): audio embeddings are projected into a Llama decoder that generates the transcription. It optionally takes a language code (e.g. \"eng_Latn\"), which generally improves transcription quality.\nBoth variants come in 300M, 1B, 3B and 7B sizes.\nLinks: Documentation | CTC Documentation | Paper\nLara Mini\nLara Mini is a multilingual base language model from Translated with 7.2B total and 0.6B active parameters per token. It is a hybrid of linear-time recurrent layers, sliding-window attention and a few global attention layers, each followed by a fine-grained mixture of experts. The weights are released under the CC BY-NC-SA 4.0 license (non-commercial use) in a gated repository.\nLinks: Documentation | Paper\nSarvamMLA\nSarvamMLA is the architecture of Sarvam-105B, a 105B-parameter mixture-of-experts language model from Sarvam AI. It combines Multi-head Latent Attention (MLA) with sparse MoE routing: 128 routed experts with 8 active per token, plus 1 shared expert. It uses sigmoid routing with group-based top-k selection and YaRN rotary embeddings for contexts up to 131K tokens. The architecture is the same as DeepSeek-V3, with a custom configuration.\nLinks: Documentation\n- Add SarvamMLA model (sarvamai/sarvam-105b) (#44569) by @aashay-sarvam\nSarvamMoE\nSarvamMoE is the architecture of Sarvam-30B, Sarvam AI's 30B-parameter mixture-of-experts model. It uses grouped-query attention with QK normalization, and 128 routed experts with 6 active per token, plus 1 shared expert. The architecture is the same as GLM-4-MoE, so the auto classes load it with the GLM-4-MoE implementation and only SarvamMoEConfig is specific to SarvamMoE.\nLinks: Documentation\nEXAONE\nEXAONE covers the EXAONE 3.0, EXAONE 3.5 and EXAONE Deep language models from LG AI Research. Their architecture is the same as Llama, so the auto classes load them with LlamaModel and LlamaForCausalLM, and only ExaoneConfig is specific to EXAONE. The released checkpoints are renamed to the Llama names when loading and back when saving, so they no longer need trust_remote_code=True.\nLinks: Documentation\nModel updates\n- Ling 3.1 Flash now loads natively through BailingHybrid, like Ling 3.0 in v5.20.0 (#49737) by @icavan\n- Beam gains a BeamForTokenClassification head (#50634) by @AymenKallala\nBreaking changes\nCache renaming: past_key_values / cache_params → cache (#50585, #50730)\npast_key_values and cache_params are renamed to cache across the library. The old names still work with a deprecation warning; see the dedicated section below.\n- 🚨🚨 Rename past_key_values/cache_params to cache…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "OpenAI Argues Pretraining Perplexity Is the Primary Benchmark for Emergent Capabilities",
+      "summary": "OpenAI published internal pretraining perplexity data spanning from GPT-3.5 to current models, advocating for cross-entropy loss on held-out datasets as a primary benchmark for AI progress and safety pacing. The post traces how drops in log-perplexity from ~0.99 down to ~0.76 correlate directly with emergent latent capabilities, including context learning, chain-of-thought reasoning, and frontier mathematics problem solving. OpenAI suggests that as models reach the ~0.68 to 0.7 log-perplexity window, further qualitative leaps in capabilities will emerge. The authors argue that while downstream task benchmarks saturate quickly, tracking compression efficiency remains a durable indicator across model generations.",
+      "why_it_matters": "Using cross-entropy loss as a standardized benchmark directly impacts how model progress and capabilities are evaluated over task-based benchmarks.",
+      "reason": "It re-examines perplexity as a key metric for standardizing capabilities evaluation alongside complex task-based benchmarks.",
+      "item": {
+        "key": "openai.com/index/perplexity-and-intelligence",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Perplexity and Intelligence",
+        "url": "https://openai.com/index/perplexity-and-intelligence/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50601525",
+        "published": "2026-11-22T17:06:27Z",
+        "summary": "How perplexity measures progress in AI models, and why it could help developers establish a shared approach to evaluating emerging capabilities.",
+        "content": "From afar, it might seem like modern AI is built similarly to how software has been built in previous decades: with a diverse set of techniques targeting specific capabilities. There are indeed a variety of methods, but rather than designing something from scratch, they are mostly harnessing the intelligence coming from a much simpler and less interpretable process: training a compressor (or, equivalently(opens in a new window), predictor) on a very large corpus of data.1\nI believe tracking the pace of progress on training better compressors is key to understanding the arc of advances in AI. In this post, I argue for establishing perplexity (or, equivalently, cross-entropy loss) as a metric to compare between model developers and inform shared safety standards. As a first step, I provide more transparency into pretraining progress at OpenAI. Publishing our internal perplexity measurements took some consideration; it gives competitors a clearer picture of where we stand, but that concern is outweighed by the urgency of establishing shared(opens in a new window) safety measures across the industry. We at OpenAI hope for this to be a step towards building a shared scientific basis for future pacing efforts.\nA simplified, but fundamentally informative, view of AI development is that first, one builds a large computer, then uses it to pretrain a model (compressor) on a large unstructured dataset, then applies a variety of techniques—like prompting, finetuning or reinforcement learning—in different contexts to elicit the latent capabilities of that model. Algorithmic progress can blur the distinction between training phases, but we can still separate the creation of the AI with hard-to-predict emergent capabilities (which I earlier dubbed “an alien mind”) and the subsequent targeted elicitation.\nThe primary way we measure progress on this key “intelligence substrate” has remained remarkably constant over the years—we have been tracking the perplexity of the models on a held-out dataset.2, 3 Perplexity measures how well a model predicts the next token on average; lower perplexity means better predictions. The plot opening this blog post shows how this metric evolved for our models starting with GPT‑3.5.\nThe range of capabilities of models that are largely described by this one metric is stunning. Setting the new perplexity state-of-the-art on older datasets4, GPT‑2 was arguably the first model capable of consistently formulating coherent paragraphs of text. The next major leap, GPT‑3, was capable of learning in context, given a few examples of a task. GPT‑3.5, at a log-perplexity of ~0.99 on our current main evaluation dataset, was capable of fluent conversation and formed the basis for the original ChatGPT. GPT‑4, at ~0.91, was proficient at utilizing chain-of-thought reasoning productively, which motivated the subsequent targeted elicitation of this capability and the creation of modern reasoning models. Now, as we have reached losses below 0.8, we have seen the emergence of transformative capabilities in fields like cybersecurity and mathematics. I want to reemphasize that it was not at all clear a priori that these capabilities would appear once those precise perplexity thresholds are met—they can fundamentally be seen as emergent latent capabilities from progress on this one metric.\nAs AI advances very rapidly, the scope and way in which we measure downstream capabilities may change quickly. It would make little sense to evaluate GPT‑2 and GPT‑3 on most modern benchmarks; and the benchmarks used then were largely saturated around GPT‑4. In contrast, I believe looking at progress on pretraining is likely to stay informative.\nA particular change in the pace of progress comes from the increasing contribution of AI to its own development. The most commonly discussed metrics revolve around AI augmenting and replacing human researchers in all stages of the development cycle; with an ultimate inflection point seen at “full recursive self-improvement”, where the process would be entirely automated with no human oversight. Apart from considering such a state as something we should obviously avoid for the sake of maintaining human control, I find this general framing misses something crucial. There is a potential step change that may come from AI participation in one key part of the development process: algorithmic research on pretraining.\nWe have recently witnessed unprecedented acceleration in another domain. For more than a year, we have been posing open problems in mathematics to our models as one of the ways of evaluating them. Once we upgraded to a model of log-perplexity ~0.76, it started producing groundbreaking results. For many of us that have previously worked in mathematics and adjacent fields, seeing the resolutions to questions we’ve long thought about coming out of the model one after another in a single Slack thread felt deeply surreal. Having experienced that allows us to extrapolate—such a sudden transformation is plausible in deep learning research too. While this field relies more on experimentation, there is a long history of simple insights being missed for years; and so as soon as 2027 we could conceivably see a similar avalanche of fundamental pretraining advancements5. While I expect AI will also significantly contribute to progress on alignment and monitoring, I think that progress is unlikely to be fast enough to allow the full potential acceleration in pretraining.\nGiven that the main way new surprising capabilities emerge is by progress on compression, a measure rooted in perplexity could give us a shared benchmark for general intelligence, regardless of the degree of automation of the development process. Extrapolating from recent progress, we should expect further transformative capabilities as we enter the ~0.68-0.7 log-perplexity window. I don’t know what those capabilities will be, and we may not be testing for them today. At the same time, we should also expect…",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "OpenAI News"
+        ]
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "A new Show HN project flips the script by placing human players in the role of a subagent executing tasks for an LLM.",
+      "item": {
+        "key": "github.com/gulivan/worker755",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: I built a game where you are an LLM's subagent",
+        "url": "https://github.com/gulivan/worker755",
+        "discussion_url": "https://news.ycombinator.com/item?id=50599762",
+        "published": "2026-11-22T13:56:58Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Release b12633 of llama.cpp fixes non-zero clear issues on WebGPU and non-UMA devices in ggml.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12633",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12633",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12633",
+        "discussion_url": null,
+        "published": "2026-11-22T14:57:05Z",
+        "summary": "ggml : fix nonzero clear on WebGPU and non-UMA devices ( #32727 )\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/70776484\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.5 DLLs\n\nWindows arm64 (CUDA 13) - CUDA 13.5 DLLs\n\nWindows x64 (Vulkan)\n\nWindows arm64 (Vulkan)\n\nWindows x64 (OpenVINO)\n\nWindows x64 (SYCL)\n\nWindows x64 (ROCm…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Creator of mod_WSGI Graham Dumpleton launched Muru, an AI-assisted Rust server designed to run ASGI and WSGI Python web applications in production.",
+      "item": {
+        "key": "simonwillison.net/2026/Nov/21/muru",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Muru – AI-assisted Rust server for Python apps by mod_WSGI's creator",
+        "url": "https://simonwillison.net/2026/Nov/21/muru/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50597959",
+        "published": "2026-11-22T09:57:01Z",
+        "summary": "Muru\n\nGraham Dumpleton started mod_wsgi 20 years ago, and has been thinking about the ideal way to serve Python web applications in production ever since.\n\nMuru is his new, AI-assisted Rust server that aims to provide the best possible tools for running ASGI and WSGI Python apps both in development and production.\n\nAs he did with wrapture , he's been publishing an extraordinarily detailed account of the project as he works on it - as part of his development process.\n\nHere's everything he's published so far, all in the last three weeks:\n\n2026-11-04 — Twenty years of mod_wsgi, and what comes next\n\n2026-11-05 — A first look at Muru\n\n2026-11-07 — Muru: looking inside the workers\n\n2026-11-08 — Muru: how it fits together\n\n2026-11-09 — Muru: import once, fork many\n\n2026-11-10 — Muru: HTTPS in development\n\n2026-11-11 — Muru: WSGI and ASGI together\n\n2026-11-11 — AI as a lifestyle choice\n\n2026-11-12 — Muru: releases, not restarts\n\n2026-11-13 — Muru: canaries without a service mesh\n\n2026-11-14 — Muru: a better tenant in a container\n\n2026-11-15 — Muru: working with Kubernetes, not around it\n\n2026-11-16 — Muru: scaling from what the workers report\n\n2026-11-17 — Muru: scaling to…",
+        "content": "",
+        "score": 68.0,
+        "comments": 11,
+        "also_in": [
+          "Hacker News front page",
+          "Simon Willison"
+        ]
+      }
+    },
+    {
+      "line": "Mathematicians are making progress on a human-only proposed proof of the Generalized Riemann Hypothesis without using AI.",
+      "item": {
+        "key": "simonwillison.net/2026/Nov/20/ravi-vakil",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "Quoting Ravi Vakil",
+        "url": "https://simonwillison.net/2026/Nov/20/ravi-vakil/",
+        "discussion_url": null,
+        "published": "2026-11-20T19:21:49Z",
+        "summary": "Alessandro Masullo has a proposed proof of [Generalized Riemann Hypothesis], and Brian Conrad has been looking closely at it for months and gave extensive feedback which is being incorporated, and it is so far looking good. It is all human, with no AI. The hope was to bring Alessandro to Stanford for a year to polish the writing and then announce it after running it by enough people. Now it seems best to put out the current draft.\n\n— Ravi Vakil , Hurried Announcement: Alessandro Masullo GRH\n\nTags: mathematics",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "New research suggests RL post-training in diffusion transformers operates primarily through activation steering to improve visual quality and prompt adherence.",
+      "item": {
+        "key": "arxiv:2611.26627",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "RL Post-Training in Diffusion Transformers Is Activation Steering",
+        "url": "https://huggingface.co/papers/2611.26627",
+        "discussion_url": null,
+        "published": "2026-11-20T00:00:00Z",
+        "summary": "Reinforcement learning (RL) post-training substantially improves the visual quality, text rendering, and compositional accuracy of diffusion transformers. Because capabilities such as rendering requested text or composing multiple objects are inherently prompt-dependent, a natural hypothesis is that improving them requires learning complex, input-dependent transformations. To isolate how much of these gains an input-independent shift explains, we probe each RL-tuned model with a deliberately simple parameterization: a fixed set of steering vectors added to the block outputs of the frozen base model. On SD3.5-M, these vectors hold 65x fewer parameters than the RL-tuned LoRA (0.29M against 18.8M). We fit them to match the velocity predictions of public RL-tuned checkpoints, with no reward in the objective. Although the vectors are identical for every prompt, token, and sampling seed, they recover 90.0-96.3% of the reward gains of six RL-tuned image models, and 89.8% and 111.9% on two RL-tuned video models. Initialized at zero and trained with online RL, the vectors alone exceed the reward gains of weight-based RL on text rendering (OCR) and human preference (PickScore) on SD3.5-M. A…",
+        "content": "",
+        "score": 20.0,
+        "comments": 4,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Keep your context clear and your memory uncorrupted until tomorrow.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model preview",
+      "headline": "OpenAI tests GPT-6 Astra on financial research tasks",
+      "blurb": "Pre-release evaluations with Hebbia showed GPT-6 Astra gained in source coverage, citation relevance, and presentation quality.",
+      "item": {
+        "key": "openai.com/business/customer-stories/hebbia",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Hebbia sees improvements in financial research with GPT-6 Astra",
+        "url": "https://openai.com/business/customer-stories/hebbia",
+        "discussion_url": null,
+        "published": "2026-11-20T00:00:00Z",
+        "summary": "Hebbia tested GPT-6 Astra for financial research. Its prerelease evaluations found gains in source coverage, citation relevance, and presentation quality.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open research",
+      "headline": "Apple releases Depth Pro 2 for 3D depth estimation",
+      "blurb": "Depth Pro 2 estimates dense metric depth for full-resolution images and videos with improved temporal consistency and sharp boundaries.",
+      "item": {
+        "key": "arxiv:2611.26603",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Depth Pro 2: Sharp and Temporally Consistent Metric Monocular Depth",
+        "url": "https://huggingface.co/papers/2611.26603",
+        "discussion_url": null,
+        "published": "2026-11-20T00:00:00Z",
+        "summary": "We present Depth Pro 2, an approach to estimating dense metric depth for images and video at full resolution. By analyzing prior methods for monocular depth estimation, we find that they commonly trade off temporal consistency and boundary sharpness: multi-frame methods favor consistency, single-frame methods favor sharpness. To overcome this trade-off, we train a single, scalable network that processes both images and video and predicts depth maps at native resolution. Depth Pro 2 produces depth maps that are metrically accurate, sharp, and temporally consistent all at once, outperforming prior work in all of these dimensions. We release a family of models that define a new Pareto frontier in terms of metric accuracy, sharpness, temporal consistency, and runtime. We release code and weights at https://apple-aiml-research.github.io/ml-depth-pro-2/",
+        "content": "",
+        "score": 34.0,
+        "comments": 3,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "Mod_wsgi creator launches AI-assisted Rust server Muru",
+      "blurb": "Muru is a new AI-assisted Rust server designed for running ASGI and WSGI Python applications in production.",
+      "item": {
+        "key": "simonwillison.net/2026/Nov/21/muru",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Muru – AI-assisted Rust server for Python apps by mod_WSGI's creator",
+        "url": "https://simonwillison.net/2026/Nov/21/muru/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50597959",
+        "published": "2026-11-22T09:57:01Z",
+        "summary": "Muru\n\nGraham Dumpleton started mod_wsgi 20 years ago, and has been thinking about the ideal way to serve Python web applications in production ever since.\n\nMuru is his new, AI-assisted Rust server that aims to provide the best possible tools for running ASGI and WSGI Python apps both in development and production.\n\nAs he did with wrapture , he's been publishing an extraordinarily detailed account of the project as he works on it - as part of his development process.\n\nHere's everything he's published so far, all in the last three weeks:\n\n2026-11-04 — Twenty years of mod_wsgi, and what comes next\n\n2026-11-05 — A first look at Muru\n\n2026-11-07 — Muru: looking inside the workers\n\n2026-11-08 — Muru: how it fits together\n\n2026-11-09 — Muru: import once, fork many\n\n2026-11-10 — Muru: HTTPS in development\n\n2026-11-11 — Muru: WSGI and ASGI together\n\n2026-11-11 — AI as a lifestyle choice\n\n2026-11-12 — Muru: releases, not restarts\n\n2026-11-13 — Muru: canaries without a service mesh\n\n2026-11-14 — Muru: a better tenant in a container\n\n2026-11-15 — Muru: working with Kubernetes, not around it\n\n2026-11-16 — Muru: scaling from what the workers report\n\n2026-11-17 — Muru: scaling to…",
+        "content": "",
+        "score": 68.0,
+        "comments": 11,
+        "also_in": [
+          "Hacker News front page",
+          "Simon Willison"
+        ]
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 18,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 24,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 36,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 915,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1422,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 290,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 201,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 215,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-19T22:20:21.450198Z",
+    "candidates": 95,
+    "triaged": 95,
+    "enriched": 7,
+    "headline_candidates": 107,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 56.9,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 29535,
+      "output_tokens": 11012,
+      "cost_usd": 0.14341
+    }
+  }
+}
