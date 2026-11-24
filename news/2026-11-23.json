@@ -1,0 +1,617 @@
+{
+  "date": "2026-11-23",
+  "generated_at": "2026-11-24T03:13:27.033081Z",
+  "title": "Agent Evals, Looped Transformers, and Sub-3-Bit Quants",
+  "intro": "Today's update highlights structural shifts in model architectures, quantization techniques, and evaluation practices. From looped transformers and 10 GB agent-capable models to harness sensitivity in agent benchmarks, here is what changed.",
+  "stories": [
+    {
+      "headline": "Z.ai debuts GLM-5.4 with a looped transformer architecture",
+      "summary": "Z.ai has released GLM-5.4, introducing a looped transformer architecture that executes weight-shared layers iteratively during forward passes to deepen the network without increasing parameter count. The model follows a design pattern seen in Inkling 2 Mini, which runs middle layers three times per token to improve reasoning efficiency on agentic tasks. GLM-5.4 is accessible via Z.ai's OpenAI-compatible API endpoint using their Coding Plan subscription key.",
+      "why_it_matters": "Looped architectures provide a parameter-efficient approach to boosting reasoning depth for agentic coding workloads.",
+      "reason": "Z.ai released GLM-5.4 featuring a looped transformer architecture that executes layers iteratively during forward passes to improve generalized coding performance.",
+      "item": {
+        "key": "simonwillison.net/2026/Nov/23/glm-54",
+        "source": "Simon Willison",
+        "tags": [
+          "practitioner"
+        ],
+        "title": "GLM-5.4: Toward Generalized Coding with Our First Loop Transformer",
+        "url": "https://simonwillison.net/2026/Nov/23/glm-54/",
+        "discussion_url": null,
+        "published": "2026-11-23T23:40:49Z",
+        "summary": "GLM-5.4: Toward Generalized Coding with Our First Loop Transformer\n\nGLM 5.4 is now available from Chinese AI lab Z.ai. It's their first model to use a looped transformer architecture, which they describe like this:\n\nIn a standard Transformer, each layer runs once per forward pass. In a Loop Transformer, a group of weight-shared layers runs for multiple iterations, refining the hidden states from the previous pass. This gives us a deeper network without increasing the parameter count.\n\nThis is the second mention of looped transformers I've seen in the past week - the first was Inkling 2 Mini from Thinking Machines Lab on November 20th, who said:\n\nInkling 2 Mini is a looped transformer, running the middle layers of the model three times for every token. This allows the model to apply more reasoning and reach the right answer with fewer tokens, especially on tasks such as agentic coding that depend on reasoning quality.\n\nGLM 5.4 is not (yet?) available as open weights. I tried it out using the Z.ai API, for which I had to sign up for their Coding Plan subscription because 5.4 cannot currently be accessed through the regular API.\n\nIt turns out both coding plan and regular API share…",
+        "content": "23rd November 2026 - Link Blog\nGLM-5.4: Toward Generalized Coding with Our First Loop Transformer. GLM 5.4 is now available from Chinese AI lab Z.ai. It's their first model to use a looped transformer architecture, which they describe like this:\nIn a standard Transformer, each layer runs once per forward pass. In a Loop Transformer, a group of weight-shared layers runs for multiple iterations, refining the hidden states from the previous pass. This gives us a deeper network without increasing the parameter count.\nThis is the second mention of looped transformers I've seen in the past week - the first was Inkling 2 Mini from Thinking Machines Lab on November 20th, who said:\nInkling 2 Mini is a looped transformer, running the middle layers of the model three times for every token. This allows the model to apply more reasoning and reach the right answer with fewer tokens, especially on tasks such as agentic coding that depend on reasoning quality.\nGLM 5.4 is not (yet?) available as open weights. I tried it out using the Z.ai API, for which I had to sign up for their Coding Plan subscription because 5.4 cannot currently be accessed through the regular API.\nIt turns out both coding plan and regular API share the same OpenAI-compatible Responses API (at https://api.z.ai/api/v1), and the API key for the coding plan worked with that and gave me access to the new model.\nI built a llm-glm plugin, then realized that llm-zai by Tommy Hughes already exists! I've shipped mine purely because llm-zai doesn't yet support the new model, but I'll likely retire mine once that plugin catches up.\nHere are pelicans for GLM-5.4 on low, high, and max. This is the max one:\nI realized I never ran pelicans for GLM-5.3, so here those are for the same effort levels. They look similar in quality to 5.4.\nIt's interesting how GLM 5.1 and GLM 5.2 produced radically different pelicans from other models. The pelicans for 5.3 and 5.4 are much more comparable to those I get from OpenAI or Anthropic models - the previous generations had their own distinctive look.\nI made a comparison grid showing the four generations of GLM pelicans all in one place. The style transition between 5.2 and 5.3 is pretty stark.\nRecent articles\n- Ladybird's first alpha release - 23rd November 2026\n- Running the full server-side Datasette Python app in the browser with service workers and Pyodide - 17th November 2026\n- Locating the source of a mysterious beep with Claude - 9th November 2026\n- Hide your slop PR descriptions behind <details><summary> - 9th November 2026",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "z.ai/blog/glm-5.4",
+          "source": "Hacker News (AI)",
+          "tags": [
+            "community"
+          ],
+          "title": "GLM-5.4: Toward generalized coding with our first loop transformer",
+          "url": "https://z.ai/blog/glm-5.4",
+          "discussion_url": "https://news.ycombinator.com/item?id=50609685",
+          "published": "2026-11-23T10:06:43Z",
+          "summary": "Comments",
+          "content": "",
+          "score": 1075.0,
+          "comments": 348,
+          "also_in": [
+            "Hacker News front page"
+          ]
+        }
+      ]
+    },
+    {
+      "headline": "NariQ compresses Qwen3.8-27B into sub-3-bit GGUFs while preserving BF16 performance",
+      "summary": "Nari-labs released NariQ v1, compressing Qwen3.8-27B down to sub-3-bit GGUF files that fit within a 10 GB footprint. The method uses trellis-coded post-training quantization calibrated on real coding-agent execution traces. Benchmarks on long-horizon agentic tasks show the 3-bit and 2.5-bit variants match full BF16 performance on DeepSWE and math evaluations when served via a modified llama.cpp fork.",
+      "why_it_matters": "Sub-3-bit quantization calibrated on agent traces enables high-precision agentic reasoning on consumer GPUs within a 10 GB memory budget.",
+      "reason": "NariQ introduces sub-3-bit quantization methods for Qwen3.8-27B that compress the model into 10 GB while preserving near-BF16 accuracy on long-horizon agentic benchmarks.",
+      "item": {
+        "key": "huggingface.co/nari-labs/Qwen3.8-27B-NariQ-GGUF",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "NariQ: BF16-level Qwen3.8-27B in a 10 GB file",
+        "url": "https://huggingface.co/nari-labs/Qwen3.8-27B-NariQ-GGUF",
+        "discussion_url": "https://news.ycombinator.com/item?id=50611402",
+        "published": "2026-11-23T13:42:38Z",
+        "summary": "We built NariQ: 3-bit-or-lower quantizations of Qwen3.8-27B that retain near-BF16 quality across agentic tasks, math, multilingual reasoning, and image understanding.\nTo our knowledge, this is the first 3-bit-or-lower quantization that retains BF16 lvl performance on long-horizon agentic tasks.\nBenchmarks (BF16 / 3-bit / 2.5-bit / 2-bit):\n- DeepSWE: 39.8 / 41.0 / 41.9 / 28.6\n- Terminal-Bench 2.1: 62.6 / 63.8 / 60.2 / 52.4\n- AIME 25+26: 97.7 / 98.3 / 96.5 / 86.0\n- MSGM: 94.0 / 93.1 / 91.8 / 90.6\n- RealWorldQA: 82.4 / 82.4 / 81.3 / 80.9\nDecode speed is comparable to other quants on an RTX PRO 6000. Context-length results below\n(3-bit / 2.5-bit / 2-bit / Unsloth UD-IQ3_XXS):\n- 4K: 88.9 / 99.2 / 111.7 / 94.7\n- 16K: 84.5 / 93.8 / 105.1 / 89.8\n- 64K: 70.7 / 77.5 / 85.0 / 74.8\nRunning these currently require our llama.cpp fork:\n( https://github.com/nari-labs/nari-llama.cpp )\nFeedback and questions welcome. We'd love to hear how these perform on your workloads.",
+        "content": "Instructions to use nari-labs/Qwen3.8-27B-NariQ-GGUF with libraries, inference providers, notebooks, and local apps. Follow these links to get started.\n- Notebooks\n- Google Colab\n- Kaggle\n- Local Apps Settings\n-  llama.cpp  How to use nari-labs/Qwen3.8-27B-NariQ-GGUF with llama.cpp: Install (macOS, Linux) curl -LsSf https://llama.app/install.sh | sh # Start a local OpenAI-compatible server with a web UI: llama serve -hf nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 # Run inference directly in the terminal: llama cli -hf nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 Install from WinGet (Windows) winget install llama.cpp # Start a local OpenAI-compatible server with a web UI: llama serve -hf nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 # Run inference directly in the terminal: llama cli -hf nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 Build from source code git clone https://github.com/ggml-org/llama.cpp.git cd llama.cpp cmake -B build cmake --build build -j --target llama-app # Start a local OpenAI-compatible server with a web UI: ./build/bin/llama serve -hf nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 # Run inference directly in the terminal: ./build/bin/llama cli -hf nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 Use Docker docker model run hf.co/nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16\n- Llama new\n- LM Studio\n- Jan\n-  vLLM  How to use nari-labs/Qwen3.8-27B-NariQ-GGUF with vLLM: Install from pip and serve model# Install vLLM from pip:\npip install vllm\n# Start the vLLM server:\nvllm serve \"nari-labs/Qwen3.8-27B-NariQ-GGUF\"\n# Call the server using curl (OpenAI-compatible API):\ncurl -X POST \"http://localhost:8000/v1/chat/completions\" \\\n\t-H \"Content-Type: application/json\" \\\n\t--data '{\n\t\t\"model\": \"nari-labs/Qwen3.8-27B-NariQ-GGUF\",\n\t\t\"messages\": [\n\t\t\t{\n\t\t\t\t\"role\": \"user\",\n\t\t\t\t\"content\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"type\": \"text\",\n\t\t\t\t\t\t\"text\": \"Describe this image in one sentence.\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"type\": \"image_url\",\n\t\t\t\t\t\t\"image_url\": {\n\t\t\t\t\t\t\t\"url\": \"https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg\"\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t]\n\t}' Use Docker docker model run hf.co/nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16\n-  Ollama  How to use nari-labs/Qwen3.8-27B-NariQ-GGUF with Ollama: ollama run hf.co/nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16\n- Unsloth Desktop\n-  Pi  How to use nari-labs/Qwen3.8-27B-NariQ-GGUF with Pi: Start the llama.cpp server # Install llama.cpp: brew install llama.cpp # Start a local OpenAI-compatible server: llama serve -hf nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 Configure the model in Pi# Install Pi:\nnpm install -g @earendil-works/pi-coding-agent\n# Add to ~/.pi/agent/models.json:\n{\n  \"providers\": {\n    \"llama-cpp\": {\n      \"baseUrl\": \"http://localhost:9931/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"none\",\n      \"models\": [\n        {\n          \"id\": \"nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16\"\n        }\n      ]\n    }\n  }\n} Run Pi # Start Pi in your project directory: pi\n-  Docker Model Runner  How to use nari-labs/Qwen3.8-27B-NariQ-GGUF with Docker Model Runner: docker model run hf.co/nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16\n-  Lemonade  How to use nari-labs/Qwen3.8-27B-NariQ-GGUF with Lemonade: Pull the model # Download Lemonade from https://lemonade-server.ai/ lemonade pull nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 Run and chat with the model lemonade run user.Qwen3.8-27B-NariQ-GGUF-BF16 List all available models lemonade list\n-  Hermes Agent  How to use nari-labs/Qwen3.8-27B-NariQ-GGUF with Hermes Agent: Start the llama.cpp server # Install llama.cpp: brew install llama.cpp # Start a local OpenAI-compatible server: llama serve -hf nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 Configure Hermes # Install Hermes: curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash hermes setup # Point Hermes at the local server: hermes config set model.provider custom hermes config set model.base_url http://127.0.0.1:9931/v1 hermes config set model.default nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 Run Hermes hermes\n- Atomic Chat\n-  OpenClaw  How to use nari-labs/Qwen3.8-27B-NariQ-GGUF with OpenClaw: Start the llama.cpp server # Install llama.cpp: brew install llama.cpp # Start a local OpenAI-compatible server: llama serve -hf nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16 Configure OpenClaw # Install OpenClaw: npm install -g openclaw@latest # Register the local server and set it as the default model: openclaw onboard --non-interactive --mode local \\ --auth-choice custom-api-key \\ --custom-base-url http://127.0.0.1:9931/v1 \\ --custom-model-id \"nari-labs/Qwen3.8-27B-NariQ-GGUF:BF16\" \\ --custom-provider-id llama-cpp \\ --custom-compatibility openai \\ --custom-text-input \\ --accept-risk \\ --skip-health Run OpenClaw openclaw agent --local --agent main --message \"Hello from Hugging Face\"\nNariQ: Qwen3.8-27B in a 10 GB file, BF16-level on long-horizon agentic tasks\n(Nov 20, 2026) We are releasing NariQ v1 GGUFs of Qwen3.8-27B at 3, 2.5 and 2 bits per weight. Run them on our llama.cpp fork (required).\n- The 3-bit and 2.5-bit files match BF16 on long-horizon agent tasks, math and image understanding. The 2-bit file scores lower.\n- NariQ is a trellis-coded post-training quantization (PTQ), calibrated on real coding-agent traces and stored in a layout that runs on a single GPU.\n- More details are in the tech report.\nEach cell gives a percentage and a count in parentheses. For DeepSWE, the count is the mean number of fully solved tasks per round. Across the same three rounds, the mean share of each task's new tests that passed was 83.1% (BF16), 82.9% (3-bit), 83.2% (2.5-bit) and 77.2% (2-bit). One BF16 verifier timeout in round 3 counts as zero (338 of 339 trials graded). Each NariQ variant had all 339 trials graded. Terminal-Bench counts solved trials, and the remaining columns count correct answers. The agent runs use the Claude Code CLI (2.1.309, thinking on, effort max) driving the local model, with a 262,144-token context and the model's thinking-mode sampling (temperature 1.0, top-p 0.95, top-k 20).\nKL divergence from the BF16…",
+        "score": 133.0,
+        "comments": 29,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "Hugging Face details best practices and pitfalls in agentic evaluations",
+      "summary": "Hugging Face published a comprehensive guide on designing and maintaining evaluation suites for non-deterministic LLM agents. The guide highlights how execution environments skew results, pointing out an audit where changing the agent harness while holding the model fixed altered Terminal-Bench accuracy by up to 29.9 percentage points. To address these discrepancies, the authors break down the eight-step lifecycle of an agentic evaluation and offer guidelines for open-sourcing evaluation components.",
+      "why_it_matters": "Understanding harness-induced variance is essential for building robust benchmarks and isolating true model capability.",
+      "reason": "Hugging Face published a practical guide on designing and maintaining robust evaluation suites specifically engineered for non-deterministic AI agents.",
+      "item": {
+        "key": "huggingface.co/blog/agentic-evals",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "How to build and maintain an agentic evaluation",
+        "url": "https://huggingface.co/blog/agentic-evals",
+        "discussion_url": null,
+        "published": "2026-11-23T00:00:00Z",
+        "summary": "",
+        "content": "How to build and maintain an agentic evaluation\nOverview\nAI evaluations help shape which systems people build, adopt, and trust. An evaluation gives a system tasks, checks its answers or actions, and produces a score. Building and maintaining a useful evaluation therefore takes real work: defining tasks that reflect domain expertise, scoring them reliably, and checking that the results support the claims made. When methods, code, and data stay private, that work is harder for others to scrutinize or build on.\nOpen source offers a means to build stronger, more frequently updated, and more comparable evaluations and the infrastructure around them. Existing tasks, environments, and tools give builders a starting point, so their effort can go to domain expertise and validation. Sharing how an evaluation was built, including what went wrong, lets others find errors, improve it, and reuse it.\nThe Hugging Face hub is the home for AI evaluation: we host around 3500 eval leaderboards and have seen about a 16X growth in eval datasets on the hub in the past year, to about 17000 datasets. In recent months, we have also incorporated support for agentic abstractions that are relevant to evaluation. For example, Traces that store an agent’s work in an easily reviewable and sharable way; Benchmarks that highlight datasets used to evaluate models with leaderboards; and Environments that show datasets used as agentic RL or evaluation environments.\nThis guide covers four things:\n- Three eras of evaluation (section 1). Evaluations moved from checking answers, to checking what an agent did, to checking what a team of agents produces. Each step adds software that can change the score.\n- The steps in an agentic evaluation (section 2). We follow one task through eight steps, from the claim to the reported score. The full walkthrough, with commands, is in Appendix A.\n- When a benchmark is wrong (section 3). Errors in tasks and graders are common. We look at how they are found and corrected.\n- What to open strategically and why (section 4). A table sets out, component by component, what to share and what can stay protected.\nIn the research community, AI evaluation terminology is notoriously inconsistent. The glossary at the end defines each term we use and notes the other names you may come across.\n1. Introduction: how evaluation design has changed\nAI evaluation design has evolved in three forms as language models have become more capable and able to perform more complex work: question answer, agentic, and teams or swarms. Question-answer benchmarks such as MMLU (2020) and GPQA (2023) measure knowledge and reasoning through the answers models produce. As models became capable of planning and using tools, agentic benchmarks such as SWE-bench and WebArena expanded the scope to resolving software issues and completing tasks on websites. These tasks require evaluation setups that account for the environment in which the system operates and the changes it makes.\nLately, research on multi-agent systems has started to add another dimension: how agents coordinate and what they accomplish together. This includes decentralized swarms, teams managed by an orchestrator, and specialized agents collaborating on scientific work. Figure 1 shows a rough timeline of these three eras of evaluations.\nFigure 1. Three types of language model evals. Question-and-answer benchmarks check a response against a key. Agentic benchmarks check what an agent changed in an environment. Team and swarm benchmarks score what a group of agents produced.\nWe’ll focus on agentic evaluations in this article for two reasons. First, they are becoming increasingly the most prominent type in model release announcements due to high user and enterprise interest in agentic deployment. Second, they offer a useful starting point for understanding how evaluation design affects model performance. Team and swarm evaluations introduce further complexity through interactions between agents, which we leave outside the scope of this guide. Once an agent uses tools to complete a task, each part of the surrounding software can affect its score. For instance, in an audit of Terminal-Bench, researchers kept the model fixed and changed the agent harness. Accuracy varied by up to 29.9 percentage points. To understand differences like that, we examine the anatomy of an agentic evaluation and follow one task from the instructions the agent receives to the checks that determine whether it passed.\nThe anatomy of an agentic evaluation\nFigure 2. The different components of an agentic evaluation.\nThere are various parts to an agentic evaluation. A task gives the agent its instruction. The agent harness wraps the model and its tools, letting it work inside a pinned environment. During one rollout, the agent attempts the task from start to finish: it may run several commands, inspect their output, and try again before it stops. The evaluation harness runs several rollouts for each task. When a rollout ends, the verifier grades the environment's final state. Each rollout also leaves a trace, and traces and scores together become part of the final published evidence. Each part can be published, inspected, and reused separately.\nWhy benchmark release decisions matter\nDemand for independent evaluation is growing. Policymakers, enterprises, and researchers want evaluations they can verify, and today they mostly cannot: 98.2% of model-benchmark scores are reported by only one party, and researchers have argued that in-house evaluation is not enough.\nAt the same time, more benchmarks are holding back test items to reduce contamination: questions or solutions entering training data, so scores may reflect prior exposure. Artificial Analysis says 60% of its Intelligence Index v5, announced in October 2026, rests on evaluations with private test sets or held-out answers. Google DeepMind recently piloted double-blind evaluations, where a secure enclave hides an outside evaluator's test prompts…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "llama.cpp automates Pareto-optimized quantization selection",
+      "summary": "The latest llama.cpp release (b12669) adds an automated Pareto-optimization feature to target specific file sizes or bits-per-weight limits while minimizing quantization error. The system dynamically selects optimal tensor precision using weighted cosine error metrics and centered-normalized importance scaling. It also introduces state checkpointing and parallelized tensor processing to streamline long quantization jobs.",
+      "why_it_matters": "Automated tensor-level Pareto optimization allows inference engines to maximize model quality under strict VRAM caps without manual tuning.",
+      "reason": "llama.cpp added an automatic Pareto-optimization quantizer that dynamically selects optimal tensor precision to hit target file sizes or bits-per-weight at minimal error.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12669",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12669",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12669",
+        "discussion_url": null,
+        "published": "2026-11-24T02:43:24Z",
+        "summary": "quantize: add option to automatically choose optimal quant types to reach a file/bpw target size at lowest error ( #15550 )\n\nRefactor pareto optimise and convexify\n\nRefactor lagrange_penalty()\n\nRefactor quantisation checks into its own function\n\nExit loop if no better solution found\n\nReplace slope with cross product\n\nAdjust for small vector size\n\nSimplify candidates sorting\n\nAdd comments to explain magic numbers\n\nIncrease scale multiplier\n\nMove is_iq() into a lambda and remove unused variables\n\nCombine quant types\n\nReduce bpw range\n\nRefactor outlier trimming\n\nTighten worker allocator\n\nCheck for direction reversal\n\nSimplify dequantisation\n\nCalculate bpw over all tensors\n\nCompute rows based on tensor shape and slice count\n\nPrioritise important tensors\n\nSelect quantization type if target_bpw is set unless user specifies type and threads\n\nRelax lambda clamping\n\nAdd signal handler\n\nAdd save_bpw_state()\n\nAdd load_bpw_state()\n\nAdd delete_bpw_state()\n\nPersist progress\n\nUninstall signal handler and cleanup\n\nFix trimming logic\n\nGenerate model ID hash\n\nRemove bias mode computation\n\nRemove --no-bias option\n\nAutomatically determine if bias error is significant\n\nReduce compute time by…",
+        "content": "Repository navigation\nb12669\nPre-release\n      Pre-release\n    \nquantize: add option to automatically choose optimal quant types to reach a file/bpw target size at lowest error (#15550)\n- Refactor pareto optimise and convexify\n- Refactor lagrange_penalty()\n- Refactor quantisation checks into its own function\n- Exit loop if no better solution found\n- Replace slope with cross product\n- Adjust for small vector size\n- Simplify candidates sorting\n- Add comments to explain magic numbers\n- Increase scale multiplier\n- Move is_iq() into a lambda and remove unused variables\n- Combine quant types\n- Reduce bpw range\n- Refactor outlier trimming\n- Tighten worker allocator\n- Check for direction reversal\n- Simplify dequantisation\n- Calculate bpw over all tensors\n- Compute rows based on tensor shape and slice count\n- Prioritise important tensors\n- Select quantization type if target_bpw is set unless user specifies type and threads\n- Relax lambda clamping\n- Add signal handler\n- Add save_bpw_state()\n- Add load_bpw_state()\n- Add delete_bpw_state()\n- Persist progress\n- Uninstall signal handler and cleanup\n- Fix trimming logic\n- Generate model ID hash\n- Remove bias mode computation\n- Remove --no-bias option\n- Automatically determine if bias error is significant\n- Reduce compute time by parallelising tensor processing - courtesy of https://github.com/ddh0\n- Add quant types\n- Add --keep-bpw-state option\n- Refactor signal handlers\n- Update quant types\n- Minor refactoring\n- Add tensor type and depth heuristics\n- Add option to override bpw state file name\n- Minor refactoring\n- Finetune heuristics\n- Update usage\n- Fix lambda capture\n- Update epsilon specifier\n- Finetune heuristics\n- Simplify tensor selection\n- Read statistics from imatrix\n- Add Euclidean-Cosine score to identify important tensors\n- Improved is_important() logic\n- Fix lambda capture bug in Windows and initialise candidate_types struct\n- Remove processing statistics_data\n- Add --disable-tensor-importance option\n- Use more descriptive option naming\n- Relax target bpw range\n- Increase importance boost for final pass\n- Add B/F16 to get_ftype()\n- Process bpw targets up to B/F16\n- Improve state checkpoint filename\n- Add code comments\n- Update usage()\n- Update README.md\n- Change checkpoint file magic\n- Prepare for future optimization algorithms\n- Add parse_target_size()\n- Add --target-size option\n- Implement target_size logic\n- Update usage()\n- Refactor parameter names\n- Refactor option names\n- Update parameter names\n- Improve file handling\n- Remove file deletion\n- Refactor variable names\n- Update usage()\n- Add use_wce option\n- Read statistics_data from imatrix\n- Add experimental entropy-modulated weighted cosine error (WCE)\n- Performance optimisations (AI assisted)\n- Memory optimisations (AI assisted)\n- Update output log\n- Fix state file name generation and simplify_pareto() lambda capture\n- Change tensor importance score logic\n- Refactor is_quantizable()\n- Improve WCE to be magnitude-aware\n- Expected Output Error MSE\n- Fix scale factor overwrite bug\n- Test removing unused headers\n- Remove wce flag\n- Angle-aware/Magnitude-aware (MSE/WCE) hybrid error estimation\n- Revert to weighted cosine error estimation\n- Enhanced scaling factor\n- Use centered‑normalized importance scaling factor (CNIF)\n- Remove redundant logs\n- Improve state file handling\n- Update usage instructions\n- Update ftype parsing logic\n- Flag experimental features subject to future removal\n- Fix --target-size description\n- Fix \"casts away qualifiers\" compiler warning\n- Exclude user defined tensors (--tensor-type) from the Lagrangian optimization\n(courtesy of https://github.com/AesSedai)\n- TurboQuant bias factor for inner-product sensitive tensors\n- TurboQuant outlier mitigation\n- Refactor TurboQuant improvements\n- Fix remap tensor bug\n- Remove --importance-pct option\n- Refactor llama_model_quantize_params to expose a pure C interface\n- Consolidate load/save process and remove --save-state flag\n- Minor log output changes\n- Use the tensor statistics' schema\n- Add quant types\n- Release finished tensors mmap allocation\n- Reuse sample buffers\n- Fix C2327 error when target compilation is a MS platform\n- Minor refactoring and AI assisted optimizations\n- Add uv.lock\n- Minor refactoring and AI assisted optimizations\n- Add Halko, Martinsson & Tropp randomized SVD condition number estimator\n- Add kappa squashing functio\n- Remove unnecessary includes\n- Add required include\n- Update python dependencies\n- Fine-tune kappa mapping parameters\n- Fine-tune CNIF beta parameters\n- Fix fallback counter error\n- Move to libllama and unmap weights offloaded to backend\n- Remove unmap weights offloaded to backend\n- Add winsorization\n- Add adaptive tensor boosting\n- Minor cosmetic changes\n- Refactor processing of unused kv tensors\n- Minor cosmetic change\n- Implement --max-buffer-size in target_bpw_type()\n- Fix 32-block fallback case\n- tensor_type_override_for() DRY refactoring\n- Fix typo and remove unused option\n- Fix #28491 linking bug when compiling with BUILD_SHARED_LIBS=OFF\n- Remove GGML_USE_METAL conditional macro and let the optimizer decide\\\n- Add --target-exclude\n- Remove and ignore uv.lock\n- Fix pinned tensors safety limits calculation\n- Fix truncation error\n- Add downwards greedy upgrade\n- Add target bpw/size tests\n- Guard imatrix schema\n- Update --target-bpw/size descriptions and README.md\n- Harden state checkpoint's file operations\n- Link model and imatrix to state checkpoint\n- Enforce and consume stats schema data\n- Add stats schema tests\n- Refactor signal handlers out of lib and harden the logic\n- Improve handling of pinned tensors\n- Add tests\n- Add include to keep ubuntu-webgpu happy\n- Moving new API entries to prevent brittle downstream apps failing\n- Fix miscellaneous issues\nWebsite:\nAttestations:\nmacOS/iOS:\n- macOS Apple Silicon (arm64)\n- macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n- macOS Intel (x64)\n- iOS XCFramework\nLinux:\nAndroid:\nWindows:\nopenEuler:\n- DISABLED\n- openEuler x86 (310p)\n-…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Duopra brings real-time tool execution to full-duplex speech models",
+      "summary": "Duopra introduces real-time tool invocation and argument revision into full-duplex conversational models without losing natural turn-taking capability. Evaluated on Full-Duplex-Bench v3, prior speech systems frequently failed before executing domain tools due to incomplete or misdirected requests. By combining protocol SFT, full-duplex RL, and projector-only repair, Duopra raised direct tool execution Pass@1 performance from 26.0% after SFT to 47.7%.",
+      "why_it_matters": "Full-duplex models can now handle mid-stream tool execution and argument corrections during continuous voice agent sessions.",
+      "reason": "Duopra investigates moving full-duplex models beyond spoken conversation into real-time tool invocation and dynamic argument revision mid-stream.",
+      "item": {
+        "key": "arxiv:2611.25773",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Duopra: From Full-Duplex Conversation to Full-Duplex Agency",
+        "url": "https://huggingface.co/papers/2611.25773",
+        "discussion_url": null,
+        "published": "2026-11-23T00:00:00Z",
+        "summary": "Full-duplex interaction models exhibit strong conversational agency, enabling natural, low-latency turn-taking, backchannels, and interruptions. However, completing tasks further requires task agency: timely tool invocation and argument revision following user corrections. Frontend-backend agents separate initiation from execution: the frontend decides whether and what to request, while the backend determines how. Execution can be offloaded, but unsent requests cannot be executed, and incomplete ones can misdirect the backend. On Full-Duplex-Bench v3 (FDB v3), most failures of Realtime-Venus-Audio + Harness in our streaming pipeline occur before a domain tool executes. We introduce Duopra, a full-duplex interaction model that learns task execution alongside conversational control. Duopra treats the backend as a tool, accepting a self-contained natural-language request. Direct calls and backend delegation share an action interface and requirements for faithful initiation and correct execution. Its three-stage training combines protocol SFT, full-duplex RL rewarding timely and complete execution, and projector-only repair of talker conditioning after thinker updates. With the same…",
+        "content": "Duopra: From Full-Duplex Conversation to Full-Duplex Agency\nAbstract\nFull-duplex interaction models exhibit strong conversational agency, enabling natural, low-latency turn-taking, backchannels, and interruptions. However, completing tasks further requires task agency: timely tool invocation and argument revision following user corrections. Frontend-backend agents separate initiation from execution: the frontend decides whether and what to request, while the backend determines how. Execution can be offloaded, but unsent requests cannot be executed, and incomplete ones can misdirect the backend. On Full-Duplex-Bench v3 (FDB v3), most failures of Realtime-Venus-Audio + Harness in our streaming pipeline occur before a domain tool executes. We introduce Duopra, a full-duplex interaction model that learns task execution alongside conversational control. Duopra treats the backend as a tool, accepting a self-contained natural-language request. Direct calls and backend delegation share an action interface and requirements for faithful initiation and correct execution. Its three-stage training combines protocol SFT, full-duplex RL rewarding timely and complete execution, and projector-only repair of talker conditioning after thinker updates. With the same backend, Pass@1 rises from 4.7% to 44.7%; Duopra achieves 47.7% calling tools directly (26.0% after SFT) and 49.3% with a DeepSeek backend. It improves three FDB v1.0 takeover rates over the base model. These results show that task agency can coexist with key conversational agency.\nCommunity\nWe introduce Duopra, a full-duplex speech model that brings task agency into real-time conversational interaction. Duopra learns to invoke tools and delegate tasks while preserving natural turn-taking and interruption handling.\nOn Full-Duplex-Bench v3, Duopra achieves 47.7% Pass@1 with direct tool execution and 49.3% with a DeepSeek backend, demonstrating that conversational agency and task agency can coexist.\nProject & Demo: https://cychen2003.github.io/duopra/\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nModels citing this paper 1\nDatasets citing this paper 0\nNo dataset linking this paper",
+        "score": 26.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "v0.40.18-rc0: inkling2: faster Metal decode, prefill and draft rounds (#19843)",
+      "summary": "inkling2: faster Metal decode, prefill and draft rounds\n\nAdd Inkling-only Metal kernels, each with a stock-graph fallback, gated\n\nby GPU generation and size class: short BF16 products, deduplicated\n\nNVFP4/MXFP8 expert gathers with fused SwiGLU, fused loop controllers and\n\nresidual mixing, relative-position split attention, fused short\n\nconvolutions, faster global prefill, an ordered window cache that\n\nappends in place, and an 8-bit draft with a 4-bit vocabulary head\n\n(proposals only; outputs…",
+      "why_it_matters": "",
+      "reason": "Ollama's v0.40.18-rc0 release adds custom Metal decode and fused SwiGLU draft kernels to speed up local Inkling 2 model execution on Apple Silicon.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.18-rc0",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.18-rc0: inkling2: faster Metal decode, prefill and draft rounds (#19843)",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.18-rc0",
+        "discussion_url": null,
+        "published": "2026-11-24T01:35:09Z",
+        "summary": "inkling2: faster Metal decode, prefill and draft rounds\n\nAdd Inkling-only Metal kernels, each with a stock-graph fallback, gated\n\nby GPU generation and size class: short BF16 products, deduplicated\n\nNVFP4/MXFP8 expert gathers with fused SwiGLU, fused loop controllers and\n\nresidual mixing, relative-position split attention, fused short\n\nconvolutions, faster global prefill, an ordered window cache that\n\nappends in place, and an 8-bit draft with a 4-bit vocabulary head\n\n(proposals only; outputs stay exact).",
+        "content": "Repository navigation\nv0.40.18-rc0\n      \n      dhiltgen\n    tagged this\n      \n        24 Nov 01:35\n      \n  \n* inkling2: faster Metal decode, prefill and draft rounds\nAdd Inkling-only Metal kernels, each with a stock-graph fallback, gated\nby GPU generation and size class: short BF16 products, deduplicated\nNVFP4/MXFP8 expert gathers with fused SwiGLU, fused loop controllers and\nresidual mixing, relative-position split attention, fused short\nconvolutions, faster global prefill, an ordered window cache that\nappends in place, and an 8-bit draft with a 4-bit vocabulary head\n(proposals only; outputs stay exact).",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AgentRoboCritic provides action-level intent evaluation for direct robot control",
+      "summary": "The AgentRoboCritic framework shifts embodied agent evaluation from overall episode pass rates to step-by-step action critique. By requiring the policy agent to state local intent alongside each action, the evaluation revealed that 49.8% of successful episodes contained at least one failed action, with agents recovering in 57.7% of those failures. The team also released a fine-tuned Muse-Glimmer-30B critic model, achieving 74.24% failure-mode classification accuracy at over 30 times lower cost than GPT-6 Astra.",
+      "why_it_matters": "Action-level intent feedback provides explicit diagnostic visibility into agent error recovery dynamics during step-by-step execution loops.",
+      "reason": "AgentRoboCritic provides a granular benchmark for frontier models driving low-level control, analyzing dynamic tool and step execution failures rather than just high-level task completion.",
+      "item": {
+        "key": "arxiv:2611.26613",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "AgentRoboCritic: Understanding the Capability of Frontier Agents on Direct Robot Control",
+        "url": "https://huggingface.co/papers/2611.26613",
+        "discussion_url": null,
+        "published": "2026-11-23T00:00:00Z",
+        "summary": "Frontier multimodal language agents such as GPT-6 Astra have demonstrated strong capabilities in controlling robots directly via low-level numerical actions without high-level primitives. However, existing benchmarks report only episode-level success rates, which show neither how these agents succeed nor where they fail. In this paper, we present a systematic action-level analysis of frontier agents on direct robot control across 12 manipulation benchmarks. We introduce AgentRoboCritic, an intent-grounded critique framework in which the policy agent states a local intent alongside each action, and a critic evaluates the action's outcome and failure mode against this intent. Our action-level analysis demonstrates the promising capabilities of frontier agents on direct robot control, including closed-loop recovery from local execution failures, reliable semantic grounding across diverse scenes, and strong zero-shot manipulation without task-specific adaptation. It also identifies their current limitations, including task-relevant physical execution bottlenecks such as grasping and alignment, and uneven recovery across failure modes. Finally, we validate our critic on a 400-action…",
+        "content": "AgentRoboCritic: Understanding the Capability of Frontier Agents on Direct Robot Control\nAbstract\nFrontier multimodal language agents such as GPT-6 Astra have demonstrated strong capabilities in controlling robots directly via low-level numerical actions without high-level primitives. However, existing benchmarks report only episode-level success rates, which show neither how these agents succeed nor where they fail. In this paper, we present a systematic action-level analysis of frontier agents on direct robot control across 12 manipulation benchmarks. We introduce AgentRoboCritic, an intent-grounded critique framework in which the policy agent states a local intent alongside each action, and a critic evaluates the action's outcome and failure mode against this intent. Our action-level analysis demonstrates the promising capabilities of frontier agents on direct robot control, including closed-loop recovery from local execution failures, reliable semantic grounding across diverse scenes, and strong zero-shot manipulation without task-specific adaptation. It also identifies their current limitations, including task-relevant physical execution bottlenecks such as grasping and alignment, and uneven recovery across failure modes. Finally, we validate our critic on a 400-action human-annotated benchmark and release a dataset of 12,844 annotated actions alongside a fine-tuned open-source critic, Muse-Glimmer-30B, whose failure-mode accuracy rises from 32.58% to 74.24%, enabling low-cost action-level analysis.\nCommunity\n🤖 Can frontier agents control robots directly with low-level actions? And how do we actually tell how good they are?\n📉 Existing evaluations focus on episode-level scores such as success rates. They hide the action-level feedback that is key to improving embodied agents!\n💡 We introduce AgentRoboCritic. The policy agent states a local intent alongside each action, and a critic evaluates every action against it. For a failed action, the critic also returns its failure mode. With GPT-6 Astra as the critic, we annotate 12,844 actions across 12 manipulation benchmarks.\n🔍 What the action-level feedback reveals:\n- Closed-loop recovery: 49.8% of successful episodes contain at least one failed action, and 57.7% of failed actions are recovered by the end of the episode.\n- Reliable semantic grounding: acting on the wrong object, order or category accounts for only 0.2% of failed actions.\n- Strong zero-shot manipulation: GPT-6 Astra succeeds in 91% of RoboTwin 2.0 and 90% of YAMLab episodes, where π0.5 reaches 6% and 0%.\n- The remaining bottleneck is physical execution: Grasp is the leading failure mode on most benchmarks.\n🚀 To make action-level feedback low-cost, we release the 12,844 annotated actions, a 400-action human-annotated benchmark, and a fine-tuned Muse-Glimmer-30B critic. Its failure-mode accuracy rises from 32.6% to 74.2%, at over 30× lower cost than GPT-6 Astra.\n🌐 Project page | 💻 Code | 🤗 Dataset | 📊 Benchmark | 🧠 Critic model | 📄 Paper\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2611.26613 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 1\nDatasets citing this paper 2\ncx-cmu/AgentRoboCritic-Dataset\ncx-cmu/AgentRoboCritic-Bench\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 8.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Qwen 32B exhibits latent detection of prior concept injections",
+      "summary": "Researchers demonstrated that Qwen 32B internally detects when concepts have been injected into earlier context layers, even when its generated text denies any manipulation. Logit lens analysis showed clear detection signals within the residual stream that attenuate before final generation layers. Prompting the model with accurate information about introspection mechanisms increased injection detection sensitivity from 0.3% to 39.9% with only a 0.6% increase in false positives.",
+      "why_it_matters": "Latent residual stream monitoring can serve as an internal detection layer for prompt injection and hidden context manipulations.",
+      "reason": "Latent Introspection demonstrates that LLMs can internally detect prior concept injections in their activation space, with practical implications for interpretability and safety monitoring.",
+      "item": {
+        "key": "arxiv:2602.20031",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Latent Introspection: LLMs Can Detect Prior Concept Injections",
+        "url": "https://arxiv.org/abs/2602.20031",
+        "discussion_url": "https://news.ycombinator.com/item?id=50620328",
+        "published": "2026-11-23T22:29:48Z",
+        "summary": "Comments",
+        "content": "Computer Science > Artificial Intelligence\n  [Submitted on 23 Feb 2026 (v1), last revised 7 Nov 2026 (this version, v3)]\nTitle:Latent Introspection: Models Can Detect Prior Concept Injections\nView PDF HTML (experimental)\n            Abstract:We uncover a latent capacity for introspection in a Qwen 32B model, demonstrating that the model can detect when concepts have been injected into its earlier context and identify which concept was injected. While the model denies injection in sampled outputs, logit lens analysis reveals clear detection signals in the residual stream, which are attenuated in the final layers. Furthermore, prompting the model with accurate information about AI introspection mechanisms can dramatically strengthen this effect: the sensitivity to injection increases massively (0.3% -> 39.9%) with only a 0.6% increase in false positives. Also, mutual information between nine injected and recovered concepts rises from 0.61 bits to 1.05 bits, ruling out generic noise explanations. Our results demonstrate models can have a surprising capacity for introspection and steering awareness that is easy to overlook, with consequences for latent reasoning and safety.\n    \nSubmission history\nFrom: Martin VanÄ›k [view email]\n[v1] Mon, 23 Feb 2026 16:39:42 UTC (977 KB)\n[v2] Thu, 26 Feb 2026 12:43:02 UTC (998 KB)\n[v3] Sat, 7 Nov 2026 10:50:14 UTC (1,144 KB)\nAdditional Features\nReferences & Citations\n    \n    Loading...\nBibliographic and Citation Tools\n            Bibliographic Explorer (What is the Explorer?)\n          \n            Connected Papers (What is Connected Papers?)\n          \n            Litmaps (What is Litmaps?)\n          \n            scite Smart Citations (What are Smart Citations?)\n          \nCode, Data and Media Associated with this Article\n            alphaXiv (What is alphaXiv?)\n          \n            CatalyzeX Code Finder for Papers (What is CatalyzeX?)\n          \n            DagsHub (What is DagsHub?)\n          \n            Gotit.pub (What is GotitPub?)\n          \n            Hugging Face (What is Huggingface?)\n          \n            ScienceCast (What is ScienceCast?)\n          \nDemos\nRecommenders and Search Tools\n              Influence Flower (What are Influence Flowers?)\n            \n              CORE Recommender (What is CORE?)\n            \narXivLabs: experimental projects with community collaborators\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\nHave an idea for a project that will add value for arXiv's community? Learn more about arXivLabs.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "LangChain released langchain-huggingface 1.3.0, fixing forced tool choice behavior and streaming token count calculations.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-huggingface%3D%3D1.3.0",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-huggingface==1.3.0",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-huggingface%3D%3D1.3.0",
+        "discussion_url": null,
+        "published": "2026-11-23T20:48:59Z",
+        "summary": "Changes since langchain-huggingface==1.2.3\n\nfix(huggingface): correct forced tool choice and streaming token counts ( #42043 )\n\ntest(huggingface): accumulate pipeline streaming output ( #42039 )\n\ntest(huggingface): use Together’s GPT-OSS for standard chat coverage ( #42035 )\n\ntest(huggingface): use live Novita routing for chat tests ( #42033 )\n\nrelease(huggingface): 1.3.0 ( #41999 )\n\nrelease(standard-tests): 1.2.0 ( #41996 )\n\nchore(model-profiles): refresh model profile data ( #42013 )\n\nchore(model-profiles): refresh model profile data ( #41955 )\n\nchore(langchain): require langgraph 1.2.16 or newer ( #41959 )\n\nchore(model-profiles): refresh model profile data ( #41917 )\n\nchore(model-profiles): refresh model profile data ( #41861 )\n\nchore(deps): bump tornado from 6.6 to 6.6.1 in /libs/partners/huggingface ( #41848 )\n\nfeat(partners): Remove EOL'd Python 3.10 from partner packages ( #41268 )\n\nchore(deps): patch newer-python security lock resolutions ( #41585 )\n\nchore(model-profiles): refresh model profile data ( #41669 )\n\nchore(model-profiles): refresh model profile data ( #41520 )\n\nbuild(infra): avoid vulnerable filelock releases without dropping compatibility ( #41486 )\n\nrevert…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "llama.cpp release b12668 adds Metal backend support for BF16 and F32 src1 inputs in matrix multiplication operations.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12668",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12668",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12668",
+        "discussion_url": null,
+        "published": "2026-11-24T02:18:01Z",
+        "summary": "metal : support BF16/F32 src1 for MUL_MAT and MUL_MAT_ID ( #32677 )\n\nllama, metal : support BF16 src1 for MUL_MAT and MUL_MAT_ID\n\nAdd GGML_PREC_BF16 handling for src1 on the Metal backend when the tensor\n\nAPI is available: MUL_MAT with an F32 src0 stages the A tile as bfloat, and\n\nMUL_MAT_ID stages src1 as bfloat instead of F16. The tensor path keeps src1\n\nin F32 when it reads the operand directly.\n\nAdd a temporary LLAMA_MOE_AMAX_SKIP env var that disables the graph-level\n\namax rescaling for the MoE down projection and sets the BF16 src1 hint\n\ninstead. Apply the hint inside build_lora_mm_id so it reaches the matmul\n\nbefore the per-expert scale and LoRA nodes wrap it.\n\nAdd MUL_MAT_ID src1 BF16 test cases to test-backend-ops.\n\nAssisted-by: dsh:llama.cpp/ggml-org/DeepSeek-V4.1-Flash-1017-GGUF (Mac Studio, M5 Ultra, 256GB)\n\nmetal : support BF16 src1 without the tensor API\n\nAllow GGML_PREC_BF16 when the device has bfloat, not only when it has the\n\nMetal4 tensor API.\n\nAdd legacy _prec_bf16 kernels for MUL_MAT and MUL_MAT_ID that stage src1 as\n\nbfloat in the threadgroup and run the simdgroup multiply with bfloat A and B.\n\nThe F16 MUL_MAT_ID kernel uses half A on the tensor path and…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "MemOnce proposes a scalable memory architecture designed to bypass standard token-level KV cache growth during long-horizon deployments.",
+      "item": {
+        "key": "arxiv:2611.27973",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "MemOnce: A Scalable Memory Architecture for Large Language Models",
+        "url": "https://huggingface.co/papers/2611.27973",
+        "discussion_url": null,
+        "published": "2026-11-23T00:00:00Z",
+        "summary": "Deploying large language models (LLMs) in long-horizon and continual interactions requires maintaining reusable memory states for future inference, posing challenges for existing architectures. Standard Transformers accumulate layer-wise, token-level KV caches, incurring linear GPU memory growth and quadratic computational complexity as the context expands. In contrast, linear-time architectures compress history into fixed-size states, but struggle to retain fine-grained details. We introduce MemOnce, a foundation architecture that learns scalable memory states for language models. MemOnce is based on two core designs: (a) Memory encoder-decoder: it caches only a small subset of final-layer hidden states as compact memory representations and dynamically decodes them back into KV caches for attention layers; (b) Memory sparse attention: for each continual input, MemOnce adaptively retrieves relevant memory representations, with the sparse indices computed only once across layers. Coupling these two designs enables efficient on-the-fly memory loading and KV cache decoding, drastically reducing the GPU memory footprint and achieving linear-time complexity. We conduct extensive…",
+        "content": "",
+        "score": 19.0,
+        "comments": 2,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Until tomorrow, keep your evaluation harnesses pinned and your activation streams monitored.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Model release",
+      "headline": "Z.ai releases GLM-5.4 using looped transformer architecture",
+      "blurb": "GLM-5.4 is Z.ai's first model to use a looped transformer architecture, executing layers recurrently for generalized coding.",
+      "item": {
+        "key": "z.ai/blog/glm-5.4",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "GLM-5.4: Toward generalized coding with our first loop transformer",
+        "url": "https://z.ai/blog/glm-5.4",
+        "discussion_url": "https://news.ycombinator.com/item?id=50609685",
+        "published": "2026-11-23T10:06:43Z",
+        "summary": "Comments",
+        "content": "",
+        "score": 1075.0,
+        "comments": 348,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    },
+    {
+      "kicker": "Open source",
+      "headline": "OpenAI and Cisco launch Shirudo to protect unpatched Linux",
+      "blurb": "Shirudo is an open-source Linux runtime designed to protect running systems while security patches are rolled out.",
+      "item": {
+        "key": "openai.com/index/introducing-shirudo",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "Shirudo: OpenAI and Cisco's open-source runtime for shielding unpatched Linux",
+        "url": "https://openai.com/index/introducing-shirudo/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50619630",
+        "published": "2026-11-23T21:30:41Z",
+        "summary": "OpenAI and Cisco introduce Shirudo, an open-source runtime for Linux. It helps teams protect running systems while they roll out patches.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": [
+          "OpenAI News"
+        ]
+      }
+    },
+    {
+      "kicker": "Model compression",
+      "headline": "NariQ compresses Qwen3.8-27B into 10 GB with near-BF16 quality",
+      "blurb": "NariQ uses 3-bit quantization to fit Qwen3.8-27B into 10 GB while maintaining BF16 performance across math and agentic tasks.",
+      "item": {
+        "key": "huggingface.co/nari-labs/Qwen3.8-27B-NariQ-GGUF",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "NariQ: BF16-level Qwen3.8-27B in a 10 GB file",
+        "url": "https://huggingface.co/nari-labs/Qwen3.8-27B-NariQ-GGUF",
+        "discussion_url": "https://news.ycombinator.com/item?id=50611402",
+        "published": "2026-11-23T13:42:38Z",
+        "summary": "We built NariQ: 3-bit-or-lower quantizations of Qwen3.8-27B that retain near-BF16 quality across agentic tasks, math, multilingual reasoning, and image understanding.\nTo our knowledge, this is the first 3-bit-or-lower quantization that retains BF16 lvl performance on long-horizon agentic tasks.\nBenchmarks (BF16 / 3-bit / 2.5-bit / 2-bit):\n- DeepSWE: 39.8 / 41.0 / 41.9 / 28.6\n- Terminal-Bench 2.1: 62.6 / 63.8 / 60.2 / 52.4\n- AIME 25+26: 97.7 / 98.3 / 96.5 / 86.0\n- MSGM: 94.0 / 93.1 / 91.8 / 90.6\n- RealWorldQA: 82.4 / 82.4 / 81.3 / 80.9\nDecode speed is comparable to other quants on an RTX PRO 6000. Context-length results below\n(3-bit / 2.5-bit / 2-bit / Unsloth UD-IQ3_XXS):\n- 4K: 88.9 / 99.2 / 111.7 / 94.7\n- 16K: 84.5 / 93.8 / 105.1 / 89.8\n- 64K: 70.7 / 77.5 / 85.0 / 74.8\nRunning these currently require our llama.cpp fork:\n( https://github.com/nari-labs/nari-llama.cpp )\nFeedback and questions welcome. We'd love to hear how these perform on your workloads.",
+        "content": "",
+        "score": 133.0,
+        "comments": 29,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 14,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 29,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 30,
+      "kept": 15,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 916,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1425,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 290,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 202,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 215,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-21T03:11:49.972682Z",
+    "candidates": 100,
+    "triaged": 100,
+    "enriched": 8,
+    "headline_candidates": 107,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)",
+      "gemini-3.5-flash (key 1)"
+    ],
+    "seconds": 97.1,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 28128,
+      "output_tokens": 9163,
+      "cost_usd": 0.124659
+    }
+  }
+}
