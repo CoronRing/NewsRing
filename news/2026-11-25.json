@@ -1,0 +1,648 @@
+{
+  "date": "2026-11-25",
+  "generated_at": "2026-11-26T01:44:20.998718Z",
+  "title": "Verifiable Beliefs, CUA Watchers, and Rust API Rewrites",
+  "intro": "Today's highlights span the gap between what agents claim to know and when they prematurely stop looking. We also look at vLLM pipeline-parallelism prefill tricks, zero-mismatch RL kernels, and Anthropic swapping their Python Messages gateway for Rust.",
+  "stories": [
+    {
+      "headline": "Curbing agent laziness with verifiable belief rewards",
+      "summary": "Vision-language agents on long-horizon tasks have an annoying habit of guessing prematurely, sometimes writing out that multiple answers remain possible before immediately committing to one. Standard outcome rewards exacerbate this by rewarding lucky guesses just as heavily as thoroughly verified findings. Researchers introduced Reinforcement Learning with Verifiable Beliefs (RLVB), an RL method where the simulator calculates the exact answer posterior at each step and rewards the agent for continuing while ambiguity remains, without relying on an LLM judge or reading the agent's explicit scratchpad. Across three VLMs on three visual benchmarks, RLVB improved base model performance by an average of 17.1% and reduced premature commitments from up to 68% down to between 0.1% and 2.2%.",
+      "why_it_matters": "If you build multi-step agents, outcome-only RL frequently trains in premature termination; grounding step rewards in simulator belief states prevents agents from guessing ahead of evidence.",
+      "reason": "Directly tackles agent 'laziness'—where agents exit long-horizon tasks prematurely before gathering sufficient evidence—by using RL grounded in verifiable belief states.",
+      "item": {
+        "key": "arxiv:2611.32884",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Lazy Agents Answer Against Their Own Beliefs: Reinforcement Learning with Verifiable Beliefs Teaches Them to Act on What They Believe",
+        "url": "https://huggingface.co/papers/2611.32884",
+        "discussion_url": null,
+        "published": "2026-11-25T00:00:00Z",
+        "summary": "AI agents working on long tasks often commit to an answer before they have enough evidence, a behavior called laziness. In our evaluations, they frequently commit even while their stated belief still names several possible answers. An outcome reward at the end of the episode scores only the final answer, so it cannot teach the agent when to commit, because a lucky guess receives the same reward as an answer backed by evidence. During training, however, the simulator can compute the exact posterior over the answer at every step and tell whether the evidence is already enough. We propose Reinforcement Learning with Verifiable Beliefs (RLVB), which rewards the agent for taking further steps while this posterior still allows several answers and for committing once the evidence is sufficient. The reward needs no judge, critic or reward model, and it never reads the belief line the agent writes before each action. We also introduce Pro Worlds, a benchmark of visual puzzles where the agent views a large world through a small window. We evaluate three vision-language models on three benchmarks, two of which are never seen in training. RLVB improves the base model in all nine settings, by…",
+        "content": "Lazy Agents Answer Against Their Own Beliefs: Reinforcement Learning with Verifiable Beliefs Teaches Them to Act on What They Believe\nAbstract\nA reinforcement learning method rewards agents for delaying commitment until their inferred posterior over answers is sufficiently narrow, improving evidence-based answering across vision-language benchmarks.\nAI agents working on long tasks often commit to an answer before they have enough evidence, a behavior called laziness. In our evaluations, they frequently commit even while their stated belief still names several possible answers. An outcome reward at the end of the episode scores only the final answer, so it cannot teach the agent when to commit, because a lucky guess receives the same reward as an answer backed by evidence. During training, however, the simulator can compute the exact posterior over the answer at every step and tell whether the evidence is already enough. We propose Reinforcement Learning with Verifiable Beliefs (RLVB), which rewards the agent for taking further steps while this posterior still allows several answers and for committing once the evidence is sufficient. The reward needs no judge, critic or reward model, and it never reads the belief line the agent writes before each action. We also introduce Pro Worlds, a benchmark of visual puzzles where the agent views a large world through a small window. We evaluate three vision-language models on three benchmarks, two of which are never seen in training. RLVB improves the base model in all nine settings, by 17.1% on average. Under the outcome reward, GRPO and PPO fall below the base model on average. RLVB also outperforms PPO with a process reward from an LLM judge by 9.3% on average while using 1.6 times fewer GPU-hours. The trained agent answers with sufficient evidence in 51%, 12% and 74% of the episodes on the three benchmarks, against 8%, 0.4% and 36% for the base model. Its accuracy gain therefore comes from answering more often at high levels of evidence. The belief line shows how the agent reaches this evidence: it acts on its own belief. It commits at only 0.1 to 2.2% of the turns at which the evidence is insufficient and its line still names several answers, against 3 to 68% for the base model.\nCommunity\nLazy agents answer against their own beliefs. VLM agents on long tasks often commit to an answer while their own stated belief still names several possible answers, for example writing \"Possible: cups 2, 4\" and then answering cup 4.\nRLVB (Reinforcement Learning with Verifiable Beliefs) moves agentic RL from verifiable rewards to verifiable beliefs. During training, the simulator knows the rules linking the hidden answer to the evidence, so it computes the exact posterior after every step. At each history, RLVB samples several turns and scores each action against a teacher that acts on this posterior: further steps are rewarded while the evidence still allows several answers, and an answer is rewarded once the evidence is sufficient. It needs no judge, critic or reward model.\n- Across three VLMs and three benchmarks, two of which are never seen in training, RLVB improves the base model in all nine settings, by 17.1% on average.\n- It outperforms PPO with a process reward from an LLM judge by 9.3% on average while using 1.6x fewer GPU-hours. With the outcome reward, GRPO and PPO fall below the base model on average.\n- The trained agent acts on its own belief. It commits at only 0.1–2.2% of the turns where the evidence is insufficient and its belief still names several answers, against 3–68% for the base model. It answers with sufficient evidence in 51%, 12% and 74% of episodes, against 8%, 0.4% and 36%.\nWe also release Pro-Worlds, a benchmark of visual puzzles where the agent sees a large world through a small window and must decide when it has seen enough.\nProject page: https://declare-lab.github.io/RLVB/\nCode: https://github.com/declare-lab/RLVB\nModels: https://huggingface.co/collections/richmondsin/rlvb\nThis is an automated message from the ResearchStudio team.\nWe created an interactive ResearchStudio Reel for this paper. It includes a visual poster, a video, and a blog, all available for download in editable formats.\nOpen the ResearchStudio Reel →\nDownload all files from Hugging Face\nPlease give this comment a thumbs up if you find the Reel helpful!\nWant to explore or create Reels for more papers? Visit the ResearchStudio demo.\nCommitting before the evidence is in is the oldest problem in estimating. A number given early gets treated as the number, and a lucky early guess looks the same on paper as one that was earned. Rewarding the agent for holding off while several answers are still possible, and for committing once only one is left, pays for the work and not only the result. I like that the reward never reads the belief line the agent writes, so it can't be talked into anything. Outside the simulator there's no exact posterior to check against. What stands in for it there?\nSo that's when we got surprised too! We evaluated it on RoboQuest, where an agent has to solve long-horizon, multi-step tasks and there is no exact posterior. It surprisingly worked well. Please check the paper's appendix and the project page to find the belief lines when the agent trained in a closed world is deployed in an open world. This intrigued us: maybe it can be a scalable solution for a general agentic post-training pipeline.\nSo that's when we got surprised too! We evaluated it on RoboQuest where an agent has to solve a long horizon multi-step tasks and there is no exact posterior. It surprisingly worked well. Please check the paper's appendix and the project page to find the belief lines when the agent trained on closed work is deployed in open world. This intrigued us : maybe it can be scalable solution for general agentic post-training pipeline.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers…",
+        "score": 93.0,
+        "comments": 6,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Co-evolving environments and verifiers to evaluate computer-use agents",
+      "summary": "Static benchmarks for computer-use agents age poorly as agents saturate canned tasks while brittle click-coordinate checks yield coarse aggregate metrics. CUA-SEE addresses this with a closed-loop framework that co-evolves tasks and executable verifiers directly from agent rollout traces. It splits the evaluation into benchmark evolution for calibrated difficulty growth, diagnostic probes to pinpoint capability boundaries, and state-grounded checkpoints validated adversarially. While detailed empirical results in the release are sparse, the approach treats evaluation suites as dynamic systems rather than immutable test scripts.",
+      "why_it_matters": "For anyone benchmarking desktop agents, static harness tests saturate quickly and miss real failure boundaries without continuously adapting verifiers.",
+      "reason": "Addresses the saturation and static limits of computer-use agent benchmarks by introducing automatically evolving test environments.",
+      "item": {
+        "key": "arxiv:2611.30962",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Self-Evolving Evaluation Environments for Computer-Use Agents",
+        "url": "https://huggingface.co/papers/2611.30962",
+        "discussion_url": null,
+        "published": "2026-11-25T00:00:00Z",
+        "summary": "Computer-use agents (CUAs) are rapidly improving, yet their evaluation remains largely static. Existing benchmarks provide a strong foundation, but fixed difficulty ceilings, limited feature coverage, and coarse aggregate scores progressively weaken their discriminative and diagnostic value. We introduce CUA-SEE, a closed-loop evaluation environment that co-evolves tasks and executable verifiers from rollout evidence. It disentangles three objectives: benchmark evolution expands evaluation scope through cohort-calibrated difficulty and coverage growth; diagnostic evolution increases resolution through agent-conditional capability-boundary probes; and verifier evolution improves precision by translating changing requirements into state-grounded checkpoints with adversarial validation. Across multiple agents, applications, and rounds, CUA-SEE generates challenging, measurable tasks while preserving process-level evidence. Our results position adaptive evaluation as a scalable counterpart to self-evolving agents, continuously tracking what agents can do, where their boundaries lie, and how reliably progress is measured.",
+        "content": "Abstract\nCUA-SEE is a closed-loop evaluation environment that co-evolves tasks and executable verifiers to adaptively measure computer-use agents’ capabilities, boundaries, and progress reliability.\nComputer-use agents (CUAs) are rapidly improving, yet their evaluation remains largely static. Existing benchmarks provide a strong foundation, but fixed difficulty ceilings, limited feature coverage, and coarse aggregate scores progressively weaken their discriminative and diagnostic value. We introduce CUA-SEE, a closed-loop evaluation environment that co-evolves tasks and executable verifiers from rollout evidence. It disentangles three objectives: benchmark evolution expands evaluation scope through cohort-calibrated difficulty and coverage growth; diagnostic evolution increases resolution through agent-conditional capability-boundary probes; and verifier evolution improves precision by translating changing requirements into state-grounded checkpoints with adversarial validation. Across multiple agents, applications, and rounds, CUA-SEE generates challenging, measurable tasks while preserving process-level evidence. Our results position adaptive evaluation as a scalable counterpart to self-evolving agents, continuously tracking what agents can do, where their boundaries lie, and how reliably progress is measured.\nCommunity\nCUA-SEE reconceptualizes evaluation as a dynamic, closed-loop process where tasks, executable verifiers, and agent rollout evidence continuously inform and refine one another.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2611.30962 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 46.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "vLLM meetup unpacks high-throughput prefill and exact RL kernels",
+      "summary": "The vLLM Singapore meetup revealed several practical low-level engine improvements for serving and post-training. Inferact demonstrated that pipeline parallelism (PP2) on 2× GB300 can outpace tensor and sequence parallelism by up to 1.37× for agentic prefill workloads with 100K input tokens, primarily by moving activations to copy engines and scheduling micro-batches dynamically from the queue. For RL post-training, Inferact and NVIDIA highlighted that non-associative floating-point addition causes divergence between rollout and training kernels; using coding agents to generate bit-exact, zero-mismatch kernels eliminated KL drift on DeepSeek V4 and enabled unclipped asynchronous REINFORCE at a 2.4× speedup. NVIDIA also reported using agent-written kernels to bring SM120 workstations from zero DeepSeek-V4 support to 98–99% peak DRAM utilization during MoE decoding.",
+      "why_it_matters": "Highlights concrete optimizations for agent workloads: making long-context prefill viable under tight TTFT constraints and preventing rollout-to-trainer drift during RL post-training.",
+      "reason": "Highlights key production vLLM optimizations, including pipeline parallelism for prefill throughput and the use of LLM agents to write custom GPU kernels.",
+      "item": {
+        "key": "pytorch.org/blog/vllm-singapore-meetup-faster-prefill-agent-written-kernels-and-the-road-to-vera-rubin",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "vLLM Singapore Meetup: Faster Prefill, Agent-Written Kernels and the Road to Vera Rubin",
+        "url": "https://pytorch.org/blog/vllm-singapore-meetup-faster-prefill-agent-written-kernels-and-the-road-to-vera-rubin/",
+        "discussion_url": null,
+        "published": "2026-11-25T18:03:15Z",
+        "summary": "TL;DR At the Singapore vLLM meetup, engineers from Inferact, NVIDIA, and Alibaba Cloud showcased how the community is advancing open source AI inference through pipeline parallelism optimizations, agent-written kernels, real-time...\n\nThe post vLLM Singapore Meetup: Faster Prefill, Agent-Written Kernels and the Road to Vera Rubin appeared first on PyTorch .",
+        "content": "TL;DR\n\nAt the Singapore vLLM meetup, engineers from Inferact, NVIDIA, and Alibaba Cloud showcased how the community is advancing open source AI inference through pipeline parallelism optimizations, agent-written kernels, real-time multimodal world models, and day-zero support for next-generation hardware like NVIDIA’s Vera Rubin platform.\n\nIntroduction\n\nOn November 13, 2026, the vLLM community gathered at SGInnovate in Singapore for a half-day technical meetup hosted by Inferact and NVIDIA. Engineers from Inferact, NVIDIA and Alibaba Cloud, together with vLLM-Omni contributors, shared what they are building right now, from high-throughput prefill and RL training to running vLLM on workstation-class Blackwell GPUs and NVIDIA’s Vera Rubin platform.\n\nvLLM, born at UC Berkeley and now hosted under the PyTorch Foundation, serves hundreds of model architectures across a wide range of accelerators. Two themes ran through the day: squeezing throughput out of communication-bound layouts, and using AI agents to write and tune kernels.\n\nHighlights from the Meetup\n\n1. Optimizing Pipeline Parallelism for High-Throughput Prefill in vLLM\n\nThien Tran, Member of Technical Staff from Inferact made the case for pipeline parallelism (PP) as a throughput layout for prefill. In agentic traffic, one turn carries roughly 100K input tokens (about 95% cached), so a 3 s time-to-first-token (TTFT) target for 5K new tokens leaves a per-token budget about 33× tighter than decode’s. On MiniMax-M3.1-Flash on 2× GB300, PP2 delivered up to 1.37× the max throughput of TEP2 + SP, because PP removes most of the collectives that compete with compute. Thien walked through the fixes that make PP work in practice: balancing stages by measured time rather than layer count, capping step size to shrink pipeline fill and drain, and moving activation transfers onto the copy engines, which cut p50 TTFT by 13–20% near saturation and is now on by default on NVLink. With fixed step sizes, TEP2 + SP still wins at tight TTFT targets (0.75 s) while PP2 wins at looser ones. A new PP-aware scheduler sizes each micro-batch from the queue, matches the best hand-tuned step size with no tuning, and puts PP2 ahead from about 0.5 s upward.\n\n2. vLLM on SM12x: From Usable to Efficient\n\nJie Fang, DevTech Compute Engineer from NVIDIA showed how SM12x cards (RTX PRO and DGX Spark) went in six months from having no DeepSeek-V4 path in vLLM to near-peak efficiency. FlashInfer feature categories with dedicated SM12x kernels grew from 0 of 17 in January to 14 in October, and monthly SM12x pull requests rose from 6 to 121, helped by AI coding agents. Kernels only help if the framework selects them: a one-line dispatch fix gave +17.7% throughput, and preferring W4A4 for NVFP4 linears gave +23.8%. These cards have PCIe Gen5 but no NVLink, so the choice of parallelism sets the communication cost. TP2 × PP2 instead of TP4 gave 1.37× prefill throughput, and communication-aware weight offloading let DeepSeek-V4-Pro start on 8× RTX PRO 6000. The headline results: a 32K-token prefill in 939 ms on 8× RTX PRO 5000, MoE decode reading weights at 98–99% of measured DRAM peak, and video generation cut from 213.4 s to 4.92 s for a 5.17 s clip, a real-time factor of 0.95.\n\n3. Making World Models Interactive: Real-Time Inference with vLLM-Omni\n\nTaichang Zhou, a vLLM-Omni committer, showed how vLLM-Omni, which extends vLLM from text-only models to omni-modality models and supports 100+ architectures, now serves LingBot-World 2.0, an interactive video world model, in real time for one session on 4× H200. The key piece is a new AR-Diffusion engine that reuses vLLM’s paged KV cache manager to generate video chunk by chunk. The rule of thumb is KV lifetime: if K/V lives for one request, the model runs on the DiffusionEngine; if it lives for a whole interactive session, it runs on the new engine. Ulysses sequence parallelism cut one block on H200 from 2,397 ms to 725 ms. Per 12-frame chunk, the latest main is 1.9× faster than September with no quality loss, and 2.75× faster (22.5 fps) with every opt-in option, well above the 12 fps real-time bar. The team also previewed Noisy PP, which lets later chunks start on earlier chunks’ in-progress KV and lifted steady-state throughput 2.85× on CausVid-Wan 1.3B, and announced OpenDirector, an open-source video agent built on vLLM-Omni.\n\n4. Finish RL Training Faster: Zero-Mismatch Kernels and Simple Async RL\n\nAo Shen, Member of Technical Staff from Inferact, presenting joint work with NVIDIA DevTech and NVIDIA Research, argued that an RL trainer must learn from exactly what the rollout produced. Floating-point addition is not associative, so vLLM rollout kernels and trainer kernels split the same sum differently and drift apart. On DeepSeek V4, standard kernels showed rising KL mismatch and the run collapsed within about 100 RL steps, while exact kernels held KL at 0. The team brought the cost of exact kernels down to about 10% of rollout speed with an agent loop that first makes each layer match bit for bit, then swaps in faster kernels and re-checks that the diff stays zero. The skill is open source and worked on Nemotron, DeepSeek V4.1 and Kimi K3.1, where zero diff was ready on the day the model came out. With exact kernels, async RL no longer needs clipping, gates or dropped samples: REINFORCE Zero simply reweights every token, reaching 48.80% accuracy against 48.91% for sync RL while cutting time per update from 49.4 s to 20.6 s, a 2.40× speedup.\n\n5. vLLM on NVIDIA Vera Rubin: Architecture, Locality Domains and Kernels\n\nHao Lu, Software Engineer from NVIDIA, speaking for a joint effort of the vLLM team, Inferact, Red Hat and NVIDIA, explained that vLLM ran on Vera Rubin from day 0 because Blackwell kernels run unchanged, but peak performance needs Rubin-specific kernels such as double-K MMA. The central idea is that Rubin behaves like a NUMA GPU: each of its two dies is a locality domain with its own SMs, L2 and HBM4 stacks, and by default about half of a kernel’s memory traffic crosses the L2 fabric. The rule is to co-locate memory and compute, and to query the locality-domain count rather than assume it. In vLLM, localizing MoE experts in decode brings the most benefit, and memory-bound decode kernels gained 8–29%, with TMA load rising from 13.4 to 18.7 TB/s against a 19.2 TB/s HBM peak. On InferenceX, MiniMax M3.1-Flash on Vera Rubin NVL72 reached about 4.3~6.5× the tokens per dollar of GB300 at matched interactivity.\n\n6. Enterprise Scale Agent Infra\n\nSean Zhan, Senior Director from Alibaba Cloud International, shared the session Enterprise Scale Agent Infra. As enterprise software shifts from “humans calling tools” to “agents executing autonomously,” risk and cost are moving down from the model layer to the execution layer. Agents need to run concurrently, mutate system state, and hold real credentials — every execution is a security-boundary event. MicroVMs deliver hardware-grade isolation, least-privilege policies constrain network egress and credentials, full audit trails make every action replayable, and snapshotting and hibernation make million-scale concurrency economically viable. Sean shared many insightful ideas during this session.\n\nClosing Thoughts\n\nFrom faster prefill and efficient support for new hardware to AI agents that write and tune kernels, this meetup showed a vLLM community that keeps pushing the boundaries of inference, together with its partners across the ecosystem. Our thanks go to Inferact and NVIDIA for hosting, to all the speakers, and to everyone who joined us at SGInnovate. As the core engine grows stronger and the hardware ecosystem keeps expanding, vLLM is becoming a solid foundation for putting large models into real-world use. We look forward to our next gathering and to the continued growth of the vLLM community!\n\nThe post vLLM Singapore Meetup: Faster Prefill, Agent-Written Kernels and the Road to Vera Rubin appeared first on PyTorch .",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "A 0.8B streaming watcher stops desktop agents from acting on stale frames",
+      "summary": "Current computer-use agents operate on discrete screenshot turn-cycles, meaning asynchronous UI updates during slow VLM inference frequently render observed states stale before an action lands. NightWatch patches this perception-action gap by running a lightweight 0.8B parameter streaming watcher alongside the primary agent without altering its prompt or action space. In OSWorld benchmarks, the watcher reduced non-reasoning wall-clock time by 33% and cut wasted idle time by 53% without degrading task success. On DynaCU-Bench, grounding decisions in current rather than stale UI states pushed success rates from 39.5% to 44.2%.",
+      "why_it_matters": "Decoupling high-frequency GUI state monitoring from heavy VLM decision-making directly fixes the stale-perception latency trap in computer-use agent harnesses.",
+      "reason": "Tackles a major failure mode in computer-use agent harnesses by introducing continuous proactive perception for dynamic, asynchronous GUIs.",
+      "item": {
+        "key": "arxiv:2611.28947",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Don't Sleep, Keep Watch: Proactive Perception for Computer-Use Agents",
+        "url": "https://huggingface.co/papers/2611.28947",
+        "discussion_url": null,
+        "published": "2026-11-25T00:00:00Z",
+        "summary": "Computer-use agents (CUAs) built on vision-language models are increasingly entrusted with long-horizon tasks in live desktop, web, and mobile environments, where the screen keeps changing on its own. However, current CUAs lack real-time situational awareness: they perceive the environment through discrete snapshots, and the substantial inference latency of VLMs, compounded by highly dynamic interfaces, opens a perception-action gap in which the observed state frequently becomes stale before the corresponding action is executed. To bridge this gap, we present NightWatch, a plug-and-play framework that endows any CUA with continuous, temporally grounded perception without changing the agent's model, prompt, or action space. NightWatch couples the VLM agent with NightWatch-0.8B, a lightweight System-1 model that performs streaming monitoring of the interface state and keeps the agent synchronized with the evolving environment at low computational cost and latency, thereby grounding each decision in the current state rather than an outdated snapshot and reducing both stale actions and idle waiting while preserving task success. Experiments on desktop and dynamic web environments…",
+        "content": "Don't Sleep, Keep Watch: Proactive Perception for Computer-Use Agents\nAbstract\nNightWatch adds a lightweight streaming watcher to vision-language computer-use agents to keep perception synchronized with dynamic interfaces, reducing latency and wasted time while maintaining or improving task success.\nComputer-use agents (CUAs) built on vision-language models are increasingly entrusted with long-horizon tasks in live desktop, web, and mobile environments, where the screen keeps changing on its own. However, current CUAs lack real-time situational awareness: they perceive the environment through discrete snapshots, and the substantial inference latency of VLMs, compounded by highly dynamic interfaces, opens a perception-action gap in which the observed state frequently becomes stale before the corresponding action is executed. To bridge this gap, we present NightWatch, a plug-and-play framework that endows any CUA with continuous, temporally grounded perception without changing the agent's model, prompt, or action space. NightWatch couples the VLM agent with NightWatch-0.8B, a lightweight System-1 model that performs streaming monitoring of the interface state and keeps the agent synchronized with the evolving environment at low computational cost and latency, thereby grounding each decision in the current state rather than an outdated snapshot and reducing both stale actions and idle waiting while preserving task success. Experiments on desktop and dynamic web environments (OSWorld-Verified and DynaCU-Bench) show that NightWatch, driven by a watcher of only 0.8B parameters, reduces non-reasoning wall-clock time by 33% and wasted time by 53% on OSWorld while keeping task success on par, raises success on DynaCU-Bench from 39.5% to 44.2% with the large VLM agent, and is more efficient than passive-watching baselines such as AOI and PUSV under the same screenshot-only input, as well as a System-1 decision model more than 30times its size. Overall, NightWatch demonstrates that the timing of perception is as critical as its content, marking a step toward agents that maintain continuous awareness of their environment rather than perceiving it turn by turn.\nCommunity\nThis is an automated message from the ResearchStudio team.\nWe created an interactive ResearchStudio Reel for this paper. It includes a visual poster, a video, and a blog, all available for download in editable formats.\nOpen the ResearchStudio Reel →\nDownload all files from Hugging Face\nPlease give this comment a thumbs up if you find the Reel helpful!\nWant to explore or create Reels for more papers? Visit the ResearchStudio demo.\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nGet this paper in your agent:\nhf papers read 2611.28947 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 93.0,
+        "comments": 2,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "High test pass rates mask poor defect discovery in coding agents",
+      "summary": "Existing coding benchmarks often spoon-feed agents issue descriptions and exact entry points, masking whether agents actually know how to identify bugs from scratch. SpecEngineeringBench tests seven frontier coding agents across 100 multi-defect instances without hints, asking them to generate test suites and isolate defects independently. The evaluation uncovered a stark disconnect: agents achieved a 91.47% test pass rate and 80.48% change-focused coverage, yet only managed a 26.36% fail-to-pass defect detection rate. Furthermore, fault localization recall fell from 78.11% at the file level down to 51.29% at the function level.",
+      "why_it_matters": "A clean demonstration that code coverage and passing unit tests remain poor proxies for whether an evaluation agent is catching actual underlying defects.",
+      "reason": "Provides a targeted evaluation benchmark assessing whether coding agents can autonomously formulate executable specifications to catch latent software bugs.",
+      "item": {
+        "key": "arxiv:2611.32973",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "SpecEngineeringBench: Evaluating Coding Agents as Autonomous Specification Engineers",
+        "url": "https://huggingface.co/papers/2611.32973",
+        "discussion_url": null,
+        "published": "2026-11-25T00:00:00Z",
+        "summary": "Autonomous specification engineering requires coding agents to translate functional requirements into executable tests and use the results to discover and validate defects. However, existing benchmarks evaluate coding agents on explicitly specified test generation tasks, commonly providing an issue description, a designated test entry point, or files to inspect, leaving the ability to determine what to test and where to investigate insufficiently evaluated. Relying on such clues bypasses the challenge of mapping requirements to implementations and proactively uncovering unknown defects. We propose SpecEngineeringBench, comprising 100 instances from 78 open-source Python repositories across 16 application categories, with multiple recorded defects in each instance. Two independent tasks evaluate complementary capabilities: generating test suites and discovering defects through execution analysis. The evaluation combines test validity, defect detection, and coverage with localization precision and recall. Across seven frontier coding agents, results reveal that test validity and coverage decouple from defect exposure: agents achieve a 91.47% Head Pass Rate and 80.48% Change-focused…",
+        "content": "SpecEngineeringBench: Evaluating Coding Agents as Autonomous Specification Engineers\nAbstract\nAutonomous specification engineering requires coding agents to translate functional requirements into executable tests and use the results to discover and validate defects. However, existing benchmarks evaluate coding agents on explicitly specified test generation tasks, commonly providing an issue description, a designated test entry point, or files to inspect, leaving the ability to determine what to test and where to investigate insufficiently evaluated. Relying on such clues bypasses the challenge of mapping requirements to implementations and proactively uncovering unknown defects. We propose SpecEngineeringBench, comprising 100 instances from 78 open-source Python repositories across 16 application categories, with multiple recorded defects in each instance. Two independent tasks evaluate complementary capabilities: generating test suites and discovering defects through execution analysis. The evaluation combines test validity, defect detection, and coverage with localization precision and recall. Across seven frontier coding agents, results reveal that test validity and coverage decouple from defect exposure: agents achieve a 91.47% Head Pass Rate and 80.48% Change-focused Coverage alongside a 26.36% Fail-to-Pass Rate, while localization recall drops from 78.11% at the file level to 51.29% at the function level. Autonomous test generation improves file, function, and hunk localization recall by 4.99, 2.77, and 2.69 percentage points over relying solely on existing repository test suites.\nCommunity\nWe propose SpecEngineeringBench, a benchmark of 100 multi-defect instances across 78 Python repositories that evaluates coding agents on hint-free test generation and defect discovery. Evaluations of seven frontier agents show a stark disconnect between high test validity and coverage (91.47% pass rate, 80.48% coverage) and actual bug detection (26.36% fail-to-pass rate), alongside a drop in localization recall from 78.11% at the file level to 51.29% at the function level. Nevertheless, autonomous test generation still improves bug localization recall across files, functions, and hunks by 2.69 to 4.99 percentage points compared to relying solely on existing test suites.\nTests that pass 91.47% of the time and cover 80.48% of the changed code, but expose only 26.36% of the defects, is a result worth repeating. Coverage tells you the test walked through the room. It doesn't tell you the test looked at anything. I direct coding agents as a Language Modeler, and this matches what I see: asking for tests gets you tests, and asking what could be wrong gets you something different. Taking away the hints (no issue text, no entry point) is what makes the benchmark honest. Did the agents that exposed more defects write fewer, more targeted tests, or just more of them?\nI like that this asks agents to decide what needs testing without a supplied location to inspect. For the defects that remain undetected, did you distinguish tests that reach the faulty behavior but lack a useful assertion from tests that never trigger it?\nThis is an automated message from the Librarian Bot. I found the following papers similar to this paper.\nThe following papers were recommended by the Semantic Scholar API\nPlease give a thumbs up to this comment if you found it helpful!\nIf you want recommendations for any Paper on Hugging Face checkout this Space\n You can directly ask Librarian Bot for paper recommendations by tagging it in a comment: @librarian-bot recommend\nModels citing this paper 0\nNo model linking this paper\nDatasets citing this paper 1\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 11.0,
+        "comments": 4,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Cloudflare adds discoverable HTTP search endpoints for web agents",
+      "summary": "Cloudflare has introduced Search for Agents, a dashboard setting that automatically crawls and indexes a zone into an AI Search instance exposed under the origin domain. To aid agent discovery, the system injects search endpoint metadata directly into HTML headers and YAML front matter for Markdown-negotiated responses pointing to `/.well-known/search`. Agents can query the indexed site using either keyword or natural language requests via standard HTTP GET parameters. The underlying indexing includes customizable reranking and caching configurations, subject to standard zone WAF and bot management rules.",
+      "why_it_matters": "Standardizing structured site search discovery via `.well-known` endpoints saves web-browsing agents from burning context windows on brute-force page crawling.",
+      "reason": "Introduces agent-oriented site indexing and discovery with native HTTP QUERY support, relevant for web-grounded agent tooling.",
+      "item": {
+        "key": "blog.cloudflare.com/search-for-agents",
+        "source": "Cloudflare AI",
+        "tags": [
+          "infra"
+        ],
+        "title": "Introducing Search for Agents",
+        "url": "https://blog.cloudflare.com/search-for-agents/",
+        "discussion_url": null,
+        "published": "2026-11-25T14:00:00Z",
+        "summary": "Flip one toggle to make your site searchable by AI agents — complete with automatic content indexing, a discoverable search API, and native HTTP QUERY support.",
+        "content": "AI Search , our service that indexes your content and lets you add search to any application or agent without having to build an entire retrieval infrastructure, has supported adding your website  as a data source for a while now, automatically crawling, converting and indexing its pages.\n\nStill, setting up an AI Search instance for your website requires manually creating and configuring it initially, and then doing all the integration work to get the search endpoints available from your domain and to make sure that agents know where to find the index and know how to use it.\n\nToday we're introducing Search for Agents , which puts that setup behind a toggle in your Cloudflare dashboard. Turn it on for your zone, and our service will create your AI Search instance, start indexing your content, and make search discoverable and available from your own domain.\n\nHow it works\n\nThe idea follows naturally from Markdown for Agents , where Cloudflare's network converts any HTML page to Markdown in real time for enabled zones using content negotiation headers. Similarly, Search for Agents leverages the power of AI Search by automatically creating an index for your zone and exposing APIs that any AI agent can discover and use to search your website, under your domain, all done at the network level.\n\nYou can enable Search for Agents using the API, or by going to the dashboard in your zone page, under Quick Actions :\n\nSearch for Agents is available to all customers, including Free (with limits ). Once it’s enabled, Cloudflare will automatically create an AI Search instance, start crawling and indexing the content in your zone. Refer to our developer documentation   to understand how the crawling process works.\n\nYou can access your instance directly from this page, or by going to directly to your account’s AI  > AI Search  instances view:\n\nThe AI Search instance for your zone is created with default settings, but you can enable reranking or change configuration options like cache settings at any time. Refer to our documentation  for the full list of options.\n\nOnce AI Search indexes your content, you or any agent on the Internet can start using Search for Agents, subject to your domain settings (e.g. your bot management settings, AI Crawl Control  and web application firewall ( WAF ) configurations).\n\nDiscoverability\n\nSearch isn't much use if the agents don’t know it's there. To facilitate discoverability, Search for Agents automatically advertises the search endpoint on every page of your site.\n\nFor example, for HTML responses, we add metadata to the page's <head>:\n\n<meta name=\"agent:instructions\" content=\"Use this search API to find relevant content across this site with keywords or natural-language queries, instead of crawling individual pages. Results are returned in Markdown.\">\n<meta name=\"agent:endpoint\" content=\"https://developers.cloudflare.com/.well-known/search?q={query}\">\n<meta name=\"agent:method\" content=\"GET\">\n<meta name=\"agent:documentation\" content=\"https://developers.cloudflare.com/ai-search/how-to/search-for-agents/\">\n\nIf you also have Markdown for Agents  enabled, an agent requesting a page with Accept: text/markdown  receives the same information in YAML front matter:\n\n---\nagent:\ninstructions: \"Use this search API to find relevant content across this site with keywords or natural-language queries, instead of crawling individual pages. Results are returned in Markdown.\"\nendpoint: \"https://developers.cloudflare.com/.well-known/search?q={query}\"\nmethod: \"GET\"\ndocumentation: \"https://developers.cloudflare.com/ai-search/how-to/search-for-agents/\"\n---\n\nThe agent will easily pick up these instructions and know what to do next to search your site.\n\nSearching content\n\nOnce the agent knows that your site has a search endpoint, it can start using it:\n\n$ curl \"https://developers.cloudflare.com/.well-known/search?q=cloudflare+artifacts\"\n# Search results for: \"cloudflare artifacts\"\n\n## docs/artifacts/api/workers-binding/index.md (score: 1.000)\n\n# Workers binding · Artifacts · Cloudflare Artifacts docs\n\nCall Artifacts from a Worker binding.\n\n---\n\n## docs/artifacts/index.md (score: 0.951)\n\n# Artifacts · Cloudflare Artifacts docs\n\nStore, version, and share filesystem artifacts across Workers, APIs, and Git-compatible tools.\n...\n\nDepending on your AI Search configuration, the agent can also use natural language and ask questions to the search endpoint:\n\n$ curl --get \"https://developers.cloudflare.com/.well-known/search\" --data-urlencode \"q=What is the maximum push size for Cloudflare Artifacts?\"\n# Search results for: \"What is the maximum push size for Cloudflare Artifacts?\"\n\n## docs/artifacts/platform/limits/index.limits-cloudflare-artifacts-docs.md (score: 1.000)\n\n# Limits · Cloudflare Artifacts docs\nSection: Limits · Cloudflare Artifacts docs\n\ntitle: Limits\ndescription: Review Artifacts platform limits.\npcx_content_type: reference\nproducts:\n- artifacts\n\nLimits that apply to creating, importing, cloning, and pushing Artifacts are detailed below.\n\nThese limits cover naming rules, storage, request rates for control-plane and Git operations, and the size of each push.\n\nFeatureLimitControl-plane request rate2,000 requests per 10 seconds per Artifacts namespaceGit request rate, per artifact2,000 requests per 10 seconds per artifactMaximum storage per repository1 GB for repos created on or after 2026-09-29. Repos created earlier have a 10 GB limit. See size limit change.Maximum storage per account1 TB (can be raised on request)Maximum number of repositoriesUnlimitedMaximum number of namespacesUnlimitedNamespace name length2–63 charactersNamespace and repo namesStart with a letter or digit. Remaining characters may include letters, digits, ., _, and -.Maximum push size64 MiB per push. Includes all data sent in the push. Split larger work into several smaller pushes.Maximum objects per push50,000 objects, such as file versions, folders, and commits.Maximum file size32 MiB per file. Already-compressed files, like images, video, or zip archives, may be rejected slightly below 32 MiB.Maximum ref updates per push1 MiB of branch and tag updates per push.Maximum entries per folder100,000 files and subfolders in a single folder.\n...\n\nNote that this search endpoint returns retrieved content, in Markdown, not a generated answer. The agent already has an AI model and a conversation with the user; all it needs is the relevant information from your site, not another AI model's attempt to answer on its behalf.\n\nSupporting a new HTTP method: QUERY\n\nThe new HTTP QUERY method is an IETF Proposed Standard, incidentally coauthored by our own James Snell , published in June 2026 as RFC 10008 . A QUERY allows a client to send search criteria in a request body safely and idempotently without modifying server state. This makes it a good fit for AI search.\n\nThe adoption of QUERY is underway with major browser vendors discussing  the RFC and multiple frameworks and clients either adopting ( curl  and  undici , for example), or discussing  adoption.\n\nSearch for Agents supports QUERY natively either using a plain text or JSON request body:\n\n# Plain text\ncurl -X QUERY 'https://developers.cloudflare.com/.well-known/search' \\\n--data 'What is the maximum payload size per ingestion request in Basin Pipelines?'\n\n# JSON\ncurl -X QUERY 'https://developers.cloudflare.com/.well-known/search' \\\n--header 'Content-Type: application/json' \\\n--data '{\"q\":\"How many bulk import requests per minute does Email Service allow?\"}'\n\nSee it in action\n\nLet’s see it in action during an agentic session. Search for Agents is enabled for our Developer Documentation . When we open an OpenCode session and ask “What is the maximum push size for Cloudflare Artifacts?”, in the logs we can see the agent discovering the search endpoint on the homepage and then fetching /.well-known/search  with the question for the search results.\n\nThe answer comes back a few seconds later and it’s correct.\n\nOnce the agent discovers the search API…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Register recycling unlocks NVFP4 attention on RTX Blackwell",
+      "summary": "While data-center Blackwell GPUs are typically softmax-bound during attention, workstation-class SM120 cards (such as the RTX PRO 6000) are heavily MMA-bound on BF16 operations. SageAttention3 targets this by executing both $QK$ and $PV$ matrix multiplications in native NVFP4 with two-level scaling to avoid precision loss over narrow dynamic ranges. To prevent Tensor Cores from stalling during the synchronous sequential steps of MMA and online softmax, the authors implemented register recycling. Reclaiming score registers immediately after quantizing softmax outputs into NVFP4 allows overlapping the next tile's matrix multiply with current tile softmax work without paying for a second full score buffer.",
+      "why_it_matters": "Crucial low-level mechanics for running long-context models and diffusion attention efficiently on workstation-class Blackwell silicon.",
+      "reason": "Provides a low-level technical dive into register recycling to overcome NVFP4 attention bottlenecks during long-context inference on Blackwell.",
+      "item": {
+        "key": "developer.nvidia.com/blog/how-to-optimize-nvfp4-attention-on-nvidia-rtx-blackwell-through-register-recycling",
+        "source": "NVIDIA Developer",
+        "tags": [
+          "infra"
+        ],
+        "title": "How to Optimize NVFP4 Attention on NVIDIA RTX Blackwell Through Register Recycling",
+        "url": "https://developer.nvidia.com/blog/how-to-optimize-nvfp4-attention-on-nvidia-rtx-blackwell-through-register-recycling/",
+        "discussion_url": null,
+        "published": "2026-11-25T19:30:00Z",
+        "summary": "Attention can be a major bottleneck when serving world foundation models, where long sequences make inference computationally demanding. On NVIDIA Hopper and...",
+        "content": "Attention can be a major bottleneck when serving world foundation models, where long sequences make inference computationally demanding. On NVIDIA Hopper and NVIDIA Blackwell data center GPUs, FlashAttention3 and FlashAttention4 improve attention performance by overlapping matrix multiply-accumulate (MMA) operations through softmax within a thread block.\nHowever, these hardware-specific pipelines cannot be applied directly to the NVIDIA RTX PRO 6000 Blackwell Series (SM120), which uses a different Tensor Core architecture. For video generation models using BF16 inference, attention remains primarily MMA-bound on NVIDIA Blackwell RTX GPUs, while softmax is a major bottleneck in forward attention on Blackwell data center GPUs.\nIntroduced with NVIDIA Blackwell architecture, NVFP4 offers hardware-accelerated 4-bit matrix multiplication, enabling higher Tensor Core throughput and creating an opportunity to accelerate attention beyond BF16. But sustaining high throughput requires careful coordination of softmax, data movement, and intermediate storage. Dependencies between these stages can leave Tensor Cores idle, limiting how effectively the kernel uses the available compute.\nThis post explains how to accelerate NVFP4 attention on the SM120 architecture through register recycling and improved scheduling. By reclaiming score registers after the softmax outputs have been packed into NVFP4, the next tile’s matrix multiplication can overlap with remaining softmax work on the current tile. This creates a more efficient pipeline that reduces Tensor Core idle time and improves utilization without requiring a second full score buffer.\nReactor, a developer platform that provides global low-latency infrastructure and APIs for deploying and scaling real-time video, robotics, and world models, integrated this kernel in their production serving stack to serve real customer traffic and saw tremendous speedups. Their benchmarks are shared in this post.\nImproving throughput with NVFP4\nNVIDIA RTX Blackwell has lower BF16 matmul throughput compared to the data center variants. While data center workloads are bounded by softmax (FlashAttention4 tries to solve this through pipelining and exp2 emulation), the NVIDIA RTX Blackwell is bounded by MMA on BF16 Attention. Due to higher TFLOP/s for NVFP4, throughput can be improved to achieve better performance.\nAttention compute\nThe general attention computation and the two core matrix multiplications it involves are:\n- Query-Key matrix multiplication (\\(QK\\)): The first matmul in attention, \\(QKᵀ\\), where \\(Q\\) contains query vectors and \\(K\\) contains key vectors. It computes the attention scores used by softmax.\n- Attention-Weight Value matrix multiplication (\\(PV\\)): The second matmul in attention, \\(PV\\), where \\(P\\) contains softmax-derived attention weights and \\(V\\) contains value vectors. It combines the value vectors according to their attention weights to produce the output. In the tiled attention kernel discussed here, \\(P\\) contains unnormalized softmax weights, and final normalization is applied after the output has been accumulated across tiles (similar to FlashAttention).\nHow SageAttention3 accelerates attention using NVFP4\nSageAttention3 is a native NVFP4 attention mechanism specifically designed for NVIDIA RTX Blackwell streaming multiprocessor (SM) 120. It performs both \\(QK\\) and \\(PV\\) using NVFP4. Its primary innovation came from performing two-level scaling for \\(P\\).\nNVFP4 quantization generates two tensors: an NVFP4 data tensor and an FP8 scaling tensor. Because softmax outputs are bound to a narrow [0, 1] range, they can underutilize the NVFP4 dynamic range, resulting in accuracy degradation. Two-level scaling addresses this by first normalizing the values to fully utilize dynamic range before quantizing the result.\nSageAttention3 cooperative thread array stable state design\nThe SageAttention3 cooperative thread array (CTA) design is as follows:\n- The CTA uses four producer warps and eight consumer warps. For each N128 tile, consumers execute \\(QK\\), softmax and probability quantization, and \\(PV\\) in sequence.\n- While consumers perform softmax, scaling, and quantization, tensor-core activity has gaps. Video 1 illustrates this sequential execution.\n# Current SageAttention 3 CTA Execution (per N tile)\n# CTA Structure: 12 warps total (4 Producer, 8 Consumer)\nFor each N tile:\n    # 1. Producer Role: Data Loading\n    # Q is loaded once per M tile\n    AsyncLoad(Q)\n    # K, V, Scale Factors, and delta_s use 3-stage async TMA pipeline\n    AsyncLoad(K, V, Scale_Factors, delta_s)\n    # 2. Consumer Role: Dependency Chain (Serial Execution)\n    # 8 Consumer warps (256-thread MMA collective)\n    # A. QK Computation\n    Execute_QK_OMMA()\n    Apply_delta_s_correction()\n    # B. Softmax & Quantization\n    Apply_Masking()\n    Execute_Online_Softmax()\n    Execute_NVFP4_Probability_Quantization()\n    # C. PV Computation\n    Execute_PV_OMMA()\n    # Note: Execution is strictly serial per N tile\n    # No overlapping or independent fragments in flight\nThe following observations can be drawn from this CTA design and the parallel thread execution (PTX) and instruction set architecture (ISA) for NVIDIA RTX Blackwell GPUs:\nFirst, TMA Loads are bound to Shapes of 128×128, not utilizing the entire shape would mean underutilizing our GPU bandwidth.\nSecond, the NVIDIA Blackwell RTX OMMA operation remains constrained to m16, n8, k64 (where m and n represent LHS/RHS free dimensions, while k is the contraction axis), as specified by the PTX instruction mma.sync.aligned.kind::mxf4nvf4.block_scale.scale_vec::4X.m16n8k64.\nTo cover the full contraction dimension of k=128, two MMA instructions with k=64 must be issued. The current CTA design issues these instructions for \\(QK\\) in succession. Because MMA execution is synchronous, the issuing consumer warps wait for completion before proceeding to online softmax and intermediate quantization.\nThis means that the operations within…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "Anthropic rewrites its Messages API gateway in Rust using production traffic as an oracle",
+      "summary": "Facing an 1,800× traffic surge since 2024, Anthropic migrated its primary Messages API serving layer from Python to Rust. An initial attempt at an incremental rewrite that only parsed model outputs in Rust yielded an 8–10% CPU reduction, but cross-language overhead made the added complexity unjustifiable. Instead, they used Claude to generate the Rust implementation and resolved the generator-verifier gap by mirroring live production traffic into the Rust service as an oracle verifier. The finished Rust service cut per-request CPU usage by approximately 70% and dropped median time-to-first-token by 20% without downtime.",
+      "why_it_matters": "A realistic blueprint for using production shadowing as a verifier when rewriting performance-critical model gateway plumbing.",
+      "reason": "Details Anthropic's technical architecture and performance migration of their core model serving API gateway from Python to Rust.",
+      "item": {
+        "key": "anthropic.com/research/migrating-api-to-rust",
+        "source": "Anthropic Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "Migrating our Messages API to Rust",
+        "url": "https://www.anthropic.com/research/migrating-api-to-rust",
+        "discussion_url": null,
+        "published": "2026-11-25T00:00:00Z",
+        "summary": "How we migrated our Messages API from Python to Rust.",
+        "content": "Many problems have a generator–verifier gap: it’s often far easier to verify that a solution is correct than to come up with one. Sudoku is a classic example. It’s simple to check the solution (just count the numbers in each row, column, and box), but finding that solution can take a long time. Many ambitious Claude projects have relied on this gap: formalizing proofs in mathematics or migrating large, well-tested codebases are tasks Claude can take on as long as it has a reliable way to verify its work.\nBut as Claude has become more capable, it’s begun to take on projects in live systems, where generating the work is easier than verifying it. In these systems, users often rely on edge cases and quirks that fall outside the test suite, and it’s hard to write a definition of “correct” that covers everything. Without a reliable way to check Claude’s work, the migration of a live system is hard to trust—however quickly Claude can generate the code for it.\nWe ran into this problem when we migrated our Messages API from Python to Rust. This API is the primary way that customers—as well as our own apps, like Claude Code and Cowork—reach Claude. From early 2024 to fall 2026, API traffic grew roughly 1,800 times. Rust would allow us to use far less CPU per request. Claude wrote a first version of the API’s core request path in about a week. But building trust in the migration required us to find a way to verify that our Rust API was at parity with our production API. This proved hard for several reasons, including that the Python API continued changing throughout the migration, so parity was a moving target; Claude can reply nondeterministically to the same request, so a difference between two outputs didn’t necessarily mean a bug; and we couldn't read customer requests, so we weren't able to easily see where the two versions diverged.\nIn this post, we share how we turned the production Messages API itself into a verifier—and how that helped us test the new Rust version on production traffic, find where it differed, and automatically dispatch agents to fix those differences. This allowed us to ship an API on Rust that uses about 70% less CPU per request and cuts median time to first token by about 20% without ever taking the service offline or freezing feature development.\nWhy migrate?\nWe built the Messages API in 2023 and wrote it in Python, which was widely used internally for much of our research code. At first, it was simple. The Messages API passed requests to the model and sent back what the model wrote. (One engineer at the time called it “basically a request forwarder.”) But as the Messages API became more capable and deeply integrated with our codebases, it also developed shared dependencies with Python libraries that were owned by our research and inference teams, which made it hard to move. If we ever wanted to move to another language, it would mean building logging, metrics, and tools all over again.\nThis calculus gradually began to change. By late 2025, every Messages API request had to be validated, converted into the prompt, tokenized, and screened by our safety classifiers. As each reply arrived, the stream of tokens had to be sorted into text, thinking, and tool calls, and Python added overhead to every one of those steps each time it created an object, freed memory, or handed its work to the next task. Traffic eventually grew far beyond what the initial Python service was built for (Figure 1), and we quickly needed to find a way to make the service much more efficient.\nIncremental or all at once?\nFull rewrites of large production systems are often approached cautiously, for at least two reasons. First, there is no guarantee that test suites cover 100% of production code behavior, and rewriting it is risky. Second, the sheer effort required often makes such work intractable. (In 2024, after one of our engineers suggested migrating to Go or Rust, another temporarily settled the question: “We are not rewriting the API in go or rust!”)\nThe standard advice if you’re looking for performance gains is thus to rewrite only the parts that are slowing the system down, so that’s where we started. In Rust, we rewrote the code that parses a model’s output and called it from Python. This reduced the API’s CPU usage by about 8% to 10%. However, incremental solutions often incur added complexity, and it’s important to make sure that incremental improvements justify those costs. In our case, the gains didn’t justify the added complexity. Each token now crossed between Python and Rust three times (Figure 2), creating new sources of overhead.\nAs Claude became increasingly capable, we began to question whether the usual reasons to avoid a full migration still held. The effort required to undertake the project was dropping fast: by May 2026, Claude was writing more than 80% of the code Anthropic merged. We wondered if Claude could now help us write code that would empirically capture every behavior and fix in the production system. But the question became: how could we verify that the behavior of our migration was correct? Verification, not generation, had become the bottleneck.\nHow we verified the migration\nGeneral approaches\nTo verify the migration, we first needed to define what “correct” meant. You can do this in a few ways (Figure 3). If you’re lucky, you can simply write a rule. A theorem in mathematics is a precise statement, and a proof assistant (like Lean) can check each step of a proof against a fixed set of rules. Other times—and more frequently in software engineering—you define “correct” with a set of examples, like tests. For instance, when Bun moved from Zig to Rust, its test suite was written in TypeScript, so the same tests could judge both versions. In our case, neither approach was sufficient, so we used the existing system as an oracle to test parity during the migration. In this case, our existing system (the Messages API) kept changing. We were releasing new models and…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "CoT-Proxy investigates cross-format policy distillation to teach smaller agents long-horizon behaviors without replicating teacher reasoning lock-in.",
+      "item": {
+        "key": "arxiv:2611.33148",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "CoT-Proxy: Cross-Format Transfer for Distilling Long-Horizon Policies",
+        "url": "https://huggingface.co/papers/2611.33148",
+        "discussion_url": null,
+        "published": "2026-11-25T00:00:00Z",
+        "summary": "Reasoning models become long-horizon agents through reinforcement learning or, more cheaply, through fine-tuning on a stronger teacher's trajectories, which contain the teacher's chain-of-thought as well as its actions. The standard fine-tuning approach imitates both, yet the strongest teachers are closed models whose chain-of-thought is hidden behind an API. We show that the chain-of-thought can be left out altogether and that the long-horizon policy can be distilled from the teacher's actions alone. The student is trained on these trajectories with its reasoning block left empty, while a KL loss on a replay buffer of its own generations limits drift from its initial model. Surprisingly, the policy learned from these trajectories with an empty reasoning block carries over to inference with thinking enabled, where the student reasons in its own style while acting like the teacher, an effect we call cross-format transfer. Distilling the actions of Qwen3.6-27B raises the task success of Qwen3-4B on AppWorld from 7% to 18% and that of Qwen3-32B from 12% to 25%. We further introduce CoT-proxies, short summaries of the teacher's reasoning placed after the empty reasoning block, which…",
+        "content": "",
+        "score": 14.0,
+        "comments": 2,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Hugging Face shared engineering notes on tuning Inkling 2 Mini inference throughput on a single RTX PRO 6000 workstation GPU.",
+      "item": {
+        "key": "huggingface.co/blog/inkling-2-mini-inference-hillclimb",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "Hill-climbing Inkling 2 Mini inference on one RTX PRO 6000",
+        "url": "https://huggingface.co/blog/inkling-2-mini-inference-hillclimb",
+        "discussion_url": null,
+        "published": "2026-11-25T00:00:00Z",
+        "summary": "",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Prism-ml released Ternary-Bonsai-2.5-27B-GGUF, a 27B parameter ternary quantized checkpoint targeting llama.cpp runtime deployments.",
+      "item": {
+        "key": "huggingface.co/prism-ml/Ternary-Bonsai-2.5-27B-GGUF",
+        "source": "HF Trending Models",
+        "tags": [
+          "models"
+        ],
+        "title": "prism-ml/Ternary-Bonsai-2.5-27B-GGUF (text-generation)",
+        "url": "https://huggingface.co/prism-ml/Ternary-Bonsai-2.5-27B-GGUF",
+        "discussion_url": null,
+        "published": null,
+        "summary": "Trending model. Task: text-generation. Library: llama.cpp. Created 2026-11-24. 331 likes, 59366 downloads.",
+        "content": "",
+        "score": 290.0,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "LangChain Core 1.8.5 patched provider message ID reuse across streaming chunks and clarified v3 runtime warning semantics.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.5",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-core==1.8.5",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.5",
+        "discussion_url": null,
+        "published": "2026-11-25T21:52:41Z",
+        "summary": "Changes since langchain-core==1.8.4\n\nrelease(core): 1.8.5 ( #42103 )\n\nfix(core): reuse provider message id on later stream chunks ( #42050 )\n\ndocs(core): clarify v3 runtime warning behavior ( #42040 )\n\ndocs(core): clarify supported streaming event APIs ( #42038 )\n\nrelease(standard-tests): 1.2.0 ( #41996 )\n\nrelease(text-splitters): 1.2.0 ( #41998 )\n\nchore(deps): bump mistune from 3.3.3 to 3.3.4 in /libs/core ( #41968 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "An academic Hacker News demo showcases an agent skill that automates iterative algorithm code optimization using falsifiable experimental hypotheses.",
+      "item": {
+        "key": "chszlab.github.io/AgenticAlgorithmEngineering",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Show HN: An agent skill that optimizes code with falsifiable hypotheses",
+        "url": "https://chszlab.github.io/AgenticAlgorithmEngineering/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50611593",
+        "published": "2026-11-23T14:02:15Z",
+        "summary": "Hi all, I am a professor in algorithm engineering. In our field we use a method of falsifiable hypothesis testing to improve algorithms. More precisely, this is a cycle consisting of designing an algorithm, analyzing the algorithm, then implementing it and lastly testing it using experiments on real-world instances which leads to designing new algorithms based on the current observations.\nWe put this methodology into an AI skill which runs in an infinite loop. This skill first creates a performance profile, then produces a hypothesis which is implemented and tested automatically using an AI agent. If the change improved the performance and tests negotiated with the user verify it, the change is kept, if not it is discarded. Everything is tracked via version control.\nPart of the output is a pdf report which documents all the code changes and progress over time as well as individual patches to only merge specific patches if one chooses to do so. Moreover, this comes with a knowledge-base in which we collect global optimization knowledge, thereby improving the skill over time.\nWe ran this on a wide range of public code bases, e.g. our KaHIP graph partitioning toolkit, which improved…",
+        "content": "",
+        "score": 70.0,
+        "comments": 9,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      }
+    },
+    {
+      "line": "The ACAP paper introduces asynchronous coding agents for robotics, delegating robot control across a team of persistent sub-agents to avoid single-thread execution blocks.",
+      "item": {
+        "key": "arxiv:2611.31205",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "ACAP: Asynchronous Coding Agents for Efficient Robot Control",
+        "url": "https://huggingface.co/papers/2611.31205",
+        "discussion_url": null,
+        "published": "2026-11-25T00:00:00Z",
+        "summary": "Coding agents can construct and revise robot behavior during execution, but using one agent for the whole robot can delay otherwise independent work. We introduce Asynchronous Coding Agents as Policy (ACAP), an asynchronous framework that organizes one robot as a team of persistent agents. Each member reasons and acts for a configurable control group, such as an arm with its gripper or the torso and chassis, enabling asynchronous reasoning and execution. However, different robot components often have physical dependencies that require coordination. To address this challenge, ACAP introduces a hyper-agent that assigns tasks, coordinates dependencies, and dynamically allocates control between the lead and member agents. This allows independent work to progress concurrently while supporting tightly coupled manipulation when necessary. Across 72 real-world rollouts covering 25 task/platform settings, ACAP reduces task-balanced time cost by 28.2% compared with a single-agent Direct Policy, with improvements across Fully Parallel, Parallel-Sequential, and Collaborative tasks. Across all eight Collaborative settings, ACAP also achieves lower mean time cost than Fixed Delegation, where…",
+        "content": "",
+        "score": 62.0,
+        "comments": 3,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Keep your kernels bit-exact and your agents skeptical of their own first guesses.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Satellite compute",
+      "headline": "FCC Approves SpaceX Plan for 1 Million AI Satellites",
+      "blurb": "The FCC authorized SpaceX to deploy up to one million AI chip-equipped satellites for its Starmind orbital data center initiative.",
+      "item": {
+        "key": "theverge.com/science/1042278/spacex-fcc-starmind-ai-space-data-centers",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "FCC signs off on SpaceX’s plan to put up to 1 million data center satellites into space",
+        "url": "https://www.theverge.com/science/1042278/spacex-fcc-starmind-ai-space-data-centers",
+        "discussion_url": null,
+        "published": "2026-11-25T17:44:51Z",
+        "summary": "In an announcement on Wednesday, the FCC says it authorized SpaceX to deploy up to 1 million AI chip-equipped satellites as part of the Elon Musk-owned company's \"Starmind\" initiative. With several others also pursuing the idea of putting AI data centers in space, including Google and Blue Origin, this is the first approval the agency […]",
+        "content": "In an announcement on Wednesday , the FCC says it authorized SpaceX to deploy up to 1 million AI chip-equipped satellites as part of the Elon Musk-owned company's \"Starmind\" initiative . With several others also pursuing the idea of putting AI data centers in space , including Google and Blue Origin, this is the first approval the agency has granted for a full \"constellation\" of AI satellites.\n\nThe FCC's approval requires SpaceX to deploy at least one satellite by 2033, and meet the 1 million satellite milestone by 2040. The FCC also deferred SpaceX's request to dispose of satellites located above 600km in space \"graveyard\" orbits , rather than …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Media policy",
+      "headline": "Tidal to Ban AI Music and Delete 29 Million Songs",
+      "blurb": "Starting December 9, Tidal will ban AI-generated music, deleting roughly 29 million tracks and rejecting up to 85,000 submissions per day.",
+      "item": {
+        "key": "theverge.com/entertainment/1041362/tidal-ai-music-ban",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "Tidal will start banning AI-generated music next month",
+        "url": "https://www.theverge.com/entertainment/1041362/tidal-ai-music-ban",
+        "discussion_url": null,
+        "published": "2026-11-24T17:17:09Z",
+        "summary": "Tidal is officially banning AI-generated music on December 9th. As a result of this change, Tidal will delete around 29 million AI-generated songs and reject an estimated 80,000 to 85,000 tracks per day, according to Tidal music lead Robert Andersen. The move comes just months after Tidal began labeling and demonetizing tracks identified as 100 […]",
+        "content": "Tidal is officially banning AI-generated music on December 9th. As a result of this change, Tidal will delete around 29 million AI-generated songs and reject an estimated 80,000 to 85,000 tracks per day, according to Tidal music lead Robert Andersen .\n\nThe move comes just months after Tidal began labeling and demonetizing tracks identified as 100 percent AI-generated. In a post on X, Andersen says Tidal needed to take a more \"drastic\" measure, as AI music made up 43 percent of the tracks distributed to the platform in the last 90 days. \"We believe this will resonate with both artists and listeners alike, as 96% of all AI-generated songs recei …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Agent infrastructure",
+      "headline": "Cloudflare Introduces Search for AI Agents",
+      "blurb": "Cloudflare launched a toggle that indexes site content and adds a discoverable API with native HTTP QUERY support for AI agents.",
+      "item": {
+        "key": "blog.cloudflare.com/search-for-agents",
+        "source": "Cloudflare AI",
+        "tags": [
+          "infra"
+        ],
+        "title": "Introducing Search for Agents",
+        "url": "https://blog.cloudflare.com/search-for-agents/",
+        "discussion_url": null,
+        "published": "2026-11-25T14:00:00Z",
+        "summary": "Flip one toggle to make your site searchable by AI agents — complete with automatic content indexing, a discoverable search API, and native HTTP QUERY support.",
+        "content": "AI Search , our service that indexes your content and lets you add search to any application or agent without having to build an entire retrieval infrastructure, has supported adding your website  as a data source for a while now, automatically crawling, converting and indexing its pages.\n\nStill, setting up an AI Search instance for your website requires manually creating and configuring it initially, and then doing all the integration work to get the search endpoints available from your domain and to make sure that agents know where to find the index and know how to use it.\n\nToday we're introducing Search for Agents , which puts that setup behind a toggle in your Cloudflare dashboard. Turn it on for your zone, and our service will create your AI Search instance, start indexing your content, and make search discoverable and available from your own domain.\n\nHow it works\n\nThe idea follows naturally from Markdown for Agents , where Cloudflare's network converts any HTML page to Markdown in real time for enabled zones using content negotiation headers. Similarly, Search for Agents leverages the power of AI Search by automatically creating an index for your zone and exposing APIs that any AI agent can discover and use to search your website, under your domain, all done at the network level.\n\nYou can enable Search for Agents using the API, or by going to the dashboard in your zone page, under Quick Actions :\n\nSearch for Agents is available to all customers, including Free (with limits ). Once it’s enabled, Cloudflare will automatically create an AI Search instance, start crawling and indexing the content in your zone. Refer to our developer documentation   to understand how the crawling process works.\n\nYou can access your instance directly from this page, or by going to directly to your account’s AI  > AI Search  instances view:\n\nThe AI Search instance for your zone is created with default settings, but you can enable reranking or change configuration options like cache settings at any time. Refer to our documentation  for the full list of options.\n\nOnce AI Search indexes your content, you or any agent on the Internet can start using Search for Agents, subject to your domain settings (e.g. your bot management settings, AI Crawl Control  and web application firewall ( WAF ) configurations).\n\nDiscoverability\n\nSearch isn't much use if the agents don’t know it's there. To facilitate discoverability, Search for Agents automatically advertises the search endpoint on every page of your site.\n\nFor example, for HTML responses, we add metadata to the page's <head>:\n\n<meta name=\"agent:instructions\" content=\"Use this search API to find relevant content across this site with keywords or natural-language queries, instead of crawling individual pages. Results are returned in Markdown.\">\n<meta name=\"agent:endpoint\" content=\"https://developers.cloudflare.com/.well-known/search?q={query}\">\n<meta name=\"agent:method\" content=\"GET\">\n<meta name=\"agent:documentation\" content=\"https://developers.cloudflare.com/ai-search/how-to/search-for-agents/\">\n\nIf you also have Markdown for Agents  enabled, an agent requesting a page with Accept: text/markdown  receives the same information in YAML front matter:\n\n---\nagent:\ninstructions: \"Use this search API to find relevant content across this site with keywords or natural-language queries, instead of crawling individual pages. Results are returned in Markdown.\"\nendpoint: \"https://developers.cloudflare.com/.well-known/search?q={query}\"\nmethod: \"GET\"\ndocumentation: \"https://developers.cloudflare.com/ai-search/how-to/search-for-agents/\"\n---\n\nThe agent will easily pick up these instructions and know what to do next to search your site.\n\nSearching content\n\nOnce the agent knows that your site has a search endpoint, it can start using it:\n\n$ curl \"https://developers.cloudflare.com/.well-known/search?q=cloudflare+artifacts\"\n# Search results for: \"cloudflare artifacts\"\n\n## docs/artifacts/api/workers-binding/index.md (score: 1.000)\n\n# Workers binding · Artifacts · Cloudflare Artifacts docs\n\nCall Artifacts from a Worker binding.\n\n---\n\n## docs/artifacts/index.md (score: 0.951)\n\n# Artifacts · Cloudflare Artifacts docs\n\nStore, version, and share filesystem artifacts across Workers, APIs, and Git-compatible tools.\n...\n\nDepending on your AI Search configuration, the agent can also use natural language and ask questions to the search endpoint:\n\n$ curl --get \"https://developers.cloudflare.com/.well-known/search\" --data-urlencode \"q=What is the maximum push size for Cloudflare Artifacts?\"\n# Search results for: \"What is the maximum push size for Cloudflare Artifacts?\"\n\n## docs/artifacts/platform/limits/index.limits-cloudflare-artifacts-docs.md (score: 1.000)\n\n# Limits · Cloudflare Artifacts docs\nSection: Limits · Cloudflare Artifacts docs\n\ntitle: Limits\ndescription: Review Artifacts platform limits.\npcx_content_type: reference\nproducts:\n- artifacts\n\nLimits that apply to creating, importing, cloning, and pushing Artifacts are detailed below.\n\nThese limits cover naming rules, storage, request rates for control-plane and Git operations, and the size of each push.\n\nFeatureLimitControl-plane request rate2,000 requests per 10 seconds per Artifacts namespaceGit request rate, per artifact2,000 requests per 10 seconds per artifactMaximum storage per repository1 GB for repos created on or after 2026-09-29. Repos created earlier have a 10 GB limit. See size limit change.Maximum storage per account1 TB (can be raised on request)Maximum number of repositoriesUnlimitedMaximum number of namespacesUnlimitedNamespace name length2–63 charactersNamespace and repo namesStart with a letter or digit. Remaining characters may include letters, digits, ., _, and -.Maximum push size64 MiB per push. Includes all data sent in the push. Split larger work into several smaller pushes.Maximum objects per push50,000 objects, such as file versions, folders, and commits.Maximum file size32 MiB per file. Already-compressed files, like images, video, or zip archives, may be rejected slightly below 32 MiB.Maximum ref updates per push1 MiB of branch and tag updates per push.Maximum entries per folder100,000 files and subfolders in a single folder.\n...\n\nNote that this search endpoint returns retrieved content, in Markdown, not a generated answer. The agent already has an AI model and a conversation with the user; all it needs is the relevant information from your site, not another AI model's attempt to answer on its behalf.\n\nSupporting a new HTTP method: QUERY\n\nThe new HTTP QUERY method is an IETF Proposed Standard, incidentally coauthored by our own James Snell , published in June 2026 as RFC 10008 . A QUERY allows a client to send search criteria in a request body safely and idempotently without modifying server state. This makes it a good fit for AI search.\n\nThe adoption of QUERY is underway with major browser vendors discussing  the RFC and multiple frameworks and clients either adopting ( curl  and  undici , for example), or discussing  adoption.\n\nSearch for Agents supports QUERY natively either using a plain text or JSON request body:\n\n# Plain text\ncurl -X QUERY 'https://developers.cloudflare.com/.well-known/search' \\\n--data 'What is the maximum payload size per ingestion request in Basin Pipelines?'\n\n# JSON\ncurl -X QUERY 'https://developers.cloudflare.com/.well-known/search' \\\n--header 'Content-Type: application/json' \\\n--data '{\"q\":\"How many bulk import requests per minute does Email Service allow?\"}'\n\nSee it in action\n\nLet’s see it in action during an agentic session. Search for Agents is enabled for our Developer Documentation . When we open an OpenCode session and ask “What is the maximum push size for Cloudflare Artifacts?”, in the logs we can see the agent discovering the search endpoint on the homepage and then fetching /.well-known/search  with the question for the search results.\n\nThe answer comes back a few seconds later and it’s correct.\n\nOnce the agent discovers the search API…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 11,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 28,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 26,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 917,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1430,
+      "kept": 8,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 290,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 203,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 7,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 6,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 215,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-23T01:26:16.272722Z",
+    "candidates": 126,
+    "triaged": 126,
+    "enriched": 6,
+    "headline_candidates": 129,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.7-flash (key 1)",
+      "gemini-3.7-flash (key 1)"
+    ],
+    "seconds": 1084.7,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 33562,
+      "output_tokens": 8065,
+      "cost_usd": 0.055415
+    }
+  }
+}
