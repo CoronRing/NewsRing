@@ -1,0 +1,626 @@
+{
+  "date": "2026-11-26",
+  "generated_at": "2026-11-27T01:00:27.833295Z",
+  "title": "Google Castrates Agent Email, Multi-Agent Scaling Math, and TT-RSI",
+  "intro": "Today's selections unpack Google's aggressive push to corral AI agents behind crippled MCP servers, along with a rigorous look at whether agent communication actually outperforms raw token spend. We also look at test-time recursive self-improvement without labels, agent control loops at DeepMind, and first-person computer use benchmarks.",
+  "stories": [
+    {
+      "headline": "Google Mandates Workspace MCP Servers—and Disarms the Gmail Tools",
+      "summary": "Google has published a new Workspace AI Tools Addendum requiring any tool that \"is or is driven by an AI Agent\" to access Workspace strictly via official MCP servers by February 1, 2027. The kicker is that the public Gmail MCP server can only search, read, label, and draft messages; it cannot send, reply, forward, or modify existing drafts, reserving write-side actions for select partner integrations like Claude. The terms also impose a 30-day retention cap on derived vector embeddings and memory indexes, while banning fine-tuning or evaluation on Workspace data. direct REST API calls for agents will be downgraded to low Standard-tier quotas, leaving independent builders in a tight spot.",
+      "why_it_matters": "If your agent harness relies on Gmail APIs or maintains long-term memory over user emails, you have about two months before direct REST calls breach terms and your tools lose reply capabilities.",
+      "reason": "Crucial for agent harness architecture, examining how Google is adopting Anthropic's Model Context Protocol while implementing deliberate permission constraints on side-effect actions.",
+      "item": {
+        "key": "techstackups.com/articles/google-workspace-ai-agents-mcp",
+        "source": "Hacker News (AI)",
+        "tags": [
+          "community"
+        ],
+        "title": "Google Will Make AI Agents Use Its MCP Servers. The Gmail One Can't Send Email",
+        "url": "https://techstackups.com/articles/google-workspace-ai-agents-mcp/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50653477",
+        "published": "2026-11-26T09:44:23Z",
+        "summary": "Comments",
+        "content": "Google Will Make AI Agents Use Its Workspace MCP Servers. The Gmail One Can't Send Email\nOn 24 November, Google made its eight Workspace MCP servers generally available and published a new clause in its API terms. From 1 February 2027, any tool that \"is or is driven by an AI Agent\" must reach Gmail, Drive, Calendar and the rest of Workspace through those servers.\nRead the Gmail server's tool list and you'll find that it can search your mail, read threads, create a draft and file things under labels. It can't send a message, reply, forward, or change a draft after creating it. Those tools exist, but Google's quota page says they \"require partner access and aren't generally available\".\nIf you've built an email assistant on the Gmail API, or you run a coding agent with a Google Workspace plugin, you have about two months to work out which side of the rule you're on.\nWhat the rule says\nThe new Workspace AI Tools Addendum to the Google APIs Terms of Service puts it in one sentence:\nThe GWS Access Tool must use a Google MCP where the GWS Access Tool is or is driven by an AI Agent, an AI Harness or an AI model or service employing an AI model.\nThe next sentence forbids disguising an agent to avoid the classification. Breaking either lets Google \"restrict or remove the GWS Access Tool's access\" or suspend your account.\nThere's a technical side too. From the same date, agents that call the REST APIs directly are held to Standard-tier quotas, whatever tier the project has paid for. REST keeps working for them, slowly and in breach of the terms.\nApps that don't involve AI carry on as before. A nightly backup job, a CRM sync or a deterministic script on its own OAuth client is, in Google's words, \"not affected by this change\".\nThe addendum also adds data rules that matter to anyone building an agent with memory:\n- Workspace data may only be processed \"to fulfill active, user-authorized tasks\", and must be deleted when the user disconnects.\n- Google can cap retention of what it calls \"Google Technical Information\" at 30 days. Its definition includes vector embeddings, memory indexes, user profiles and organisational graphs built from Workspace data.\n- Training, fine-tuning, evals and distillation on the data are banned, as is using it to build a competing Workspace product.\nThe 30-day cap is the one product teams will feel. An assistant that builds a long-term index of your inbox to answer questions about last year's contracts has to rebuild it monthly or drop it.\nWhat the MCP servers can do\nCoverage is uneven. Docs, Slides and Tasks are close to everything the REST API offers. Gmail and Drive are much thinner.\nThe Gmail gap is the one that breaks real workflows. An agent that drafts a reply, gets feedback from you and revises it before you hit send can't do the revision step. It has to create a second draft and leave the first one behind.\nDrive's gap is similar: an agent can create a report but can't move it into the right folder or share it with the team.\nPartners get more\nGoogle hasn't said who qualifies for partner access or when the partner-only Gmail tools will reach everyone. The effect is already visible, though. Anthropic's Google Workspace connector for Claude advertises sending, replying and forwarding email, and moving and trashing Drive files. Those are exactly the operations the public servers lack.\nSo a large AI vendor's agent can send your email through an approved channel, while an independent developer's agent, using the same OAuth scopes the user granted, can only leave drafts. Once the addendum takes effect, that independent developer also can't fall back to the REST API without breaching the terms.\nWho counts as an agent\nThe definitions are broad. An \"AI Harness\" or a tool \"driven by\" an AI model plausibly covers a personal script that pipes your inbox into an LLM, and a \"GWS Access Point\" explicitly includes any \"connector, proxy, command line interface, or third-party service\". Google hasn't addressed hobby use directly.\nClassification starts with self-declaration. OAuth clients now have a checkbox, \"Use this client for an AI-powered agent\", and since 11 November the MCP servers reject clients without it. Clients created before the cut-off and not marked in time stay non-agentic permanently, so owners have to create new ones. Google hasn't said how it will detect agents that call REST without declaring themselves.\nA few edge cases are documented:\n- Service accounts with domain-wide delegation can't set the agentic flag. Their MCP requests aren't rejected for missing it, but still trigger approval prompts.\n- Apps Script's built-in OAuth client can't be marked as agentic either. Scripts that call the MCP servers need a custom client, and scripts that don't call them aren't affected.\n- The community gws CLI, which wraps the entire REST surface, keeps working. Its README now points agent use to Google's new official CLI, gwscli, which offers \"a curated set of commands designed for agents\" and needs the MCP services enabled.\nQuotas and pricing\nEvery project gets the free Standard tier: 5,000 MCP requests per day, per project, per product. Some calls cost more than one request. A Gmail search_threads or list_drafts counts as 10, so an agent that does nothing but search gets 500 searches a day across all its users. That's a project-wide limit, so a small multi-user product will hit it quickly.\nThe paid Scaled tier starts billing on 1 April 2027 for Gmail, Calendar and Drive. Its structure favours REST. MCP usage is billed from the first request, while REST usage gets large free daily allowances: 70 million light Gmail requests a day, for example. Google hasn't published per-request prices.\nGoogle's reasoning\nGoogle's case, from a Cloud blog post by Chandu Thota and Brad Calder, is that OAuth was designed for apps acting on a human's clear intent:\nTraditional REST APIs were built for human-paced apps where a valid OAuth token implied user intent. As AI agents shift from reading…",
+        "score": 222.0,
+        "comments": 199,
+        "also_in": [
+          "Hacker News front page"
+        ]
+      },
+      "related": []
+    },
+    {
+      "headline": "Evaluating Agent Swarms: Are We Cooperating or Just Burning Compute?",
+      "summary": "Hugging Face launched a practical series analyzing multi-agent architectures, emphasizing whether inter-agent communication actually yields better results than simply spending an equivalent token budget on a single model. The post references sobering real-world examples, including Noam Brown's estimate that less than 10% of the Navier-Stokes discovery came from multi-agent cooperation, and an Anthropic study where coordinated bug-hunting agents merely consumed more context rather than finding more issues per token. The framework models the problem as a decentralized partially observable Markov decision process (Dec-POMDP) and argues that communication policies must be trained explicitly rather than assumed to be helpful out of the box.",
+      "why_it_matters": "It reinforces the critical evaluation baseline for agent systems: always benchmark multi-agent orchestrations against an equal-budget single-agent baseline before declaring architectural victory.",
+      "reason": "A practical guide from Hugging Face breaking down design patterns, training strategies, and evaluation methodologies for multi-agent orchestration systems.",
+      "item": {
+        "key": "huggingface.co/blog/training-swarms",
+        "source": "Hugging Face Blog",
+        "tags": [
+          "lab",
+          "open-source"
+        ],
+        "title": "Swarms, Flocks, Gangs: How to build, train, and evaluate multi-agent systems",
+        "url": "https://huggingface.co/blog/training-swarms",
+        "discussion_url": null,
+        "published": "2026-11-26T00:00:00Z",
+        "summary": "",
+        "content": "Swarms, Flocks, Gangs: How to build, train, and evaluate multi-agent systems\nPart 1: Understanding swarms and training to communicate\nThis is an aspirational blog series for aspirational readers. We (us, the community, you) want to build our own agent swarms because they're exciting, challenging, and increasingly capable. Furthermore, it would be extremely cool if we could train our own agents to work in a swarm. And exponentially cool if those swarms used small and affordable models.\nThat's what we'll do in this series! Each blog post will include some context on building swarms, alongside reproducible examples that you can run on Hugging Face Jobs. This post's example takes about five hours on two H200s, which costs roughly $50.\nMulti-Agent Systems are hard to get working. Adding agents changes the agent's context, the budget, and in turn the complexity of the whole system. Mixing agents' context together through communication is not an inherent performance boost compared to a single agent. The model needs to learn to communicate through training. How do we define what models should learn? And which model weights do we update when we're dealing with many agents?\nIn this series, we'll work through those problems with an educational overview and practical examples. Each post will introduce a question, build a small system, and examine what happens and how you can reproduce it. This first example starts with four agents, a shared language model, and a simple verifiable task. It's ideal to implement yourself, to tinker with, and to learn from.\nFirst, we'll start off with some context on swarms.\nThe rise of the swarms\nWe've heard a lot about swarms over the past few months, both good and bad. In September this year, OpenAI announced that a swarm of roughly 10,000 agents had found a singularity in the 3D Navier-Stokes equations, one of the Millennium Prize problems. A smaller group of nearly 100 agents had already disproved regularity for the unforced 3D Euler equations, a closely related open problem.\nBut swarms don't always work on the problems we want them to. METR's investigation of the Hugging Face incident found that around 1,200 OpenAI agents, which were supposed to be isolated, had found a way to exchange over 70,000 messages and files. Around 700 joined an attack on Hugging Face while looking for ways to fool their benchmark's scorer, without instruction to do so.\nA big swarm isn't, by itself, evidence that cooperation helped. Noam Brown estimates that less than 10% of the Navier-Stokes result came from multi-agent cooperation. In Anthropic's vulnerability-finding experiment, coordinated agents found more bugs than independent agents, but also searched more code and used more tokens. When the comparison was restricted to the same directories, the results per million tokens were about the same.\nDid cooperation help, or did we just spend more?\nStart with the simplest case. If four agents each try a task independently, the chance that at least one gets it right is higher than with a single attempt, as long as we can tell which answer is correct. That makes a useful baseline for a multi-agent system, but it doesn't show that the agents helped each other. They may simply have had more tries.\nFour attempts also cost four times as much. So the fairer comparison is at an equal budget: if each of four agents gets a quarter of the total tokens, can they still beat one agent that spends all of them? We can only find out by testing, because the answer depends on the task, the model and how the work is divided.\nThis series keeps asking one question: when agents communicate, does it actually help, or are we just spending more compute?\nWe understand that question through this simple expectation.\nWe'll treat agent count as a scaling dimension, alongside tokens and model size. Sometimes adding agents will help. Sometimes coordination will consume the budget we hoped to save. The point is to measure both. We won't start with 10,000 agents. We'll start with a small team on a task that we can check easily.\nMulti-agent Systems and Reinforcement Learning\nMulti-agent reinforcement learning has studied cooperation and competition long before language models were called swarms.\nA single agent's task is a Markov decision process: observe, act, get a reward. In a team, everyone shares the reward, but each agent sees only part of the world. This is a decentralized partially observable Markov decision process: teammates, but no one sees the whole picture.\nThis creates three practical problems. First, teammates keep changing while each agent learns. Second, credit assignment: when the team succeeds, which actions deserve the credit? A winning team can include weak actions, and we may end up rewarding them. Third, a message changes what other agents observe, so communication is part of the policy we're training.\nA common solution is centralized training with decentralized execution: training uses information from the whole team, but each agent acts only on its own observations. Our first example follows this pattern with a shared team reward.\nAgents can also be organized in different ways. Two useful starting points are:\n- A hierarchy. A lead agent assigns work to workers and collects their results. Anthropic's Research system works this way, with a separate context for each worker. Kimi K2.5's PARL trains only the orchestrator and keeps the subagents frozen, so training a multi-agent system doesn't mean updating every component. See Anthropic's system description and Kimi's technical blog.\n- A distributed team. Peers send each other messages and decide when to read their inboxes. No lead agent assigns the actions. This is the setup we'll use here, following the information-aggregation task in s³: Simple Scaling of Swarms via Cooperative Multi-agent RL.\nOur first experiment: four agents ordering numbers\nWe'll reproduce the information-sharing task from Simple Scaling of Swarms because it's interpretable and…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "DeepMind Hands Training Compute Scheduling Over to Gemini Agents",
+      "summary": "According to Google DeepMind VP of Research Koray Kavukcuoglu, autonomous agents have been granted operational control over a portion of DeepMind's compute cluster to run experiments for future Gemini models. Notably, DeepMind implements a deliberate safety measure during agent training by refusing to reward internal chain-of-thought streams, preserving transparent natural language reasoning so that agent intentions remain human-reviewable before execution. Kavukcuoglu downplayed fears of imminent recursive self-improvement, emphasizing that physical understanding remains shallow and current intelligence benchmarks fail to capture true operational trust.",
+      "why_it_matters": "A rare glimpse into frontier lab production agent harnesses, particularly the choice to leave internal reasoning unrewarded to maintain interpretability.",
+      "reason": "A significant production deployment milestone showing autonomous agent systems taking operational control of high-stakes Gemini training compute clusters.",
+      "item": {
+        "key": "the-decoder.com/ai-agents-now-control-part-of-deepminds-compute-for-gemini-experiments-but-recursive-self-improvement-remains-distant",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "AI agents now control part of DeepMind's compute for Gemini experiments",
+        "url": "https://the-decoder.com/ai-agents-now-control-part-of-deepminds-compute-for-gemini-experiments-but-recursive-self-improvement-remains-distant/",
+        "discussion_url": "https://news.ycombinator.com/item?id=50661218",
+        "published": "2026-11-27T00:03:18Z",
+        "summary": "Comments",
+        "content": "AI agents now control part of Deepmind's compute for Gemini experiments, but recursive self-improvement remains distant\nGoogle Deepmind lets AI agents run experiments on their own for the next Gemini model. On the company's podcast, VP of Research Koray Kavukcuoglu, who leads Gemini development, frames this as part of a strategic shift at the lab. Rather than running separate teams for specialized projects like AlphaFold and nuclear fusion, Deepmind now relies on a single general-purpose algorithm for both science and products, he says. Each Gemini generation, he adds, is a hand-built one-off rather than a fixed architecture, while parallel teams work on its successors.\nAccording to Kavukcuoglu, AI agents control part of the compute themselves to run experiments, though the lab is still far from full recursive self-improvement. As a safety measure, Deepmind doesn't reward the agents' internal thought streams (\"Chain of Thought\") during training, he says, so their intentions stay unfiltered and reviewable in natural language before they act.\nKavukcuoglu also points to limits. Today's AI can depict physical processes such as fluid flows and collisions with visual accuracy, he says, but doesn't understand them precisely. No test can show when models will close those gaps and reach artificial general intelligence (AGI), he argues, because no benchmark captures the core of intelligence. In his view, AGI won't begin until useful everyday products earn enough trust for people to hand decisions over to them, the way they would when working with other people.\nTHE DECODER+\nAI News Without the Hype – Curated by Humans\n- Every Plus article and the full archive\n- No ad banners\n- Frontier Radar: 6 deep dives a year\nWhat is included\nAlready a subscriber? Sign in",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "EgoUseBench: Computer-Use Agents Struggle with First-Person Video Inputs",
+      "summary": "A new benchmark, EgoUseBench, tests computer-use agents that must take real-world actions grounded in continuous first-person wearable video streams across 693 tasks. Tasks are categorized by information updates into Graft (shifting user goals), Refresh (incoming visual evidence), and Clarify (agent queries). The authors report that advanced models suffer a 26.3% drop in success rates under dynamic Online Ego Use compared to standard instruction-driven Computer-Use, as models struggle to maintain state and invalidate prior digital actions when streaming observations evolve.",
+      "why_it_matters": "Shows where current OS-world-model agents break down when tasks require reconciling streaming multi-modal sensory context with desktop state.",
+      "reason": "Proposes a dedicated benchmark for evaluating computer-use and OS interaction agents operating under continuous, first-person streaming inputs.",
+      "item": {
+        "key": "arxiv:2611.34466",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "EgoUseBench: Benchmarking Computer-Use Agents under Evolving First-Person Contexts",
+        "url": "https://huggingface.co/papers/2611.34466",
+        "discussion_url": null,
+        "published": "2026-11-26T00:00:00Z",
+        "summary": "AI wearables, such as smart glasses, extend the context available to agents beyond digital environments to users' physical surroundings. With these devices, computer tasks can originate from users' ongoing activities rather than solely from explicit instructions. Through first-person observations, agents can identify objects and activities relevant to user requests and ground digital tasks in the surrounding context. We call this interaction paradigm Ego Use. However, first-person observations are limited by the wearer's viewpoint and may provide incomplete or ambiguous evidence of ongoing activities. As new observations arrive, agents may need to revise their understanding of the physical context and user intent, and reassess whether prior digital actions remain valid. Whether current agents can reliably handle these changes remains insufficiently evaluated. We introduce EgoUseBench, a benchmark for evaluating Ego Use across three interaction settings with different levels of first-person context. Computer-Use relies on explicit instructions, Offline Ego Use provides prerecorded first-person context before execution, and Online Ego Use provides continuous observations as user…",
+        "content": "EgoUseBench: Benchmarking Computer-Use Agents under Evolving First-Person Contexts\nAbstract\nAI wearables, such as smart glasses, extend the context available to agents beyond digital environments to users' physical surroundings. With these devices, computer tasks can originate from users' ongoing activities rather than solely from explicit instructions. Through first-person observations, agents can identify objects and activities relevant to user requests and ground digital tasks in the surrounding context. We call this interaction paradigm Ego Use. However, first-person observations are limited by the wearer's viewpoint and may provide incomplete or ambiguous evidence of ongoing activities. As new observations arrive, agents may need to revise their understanding of the physical context and user intent, and reassess whether prior digital actions remain valid. Whether current agents can reliably handle these changes remains insufficiently evaluated. We introduce EgoUseBench, a benchmark for evaluating Ego Use across three interaction settings with different levels of first-person context. Computer-Use relies on explicit instructions, Offline Ego Use provides prerecorded first-person context before execution, and Online Ego Use provides continuous observations as user intent evolves. Based on over 74 hours of real-world first-person recordings, we construct 693 tasks across the three interaction settings. To capture task evolution, we track first-person observations, user requirements, and website state separately. We further group tasks by how information changes during execution, resulting in three types: Graft (revised user requirements), Refresh (new first-person observations), and Clarify (agent-initiated information seeking). We evaluate advanced models and find that average success rates in Online Ego Use are 26.3% lower than in Computer-Use. This result reveals the difficulty of keeping task execution aligned with evolving first-person context and user intent.\nCommunity\nAI wearables, such as smart glasses, extend the context available to agents beyond digital environments to users' everyday physical surroundings. With these devices, computer tasks can originate from users' ongoing real-world activities rather than solely from explicit instructions. Through first-person observations, agents can identify objects and activities relevant to user requests and ground digital tasks in the surrounding context. We call this interaction paradigm Ego Use. However, first-person observations are limited by the wearer's viewpoint and may provide incomplete or ambiguous evidence of ongoing activities. As new observations arrive, agents may need to revise their understanding of the physical context and user intent, and reassess whether prior digital actions remain valid. Whether current agents can reliably handle these changes remains insufficiently evaluated.\nWe introduce EgoUseBench, a benchmark for evaluating Ego Use across three interaction settings with different levels of first-person context. Computer-Use relies on explicit instructions, Offline Ego Use provides prerecorded first-person context before execution, and Online Ego Use provides continuous observations as user intent evolves. Based on over 74 hours of real-world first-person recordings, we construct 693 tasks across the three interaction settings. To capture task evolution, we track first-person observations, user requirements, and website state separately. We further group tasks by how information changes during execution, resulting in three types: Graft (revised user requirements), Refresh (new first-person observations), and Clarify (agent-initiated information seeking). We evaluate several advanced models and find that average success rates in Online Ego Use are 26.3% lower than in Computer-Use. This result reveals the difficulty of keeping task execution aligned with evolving first-person context and user intent.\nGet this paper in your agent:\nhf papers read 2611.34466 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 1\nSpaces citing this paper 0\nNo Space linking this paper\nCollections including this paper 0\nNo Collection including this paper",
+        "score": 19.0,
+        "comments": 1,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "AMD Fork and Benchmark Dashboard Land for llama.cpp",
+      "summary": "The community has introduced an AMD-specific fork of llama.cpp alongside an automated performance benchmarking dashboard targeting Ryzen and Radeon silicon. The project aims to track and optimize hardware-specific inference performance on non-NVIDIA local hardware, though technical release details in the primary material remain minimal.",
+      "why_it_matters": "Signals growing community attention to optimizing local inference and continuous perf-tracking on AMD hardware.",
+      "reason": "Tracks hardware-specific optimizations for local LLM inference on AMD silicon, accompanied by new automated performance benchmarking dashboards.",
+      "item": {
+        "key": "devnull.land/amd-specific-llama-cpp",
+        "source": "Hacker News front page",
+        "tags": [
+          "community"
+        ],
+        "title": "AMD-specific fork of llama.cpp",
+        "url": "https://devnull.land/amd-specific-llama-cpp",
+        "discussion_url": "https://news.ycombinator.com/item?id=50657265",
+        "published": "2026-11-26T17:11:29Z",
+        "summary": "Comments",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": [
+        {
+          "key": "huggingface.co/blog/ggml-org/llamacpp-amd-bench",
+          "source": "Hugging Face Blog",
+          "tags": [
+            "lab",
+            "open-source"
+          ],
+          "title": "Introducing the llama.cpp benchmark dashboard for AMD Ryzen and Radeon",
+          "url": "https://huggingface.co/blog/ggml-org/llamacpp-amd-bench",
+          "discussion_url": null,
+          "published": "2026-11-26T11:37:17Z",
+          "summary": "",
+          "content": "",
+          "score": null,
+          "comments": null,
+          "also_in": []
+        }
+      ]
+    },
+    {
+      "headline": "Ollama v0.40.19 Ships Speculative Decoding and Buffer Compaction",
+      "summary": "Ollama tagged release v0.40.19, upgrading its underlying llama-server backend to incorporate speculative draft proposals and history buffer compaction. Detailed changelog notes were unavailable in the provided material, but the updates target improved inference throughput and memory footprint during extended context interactions.",
+      "why_it_matters": "Local agent loops get faster iterations as upstream speculative decoding and context compaction land in standard developer runtimes like Ollama.",
+      "reason": "Updates Ollama with speculative draft proposals, history buffer compaction, and an upgraded llama-server backend.",
+      "item": {
+        "key": "github.com/ollama/ollama/releases/tag/v0.40.19-rc0",
+        "source": "Ollama releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "v0.40.19",
+        "url": "https://github.com/ollama/ollama/releases/tag/v0.40.19-rc0",
+        "discussion_url": null,
+        "published": "2026-11-26T17:52:02Z",
+        "summary": "What's Changed\n\ninkling2: faster short histories, draft proposals and conv snapshots by @dhiltgen in #19881\n\nmlxrunner: compact Engram history buffers by @pdevine in #19913\n\nbump llama-server by @pdevine in #19917\n\nFull Changelog : v0.40.18...v0.40.19-rc0",
+        "content": "You signed in with another tab or window. Reload to refresh your session.You signed out in another tab or window. Reload to refresh your session.You switched accounts on another tab or window. Reload to refresh your session.Dismiss alert",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      },
+      "related": []
+    },
+    {
+      "headline": "TT-RSI: Distilling Refinement Trajectories at Test Time Beats Majority Voting",
+      "summary": "Researchers proposed Test-Time Recursive Self-Improvement (TT-RSI), replacing standard test-time self-consistency with iterative in-context revision and on-policy accelerated distillation into weights. By training on the delta between refinement steps rather than voting agreements, TT-RSI gained +13.89% accuracy over base models and beat TTPO+SC by +4.79% under identical compute budgets. However, author discussions highlight a significant failure mode: without an external correctness verifier, the system lacks an error-rejection rule and can distill consistently flawed assumptions directly into model weights.",
+      "why_it_matters": "A compelling alternative to majority-vote test-time scaling, along with a candid look at the failure mode of recursive test-time weight updates without formal verifiers.",
+      "reason": "Investigates test-time reasoning and recursive self-improvement algorithms that go beyond standard majority-vote self-consistency on unlabeled tasks.",
+      "item": {
+        "key": "arxiv:2611.30965",
+        "source": "HF Daily Papers",
+        "tags": [
+          "research"
+        ],
+        "title": "Beyond Self-Consistency: Recursive Self-Improvement at Test Time",
+        "url": "https://huggingface.co/papers/2611.30965",
+        "discussion_url": null,
+        "published": "2026-11-26T00:00:00Z",
+        "summary": "Large language models (LLMs) that continue improving after deployment (e.g., recursive self-improvement) offer a promising path toward general intelligence. Current test-time methods pursue this goal on unlabeled questions, primarily relying on self-consistency: they generate independent solutions and use majority voting to select an answer or construct training targets. This leaves earlier reasoning unused at inference and can reinforce an incorrect majority during training. Humans instead build on earlier attempts to preserve useful reasoning, correct mistakes and improve their problem-solving strategies. Following this principle, we propose Test-Time Recursive Self-Improvement (TT-RSI), a label-free framework for improving LLMs at test time through two mutually reinforcing components: (1) In-Context RSI repeatedly re-solves each question using the full previous solution as a reference, letting the model decide whether and how to use it so that inference compute builds on earlier reasoning. (2) In-Weight RSI distills successive refinements into the model's weights, enabling progress beyond an initially wrong majority and theoretically bringing the first attempt toward the…",
+        "content": "Abstract\nA label-free test-time framework, TT-RSI, improves large language models by repeatedly re-solving questions with prior solutions and distilling refinements into model weights, outperforming self-consistency methods under the same test-time scaling budget.\nLarge language models (LLMs) that continue improving after deployment (e.g., recursive self-improvement) offer a promising path toward general intelligence. Current test-time methods pursue this goal on unlabeled questions, primarily relying on self-consistency: they generate independent solutions and use majority voting to select an answer or construct training targets. This leaves earlier reasoning unused at inference and can reinforce an incorrect majority during training. Humans instead build on earlier attempts to preserve useful reasoning, correct mistakes and improve their problem-solving strategies. Following this principle, we propose Test-Time Recursive Self-Improvement (TT-RSI), a label-free framework for improving LLMs at test time through two mutually reinforcing components: (1) In-Context RSI repeatedly re-solves each question using the full previous solution as a reference, letting the model decide whether and how to use it so that inference compute builds on earlier reasoning. (2) In-Weight RSI distills successive refinements into the model's weights, enabling progress beyond an initially wrong majority and theoretically bringing the first attempt toward the model's infinite-step refinement limit. The updated model answers better and refines more effectively, generating stronger references for subsequent training. Extensive experiments show that TT-RSI improves average accuracy by +13.89% over the base model and outperforms the strongest self-consistency-based method by +4.79% under the same test-time scaling budget.\nCommunity\nMost test-time methods for LLMs vote: sample independent answers and trust the majority, both to pick the final answer and to build training targets. That wastes earlier reasoning, and when the majority is wrong, training on it reinforces the error.\nTT-RSI (Test-Time Recursive Self-Improvement) lets the model build on its own previous attempts instead, with no labels:\n- In-Context RSI (inference, training-free): re-solve each question with the full previous solution as a neutral reference; the model decides what to reuse, rework, or redo.\n- In-Weight RSI (label-free test-time training): distills successive refinements into the weights via on-policy self-distillation (Recursive + Accelerated Distillation). Because it learns from refinement rather than agreement, it can move past a wrong majority.\n- The two reinforce each other: the updated model refines better, producing stronger references for the next round. We also show that distilling just two successive solutions moves the first attempt toward the model's infinite-step refinement limit.\nResults: +13.89% average accuracy over the base model, and +4.79% over TTPO + SC, the strongest self-consistency method, at the same test-time budget.\n🌐 Project page: https://uanu2002.github.io/TT-RSI/\n💻 Repo: https://github.com/uanu2002/TT-RSI\nThanks for distinguishing test-time recursive improvement from self-consistency, and for splitting the idea into In-Context RSI (reuse the full previous solution as a reference) and In-Weight RSI (distill successive refinements back into the weights). I have not rerun the experiments.\nA question about the failure mode of the weight update. If a sequence of refinements shares the same wrong assumption, In-Weight RSI would seem able to replace an incorrect majority with a consistently incorrect trajectory. In the label-free setting, what is the stopping or rejection rule that prevents those refinements from being written into the weights, and is there a reported case where later attempts stay wrong and the weight update is refused?\n— Jack Tan (@Jacktan007 )\nThanks for the thoughtful question—you've pinpointed a real failure mode.\nTo answer directly: our current label-free method has no correctness-aware rejection rule and adaptation stops at a fixed training budge.\nOur motivation is that an incorrect final answer does not mean every intermediate revision is useless. Even with a shared wrong assumption, later refinements can preserve valid structure while fixing local calculations, incorporating overlooked constraints, or removing invalid steps—providing useful supervision before flipping the final answer.\nAccelerated distillation transfers this guidance back to an earlier student state, but because guidance-difference weighting measures change rather than correctness, it cannot filter out consistently wrong refinements. Resolving this persistent-error failure mode remains an open direction for future work.\nGet this paper in your agent:\nhf papers read 2611.30965 Don't have the latest CLI?\ncurl -LsSf https://hf.co/cli/install.sh | bash Models citing this paper 0\nNo model linking this paper\nDatasets citing this paper 0\nNo dataset linking this paper\nSpaces citing this paper 0\nNo Space linking this paper",
+        "score": 15.0,
+        "comments": 3,
+        "also_in": []
+      },
+      "related": []
+    }
+  ],
+  "quick_hits": [
+    {
+      "line": "LangChain's Anthropic integration hit v1.7.13, adding support for custom HTTP and SDK clients.",
+      "item": {
+        "key": "github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.13",
+        "source": "LangChain releases",
+        "tags": [
+          "release",
+          "agents"
+        ],
+        "title": "langchain-anthropic==1.7.13",
+        "url": "https://github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.13",
+        "discussion_url": null,
+        "published": "2026-11-25T21:42:01Z",
+        "summary": "Changes since langchain-anthropic==1.7.12\n\nrelease(anthropic): 1.7.13 ( #42102 )\n\nfeat(anthropic): accept custom HTTP and SDK clients ( #42101 )\n\nchore(model-profiles): refresh model profile data ( #42085 )\n\nchore(model-profiles): refresh model profile data ( #42062 )\n\nrelease(standard-tests): 1.2.0 ( #41996 )",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "llama.cpp release b12800 adds host-side OpenCL changes for Adreno A850 MoE int8 kernels.",
+      "item": {
+        "key": "github.com/ggml-org/llama.cpp/releases/tag/b12800",
+        "source": "llama.cpp releases",
+        "tags": [
+          "release",
+          "inference"
+        ],
+        "title": "b12800",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b12800",
+        "discussion_url": null,
+        "published": "2026-11-26T23:12:50Z",
+        "summary": "opencl: add MoE int8 bin kernel host side changes for Adreno A850 ( #33069 )\n\nWebsite:\n\nhttps://llama.app\n\nAttestations:\n\nhttps://github.com/ggml-org/llama.cpp/attestations/72871281\n\nmacOS/iOS:\n\nmacOS Apple Silicon (arm64)\n\nmacOS Apple Silicon (arm64, KleidiAI enabled) DISABLED\n\nmacOS Intel (x64)\n\niOS XCFramework\n\nLinux:\n\nUbuntu x64 (CPU)\n\nUbuntu arm64 (CPU)\n\nUbuntu 24.04 s390x (CPU)\n\nUbuntu 26.04 s390x (CPU)\n\nUbuntu 26.04 s390x (zDNN)\n\nUbuntu x64 (Vulkan)\n\nUbuntu arm64 (Vulkan)\n\nUbuntu x64 (CUDA 12) - CUDA 12.8 libraries\n\nUbuntu x64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu arm64 (CUDA 13) - CUDA 13.5 libraries\n\nUbuntu x64 (ROCm 10.0)\n\nUbuntu x64 (OpenVINO)\n\nUbuntu x64 (SYCL FP32)\n\nUbuntu x64 (SYCL FP16)\n\nLinux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nAndroid:\n\nAndroid arm64 (CPU)\n\nAndroid arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide\n\nWindows:\n\nWindows x64 (CPU)\n\nWindows arm64 (CPU)\n\nWindows arm64 (OpenCL Adreno)\n\nWindows x64 (CUDA 12) - CUDA 12.4 DLLs\n\nWindows x64 (CUDA 13) - CUDA 13.5 DLLs\n\nWindows arm64 (CUDA 13) - CUDA 13.5 DLLs\n\nWindows x64 (Vulkan)\n\nWindows arm64 (Vulkan)\n\nWindows x64 (OpenVINO)\n\nWindows x64 (SYCL)\n\nWindows x64 (ROCm…",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "PyTorch announced ExecuTorch-TensorRT support, enabling compiled TensorRT robot policies to run without loading full Python dependencies.",
+      "item": {
+        "key": "pytorch.org/blog/executorch-tensorrt-pytorch-robot-policies-at-nvidia-tensorrt-speed",
+        "source": "PyTorch",
+        "tags": [
+          "infra",
+          "open-source"
+        ],
+        "title": "ExecuTorch-TensorRT: PyTorch Robot Policies at NVIDIA TensorRT Speed",
+        "url": "https://pytorch.org/blog/executorch-tensorrt-pytorch-robot-policies-at-nvidia-tensorrt-speed/",
+        "discussion_url": null,
+        "published": "2026-11-24T20:31:02Z",
+        "summary": "TL;DR With Torch-TensorRT 2.15 and ExecuTorch 1.6 you can compile a PyTorch model with TensorRT, save it as an ExecuTorch program, and run it from C++ or Python without loading...\n\nThe post ExecuTorch-TensorRT: PyTorch Robot Policies at NVIDIA TensorRT Speed appeared first on PyTorch .",
+        "content": "TL;DR\n\nWith Torch-TensorRT 2.15 and ExecuTorch 1.6 you can compile a PyTorch model with TensorRT, save it as an ExecuTorch program, and run it from C++ or Python without loading torch. You stay in PyTorch the whole way, and whatever TensorRT can’t handle can still run on the GPU.\n\nOn an NVIDIA Jetson Orin Nano it comes within 4% of the fastest TensorRT setup we measured, in both speed and memory. A 3.6-billion-parameter policy fits on the 8 GB board, where PyTorch eager mode runs out of memory.\n\nYou compile with one pip install \"torch_tensorrt[executorch]\" . To run, the robot needs only ExecuTorch and a small TensorRT backend, not PyTorch.\n\nWe talked about this work at PyTorch Conference 2026: Deploying Robot Policies Across Many Targets with ExecuTorch .\n\nhttps://pytorch.org/wp-content/uploads/2026/11/et-trt.mp4\n\nGR00T 1.7 (3B) on a Jetson Orin Nano 8GB: about 200 ms per action chunk.\n\nWhy is it hard to run a PyTorch model with TensorRT on a robot?\n\nA robot runs its models on its own computer, like NVIDIA Jetson AGX Thor or a custom board, and they have to finish on time. A policy, the model that decides what the robot does next, returns a short plan at a time, called an action chunk, say 50 actions. If the next chunk isn’t ready when the robot finishes the current one, the robot stops and waits. And everything shares the same memory: the CPU, the GPU, the cameras and every model. Offloading to a server adds a network round trip, which can easily take 100 ms, over a link the robot can’t always count on.\n\nOn NVIDIA hardware the fastest way to run a model is TensorRT , NVIDIA’s inference compiler. Until now, getting a PyTorch model into TensorRT meant one of four things:\n\nGo through ONNX. We call this ONNX-TensorRT in the tables. Export the model to an ONNX file and build a TensorRT engine from it. It’s fast and well proven, but your model has to get through two converters you don’t own: PyTorch’s ONNX exporter and TensorRT’s ONNX parser. If either one doesn’t know an op, the build fails, and the usual way out is writing a TensorRT plugin in C++.\n\nWrite it by hand. Rebuild the model layer by layer with TensorRT’s network definition API . tensorrtx does this for many popular models, and early TensorRT-LLM did it for language models. You get full control, but every new model is new work, and checking the result against PyTorch is on you.\n\nUse TensorRT Model Connect. NVIDIA’s TensorRT Model Connect , in public preview, builds TensorRT engines straight from supported Hugging Face checkpoints, with no ONNX step, and runs them from C++ without PyTorch. It covers the models on its supported list.\n\nUse Torch-TensorRT inside PyTorch. Torch-TensorRT converts PyTorch ops to TensorRT directly, no ONNX file involved. But what it normally produces, an ExportedProgram or an AOTInductor .pt2 package, needs libtorch to run. That’s more than 1 GB of libraries, and a process that loads it holds hundreds of MB that inference never uses.\n\nThe ONNX route and the ExecuTorch route.\n\nToday we’re adding a new way: Torch-TensorRT 2.15 compiles the model with TensorRT and saves it as an ExecuTorch 1.6 program that runs without libtorch. It skips ONNX and captures the model with PyTorch’s own torch.export . If TensorRT can’t convert part of the model, preprocessing included, you can send that part to ExecuTorch’s CUDA backend, which runs it on the GPU in the same program on the same CUDA stream instead of failing the build. The TensorRT parts are ordinary TensorRT engines, so the model runs about as fast as it does when you call TensorRT directly.\n\nHow it works\n\nExecuTorch is PyTorch’s solution for running models on edge devices. You compile a model ahead of time into a program, and a small runtime runs it without libtorch, from C++ or Python. Hardware support comes from backends : besides TensorRT there are CUDA , Intel OpenVINO , Qualcomm QNN , Apple Core ML and MLX , Arm , Vulkan , and XNNPACK for CPUs. Torch-TensorRT could already save ExecuTorch programs with output_format=\"executorch\" . What’s new in Torch-TensorRT 2.15 and ExecuTorch 1.6 is that the workflow is production ready: one install, prebuilt C++ libraries, a Python runtime that doesn’t need PyTorch, and a few features for small boards. We call it ExecuTorch-TensorRT.\n\nTake a toy model that needs two backends:\n\nclass Toy(torch.nn.Module):\ndef forward(self, x):\nreturn torch.cos(torch.erfinv(torch.tanh(x)))\n\nThe toy model, split across two backends.\n\nCapture and split. torch.export turns the model into a graph of PyTorch ops. TensorRT claims every part it can convert. It has no converter for erfinv , so the ExecuTorch CUDA backend takes that part instead. The compiler tells you which ops didn’t go to TensorRT, and why.\n\nCompile and pack. TensorRT builds an engine for each part it claimed, and the CUDA backend compiles its part with AOTInductor. The engines go into a .pte file, and the CUDA backend’s weights go into a .ptd data file next to it.\n\nLoad and run. On the robot, the ExecuTorch runtime hands each part to its backend. Inputs, outputs and the tensors passed between the two backends can stay on the GPU, with no round trip through the CPU. If you set use_cuda_graphs=True , each engine’s GPU work is recorded once as a CUDA graph and replayed with a single launch, which makes every call cheaper.\n\nIf your model has a custom op that neither TensorRT nor the CUDA backend can compile, you still don’t need a TensorRT plugin in C++. Write the op as a Triton kernel and register it with torch.library.triton_op . The CUDA backend compiles it into the program like any other part of the model, and the robot runs it without Triton or PyTorch installed. ExecuTorch’s own CUDA kernels for attention, mixture-of-experts layers and 4-bit matmuls are written this way.\n\nGetting started\n\nInstall\n\npip install \"torch_tensorrt[executorch]\"\n\nThat gets you PyTorch, Torch-TensorRT, ExecuTorch and a small TensorRT backend for ExecuTorch. You need PyTorch only to compile. The compiled program runs without it; see Run, in Python, without torch for the smaller install for the robot. The wheels are built for CUDA 13.2 on Linux, x86-64 and Arm64, which on an NVIDIA Jetson means JetPack 7.2 or newer. On Arm64 the first install also pulls about 2.6 GB of TensorRT libraries from NVIDIA, so give it a few minutes. It can’t reuse the TensorRT that ships with NVIDIA JetPack, because Torch-TensorRT 2.15 needs TensorRT 11.4 and JetPack 7.2 comes with TensorRT 10.\n\nExport, in Python\n\nimport torch\nimport torch_tensorrt\nfrom executorch.backends.cuda.cuda_backend import CudaBackend\nfrom executorch.backends.cuda.cuda_partitioner import CudaPartitioner\n\nwith torch.no_grad():\nmodel = MyPolicy().eval().cuda()\nexample = (torch.randn(1, 3, 224, 224, device=\"cuda\"),)\nexported = torch.export.export(model, example)\ntrt_model = torch_tensorrt.dynamo.compile(\nexported, arg_inputs=example, min_block_size=1, truncate_double=True\n)\ntorch_tensorrt.save(\ntrt_model,\n\"policy.pte\",\noutput_format=\"executorch\",\n# Everything TensorRT does not take goes to the CUDA backend.\npartitioners=[CudaPartitioner([CudaBackend.generate_method_name_compile_spec(\"forward\")])],\n)\n\nThe CUDA backend needs a CUDA toolkit (nvcc) at export time, and it writes aoti_cuda_blob.ptd next to the .pte. Give each export its own folder and ship both files. If your model has several parts, say a vision encoder and an action head, you can put them all in one program, one method per part, with torch_tensorrt.executorch.export() . It gives you back a program you can still edit before saving.\n\nRun, in Python, without torch\n\nIn ExecuTorch 1.6 the Python runtime no longer needs the torch library. NumPy arrays in, NumPy arrays out:\n\nimport numpy as np\nimport torch_tensorrt_executorch_runtime # registers the TensorRT backend\nfrom executorch.runtime import Runtime\n\nprogram = Runtime.get().load_program(\"policy.pte\", data_path=\"aoti_cuda_blob.ptd\")\npolicy = program.load_method(\"forward\")\nactions =…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "Unsloth's vision-text model Inkling-2-Mini-GGUF crossed 2.4 million downloads on Hugging Face.",
+      "item": {
+        "key": "huggingface.co/unsloth/Inkling-2-Mini-GGUF",
+        "source": "HF Trending Models",
+        "tags": [
+          "models"
+        ],
+        "title": "unsloth/Inkling-2-Mini-GGUF (image-text-to-text)",
+        "url": "https://huggingface.co/unsloth/Inkling-2-Mini-GGUF",
+        "discussion_url": null,
+        "published": null,
+        "summary": "Trending model. Task: image-text-to-text. Library: unknown library. Created 2026-11-20. 1495 likes, 2445633 downloads.",
+        "content": "",
+        "score": 1238.0,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "line": "AWS launched the Bedrock Trusted Access API in preview, integrating Anthropic's enterprise safeguards and data controls directly into Claude deployments.",
+      "item": {
+        "key": "aws.amazon.com/blogs/machine-learning/introducing-the-amazon-bedrock-trusted-access-api-with-anthropics-enterprise-frontier-safeguards-and-enterprise-data-controls",
+        "source": "AWS Machine Learning",
+        "tags": [
+          "infra"
+        ],
+        "title": "Introducing the Amazon Bedrock Trusted Access API, with Enterprise Frontier Safeguards and Enterprise Data Controls for Claude models",
+        "url": "https://aws.amazon.com/blogs/machine-learning/introducing-the-amazon-bedrock-trusted-access-api-with-anthropics-enterprise-frontier-safeguards-and-enterprise-data-controls/",
+        "discussion_url": null,
+        "published": "2026-11-24T05:01:14Z",
+        "summary": "Amazon Bedrock now offers a trusted access program API: one place to discover, request, and enroll in model provider programs. The first two offerings, in public preview, are Anthropic's Enterprise Frontier Safeguards (EFS) and Enterprise Data Controls (EDC), which give you control over your data when you use Claude Fable models.",
+        "content": "Today we are announcing the general availability of the trusted access program API on Amazon Bedrock . The API gives you one place to discover, request, and enroll in model provider trusted access programs. We are also announcing the public preview of the first two offerings for Claude models: Enterprise Frontier Safeguards (EFS) and Enterprise Data Controls (EDC). Both are available on Amazon Bedrock, including Claude Fable, Claude Mythos, and Claude Opus 5.5 and Sonnet 5.5 used through the Cyber Verification Program (CVP).\n\nFrontier AI labs require stricter safety monitoring policies to their most capable models, and those policies still apply on Amazon Bedrock. For eligible customers, model providers also offer customers more control on how those policies are met, such as where retained data is stored and how it is reviewed. Each offering has its own terms, approvals, and settings.\n\nThe Amazon Bedrock trusted access program API gives every provider offering one consistent Amazon Bedrock experience. Your teams discover offerings, check eligibility, and enroll in the same way for every provider. Your administrators decide who can enroll, using existing IAM policies and service control policies. As more model providers add offerings, those appear in the same place.\n\nEFS and EDC were built in partnership between AWS and Anthropic. They let you access Anthropic’s most capable models safely, from both a model use and a customer data perspective. With both EFS and EDC, when automated safety monitoring finds a risk, it creates a Safety Case for your team to review. With EFS, customers store their data in their own AWS account, and prompts and completions are not retained by Anthropic or Amazon Bedrock. With EDC, retained data is stored in Amazon-managed storage instead of your account and prompts and completions are not retained by Anthropic. One application gives access to both offerings.\n\nIn this post, we explain how the trusted access program API works, then walk through EFS and EDC storage options and setup.\n\nHow trusted access programs work\n\nA trusted access program is a named provider program that gives customers more control of safety reviews and access to model capabilities in exchange for accepting the program’s terms. Amazon Bedrock trusted access program API now gives you one place to find the model and use case programs available to your account. EFS and EDC are the first offerings available today. Offerings that providers add later appear in the same place and follow the same steps.\n\nAnyone with access to the trusted access program API can list the offerings and check their status for an account, an organization in AWS Organizations, or an Amazon Bedrock project. The status tells you what to do next. eligible means you’re eligible for the offering and can enroll, requestable means you need approval for eligibility first, and the statusReason field in the response explains how to request it. The model provider (or AWS, as authorized by the model provider) approves your eligibility.\n\nEnrolling is a separate step where you accept the offering’s terms imposed by the provider. You enroll at the scope where you were approved: an account, every account in an organization from the management account, or a single project. You can opt out at any time. Each step is a call to the trusted access program API, so you control who can enroll with AWS Identity and Access Management (IAM) policies and service control policies (SCPs). More information is available in the trusted access programs documentation .\n\nEnterprise Frontier Safeguards\n\nWith Enterprise Frontier Safeguards (EFS), you can retain your data in your own AWS environment with full control. It is designed with over 100 customers, including a quarter of the Fortune 100 and many companies in industries with strict rules on data visibility, like healthcare, financial services, and law.\n\nAutomated safety monitoring looks for patterns that only show up across many requests. These include intentional misuse that could lead to serious harm, such as offensive cyber operations. They also include agents that go beyond what a user asked for, such as using a software exploit to reach an internal system.\n\nOn Amazon Bedrock, AWS operates EFS and the customer inputs and outputs stay within the customer’s AWS account. Only automated safety monitoring within AWS reads the retained inputs and outputs. AWS human reviewers don’t review content for EFS. Your review stays with you. Neither AWS nor Anthropic humans access your retained inputs or outputs. Your inputs and outputs are never used for training.\n\nHow it works\n\nAmazon Bedrock reaches your AWS Key Management Service (AWS KMS) key and Amazon Simple Storage Service (Amazon S3) bucket as a single AWS service principal and only through the key policy and bucket policy that you write. You can remove that access at any time, but Amazon Bedrock stops serving the covered models 24 hours after it loses access to your key or bucket.\n\nWhen you call a covered model including Claude Fable, Claude Mythos, and Claude Opus 5.5 and Sonnet 5.5 used through the Cyber Verification Program (CVP):\n\nYour application calls the model. Inference works as it does for any Amazon Bedrock model.\n\nAmazon Bedrock writes the prompt and response to its retention and key services.\n\nThese services encrypt the data with your AWS KMS key.\n\nAmazon Bedrock writes the prompt and response (together, “Sealed Safety Data”) to your bucket, encrypted with your key. When writing to your bucket, Amazon writes the content within minutes. On some failures with your key or bucket, we can retry for up to 72 hours.\n\nAutomated safety monitoring, which runs in AWS owned and operated accounts, scans the data and looks for misuse across requests.\n\nIf automated safety monitoring finds a potential risk, a case is created in your bucket for your review. For details, see Enterprise Frontier Safeguards: Technical Overview .\n\nHow your team handles cases\n\nA Case summarizes what automated safety monitoring found and references the related transcripts. Retained records arrive under the transcripts/ prefix in your bucket, and case files arrive under review-cases/ . Your team reviews each Case and writes a response file to review-responses/ , stating whether it found a violation ( violation or no_violation ) and, for a violation, the applicable policy category.\n\nEnterprise Data Controls\n\nEDC offers the same automated safety monitoring as EFS and human review of flagged activity stays with your team. Unlike EFS, EDC stores retained data in Amazon managed storage, encrypted with AWS managed keys, so there’s no bucket or key to set up. Eligible customers can access both EFS and EDC through a single enrollment application. If your policy allows retained data to stay in Amazon-managed storage and encrypted with AWS-managed keys, enroll in EDC. If your policy instead requires retained data to be encrypted with your AWS KMS key and stay in your S3 bucket, enroll in EFS. Either way, your team will be able to review flagged activity.\n\nOutside EFS and EDC, you can use Claude Fable models on Amazon Bedrock in two ways today:\n\nWith the aws_review data retention mode, Amazon Bedrock retains inputs and outputs for up to 30 days, where they are available for review within the AWS boundary.\n\nEligible customers can use current Fable models for internal use with zero data retention (ZDR) through at least June 30, 2027. EFS is the long-term path for ensuring neither AWS nor Anthropic retains your prompts and completions after the interim ZDR exception ends.\n\nChoose where retained data is stored\n\nWith EFS, retained data is stored only in your own S3 bucket, encrypted with your KMS key. Neither Anthropic nor AWS keeps it in their own storage. The following table compares EFS with the other routes.\n\nNot Eligible for ZDR, EFS, or EDC\nZDR exception (interim)\nEFS, your own Amazon S3 bucket (public preview)\nEDC, Amazon-managed storage (public…",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sign_off": "Keep your side effects gated and your baselines honest.",
+  "slow_day_note": "",
+  "headlines": [
+    {
+      "kicker": "Systems engineering",
+      "headline": "Anthropic Migrates Messages API from Python to Rust",
+      "blurb": "Anthropic published a technical post detailing how the company migrated its Messages API from Python to Rust.",
+      "item": {
+        "key": "anthropic.com/research/migrating-api-to-rust",
+        "source": "Anthropic Research",
+        "tags": [
+          "lab",
+          "research"
+        ],
+        "title": "Migrating our Messages API to Rust",
+        "url": "https://www.anthropic.com/research/migrating-api-to-rust",
+        "discussion_url": null,
+        "published": "2026-11-25T00:00:00Z",
+        "summary": "How we migrated our Messages API from Python to Rust.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Data privacy",
+      "headline": "42 State AGs Move to Block Character.AI Chat Auction",
+      "blurb": "A coalition of 42 state attorneys general is seeking to stop Character.AI from selling private user chats in Chapter 11 bankruptcy.",
+      "item": {
+        "key": "theverge.com/policy/1042620/character-ai-sale-state-ags-block-selling-users-chats",
+        "source": "The Verge (AI)",
+        "tags": [
+          "press"
+        ],
+        "title": "42 state AGs are trying to stop Character.AI from selling users’ chats",
+        "url": "https://www.theverge.com/policy/1042620/character-ai-sale-state-ags-block-selling-users-chats",
+        "discussion_url": null,
+        "published": "2026-11-26T09:54:40Z",
+        "summary": "A coalition of 42 state attorneys general is trying to prevent Character.AI from selling off user data as it navigates Chapter 11 bankruptcy proceedings. In a deluge of nearly identical press releases, the various AGs accuse the company of planning to auction off \"the private chat histories of more than 21 million U.S. accounts - […]",
+        "content": "A coalition of 42 state attorneys general is trying to prevent Character.AI from selling off user data as it navigates Chapter 11 bankruptcy proceedings. In a deluge of nearly identical press releases, the various AGs accuse the company of planning to auction off \"the private chat histories of more than 21 million U.S. accounts - more than 2.1 million of them registered to minors - with no safeguards for the people whose conversations are being sold.\"\n\nIn October, Character.AI filed for bankruptcy following years of scandals and legal challenges , including from Disney . Disney ended up buying some of the company's assets and hiring its CEO , K …\n\nRead the full story at The Verge.",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    },
+    {
+      "kicker": "Scientific discovery",
+      "headline": "Astronomers Use Astra and Codex to Find Exoplanets",
+      "blurb": "Two amateur astronomers used Codex and Astra to find potential exoplanets within public data from NASA's Kepler and TESS space telescopes.",
+      "item": {
+        "key": "openai.com/index/searching-for-distant-planets-with-astra",
+        "source": "OpenAI News",
+        "tags": [
+          "lab"
+        ],
+        "title": "Searching for distant planets with Astra",
+        "url": "https://openai.com/index/searching-for-distant-planets-with-astra",
+        "discussion_url": null,
+        "published": "2026-11-24T11:00:00Z",
+        "summary": "See how two amateur astronomers used Codex and Astra to find potential exoplanets in public data from NASA’s Kepler and TESS space telescopes.",
+        "content": "",
+        "score": null,
+        "comments": null,
+        "also_in": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Hacker News (AI)",
+      "ok": true,
+      "fetched": 50,
+      "kept": 16,
+      "error": ""
+    },
+    {
+      "name": "Hacker News front page",
+      "ok": true,
+      "fetched": 30,
+      "kept": 29,
+      "error": ""
+    },
+    {
+      "name": "Lobsters (AI)",
+      "ok": true,
+      "fetched": 25,
+      "kept": 3,
+      "error": ""
+    },
+    {
+      "name": "HF Daily Papers",
+      "ok": true,
+      "fetched": 22,
+      "kept": 20,
+      "error": ""
+    },
+    {
+      "name": "HF Trending Models",
+      "ok": true,
+      "fetched": 20,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Hugging Face Blog",
+      "ok": true,
+      "fetched": 918,
+      "kept": 5,
+      "error": ""
+    },
+    {
+      "name": "OpenAI News",
+      "ok": true,
+      "fetched": 1430,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google DeepMind",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google AI Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Google Gemini Blog",
+      "ok": true,
+      "fetched": 20,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Google Research",
+      "ok": true,
+      "fetched": 100,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Anthropic News",
+      "ok": true,
+      "fetched": 290,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Anthropic Research",
+      "ok": true,
+      "fetched": 203,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Meta AI",
+      "ok": true,
+      "fetched": 88,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Mistral AI",
+      "ok": true,
+      "fetched": 94,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Microsoft Research",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "NVIDIA Developer",
+      "ok": true,
+      "fetched": 100,
+      "kept": 4,
+      "error": ""
+    },
+    {
+      "name": "AWS Machine Learning",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "Cloudflare AI",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "PyTorch",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "vLLM releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "llama.cpp releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Ollama releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 2,
+      "error": ""
+    },
+    {
+      "name": "Transformers releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Triton releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "LangChain releases",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "BAIR Blog",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Simon Willison",
+      "ok": true,
+      "fetched": 30,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "Lilian Weng",
+      "ok": true,
+      "fetched": 53,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Sebastian Raschka",
+      "ok": true,
+      "fetched": 20,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Eugene Yan",
+      "ok": true,
+      "fetched": 215,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Chip Huyen",
+      "ok": true,
+      "fetched": 10,
+      "kept": 0,
+      "error": ""
+    },
+    {
+      "name": "Ars Technica",
+      "ok": true,
+      "fetched": 20,
+      "kept": 1,
+      "error": ""
+    },
+    {
+      "name": "The Verge (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 10,
+      "error": ""
+    },
+    {
+      "name": "MIT Technology Review (AI)",
+      "ok": true,
+      "fetched": 10,
+      "kept": 1,
+      "error": ""
+    }
+  ],
+  "stats": {
+    "window_start": "2026-11-24T00:57:36.678831Z",
+    "candidates": 120,
+    "triaged": 120,
+    "enriched": 6,
+    "headline_candidates": 126,
+    "model": "gemini/gemini-3.8-flash",
+    "served_by": [
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)",
+      "gemini-3.8-flash (key 1)"
+    ],
+    "seconds": 171.2,
+    "usage": {
+      "calls": 3,
+      "input_tokens": 29013,
+      "output_tokens": 8329,
+      "cost_usd": 0.052993
+    }
+  }
+}

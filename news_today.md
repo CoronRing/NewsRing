@@ -1,94 +1,85 @@
-# Verifiable Beliefs, CUA Watchers, and Rust API Rewrites
+# Google Castrates Agent Email, Multi-Agent Scaling Math, and TT-RSI
 
-*2026-11-25 · 8 stories*
+*2026-11-26 · 7 stories*
 
-![Top AI stories for 2026-11-25](https://coronring.github.io/NewsRing/today.png)
+![Top AI stories for 2026-11-26](https://coronring.github.io/NewsRing/today.png)
 
-Today's highlights span the gap between what agents claim to know and when they prematurely stop looking. We also look at vLLM pipeline-parallelism prefill tricks, zero-mismatch RL kernels, and Anthropic swapping their Python Messages gateway for Rust.
+Today's selections unpack Google's aggressive push to corral AI agents behind crippled MCP servers, along with a rigorous look at whether agent communication actually outperforms raw token spend. We also look at test-time recursive self-improvement without labels, agent control loops at DeepMind, and first-person computer use benchmarks.
 
 ## Across AI today
 
-- **FCC Approves SpaceX Plan for 1 Million AI Satellites** The FCC authorized SpaceX to deploy up to one million AI chip-equipped satellites for its Starmind orbital data center initiative. ([theverge.com](https://www.theverge.com/science/1042278/spacex-fcc-starmind-ai-space-data-centers))
-- **Tidal to Ban AI Music and Delete 29 Million Songs** Starting December 9, Tidal will ban AI-generated music, deleting roughly 29 million tracks and rejecting up to 85,000 submissions per day. ([theverge.com](https://www.theverge.com/entertainment/1041362/tidal-ai-music-ban))
-- **Cloudflare Introduces Search for AI Agents** Cloudflare launched a toggle that indexes site content and adds a discoverable API with native HTTP QUERY support for AI agents. ([blog.cloudflare.com](https://blog.cloudflare.com/search-for-agents/))
+- **Anthropic Migrates Messages API from Python to Rust** Anthropic published a technical post detailing how the company migrated its Messages API from Python to Rust. ([anthropic.com](https://www.anthropic.com/research/migrating-api-to-rust))
+- **42 State AGs Move to Block Character.AI Chat Auction** A coalition of 42 state attorneys general is seeking to stop Character.AI from selling private user chats in Chapter 11 bankruptcy. ([theverge.com](https://www.theverge.com/policy/1042620/character-ai-sale-state-ags-block-selling-users-chats))
+- **Astronomers Use Astra and Codex to Find Exoplanets** Two amateur astronomers used Codex and Astra to find potential exoplanets within public data from NASA's Kepler and TESS space telescopes. ([openai.com](https://openai.com/index/searching-for-distant-planets-with-astra))
 
-## 1. Curbing agent laziness with verifiable belief rewards
+## 1. Google Mandates Workspace MCP Servers—and Disarms the Gmail Tools
 
-Vision-language agents on long-horizon tasks have an annoying habit of guessing prematurely, sometimes writing out that multiple answers remain possible before immediately committing to one. Standard outcome rewards exacerbate this by rewarding lucky guesses just as heavily as thoroughly verified findings. Researchers introduced Reinforcement Learning with Verifiable Beliefs (RLVB), an RL method where the simulator calculates the exact answer posterior at each step and rewards the agent for continuing while ambiguity remains, without relying on an LLM judge or reading the agent's explicit scratchpad. Across three VLMs on three visual benchmarks, RLVB improved base model performance by an average of 17.1% and reduced premature commitments from up to 68% down to between 0.1% and 2.2%.
+Google has published a new Workspace AI Tools Addendum requiring any tool that "is or is driven by an AI Agent" to access Workspace strictly via official MCP servers by February 1, 2027. The kicker is that the public Gmail MCP server can only search, read, label, and draft messages; it cannot send, reply, forward, or modify existing drafts, reserving write-side actions for select partner integrations like Claude. The terms also impose a 30-day retention cap on derived vector embeddings and memory indexes, while banning fine-tuning or evaluation on Workspace data. direct REST API calls for agents will be downgraded to low Standard-tier quotas, leaving independent builders in a tight spot.
 
-**Why it matters:** If you build multi-step agents, outcome-only RL frequently trains in premature termination; grounding step rewards in simulator belief states prevents agents from guessing ahead of evidence.
+**Why it matters:** If your agent harness relies on Gmail APIs or maintains long-term memory over user emails, you have about two months before direct REST calls breach terms and your tools lose reply capabilities.
 
-[huggingface.co](https://huggingface.co/papers/2611.32884) · via HF Daily Papers
+[techstackups.com](https://techstackups.com/articles/google-workspace-ai-agents-mcp/) · [discussion](https://news.ycombinator.com/item?id=50653477) · via Hacker News (AI)
 
-## 2. Co-evolving environments and verifiers to evaluate computer-use agents
+## 2. Evaluating Agent Swarms: Are We Cooperating or Just Burning Compute?
 
-Static benchmarks for computer-use agents age poorly as agents saturate canned tasks while brittle click-coordinate checks yield coarse aggregate metrics. CUA-SEE addresses this with a closed-loop framework that co-evolves tasks and executable verifiers directly from agent rollout traces. It splits the evaluation into benchmark evolution for calibrated difficulty growth, diagnostic probes to pinpoint capability boundaries, and state-grounded checkpoints validated adversarially. While detailed empirical results in the release are sparse, the approach treats evaluation suites as dynamic systems rather than immutable test scripts.
+Hugging Face launched a practical series analyzing multi-agent architectures, emphasizing whether inter-agent communication actually yields better results than simply spending an equivalent token budget on a single model. The post references sobering real-world examples, including Noam Brown's estimate that less than 10% of the Navier-Stokes discovery came from multi-agent cooperation, and an Anthropic study where coordinated bug-hunting agents merely consumed more context rather than finding more issues per token. The framework models the problem as a decentralized partially observable Markov decision process (Dec-POMDP) and argues that communication policies must be trained explicitly rather than assumed to be helpful out of the box.
 
-**Why it matters:** For anyone benchmarking desktop agents, static harness tests saturate quickly and miss real failure boundaries without continuously adapting verifiers.
+**Why it matters:** It reinforces the critical evaluation baseline for agent systems: always benchmark multi-agent orchestrations against an equal-budget single-agent baseline before declaring architectural victory.
 
-[huggingface.co](https://huggingface.co/papers/2611.30962) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/blog/training-swarms) · via Hugging Face Blog
 
-## 3. vLLM meetup unpacks high-throughput prefill and exact RL kernels
+## 3. DeepMind Hands Training Compute Scheduling Over to Gemini Agents
 
-The vLLM Singapore meetup revealed several practical low-level engine improvements for serving and post-training. Inferact demonstrated that pipeline parallelism (PP2) on 2× GB300 can outpace tensor and sequence parallelism by up to 1.37× for agentic prefill workloads with 100K input tokens, primarily by moving activations to copy engines and scheduling micro-batches dynamically from the queue. For RL post-training, Inferact and NVIDIA highlighted that non-associative floating-point addition causes divergence between rollout and training kernels; using coding agents to generate bit-exact, zero-mismatch kernels eliminated KL drift on DeepSeek V4 and enabled unclipped asynchronous REINFORCE at a 2.4× speedup. NVIDIA also reported using agent-written kernels to bring SM120 workstations from zero DeepSeek-V4 support to 98–99% peak DRAM utilization during MoE decoding.
+According to Google DeepMind VP of Research Koray Kavukcuoglu, autonomous agents have been granted operational control over a portion of DeepMind's compute cluster to run experiments for future Gemini models. Notably, DeepMind implements a deliberate safety measure during agent training by refusing to reward internal chain-of-thought streams, preserving transparent natural language reasoning so that agent intentions remain human-reviewable before execution. Kavukcuoglu downplayed fears of imminent recursive self-improvement, emphasizing that physical understanding remains shallow and current intelligence benchmarks fail to capture true operational trust.
 
-**Why it matters:** Highlights concrete optimizations for agent workloads: making long-context prefill viable under tight TTFT constraints and preventing rollout-to-trainer drift during RL post-training.
+**Why it matters:** A rare glimpse into frontier lab production agent harnesses, particularly the choice to leave internal reasoning unrewarded to maintain interpretability.
 
-[pytorch.org](https://pytorch.org/blog/vllm-singapore-meetup-faster-prefill-agent-written-kernels-and-the-road-to-vera-rubin/) · via PyTorch
+[the-decoder.com](https://the-decoder.com/ai-agents-now-control-part-of-deepminds-compute-for-gemini-experiments-but-recursive-self-improvement-remains-distant/) · [discussion](https://news.ycombinator.com/item?id=50661218) · via Hacker News front page
 
-## 4. A 0.8B streaming watcher stops desktop agents from acting on stale frames
+## 4. EgoUseBench: Computer-Use Agents Struggle with First-Person Video Inputs
 
-Current computer-use agents operate on discrete screenshot turn-cycles, meaning asynchronous UI updates during slow VLM inference frequently render observed states stale before an action lands. NightWatch patches this perception-action gap by running a lightweight 0.8B parameter streaming watcher alongside the primary agent without altering its prompt or action space. In OSWorld benchmarks, the watcher reduced non-reasoning wall-clock time by 33% and cut wasted idle time by 53% without degrading task success. On DynaCU-Bench, grounding decisions in current rather than stale UI states pushed success rates from 39.5% to 44.2%.
+A new benchmark, EgoUseBench, tests computer-use agents that must take real-world actions grounded in continuous first-person wearable video streams across 693 tasks. Tasks are categorized by information updates into Graft (shifting user goals), Refresh (incoming visual evidence), and Clarify (agent queries). The authors report that advanced models suffer a 26.3% drop in success rates under dynamic Online Ego Use compared to standard instruction-driven Computer-Use, as models struggle to maintain state and invalidate prior digital actions when streaming observations evolve.
 
-**Why it matters:** Decoupling high-frequency GUI state monitoring from heavy VLM decision-making directly fixes the stale-perception latency trap in computer-use agent harnesses.
+**Why it matters:** Shows where current OS-world-model agents break down when tasks require reconciling streaming multi-modal sensory context with desktop state.
 
-[huggingface.co](https://huggingface.co/papers/2611.28947) · via HF Daily Papers
+[huggingface.co](https://huggingface.co/papers/2611.34466) · via HF Daily Papers
 
-## 5. High test pass rates mask poor defect discovery in coding agents
+## 5. AMD Fork and Benchmark Dashboard Land for llama.cpp
 
-Existing coding benchmarks often spoon-feed agents issue descriptions and exact entry points, masking whether agents actually know how to identify bugs from scratch. SpecEngineeringBench tests seven frontier coding agents across 100 multi-defect instances without hints, asking them to generate test suites and isolate defects independently. The evaluation uncovered a stark disconnect: agents achieved a 91.47% test pass rate and 80.48% change-focused coverage, yet only managed a 26.36% fail-to-pass defect detection rate. Furthermore, fault localization recall fell from 78.11% at the file level down to 51.29% at the function level.
+The community has introduced an AMD-specific fork of llama.cpp alongside an automated performance benchmarking dashboard targeting Ryzen and Radeon silicon. The project aims to track and optimize hardware-specific inference performance on non-NVIDIA local hardware, though technical release details in the primary material remain minimal.
 
-**Why it matters:** A clean demonstration that code coverage and passing unit tests remain poor proxies for whether an evaluation agent is catching actual underlying defects.
+**Why it matters:** Signals growing community attention to optimizing local inference and continuous perf-tracking on AMD hardware.
 
-[huggingface.co](https://huggingface.co/papers/2611.32973) · via HF Daily Papers
+[devnull.land](https://devnull.land/amd-specific-llama-cpp) · [discussion](https://news.ycombinator.com/item?id=50657265) · [huggingface.co](https://huggingface.co/blog/ggml-org/llamacpp-amd-bench) · via Hacker News front page
 
-## 6. Cloudflare adds discoverable HTTP search endpoints for web agents
+## 6. Ollama v0.40.19 Ships Speculative Decoding and Buffer Compaction
 
-Cloudflare has introduced Search for Agents, a dashboard setting that automatically crawls and indexes a zone into an AI Search instance exposed under the origin domain. To aid agent discovery, the system injects search endpoint metadata directly into HTML headers and YAML front matter for Markdown-negotiated responses pointing to `/.well-known/search`. Agents can query the indexed site using either keyword or natural language requests via standard HTTP GET parameters. The underlying indexing includes customizable reranking and caching configurations, subject to standard zone WAF and bot management rules.
+Ollama tagged release v0.40.19, upgrading its underlying llama-server backend to incorporate speculative draft proposals and history buffer compaction. Detailed changelog notes were unavailable in the provided material, but the updates target improved inference throughput and memory footprint during extended context interactions.
 
-**Why it matters:** Standardizing structured site search discovery via `.well-known` endpoints saves web-browsing agents from burning context windows on brute-force page crawling.
+**Why it matters:** Local agent loops get faster iterations as upstream speculative decoding and context compaction land in standard developer runtimes like Ollama.
 
-[blog.cloudflare.com](https://blog.cloudflare.com/search-for-agents/) · via Cloudflare AI
+[github.com](https://github.com/ollama/ollama/releases/tag/v0.40.19-rc0) · via Ollama releases
 
-## 7. Register recycling unlocks NVFP4 attention on RTX Blackwell
+## 7. TT-RSI: Distilling Refinement Trajectories at Test Time Beats Majority Voting
 
-While data-center Blackwell GPUs are typically softmax-bound during attention, workstation-class SM120 cards (such as the RTX PRO 6000) are heavily MMA-bound on BF16 operations. SageAttention3 targets this by executing both $QK$ and $PV$ matrix multiplications in native NVFP4 with two-level scaling to avoid precision loss over narrow dynamic ranges. To prevent Tensor Cores from stalling during the synchronous sequential steps of MMA and online softmax, the authors implemented register recycling. Reclaiming score registers immediately after quantizing softmax outputs into NVFP4 allows overlapping the next tile's matrix multiply with current tile softmax work without paying for a second full score buffer.
+Researchers proposed Test-Time Recursive Self-Improvement (TT-RSI), replacing standard test-time self-consistency with iterative in-context revision and on-policy accelerated distillation into weights. By training on the delta between refinement steps rather than voting agreements, TT-RSI gained +13.89% accuracy over base models and beat TTPO+SC by +4.79% under identical compute budgets. However, author discussions highlight a significant failure mode: without an external correctness verifier, the system lacks an error-rejection rule and can distill consistently flawed assumptions directly into model weights.
 
-**Why it matters:** Crucial low-level mechanics for running long-context models and diffusion attention efficiently on workstation-class Blackwell silicon.
+**Why it matters:** A compelling alternative to majority-vote test-time scaling, along with a candid look at the failure mode of recursive test-time weight updates without formal verifiers.
 
-[developer.nvidia.com](https://developer.nvidia.com/blog/how-to-optimize-nvfp4-attention-on-nvidia-rtx-blackwell-through-register-recycling/) · via NVIDIA Developer
-
-## 8. Anthropic rewrites its Messages API gateway in Rust using production traffic as an oracle
-
-Facing an 1,800× traffic surge since 2024, Anthropic migrated its primary Messages API serving layer from Python to Rust. An initial attempt at an incremental rewrite that only parsed model outputs in Rust yielded an 8–10% CPU reduction, but cross-language overhead made the added complexity unjustifiable. Instead, they used Claude to generate the Rust implementation and resolved the generator-verifier gap by mirroring live production traffic into the Rust service as an oracle verifier. The finished Rust service cut per-request CPU usage by approximately 70% and dropped median time-to-first-token by 20% without downtime.
-
-**Why it matters:** A realistic blueprint for using production shadowing as a verifier when rewriting performance-critical model gateway plumbing.
-
-[anthropic.com](https://www.anthropic.com/research/migrating-api-to-rust) · via Anthropic Research
+[huggingface.co](https://huggingface.co/papers/2611.30965) · via HF Daily Papers
 
 ## Quick hits
 
-- CoT-Proxy investigates cross-format policy distillation to teach smaller agents long-horizon behaviors without replicating teacher reasoning lock-in. ([huggingface.co](https://huggingface.co/papers/2611.33148))
-- Hugging Face shared engineering notes on tuning Inkling 2 Mini inference throughput on a single RTX PRO 6000 workstation GPU. ([huggingface.co](https://huggingface.co/blog/inkling-2-mini-inference-hillclimb))
-- Prism-ml released Ternary-Bonsai-2.5-27B-GGUF, a 27B parameter ternary quantized checkpoint targeting llama.cpp runtime deployments. ([huggingface.co](https://huggingface.co/prism-ml/Ternary-Bonsai-2.5-27B-GGUF))
-- LangChain Core 1.8.5 patched provider message ID reuse across streaming chunks and clarified v3 runtime warning semantics. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.8.5))
-- An academic Hacker News demo showcases an agent skill that automates iterative algorithm code optimization using falsifiable experimental hypotheses. ([chszlab.github.io](https://chszlab.github.io/AgenticAlgorithmEngineering/))
-- The ACAP paper introduces asynchronous coding agents for robotics, delegating robot control across a team of persistent sub-agents to avoid single-thread execution blocks. ([huggingface.co](https://huggingface.co/papers/2611.31205))
+- LangChain's Anthropic integration hit v1.7.13, adding support for custom HTTP and SDK clients. ([github.com](https://github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.13))
+- llama.cpp release b12800 adds host-side OpenCL changes for Adreno A850 MoE int8 kernels. ([github.com](https://github.com/ggml-org/llama.cpp/releases/tag/b12800))
+- PyTorch announced ExecuTorch-TensorRT support, enabling compiled TensorRT robot policies to run without loading full Python dependencies. ([pytorch.org](https://pytorch.org/blog/executorch-tensorrt-pytorch-robot-policies-at-nvidia-tensorrt-speed/))
+- Unsloth's vision-text model Inkling-2-Mini-GGUF crossed 2.4 million downloads on Hugging Face. ([huggingface.co](https://huggingface.co/unsloth/Inkling-2-Mini-GGUF))
+- AWS launched the Bedrock Trusted Access API in preview, integrating Anthropic's enterprise safeguards and data controls directly into Claude deployments. ([aws.amazon.com](https://aws.amazon.com/blogs/machine-learning/introducing-the-amazon-bedrock-trusted-access-api-with-anthropics-enterprise-frontier-safeguards-and-enterprise-data-controls/))
 
-Keep your kernels bit-exact and your agents skeptical of their own first guesses.
+Keep your side effects gated and your baselines honest.
 
 ---
 
 Written by [NewsRing](https://github.com/CoronRing/NewsRing). Get your own feed, in your own tone.
 
-<sub>35 of 35 sources read. 126 candidates, 126 reviewed, gemini/gemini-3.8-flash, 1085s, 3 model calls, $0.0554.</sub>
+<sub>35 of 35 sources read. 120 candidates, 120 reviewed, gemini/gemini-3.8-flash, 171s, 3 model calls, $0.0530.</sub>
